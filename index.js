@@ -16,7 +16,7 @@ app.get('/msg/:text', (req, res) => {
   console.log(req.params)
   res.end()
 })
-app.post('/', async (req, res) => {
+app.post('/', (req, res) => {
   let { events } = req.body
   if (!events || events.length !== 1) return res.end()
   // { events:
