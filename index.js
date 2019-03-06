@@ -29,7 +29,9 @@ app.get('/', (req, res) => {
 })
 app.get('/hook/:id/:msg', (req, res) => {
   let { id, msg } = req.params
-  console.log(id, msg)
+  client.pushMessage(id, { type: 'text', text: msg }).catch(ex => {
+    console.log('webhook::', id, msg)
+  })
   res.end()
 })
 app.post('/', (req, res) => {
@@ -49,7 +51,14 @@ app.post('/', (req, res) => {
 
           cmdFound = true
           let sender = { type: 'text', text: `*CMD* ${cmd} \`${exec.groups.arg.trim()}\`` }
-          if (event.replyToken) client.replyMessage(event.replyToken, sender)
+
+          if (cmd === 'profile') {
+            let { userId } = event.source
+            client.getProfile(userId).then(p => {
+              sender.text = `*${p.displayName}* - ${p.statusMessage}\n\`${p.userId}\`\n\`${p.pictureUrl}\``
+              return client.replyMessage(event.replyToken, sender)
+            })
+          }
           // handlerCommand(cmd, exec.groups.arg.trim(), event).then(() => {
           console.log(`${getId(event)}::${cmd}`)
           // }).catch(ex => {
