@@ -15,7 +15,7 @@ const getId = event => {
   } else if (event.source.type === 'group') {
     return event.source.groupId
   } else {
-    return event.userId
+    return event.source.userId
   }
 }
 // parse application/x-www-form-urlencoded
