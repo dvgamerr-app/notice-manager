@@ -9,6 +9,15 @@ const client = new line.Client({
   channelSecret: 'c0e4547f7379cbb385259ac33d89911c'
 })
 
+const getId = event => {
+  if (event.source.type === 'room') {
+    return event.source.roomId
+  } else if (event.source.type === 'group') {
+    return event.source.groupId
+  } else {
+    return event.userId
+  }
+}
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
  
@@ -25,40 +34,46 @@ app.get('/hook/:id/:msg', (req, res) => {
 })
 app.post('/', (req, res) => {
   let { events } = req.body
-  if (!events || events.length !== 1) return res.end()
+  if (!events) return res.end()
 
-  const cmds = [ 'id', 'profile' ]
-  for (const event of events) {
-    if (event.type === 'message' && event.message.type === 'text') {
-      let { text } = event.message
-      let cmdFound = false
-      for (const cmd of cmds) {
-        let command = new RegExp(`^/${cmd}(?<arg>\\W.*|)`, 'ig')
-        let exec = command.exec(text)
-        if (!exec) continue
+  if (events.length > 0) {
+    const cmds = [ 'profile', 'sick', 'leave', 'watch', 'help' ]
+    for (const event of events) {
+      if (event.type === 'message' && event.message.type === 'text') {
+        let { text } = event.message
+        let cmdFound = false
+        for (const cmd of cmds) {
+          let command = new RegExp(`^/${cmd}(?<arg>\\W.*|)`, 'ig')
+          let exec = command.exec(text)
+          if (!exec) continue
 
-        cmdFound = true
-        let sender = { type: 'text', text: `*CMD* ${cmd} \`${exec.groups.arg.trim()}\`` }
-        if (event.replyToken) client.replyMessage(event.replyToken, sender)
-        // handlerCommand(cmd, exec.groups.arg.trim(), event).then(() => {
-        console.log(`${event.source.userId}::${cmd}`)
-        // }).catch(ex => {
-        //   console.error(ex)
-        // })
-        break
+          cmdFound = true
+          let sender = { type: 'text', text: `*CMD* ${cmd} \`${exec.groups.arg.trim()}\`` }
+          if (event.replyToken) client.replyMessage(event.replyToken, sender)
+          // handlerCommand(cmd, exec.groups.arg.trim(), event).then(() => {
+          console.log(`${getId(event)}::${cmd}`)
+          // }).catch(ex => {
+          //   console.error(ex)
+          // })
+          break
+        }
+        if (!cmdFound) {
+          let sender = { type: 'text', text: event.message.text }
+          client.pushMessage(getId(event), sender)
+          console.log(`${getId(event)}::${vent.message.text}`)
+        }
       }
-      if (!cmdFound) {
-        console.log(event.source, event.message)
-      }
-    } else if (event.type === 'join') {
-      let { groupId } = event.source
-      console.log(`${groupId}::joined`)
-      
-    } else if (event.type === 'leave') {
-      let { groupId } = event.source
-      console.log(`${groupId}::leaved`)
-
     }
+  } else if (events.type === 'join') {
+    let { groupId } = events.source
+    console.log(`${groupId}::joined`)
+    
+  } else if (events.type === 'leave') {
+    let { groupId } = events.source
+    console.log(`${groupId}::leaved`)
+
+  } else {
+    console.log(events)
   }
   res.end()
 })
