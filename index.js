@@ -34,6 +34,8 @@ app.get('/hook/:id/:msg', (req, res) => {
   })
   res.end()
 })
+
+const groupAlert = 'C31ca657c0955d89dcb049d63bfc32408'
 app.post('/', (req, res) => {
   let { events } = req.body
   if (!events) return res.end()
@@ -58,8 +60,15 @@ app.post('/', (req, res) => {
 \`/sick\` [date] แจ้งขอลาป่วย \`/sick today\`
 \`/leave\` [date-range] ดูข้อมูลส่วนตัวของเมมเบอร์ \`/leave 2019-01-01|2019-12-31\`
 \`/profile\` ดูข้อมูลของ chat`
+            client.replyMessage(event.replyToken, sender)
           } else if (cmd === 'sick') {
+            if (!exec.groups.arg.trim()) continue
+            sender.text = `แจ้งขอลาป่วย *${exec.groups.arg.trim()}*`
+            client.replyMessage(groupAlert, sender)
           } else if (cmd === 'leave') {
+            if (!exec.groups.arg.trim()) continue
+            sender.text = `แจ้งขอลาพักร้อน *${exec.groups.arg.trim()}*`
+            client.replyMessage(groupAlert, sender)
           } else if (cmd === 'watch') {
           } else if (cmd === 'profile') {
             let { userId, type, groupId, roomId } = event.source
