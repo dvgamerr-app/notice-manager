@@ -60,7 +60,7 @@ app.post('/', (req, res) => {
         if (!cmdFound) {
           let sender = { type: 'text', text: event.message.text }
           client.pushMessage(getId(event), sender)
-          console.log(`${getId(event)}::${vent.message.text}`)
+          console.log(`${getId(event)}::${event.message.text}`)
         }
       }
     }
