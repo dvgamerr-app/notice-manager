@@ -63,12 +63,21 @@ app.post('/', (req, res) => {
             client.replyMessage(event.replyToken, sender)
           } else if (cmd === 'sick') {
             if (!exec.groups.arg.trim()) continue
-            sender.text = `แจ้งขอลาป่วย *${exec.groups.arg.trim()}*`
-            client.replyMessage(groupAlert, sender)
+            let { userId } = event.source
+            
+            client.getProfile(userId).then(p => {
+              sender.text = `คุณ${p.displayName} แจ้งขอลาป่วย *${exec.groups.arg.trim()}*`
+              return client.pushMessage(groupAlert, sender)
+            })
+
           } else if (cmd === 'leave') {
             if (!exec.groups.arg.trim()) continue
-            sender.text = `แจ้งขอลาพักร้อน *${exec.groups.arg.trim()}*`
-            client.replyMessage(groupAlert, sender)
+            let { userId } = event.source
+
+            client.getProfile(userId).then(p => {
+              sender.text = `คุณ${p.displayName} แจ้งขอลาพักร้อน *${exec.groups.arg.trim()}*`
+              return client.pushMessage(groupAlert, sender)
+            })
           } else if (cmd === 'watch') {
           } else if (cmd === 'profile') {
             let { userId, type, groupId, roomId } = event.source
