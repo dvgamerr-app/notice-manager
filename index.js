@@ -4,7 +4,10 @@ const line = require('@line/bot-sdk')
 const port = process.env.PORT || 3000
 const app = express()
  
-const client = new line.Client(require('./channel'))
+const client = new line.Client({
+  channelAccessToken: 'Mv6ULaO86WfeFE3KrueZmazOiwFFwYJiEUYn+RQt6oFc313g8KFSYrx+Z7+odTH3qqvCp5hjl75n9XYtmDg35A4BD/EQIMYoVhMvdtRy0aXUmQ62KMp6KEu8XbChgo9bQ/G4hsnsJCF+4OWH6K1EuwdB04t89/1O/w1cDnyilFU=',
+  channelSecret: 'c0e4547f7379cbb385259ac33d89911c'
+})
 
 const getId = event => {
   if (event.source.type === 'room') {
