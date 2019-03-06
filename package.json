@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@line/bot-sdk": "^6.6.0",
     "body-parser": "^1.18.3",
     "express": "^4.16.4"
   }
