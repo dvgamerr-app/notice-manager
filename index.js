@@ -74,7 +74,7 @@ app.post('/', (req, res) => {
                  items: [
                   {
                    type: 'action',
-                   action: { type: 'datetimepicker', label: 'Select Date', data: 'sick=1', mode: 'date', initial: new Date() }
+                   action: { type: 'datetimepicker', label: 'Select Date', data: 'sick=1', mode: 'date', initial: '2018-09-11T00:00' }
                   }
                  ]
                 }
@@ -95,7 +95,7 @@ app.post('/', (req, res) => {
                  items: [
                   {
                    type: 'action',
-                   action: { type: 'datetimepicker', label: 'Select Date', data: 'leave=1', mode: 'date', initial: new Date() }
+                   action: { type: 'datetimepicker', label: 'Select Date', data: 'leave=1', mode: 'date', initial: '2018-09-11T00:00' }
                   }
                  ]
                 }
