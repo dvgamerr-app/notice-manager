@@ -4,10 +4,7 @@ const line = require('@line/bot-sdk')
 const port = process.env.PORT || 3000
 const app = express()
  
-const client = new line.Client({
-  channelAccessToken: 'Mv6ULaO86WfeFE3KrueZmazOiwFFwYJiEUYn+RQt6oFc313g8KFSYrx+Z7+odTH3qqvCp5hjl75n9XYtmDg35A4BD/EQIMYoVhMvdtRy0aXUmQ62KMp6KEu8XbChgo9bQ/G4hsnsJCF+4OWH6K1EuwdB04t89/1O/w1cDnyilFU=',
-  channelSecret: 'c0e4547f7379cbb385259ac33d89911c'
-})
+const client = new line.Client(require('./channel'))
 
 const getId = event => {
   if (event.source.type === 'room') {
@@ -26,6 +23,30 @@ app.use(bodyParser.json())
 
 app.get('/', (req, res) => {
   res.end('LINE Messenger Bot Endpoint.')
+})
+app.get('/test', (req, res) => {
+  client.pushMessage('U9e0a870c01ca97da20a4ec462bf72991', {
+    type: 'text',
+    text: 'Hello Quick Reply!',
+    quickReply: {
+     items: [
+      {
+       type: 'action',
+       action: {
+        type: 'datetimepicker',
+        label: 'Datetime Picker',
+        data: 'storeId=12345',
+        mode: 'datetime',
+        initial: '2018-09-11T00:00',
+        max: '2018-12-31T23:59',
+        min: '2018-01-01T00:00'
+       }
+      }
+     ]
+    }
+   })
+  
+  res.end('test cmd')
 })
 app.get('/hook/:id/:msg', (req, res) => {
   let { id, msg } = req.params
