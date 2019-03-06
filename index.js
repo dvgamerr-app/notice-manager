@@ -28,27 +28,6 @@ app.get('/', (req, res) => {
   res.end('LINE Messenger Bot Endpoint.')
 })
 app.get('/test', (req, res) => {
-  client.pushMessage('U9e0a870c01ca97da20a4ec462bf72991', {
-    type: 'text',
-    text: 'Hello Quick Reply!',
-    quickReply: {
-     items: [
-      {
-       type: 'action',
-       action: {
-        type: 'datetimepicker',
-        label: 'Datetime Picker',
-        data: 'storeId=12345',
-        mode: 'datetime',
-        initial: '2018-09-11T00:00',
-        max: '2018-12-31T23:59',
-        min: '2018-01-01T00:00'
-       }
-      }
-     ]
-    }
-   })
-  
   res.end('test cmd')
 })
 app.get('/hook/:id/:msg', (req, res) => {
@@ -86,22 +65,47 @@ app.post('/', (req, res) => {
 \`/profile\` ดูข้อมูลของ chat`
             client.replyMessage(event.replyToken, sender)
           } else if (cmd === 'sick') {
-            if (!exec.groups.arg.trim()) continue
             let { userId } = event.source
-            
-            client.getProfile(userId).then(p => {
-              sender.text = `คุณ${p.displayName} แจ้งขอลาป่วย *${exec.groups.arg.trim()}*`
-              return client.pushMessage(groupAlert, sender)
-            })
-
+            if (!exec.groups.arg.trim()) {
+              client.replyMessage(event.replyToken, {
+                type: 'text',
+                text: 'รับทราบครับ คุณต้องการลาวันที่เท่าไหร่?',
+                quickReply: {
+                 items: [
+                  {
+                   type: 'action',
+                   action: { type: 'datetimepicker', label: 'ระบุวันลา', data: 'sick', mode: 'date', initial: new Date() }
+                  }
+                 ]
+                }
+               })
+            } else {
+              client.getProfile(userId).then(p => {
+                sender.text = `คุณ${p.displayName} แจ้งขอลาป่วย *${exec.groups.arg.trim()}*`
+                return client.pushMessage(groupAlert, sender)
+              })
+            }
           } else if (cmd === 'leave') {
-            if (!exec.groups.arg.trim()) continue
             let { userId } = event.source
-
-            client.getProfile(userId).then(p => {
-              sender.text = `คุณ${p.displayName} แจ้งขอลาพักร้อน *${exec.groups.arg.trim()}*`
-              return client.pushMessage(groupAlert, sender)
-            })
+            if (!exec.groups.arg.trim()) {
+              client.replyMessage(event.replyToken, {
+                type: 'text',
+                text: 'รับทราบครับ คุณต้องการลาวันที่เท่าไหร่?',
+                quickReply: {
+                 items: [
+                  {
+                   type: 'action',
+                   action: { type: 'datetimepicker', label: 'ระบุวันลา', data: 'leave', mode: 'date', initial: new Date() }
+                  }
+                 ]
+                }
+               })
+            } else {
+              client.getProfile(userId).then(p => {
+                sender.text = `คุณ${p.displayName} แจ้งขอลาพักร้อน *${exec.groups.arg.trim()}*`
+                return client.pushMessage(groupAlert, sender)
+              })
+            }
           } else if (cmd === 'watch') {
           } else if (cmd === 'profile') {
             let { userId, type, groupId, roomId } = event.source
@@ -126,6 +130,8 @@ app.post('/', (req, res) => {
           client.pushMessage(getId(event), sender)
           console.log(`${getId(event)}::${event.message.text}`)
         }
+      } else if (event.type === 'postback') {
+        console.log(event)
       }
     }
   } else if (events.type === 'join') {
