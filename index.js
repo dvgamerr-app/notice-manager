@@ -19,7 +19,7 @@ app.get('/msg/:text', (req, res) => {
 app.post('/', (req, res) => {
   let { events } = req.body
 
-  console.log(JSON.parse(events))
+  console.log(events)
 
   if (!events || events.length !== 1) return res.end()
   // { events:
