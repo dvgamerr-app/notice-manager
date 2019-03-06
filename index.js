@@ -67,7 +67,7 @@ app.post('/', (req, res) => {
           } else if (cmd === 'sick') {
             let { userId } = event.source
             if (!exec.groups.arg.trim()) {
-              client.replyMessage(event.replyToken, {
+              client.pushMessage(getId(event), {
                 type: 'text',
                 text: 'รับทราบครับ คุณต้องการลาวันที่เท่าไหร่?',
                 quickReply: {
@@ -88,7 +88,7 @@ app.post('/', (req, res) => {
           } else if (cmd === 'leave') {
             let { userId } = event.source
             if (!exec.groups.arg.trim()) {
-              client.replyMessage(event.replyToken, {
+              client.pushMessage(getId(event), {
                 type: 'text',
                 text: 'รับทราบครับ คุณต้องการลาวันที่เท่าไหร่?',
                 quickReply: {
