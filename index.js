@@ -1,8 +1,14 @@
-var express = require('express')
-var bodyParser = require('body-parser')
-var port = process.env.PORT || 3000
-var app = express()
+const express = require('express')
+const bodyParser = require('body-parser')
+const line = require('@line/bot-sdk')
+const port = process.env.PORT || 3000
+const app = express()
  
+const client = new line.Client({
+  channelAccessToken: 'Mv6ULaO86WfeFE3KrueZmazOiwFFwYJiEUYn+RQt6oFc313g8KFSYrx+Z7+odTH3qqvCp5hjl75n9XYtmDg35A4BD/EQIMYoVhMvdtRy0aXUmQ62KMp6KEu8XbChgo9bQ/G4hsnsJCF+4OWH6K1EuwdB04t89/1O/w1cDnyilFU=',
+  channelSecret: 'c0e4547f7379cbb385259ac33d89911c'
+})
+
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
  
@@ -12,23 +18,15 @@ app.use(bodyParser.json())
 app.get('/', (req, res) => {
   res.end('LINE Messenger Bot Endpoint.')
 })
-app.get('/msg/:text', (req, res) => {
-  console.log(req.params)
+app.get('/hook/:id/:msg', (req, res) => {
+  let { id, msg } = req.params
+  console.log(id, msg)
   res.end()
 })
 app.post('/', (req, res) => {
   let { events } = req.body
-
-  console.log(events)
-
   if (!events || events.length !== 1) return res.end()
-  // { events:
-  // [ { type: 'message',
-  // replyToken: '1556e236aae74f049ccdd7acbf9e7e36',
-  // source: [Object],
-  // timestamp: 1551861466203,
-  // message: [Object] } ],
-  // destination: 'Uedd5b2eca50d2222cdff229b626ae3cb' }
+
   const cmds = [ 'id', 'profile' ]
   for (const event of events) {
     if (event.type === 'message' && event.message.type === 'text') {
@@ -40,6 +38,8 @@ app.post('/', (req, res) => {
         if (!exec) continue
 
         cmdFound = true
+        let sender = { type: 'text', text: `*CMD* ${cmd} \`${exec.groups.arg.trim()}\`` }
+        if (event.replyToken) client.replyMessage(event.replyToken, sender)
         // handlerCommand(cmd, exec.groups.arg.trim(), event).then(() => {
         console.log(`${event.source.userId}::${cmd}`)
         // }).catch(ex => {
@@ -48,8 +48,16 @@ app.post('/', (req, res) => {
         break
       }
       if (!cmdFound) {
-        console.log(event.destination, event.source, event.message)
+        console.log(event.source, event.message)
       }
+    } else if (event.type === 'join') {
+      let { groupId } = event.source
+      console.log(`${groupId}::joined`)
+      
+    } else if (event.type === 'leave') {
+      let { groupId } = event.source
+      console.log(`${groupId}::leaved`)
+
     }
   }
   res.end()
