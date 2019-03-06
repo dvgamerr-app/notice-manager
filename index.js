@@ -52,18 +52,31 @@ app.post('/', (req, res) => {
           cmdFound = true
           let sender = { type: 'text', text: `*CMD* ${cmd} \`${exec.groups.arg.trim()}\`` }
 
-          if (cmd === 'profile') {
-            let { userId } = event.source
-            client.getProfile(userId).then(p => {
-              sender.text = `*${p.displayName}* - ${p.statusMessage}\n\`${p.userId}\`\n\`${p.pictureUrl}\``
+          if (cmd === 'help') {
+            sender.text = `*Command*
+\`/help\` ดูคำสั่งที่มีทั้งหมด
+\`/sick\` [date] แจ้งขอลาป่วย \`/sick today\`
+\`/leave\` [date-range] ดูข้อมูลส่วนตัวของเมมเบอร์ \`/leave 2019-01-01|2019-12-31\`
+\`/profile\` ดูข้อมูลของ chat`
+          } else if (cmd === 'sick') {
+          } else if (cmd === 'leave') {
+          } else if (cmd === 'watch') {
+          } else if (cmd === 'profile') {
+            let { userId, type, groupId, roomId } = event.source
+            if (type === 'room') {
+              sender.text = `*RoomId:* \`${roomId}\``
               return client.replyMessage(event.replyToken, sender)
-            })
+            } else if (type === 'group') {
+              sender.text = `*GroupId:* \`${groupId}\``
+              return client.replyMessage(event.replyToken, sender)
+            } else {
+              client.getProfile(userId).then(p => {
+                sender.text = `*${p.displayName}* - ${p.statusMessage}\n\`${p.userId}\`\n\`${p.pictureUrl}\``
+                return client.replyMessage(event.replyToken, sender)
+              })
+            }
           }
-          // handlerCommand(cmd, exec.groups.arg.trim(), event).then(() => {
           console.log(`${getId(event)}::${cmd}`)
-          // }).catch(ex => {
-          //   console.error(ex)
-          // })
           break
         }
         if (!cmdFound) {
