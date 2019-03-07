@@ -131,6 +131,13 @@ app.post('/', (req, res) => {
           console.log(`${getId(event)}::${event.message.text}`)
         }
       } else if (event.type === 'postback') {
+        // { type: 'postback',
+        // replyToken: '3c8a1c7077664cf396db73883c1adeb2',
+        // source:
+        // { userId: 'U9e0a870c01ca97da20a4ec462bf72991', type: 'user' },
+        // timestamp: 1551941106824,
+        // postback: { data: 'sick=1', params: { date: '2018-09-28' } } }
+
         console.log(event)
       }
     }
