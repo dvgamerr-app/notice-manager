@@ -67,42 +67,42 @@ app.post('/', (req, res) => {
           } else if (cmd === 'sick') {
             let { userId } = event.source
             if (!exec.groups.arg.trim()) {
-              client.pushMessage(getId(event), {
+              client.pushMessage(userId, {
                 type: 'text',
                 text: 'รับทราบครับ คุณต้องการลาวันที่เท่าไหร่?',
                 quickReply: {
                  items: [
                   {
                    type: 'action',
-                   action: { type: 'datetimepicker', label: 'Select Date', data: 'sick=1', mode: 'date', initial: '2018-09-11T00:00' }
+                   action: { type: 'datetimepicker', label: 'Select Date', data: 'sick=1', mode: 'date', initial: '2018-09-11' }
                   }
                  ]
                 }
                })
             } else {
               client.getProfile(userId).then(p => {
-                sender.text = `คุณ${p.displayName} แจ้งขอลาป่วย *${exec.groups.arg.trim()}*`
+                sender.text = `คุณ _${p.displayName}_ แจ้งขอลาป่วย *${exec.groups.arg.trim()}*`
                 return client.pushMessage(groupAlert, sender)
               })
             }
           } else if (cmd === 'leave') {
             let { userId } = event.source
             if (!exec.groups.arg.trim()) {
-              client.pushMessage(getId(event), {
+              client.pushMessage(userId, {
                 type: 'text',
                 text: 'รับทราบครับ คุณต้องการลาวันที่เท่าไหร่?',
                 quickReply: {
                  items: [
                   {
                    type: 'action',
-                   action: { type: 'datetimepicker', label: 'Select Date', data: 'leave=1', mode: 'date', initial: '2018-09-11T00:00' }
+                   action: { type: 'datetimepicker', label: 'Select Date', data: 'leave=1', mode: 'date', initial: '2018-09-11' }
                   }
                  ]
                 }
                })
             } else {
               client.getProfile(userId).then(p => {
-                sender.text = `คุณ${p.displayName} แจ้งขอลาพักร้อน *${exec.groups.arg.trim()}*`
+                sender.text = `คุณ _${p.displayName}_ แจ้งขอลาพักร้อน *${exec.groups.arg.trim()}*`
                 return client.pushMessage(groupAlert, sender)
               })
             }
