@@ -3,10 +3,16 @@ module.exports = {
   channelSecret: 'c0e4547f7379cbb385259ac33d89911c',
   onEvents: {
     'join': async (event, client) => {
-      
+      let { userId, groupId } = event.source
+      return `กลุ่มนี้ใครคุมวะ \`${groupId}\``
     },
     'leave': async (event, client) => {
-      
+      return 'อ้าว!! ไอ้สัส.. ใครเตะกู'
+    }
+  },
+  onPostBack: {
+    'saveDateTime': async (event, client) => {
+
     }
   },
   onCommands: {

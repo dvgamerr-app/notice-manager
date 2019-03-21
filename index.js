@@ -1,4 +1,5 @@
 const express = require('express')
+const querystring = require('querystring')
 const bodyParser = require('body-parser')
 const sdk = require('@line/bot-sdk')
 const port = process.env.PORT || 3000
@@ -48,10 +49,18 @@ app.post('/:bot', async (req, res) => {
   if (!events) return res.end()
   try {
     if (!client[bot]) throw new Error('LINE API bot is undefined.')
-    let { onEvents, onCommands, channelAccessToken, channelSecret } = client[bot]
+    let { onEvents, onCommands, onPostBack, channelAccessToken, channelSecret } = client[bot]
     if (!channelAccessToken || !channelSecret) throw new Error('LINE Channel AccessToken is undefined.')
 
     const line = new sdk.Client({ channelAccessToken, channelSecret })
+    const applyMessage = async sender => {
+      if (typeof sender === 'string') {
+        await line.replyMessage(e.replyToken, { type: 'text', text: sender })
+      } else if (typeof sender === 'object') {
+        await line.replyMessage(e.replyToken, sender)
+      }
+    }
+
     if (events.length > 0) {
       for (const e of events) {
         // console.log(e)
@@ -61,16 +70,23 @@ app.post('/:bot', async (req, res) => {
           // console.log(!groups, groups.name, !onCommands[groups.name])
           if (!e.replyToken || !groups || !onCommands[groups.name]) continue
           let result = await onCommands[groups.name].call(this, groups.arg.split(' '), e, line)
-
-          if (typeof result === 'string') {
-            await line.replyMessage(e.replyToken, { type: 'text', text: result })
-          } else if (typeof result === 'object') {
-            await line.replyMessage(e.replyToken, result)
+          await applyMessage(result)
+        } else if (e.type === 'postback') {
+          let data = querystring.parse(e.postback.data)
+          if (!!data.func) {
+            if (!onPostBack[data.func]) continue
+            let result = await onPostBack[data.func].call(this, e, line)
+            await applyMessage(result)
+          } else {
+            console.log(data, e)
           }
+        } else {
+          console.log('UNKNOW: ', e)
         }
       }
     } else if (typeof onEvents[events.type] === 'function') {
-      await onEvents[events.type].call(this, e, line)
+      let result = await onEvents[events.type].call(this, e, line)
+      await applyMessage(result)
     } else {
       console.log('UNKNOW: ', events)
     }
