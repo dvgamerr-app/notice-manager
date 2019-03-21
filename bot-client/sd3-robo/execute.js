@@ -1,3 +1,2 @@
-module.exports = async (args, client) => {
-  // event = this
+module.exports = async (args, event, client) => {
 }

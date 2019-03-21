@@ -60,7 +60,7 @@ app.post('/:bot', async (req, res) => {
           let { groups } = /^\/(?<name>[-_a-zA-Z]+)(?<arg>\W.*|)/ig.exec(text) || {}
           // console.log(!groups, groups.name, !onCommands[groups.name])
           if (!e.replyToken || !groups || !onCommands[groups.name]) continue
-          let result = await onCommands[groups.name].call(e, groups.arg.split(' '), line)
+          let result = await onCommands[groups.name].call(this, groups.arg.split(' '), e, line)
 
           if (typeof result === 'string') {
             await line.replyMessage(e.replyToken, { type: 'text', text: result })
@@ -70,7 +70,7 @@ app.post('/:bot', async (req, res) => {
         }
       }
     } else if (typeof onEvents[events.type] === 'function') {
-      await onEvents[events.type].call(e, line)
+      await onEvents[events.type].call(this, e, line)
     } else {
       console.log('UNKNOW: ', events)
     }

@@ -11,22 +11,18 @@ module.exports = {
   },
   onCommands: {
     'exec': require('./execute'),
-    'profile': async (args, client) => {
-      let sender =  { type: 'text', text: '' }
-      let { userId, type, groupId, roomId } = this.source
+    'profile': async (args, event, client) => {
+      let { userId, type, groupId, roomId } = event.source
       if (type === 'room') {
-        sender.text = `*RoomId:* \`${roomId}\``
-        await client.replyMessage(this.replyToken, sender)
+        return `*RoomId:* \`${roomId}\``
       } else if (type === 'group') {
-        sender.text = `*GroupId:* \`${groupId}\``
-        await client.replyMessage(this.replyToken, sender)
+        return `*GroupId:* \`${groupId}\``
       } else {
         let profile = await client.getProfile(userId)
-        sender.text = `*${profile.displayName}* - ${profile.statusMessage}\n\`${profile.userId}\`\n\`${profile.pictureUrl}\``
-        await client.replyMessage(this.replyToken, sender)
+        return `*${profile.displayName}* - ${profile.statusMessage}\n\`${profile.userId}\`\n\`${profile.pictureUrl}\``
       }
     },
-    'help': async (args, client) => {
+    'help': async (args, event, client) => {
       return [
         '`/help` ดูคำสั่งที่มีทั้งหมด',
         '`/exec` [function_name] ถ้าไม่ระบุจะเป็นเรียก func ทั้งหมดขึ้นมา',
