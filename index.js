@@ -53,7 +53,7 @@ app.post('/:bot', async (req, res) => {
     if (!channelAccessToken || !channelSecret) throw new Error('LINE Channel AccessToken is undefined.')
 
     const line = new sdk.Client({ channelAccessToken, channelSecret })
-    const applyMessage = async sender => {
+    const applyMessage = async (e, sender) => {
       if (typeof sender === 'string') {
         await line.replyMessage(e.replyToken, { type: 'text', text: sender })
       } else if (typeof sender === 'object') {
@@ -70,13 +70,13 @@ app.post('/:bot', async (req, res) => {
           // console.log(!groups, groups.name, !onCommands[groups.name])
           if (!e.replyToken || !groups || !onCommands[groups.name]) continue
           let result = await onCommands[groups.name].call(this, groups.arg.split(' '), e, line)
-          await applyMessage(result)
+          await applyMessage(e, result)
         } else if (e.type === 'postback') {
           let data = querystring.parse(e.postback.data)
           if (!!data.func) {
             if (!onPostBack[data.func]) continue
             let result = await onPostBack[data.func].call(this, e, line)
-            await applyMessage(result)
+            await applyMessage(e, result)
           } else {
             console.log(data, e)
           }
@@ -85,13 +85,13 @@ app.post('/:bot', async (req, res) => {
         }
       }
     } else if (typeof onEvents[events.type] === 'function') {
-      let result = await onEvents[events.type].call(this, e, line)
-      await applyMessage(result)
+      let result = await onEvents[events.type].call(this, events, line)
+      await applyMessage(events, result)
     } else {
       console.log('UNKNOW: ', events)
     }
   } catch (ex) {
-    console.log(ex.message)
+    console.log(ex)
   } finally {
     res.end()
   }
