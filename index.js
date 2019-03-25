@@ -46,6 +46,8 @@ app.post('/:bot', async (req, res) => {
     const lineSenderObj = msg => typeof msg === 'string' ? { type: 'text', text: msg } : typeof msg === 'function' ? msg() : msg
     const linePushId = ({ source }) => source.type === 'room' ? source.roomId : source.type === 'group' ? source.groupId : source.userId
     const lineMessage = async (e, sender) => {
+      if (!sender) return
+
       if (typeof e === 'string') {
         await line.pushMessage(e, lineSenderObj(sender))
       } else if (e.replyToken) {
@@ -85,11 +87,11 @@ app.post('/:bot', async (req, res) => {
       console.log('events: ', events)
     }
   } catch (ex) {
-    console.log(ex)
+    console.log(ex.statusCode === 400 ? ex.statusMessage :  ex)
   } finally {
     res.end()
   }
-  
+  // U9e0a870c01ca97da20a4ec462bf72991
 //   if (events.length > 0) {
 //     const cmds = [ 'profile', 'sick', 'leave', 'watch', 'help' ]
 //     for (const event of events) {

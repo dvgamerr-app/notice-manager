@@ -1,3 +1,5 @@
+const adminId = 'U9e0a870c01ca97da20a4ec462bf72991'
+
 module.exports = {
   channelAccessToken: 'Mv6ULaO86WfeFE3KrueZmazOiwFFwYJiEUYn+RQt6oFc313g8KFSYrx+Z7+odTH3qqvCp5hjl75n9XYtmDg35A4BD/EQIMYoVhMvdtRy0aXUmQ62KMp6KEu8XbChgo9bQ/G4hsnsJCF+4OWH6K1EuwdB04t89/1O/w1cDnyilFU=',
   channelSecret: 'c0e4547f7379cbb385259ac33d89911c',
@@ -7,7 +9,7 @@ module.exports = {
       return `กลุ่มนี้ใครคุมวะ \`${groupId}\``
     },
     'leave': async (event, client) => {
-      return 'อ้าว!! ไอ้สัส.. ใครเตะกู'
+      await line.pushMessage(adminId, JSON.stringify(event))
     }
   },
   onPostBack: {
