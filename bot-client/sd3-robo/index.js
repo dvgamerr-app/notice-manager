@@ -33,7 +33,7 @@ module.exports = {
     'help': async (args, event, client) => {
       return {
         type: 'text',
-        text: '',
+        text: 'Replay Message.',
         quickReply: {
           items: [
             {
