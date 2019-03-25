@@ -13,8 +13,8 @@ module.exports = {
     }
   },
   onPostBack: {
-    'saveDateTime': async (event, client) => {
-
+    'getItems': async (event, data, client) => {
+      console.log('getItems:', data)
     }
   },
   onCommands: {
@@ -31,11 +31,32 @@ module.exports = {
       }
     },
     'help': async (args, event, client) => {
-      return [
-        '`/help` ดูคำสั่งที่มีทั้งหมด',
-        '`/exec` [function_name] ถ้าไม่ระบุจะเป็นเรียก func ทั้งหมดขึ้นมา',
-        '`/profile` ดูข้อมูลของ chat'
-      ].join('\n')
+      return {
+        type: 'text',
+        text: '',
+        quickReply: {
+          items: [
+            {
+              type: 'action',
+              imageUrl: 'https://cdn1.iconfinder.com/data/icons/mix-color-3/502/Untitled-1-512.png',
+              action: {
+                type: 'message',
+                label: 'Profile',
+                text: '/profile'
+              }
+            },
+            {
+              type: 'action',
+              action: {
+                type: 'postback',
+                label: 'Commands',
+                data: 'func=getItems&id=123123',
+                displayText: 'Get Items.'
+              }
+            }
+          ]
+        }
+      }
     }
   }
 }

@@ -74,7 +74,7 @@ app.post('/:bot', async (req, res) => {
           let data = querystring.parse(e.postback.data)
           if (!!data.func) {
             if (!onPostBack[data.func]) continue
-            let result = await onPostBack[data.func].call(this, e, line)
+            let result = await onPostBack[data.func].call(this, e, data, line)
             await lineMessage(e, result)
           } else {
             console.log(data, e)
