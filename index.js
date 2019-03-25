@@ -65,6 +65,9 @@ app.post('/:bot', async (req, res) => {
           if (!e.replyToken || !groups || !onCommands[groups.name]) continue
           let result = await onCommands[groups.name].call(this, groups.arg.split(' '), e, line)
           await lineMessage(e, result)
+        } else if (typeof onEvents[e.type] === 'function') {
+          let result = await onEvents[e.type].call(this, e, line)
+          await lineMessage(e, result)
         } else if (e.type === 'postback') {
           let data = querystring.parse(e.postback.data)
           if (!!data.func) {
@@ -75,14 +78,11 @@ app.post('/:bot', async (req, res) => {
             console.log(data, e)
           }
         } else {
-          console.log('UNKNOW: ', e)
+          console.log('e: ', e)
         }
       }
-    } else if (typeof onEvents[events.type] === 'function') {
-      let result = await onEvents[events.type].call(this, events, line)
-      await lineMessage(events, result)
     } else {
-      console.log('UNKNOW: ', onEvents, events.type)
+      console.log('events: ', events)
     }
   } catch (ex) {
     console.log(ex)
