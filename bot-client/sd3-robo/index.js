@@ -9,7 +9,7 @@ module.exports = {
       return `กลุ่มนี้ใครคุมวะ \`${groupId}\``
     },
     'leave': async (event, client) => {
-      await line.pushMessage(adminId, JSON.stringify(event))
+      await client.pushMessage(adminId, JSON.stringify(event))
     }
   },
   onPostBack: {
