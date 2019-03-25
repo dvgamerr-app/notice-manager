@@ -1,6 +1,6 @@
 module.exports = {
-  channelAccessToken: '88qo4WYryf4VXg5ZcGGVXmso3qqwb3gBvDBNbAfCEY95G5OVGX6ijgG5g09ydm23gwUeZoiZ36IWI//DwHLgTDE1Pdo39n0UVtpVOEpz48Xnqfzeu7uRAL5tLkRZJDqnID7p/IbMA+DKOBdkl+r/LAdB04t89/1O/w1cDnyilFU=',
-  channelSecret: 'a3ccb2a64a07a4f0274197a2a9665466',
+  channelAccessToken: 'e1JsRE7Ol7LhD653EiBtBmSXV3Eq98gC81kbBN72JnKYCKk7isQ0kQYhyuMUkIhIB9ScVp23/qoypZOgKZWc6ydIHveHpqAFJ7GuS8de7s9zdZY3ty7jU5bYsdPl1cCgYqx7BpL5+pmJX6M4RI7/IwdB04t89/1O/w1cDnyilFU=',
+  channelSecret: 'b35c00ad80890af2dee37ed87c5f1c3b',
   commands: {
     'exec': async (args, client) => {
     

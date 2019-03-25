@@ -2,20 +2,11 @@ const express = require('express')
 const querystring = require('querystring')
 const bodyParser = require('body-parser')
 const sdk = require('@line/bot-sdk')
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 4000
 const app = express()
  
 const client = require('./bot-client')
 
-const getId = event => {
-  if (event.source.type === 'room') {
-    return event.source.roomId
-  } else if (event.source.type === 'group') {
-    return event.source.groupId
-  } else {
-    return event.source.userId
-  }
-}
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
  
@@ -35,14 +26,13 @@ app.put('/:bot/:to', async (req, res) => {
     await line.pushMessage(to, req.body)
     res.json({ error: null, type: req.body.type })
   } catch (ex) {
-    console.error(ex.stack)
+    console.error(ex.message)
     res.json({ error: ex.message || ex.toString(), type: req.body.type })
   } finally {
     res.end()
   }
 })
 
-const groupAlert = 'C31ca657c0955d89dcb049d63bfc32408'
 app.post('/:bot', async (req, res) => {
   let { bot } = req.params
   let { events } = req.body
@@ -53,11 +43,15 @@ app.post('/:bot', async (req, res) => {
     if (!channelAccessToken || !channelSecret) throw new Error('LINE Channel AccessToken is undefined.')
 
     const line = new sdk.Client({ channelAccessToken, channelSecret })
-    const applyMessage = async (e, sender) => {
-      if (typeof sender === 'string') {
-        await line.replyMessage(e.replyToken, { type: 'text', text: sender })
-      } else if (typeof sender === 'object') {
-        await line.replyMessage(e.replyToken, sender)
+    const lineSenderObj = msg => typeof msg === 'string' ? { type: 'text', text: msg } : typeof msg === 'function' ? msg() : msg
+    const linePushId = ({ source }) => source.type === 'room' ? source.roomId : source.type === 'group' ? source.groupId : source.userId
+    const lineMessage = async (e, sender) => {
+      if (typeof e === 'string') {
+        await line.pushMessage(e, lineSenderObj(sender))
+      } else if (e.replyToken) {
+        await line.replyMessage(e.replyToken, lineSenderObj(sender))
+      } else {
+        await line.pushMessage(linePushId(e), lineSenderObj(sender))
       }
     }
 
@@ -70,13 +64,13 @@ app.post('/:bot', async (req, res) => {
           // console.log(!groups, groups.name, !onCommands[groups.name])
           if (!e.replyToken || !groups || !onCommands[groups.name]) continue
           let result = await onCommands[groups.name].call(this, groups.arg.split(' '), e, line)
-          await applyMessage(e, result)
+          await lineMessage(e, result)
         } else if (e.type === 'postback') {
           let data = querystring.parse(e.postback.data)
           if (!!data.func) {
             if (!onPostBack[data.func]) continue
             let result = await onPostBack[data.func].call(this, e, line)
-            await applyMessage(e, result)
+            await lineMessage(e, result)
           } else {
             console.log(data, e)
           }
@@ -86,9 +80,9 @@ app.post('/:bot', async (req, res) => {
       }
     } else if (typeof onEvents[events.type] === 'function') {
       let result = await onEvents[events.type].call(this, events, line)
-      await applyMessage(events, result)
+      await lineMessage(events, result)
     } else {
-      console.log('UNKNOW: ', events)
+      console.log('UNKNOW: ', onEvents, events.type)
     }
   } catch (ex) {
     console.log(ex)
