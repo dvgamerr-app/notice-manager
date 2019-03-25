@@ -15,6 +15,7 @@ module.exports = {
   onPostBack: {
     'getItems': async (event, data, client) => {
       console.log('getItems:', data)
+      return `randomId: ${data.id}`
     }
   },
   onCommands: {
@@ -31,6 +32,7 @@ module.exports = {
       }
     },
     'help': async (args, event, client) => {
+      
       return {
         type: 'text',
         text: 'Replay Message.',
@@ -50,7 +52,7 @@ module.exports = {
               action: {
                 type: 'postback',
                 label: 'Commands',
-                data: 'func=getItems&id=123123',
+                data: 'func=getItems&id=' + parseInt(Math.random() * 10000),
                 displayText: 'Get Items.'
               }
             }
