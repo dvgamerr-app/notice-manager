@@ -2,6 +2,7 @@ const express = require('express')
 const querystring = require('querystring')
 const bodyParser = require('body-parser')
 const sdk = require('@line/bot-sdk')
+const request = require('request-promise')
 const port = process.env.PORT || 4000
 const app = express()
  
@@ -13,18 +14,24 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
 
-app.put('/:bot/:to', async (req, res) => {
+app.put('/:bot/:to?', async (req, res) => {
   let { bot, to } = req.params
   try {
     if (!client[bot]) throw new Error('LINE API bot is undefined.')
     if (!req.body.type) throw new Error('LINE API fail formatter.')
-
-    let { channelAccessToken, channelSecret } = client[bot]
-    if (!channelAccessToken || !channelSecret) throw new Error('LINE Channel AccessToken is undefined.')
-    
-    const line = new sdk.Client({ channelAccessToken, channelSecret })
-    await line.pushMessage(to, req.body)
-    res.json({ error: null, type: req.body.type })
+    if (client[bot].party !== 'slack') {
+      let { channelAccessToken, channelSecret } = client[bot]
+      if (!channelAccessToken || !channelSecret) throw new Error('LINE Channel AccessToken is undefined.')
+      
+      const line = new sdk.Client({ channelAccessToken, channelSecret })
+      await line.pushMessage(to, req.body)
+    } else {
+      let { hooks } = client[bot]
+      if (!hooks) throw new Error('Slack Hooks API is undefined.')
+      let result = await request({ url: hooks, method: 'POST', body: req.body, json: true })
+      if (result.body !== 'ok') throw new Error(result.body)
+    }
+    res.json({ error: null })
   } catch (ex) {
     console.error(ex.message)
     res.json({ error: ex.message || ex.toString(), type: req.body.type })
