@@ -30,8 +30,7 @@ app.put('/:bot/:to?', async (req, res) => {
       let { hooks } = client[bot]
       if (!hooks) throw new Error('Slack Hooks API is undefined.')
       let result = await request({ url: hooks, method: 'POST', body: req.body, json: true })
-      console.log(result)
-      if (result.body !== 'ok') throw new Error(result.body)
+      if (result !== 'ok') throw new Error(result)
     }
     res.json({ error: null })
   } catch (ex) {
