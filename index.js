@@ -18,8 +18,9 @@ app.put('/:bot/:to?', async (req, res) => {
   let { bot, to } = req.params
   try {
     if (!client[bot]) throw new Error('LINE API bot is undefined.')
-    if (!req.body.type) throw new Error('LINE API fail formatter.')
     if (client[bot].party !== 'slack') {
+      if (!req.body.type) throw new Error('LINE API fail formatter.')
+      
       let { channelAccessToken, channelSecret } = client[bot]
       if (!channelAccessToken || !channelSecret) throw new Error('LINE Channel AccessToken is undefined.')
       
