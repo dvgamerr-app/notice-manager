@@ -21,40 +21,39 @@ module.exports = {
   },
   onCommands: {
     'exec': require('./execute'),
-    'profile': async (args, event, client) => {
+    'id': async (args, event, client) => {
       let { userId, type, groupId, roomId } = event.source
       if (type === 'room') {
-        return `*RoomId:* \`${roomId}\``
+        return roomId // `*RoomId:* \`${roomId}\``
       } else if (type === 'group') {
-        return `*GroupId:* \`${groupId}\``
+        return groupId // `*GroupId:* \`${groupId}\``
       } else {
-        let profile = await client.getProfile(userId)
-        return `*${profile.displayName}* - ${profile.statusMessage}\n\`${profile.userId}\`\n\`${profile.pictureUrl}\``
+        return userId
+        // let profile = await client.getProfile(userId)
+        // return `*${profile.displayName}* - ${profile.statusMessage}\n\`${profile.userId}\`\n\`${profile.pictureUrl}\``
       }
     },
     'help': async (args, event, client) => {
-      
       return {
         type: 'text',
-        text: 'Replay Message.',
+        text: 'Tap on your menu item.',
         quickReply: {
           items: [
             {
               type: 'action',
-              imageUrl: 'https://cdn1.iconfinder.com/data/icons/mix-color-3/502/Untitled-1-512.png',
               action: {
                 type: 'message',
-                label: 'Profile',
-                text: '/profile'
+                label: 'profile',
+                text: '/id'
               }
             },
             {
               type: 'action',
               action: {
                 type: 'postback',
-                label: 'Commands',
+                label: 'execute',
                 data: 'func=getItems&id=' + parseInt(Math.random() * 10000),
-                displayText: 'Get Items.'
+                displayText: 'call `GetItems` fucntion.'
               }
             }
           ]
