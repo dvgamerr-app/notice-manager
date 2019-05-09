@@ -25,7 +25,11 @@ app.put('/:bot/:to?', async (req, res) => {
       if (!channelAccessToken || !channelSecret) throw new Error('LINE Channel AccessToken is undefined.')
       
       const line = new sdk.Client({ channelAccessToken, channelSecret })
-      await line.pushMessage(to, req.body)
+      if (!/^[RUC]{1}/g.test(to)) {
+        await line.replyMessage(to, req.body)
+      } else {
+        await line.pushMessage(to, req.body)
+      }
     } else {
       let { hooks } = client[bot]
       if (!hooks) throw new Error('Slack Hooks API is undefined.')
