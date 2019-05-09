@@ -1,4 +1,5 @@
 const adminId = 'U9e0a870c01ca97da20a4ec462bf72991'
+const helpFlex = require('./flex/help-command')
 
 module.exports = {
   party: 'line',
@@ -34,6 +35,9 @@ module.exports = {
       }
     },
     'help': async (args, event, client) => {
+      if (event.source.type === 'user') return helpFlex
+    },
+    'menu': async (args, event, client) => {
       return {
         type: 'text',
         text: 'Tap on your menu item.',
