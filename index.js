@@ -51,7 +51,7 @@ app.post('/:bot', async (req, res) => {
   if (!events) return res.end()
   try {
     if (!client[bot]) throw new Error('LINE API bot is undefined.')
-    let { onEvents, onCommands, onPostBack, channelAccessToken, channelSecret } = client[bot]
+    let { webhook, onEvents, onCommands, onPostBack, channelAccessToken, channelSecret } = client[bot]
     if (!channelAccessToken || !channelSecret) throw new Error('LINE Channel AccessToken is undefined.')
 
     const line = new sdk.Client({ channelAccessToken, channelSecret })
@@ -71,12 +71,12 @@ app.post('/:bot', async (req, res) => {
 
     if (events.length > 0) {
       for (const e of events) {
-        // console.log(e)
         if (e.type === 'message' && e.message.type === 'text') {
           let { text } = e.message
           let { groups } = /^\/(?<name>[-_a-zA-Z]+)(?<arg>\W.*|)/ig.exec(text) || {}
           // console.log(!groups, groups.name, !onCommands[groups.name])
           if (!e.replyToken || !groups || !onCommands[groups.name]) continue
+          
           let result = await onCommands[groups.name].call(this, groups.arg.split(' '), e, line)
           await lineMessage(e, result)
         } else if (typeof onEvents[e.type] === 'function') {
