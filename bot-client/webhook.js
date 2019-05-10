@@ -3,11 +3,11 @@ const ngrok = require('./ngrok')
 
 module.exports = async body => {
   try {
-    console.log('request -- ngrok:', ngrok)
-    console.log(body)
-    await request({ method: 'POST', url: ngrok, body: body, json: true })
+    console.log('[webhook-ngrok] ', ngrok)
+    let res = await request({ method: 'POST', url: ngrok, body: body, json: true })
+    if (res.error) throw new Error(res.error)
   } catch (ex) {
-    console.warn('request webhook to ngrok -- ', ex.message)
+    console.warn('[webhook-ngrok] fail -- ', ex.message)
     console.error(ex.stack)
   }
 }
