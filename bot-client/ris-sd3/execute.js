@@ -1,6 +1,7 @@
 const request = require('../webhook')
 
 module.exports = async (args, event) => {
+  console.log('exec --- args', args, event)
   if (args[0] === 'run') {
     switch (args[1]) {
       case 'task':
