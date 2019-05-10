@@ -38,7 +38,6 @@ app.put('/:bot/:to?', async (req, res) => {
     }
     res.json({ error: null })
   } catch (ex) {
-    console.error(ex.message)
     res.json({ error: ex.message || ex.toString(), type: req.body.type })
   } finally {
     res.end()
@@ -51,7 +50,7 @@ app.post('/:bot', async (req, res) => {
   if (!events) return res.end()
   try {
     if (!client[bot]) throw new Error('LINE API bot is undefined.')
-    let { webhook, onEvents, onCommands, onPostBack, channelAccessToken, channelSecret } = client[bot]
+    let { onEvents, onCommands, onPostBack, channelAccessToken, channelSecret } = client[bot]
     if (!channelAccessToken || !channelSecret) throw new Error('LINE Channel AccessToken is undefined.')
 
     const line = new sdk.Client({ channelAccessToken, channelSecret })
@@ -84,22 +83,22 @@ app.post('/:bot', async (req, res) => {
           await lineMessage(e, result)
         } else if (e.type === 'postback') {
           let data = querystring.parse(e.postback.data)
-          if (!!data.func) {
+          if (data.func !== undefined) {
             if (!onPostBack[data.func]) continue
             let result = await onPostBack[data.func].call(this, e, data, line)
             await lineMessage(e, result)
           } else {
-            console.log(data, e)
+            // console.log(data, e)
           }
         } else {
-          console.log('e: ', e)
+          // console.log('e: ', e)
         }
       }
     } else {
-      console.log('events: ', events)
+      // console.log('events: ', events)
     }
   } catch (ex) {
-    console.log(ex.statusCode === 400 ? ex.statusMessage :  ex)
+    // console.log(ex.statusCode === 400 ? ex.statusMessage :  ex)
   } finally {
     res.end()
   }

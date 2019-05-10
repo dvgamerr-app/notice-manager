@@ -7,8 +7,8 @@ module.exports = {
   channelSecret: 'c0e4547f7379cbb385259ac33d89911c',
   webhook: 'http://s-thcw-posdb95.pos.cmg.co.th/api/monitor/run-task/',
   onEvents: {
-    'join': async (event, client) => {
-      let { userId, groupId } = event.source
+    'join': async (event) => {
+      let { groupId } = event.source
       return `กลุ่มนี้ใครคุมวะ \`${groupId}\``
     },
     'leave': async (event, client) => {
@@ -16,14 +16,16 @@ module.exports = {
     }
   },
   onPostBack: {
-    'getItems': async (event, data, client) => {
+    // event, data, client
+    'getItems': async (event, data) => {
       console.log('getItems:', data)
       return `randomId: ${data.id}`
     }
   },
   onCommands: {
+    // args, event, client
     'exec': require('./execute'),
-    'id': async (args, event, client) => {
+    'id': async (args, event) => {
       let { userId, type, groupId, roomId } = event.source
       if (type === 'room') {
         return roomId // `*RoomId:* \`${roomId}\``
@@ -35,10 +37,10 @@ module.exports = {
         // return `*${profile.displayName}* - ${profile.statusMessage}\n\`${profile.userId}\`\n\`${profile.pictureUrl}\``
       }
     },
-    'help': async (args, event, client) => {
+    'help': async (args, event) => {
       if (event.source.type === 'user') return helpFlex
     },
-    'menu': async (args, event, client) => {
+    'menu': async () => {
       return {
         type: 'text',
         text: 'Tap on your menu item.',
