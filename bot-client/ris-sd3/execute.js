@@ -10,7 +10,7 @@ module.exports = async (args, event, client) => {
     switch (args[1]) {
       case 'task':
         await request({ url: 'http://s-thcw-posdb95.pos.cmg.co.th/api/monitor/run-task/', method: 'POST', body: event })
-        pushMessage(`Copy that!, and waiting approval...`)
+        await pushMessage(`Copy that!, and waiting approval...`)
         break
       default: return `Sir, Unknow job name is '${args[1]}'.`
     }
