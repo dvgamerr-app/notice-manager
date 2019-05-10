@@ -76,7 +76,7 @@ app.post('/:bot', async (req, res) => {
           // console.log(!groups, groups.name, !onCommands[groups.name])
           if (!e.replyToken || !groups || !onCommands[groups.name]) continue
           
-          let result = await onCommands[groups.name].call(this, groups.arg.split(' '), e, line)
+          let result = await onCommands[groups.name].call(this, (groups.arg || '').trim().split(' '), e, line)
           await lineMessage(e, result)
         } else if (typeof onEvents[e.type] === 'function') {
           let result = await onEvents[e.type].call(this, e, line)
