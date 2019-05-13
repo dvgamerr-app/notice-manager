@@ -75,7 +75,6 @@ app.post('/:bot', async (req, res) => {
           let { text } = e.message
           let { groups } = /^\/(?<name>[-_a-zA-Z]+)(?<arg>\W.*|)/ig.exec(text) || {}
           // console.log(!groups, groups.name, !onCommands[groups.name])
-          if (!e.replyToken || !groups || !onCommands[groups.name]) continue
           let args = (groups.arg || '').trim().split(' ')
           let { LineCMD } = mongo.get()
           await new LineCMD({
@@ -90,6 +89,8 @@ app.post('/:bot', async (req, res) => {
             updated: null,
             created: new Date(),
           }).save()
+          if (!e.replyToken || !groups || !onCommands[groups.name]) continue
+          
           let result = await onCommands[groups.name].call(this, args, e, line)
           await lineMessage(e, result)
         } else if (typeof onEvents[e.type] === 'function') {
@@ -136,6 +137,6 @@ mongo.open().then(async () => {
   })
   console.log(`LINE-BOT MongoDB Connected.`)
 
-  await app.listen()
+  await app.listen(port)
   console.log(`LINE Messenger Bot Endpoint listening on port ${port}!`)
 })
