@@ -3,6 +3,7 @@ const querystring = require('querystring')
 const bodyParser = require('body-parser')
 const sdk = require('@line/bot-sdk')
 const request = require('request-promise')
+const mongo = require('./mongodb')
 const port = process.env.PORT || 4000
 const app = express()
  
@@ -75,8 +76,21 @@ app.post('/:bot', async (req, res) => {
           let { groups } = /^\/(?<name>[-_a-zA-Z]+)(?<arg>\W.*|)/ig.exec(text) || {}
           // console.log(!groups, groups.name, !onCommands[groups.name])
           if (!e.replyToken || !groups || !onCommands[groups.name]) continue
-          
-          let result = await onCommands[groups.name].call(this, (groups.arg || '').trim().split(' '), e, line)
+          let args = (groups.arg || '').trim().split(' ')
+          let { LineCMD } = mongo.get()
+          await new LineCMD({
+            botname: bot,
+            userId: e.source.userId,
+            command: groups.name,
+            args: args,
+            text: text,
+            event: e,
+            executing: false,
+            executed: false,
+            updated: null,
+            created: new Date(),
+          }).save()
+          let result = await onCommands[groups.name].call(this, args, e, line)
           await lineMessage(e, result)
         } else if (typeof onEvents[e.type] === 'function') {
           let result = await onEvents[e.type].call(this, e, line)
@@ -105,6 +119,23 @@ app.post('/:bot', async (req, res) => {
 })
 
 app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
-app.listen(port, () => {
+
+process.env.MONGODB_URI = `mongodb+srv://dbLINE:CZBwk6XtyIGHleJS@line-bot-obya7.gcp.mongodb.net/LINE-BOT`
+mongo.open().then(async () => {
+  mongo.set('LineCMD', 'db-line-cmd', {
+    botname: String,
+    userId: String,
+    command: String,
+    args: Array,
+    text: String,
+    event: Object,
+    executing: Boolean,
+    executed: Boolean,
+    updated: Date,
+    created: Date,
+  })
+  console.log(`LINE-BOT MongoDB Connected.`)
+
+  await app.listen()
   console.log(`LINE Messenger Bot Endpoint listening on port ${port}!`)
 })
