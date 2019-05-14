@@ -181,6 +181,7 @@ mongo.open().then(async () => {
 
   mongo.set('LineBot', 'db-line-bot', {
     type: String,
+    botname: String,
     accesstoken: String,
     secret: String,
     options: Object,
