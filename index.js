@@ -63,6 +63,8 @@ app.post('/:bot', async (req, res) => {
   let { bot } = req.params
   let { events } = req.body
   if (!events) return res.end()
+  
+  let { LineInbound } = mongo.get()
   try {
     if (!client[bot]) throw new Error('LINE API bot is undefined.')
     let { onEvents, onCommands, onPostBack, channelAccessToken, channelSecret } = client[bot]
@@ -85,6 +87,7 @@ app.post('/:bot', async (req, res) => {
 
     if (events.length > 0) {
       for (const e of events) {
+        await new LineInbound(e).save()
         if (e.type === 'message' && e.message.type === 'text') {
           let { text } = e.message
           let { groups } = /^\/(?<name>[-_a-zA-Z]+)(?<arg>\W.*|)/ig.exec(text) || {}
@@ -125,6 +128,7 @@ app.post('/:bot', async (req, res) => {
       }
     } else {
       console.log('events: ', events)
+      await new LineInbound(events).save()
     }
   } catch (ex) {
     console.log(ex.statusCode === 400 ? ex.statusMessage :  ex)
@@ -135,7 +139,9 @@ app.post('/:bot', async (req, res) => {
 
 app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
 
-process.env.MONGODB_URI = `mongodb+srv://dbLINE:CZBwk6XtyIGHleJS@line-bot-obya7.gcp.mongodb.net/LINE-BOT`
+// process.env.MONGODB_URI = ``
+if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
+
 mongo.open().then(async () => {
   mongo.set('LineCMD', 'db-line-cmd', {
     botname: String,
@@ -158,6 +164,21 @@ mongo.open().then(async () => {
     error: String,
     created: Date,
   })
+
+  mongo.set('LineInbound', 'db-line-inbound', {
+    type: String,
+    replyToken: String,
+    source: Object,
+    message: Object,
+    joined: Object,
+    left: Object,
+    postback: Object,
+    things: Object,
+    beacon: Object,
+    timestamp: Number,
+    created: Date,
+  })
+
   console.log(`LINE-BOT MongoDB Connected.`)
 
   await app.listen(port)
