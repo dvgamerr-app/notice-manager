@@ -32,12 +32,11 @@ app.put('/:bot/:to?', async (req, res) => {
         created: new Date(),
       }).save()
       if (!req.body.type) throw new Error('LINE API fail formatter.')
-      console.log(outbound)
       let { channelAccessToken, channelSecret } = client[bot]
       if (!channelAccessToken || !channelSecret) throw new Error('LINE Channel AccessToken is undefined.')
       
       const line = new sdk.Client({ channelAccessToken, channelSecret })
-      await LineOutbound.update({ _id: outbound._id }, { set: { sended: true } })
+      await LineOutbound.update({ _id: outbound._id }, { $set: { sended: true } })
       if (!/^[RUC]{1}/g.test(to)) {
         await line.replyMessage(to, req.body)
       } else {
@@ -53,7 +52,7 @@ app.put('/:bot/:to?', async (req, res) => {
   } catch (ex) {
     res.json({ error: ex.message || ex.toString(), type: req.body.type })
     if (outbound && outbound._id) {
-      await LineOutbound.update({ _id: outbound._id }, { set: { error: ex.message || ex.toString() } })
+      await LineOutbound.update({ _id: outbound._id }, { $set: { error: ex.message || ex.toString() } })
     }
   } finally {
     res.end()
