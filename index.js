@@ -17,9 +17,19 @@ app.use(bodyParser.json())
 
 app.put('/:bot/:to?', async (req, res) => {
   let { bot, to } = req.params
+  let { LineOutbound } = mongo.get()
+  let outbound = null
   try {
     if (!client[bot]) throw new Error('LINE API bot is undefined.')
     if (client[bot].party !== 'slack') {
+      outbound = await new LineOutbound({
+        botname: bot,
+        userTo: to,
+        type: /^R/g.test(to) ? 'room' : /^C/g.test(to) ? 'group' : /^U/g.test(to) ? 'user' : 'replyToken',
+        sender: req.body || {},
+        sended: false,
+        created: new Date(),
+      }).save()
       if (!req.body.type) throw new Error('LINE API fail formatter.')
       
       let { channelAccessToken, channelSecret } = client[bot]
@@ -31,6 +41,7 @@ app.put('/:bot/:to?', async (req, res) => {
       } else {
         await line.pushMessage(to, req.body)
       }
+      await LineOutbound.update({ _id: outbound._id }, { set: { sended: true } })
     } else {
       let { hooks } = client[bot]
       if (!hooks) throw new Error('Slack Hooks API is undefined.')
@@ -40,6 +51,9 @@ app.put('/:bot/:to?', async (req, res) => {
     res.json({ error: null })
   } catch (ex) {
     res.json({ error: ex.message || ex.toString(), type: req.body.type })
+    if (outbound && outbound._id) {
+      await LineOutbound.update({ _id: outbound._id }, { set: { error: ex.message || ex.toString() } })
+    }
   } finally {
     res.end()
   }
@@ -133,6 +147,15 @@ mongo.open().then(async () => {
     executing: Boolean,
     executed: Boolean,
     updated: Date,
+    created: Date,
+  })
+  mongo.set('LineOutbound', 'db-line-outbound', {
+    botname: String,
+    userTo: String,
+    type: String,
+    sender: Object,
+    sended: Boolean,
+    error: String,
     created: Date,
   })
   console.log(`LINE-BOT MongoDB Connected.`)
