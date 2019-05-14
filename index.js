@@ -7,7 +7,7 @@ const mongo = require('./mongodb')
 const port = process.env.PORT || 4000
 const app = express()
  
-const client = require('./bot-client')
+const api = require('./line-bot')
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -17,11 +17,13 @@ app.use(bodyParser.json())
 
 app.put('/:bot/:to?', async (req, res) => {
   let { bot, to } = req.params
-  let { LineOutbound } = mongo.get()
+  
+  const { LineOutbound, LineBot } = mongo.get()
   let outbound = null
   try {
-    if (!client[bot]) throw new Error('LINE API bot is undefined.')
-    if (client[bot].party !== 'slack') {
+    const client = await LineBot.findOne({ botname: bot })
+    if (!client) throw new Error('LINE API bot is undefined.')
+    if (client.type !== 'slack') {
       outbound = await new LineOutbound({
         botname: bot,
         userTo: to,
@@ -32,10 +34,10 @@ app.put('/:bot/:to?', async (req, res) => {
         created: new Date(),
       }).save()
       if (!req.body.type) throw new Error('LINE API fail formatter.')
-      let { channelAccessToken, channelSecret } = client[bot]
-      if (!channelAccessToken || !channelSecret) throw new Error('LINE Channel AccessToken is undefined.')
+      let { accesstoken, secret } = client
+      if (!accesstoken || !secret) throw new Error('LINE Channel AccessToken is undefined.')
       
-      const line = new sdk.Client({ channelAccessToken, channelSecret })
+      const line = new sdk.Client({ channelAccessToken: accesstoken, channelSecret: secret })
       await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: true } })
       if (!/^[RUC]{1}/g.test(to)) {
         await line.replyMessage(to, req.body)
@@ -43,9 +45,8 @@ app.put('/:bot/:to?', async (req, res) => {
         await line.pushMessage(to, req.body)
       }
     } else {
-      let { hooks } = client[bot]
-      if (!hooks) throw new Error('Slack Hooks API is undefined.')
-      let result = await request({ url: hooks, method: 'POST', body: req.body, json: true })
+      if (!client.channel) throw new Error('Slack Hooks API is undefined.')
+      let result = await request({ url: client.channel, method: 'POST', body: req.body, json: true })
       if (result !== 'ok') throw new Error(result)
     }
     res.json({ error: null })
@@ -66,8 +67,8 @@ app.post('/:bot', async (req, res) => {
   
   let { LineInbound } = mongo.get()
   try {
-    if (!client[bot]) throw new Error('LINE API bot is undefined.')
-    let { onEvents, onCommands, onPostBack, channelAccessToken, channelSecret } = client[bot]
+    if (!api[bot]) throw new Error('LINE API bot is undefined.')
+    let { onEvents, onCommands, onPostBack, channelAccessToken, channelSecret } = api[bot]
     if (!channelAccessToken || !channelSecret) throw new Error('LINE Channel AccessToken is undefined.')
 
     const line = new sdk.Client({ channelAccessToken, channelSecret })
@@ -188,48 +189,6 @@ mongo.open().then(async () => {
     channel: mongo.Schema.Mixed,
     created: Date,
   })
-
-  const { LineBot } = mongo.get()
-
-  await new LineBot({
-    type: 'line',
-    botname: 'cmgpos-bot',
-    accesstoken: 'e1JsRE7Ol7LhD653EiBtBmSXV3Eq98gC81kbBN72JnKYCKk7isQ0kQYhyuMUkIhIB9ScVp23/qoypZOgKZWc6ydIHveHpqAFJ7GuS8de7s9zdZY3ty7jU5bYsdPl1cCgYqx7BpL5+pmJX6M4RI7/IwdB04t89/1O/w1cDnyilFU=',
-    secret: 'b35c00ad80890af2dee37ed87c5f1c3b',
-    options: null,
-    channel: null,
-    created: new Date()
-  }).save()
-  
-  await new LineBot({
-    type: 'line',
-    botname: 'gamgoum',
-    accesstoken: 'Hf5Qw9rlvPJHYwCg9FYlqKgqZUueNhiAa2jW4xNDQy0301hUgM4jvEYLSwakB2Fo7SVFw5aLbNRpjOpvTZ81PyY8J8QdgB6ohXiPTlmbkFcoe3jPVSb8rJ88cQy6ZO7v2GBefnzFfEab9bAlcwnWVgdB04t89/1O/w1cDnyilFU=',
-    secret: '97fdc4d77bfa5acf4df784df3a4be67c',
-    options: null,
-    channel: null,
-    created: new Date()
-  }).save()
-  
-  await new LineBot({
-    type: 'line',
-    botname: 'ris-sd3',
-    accesstoken: 'Mv6ULaO86WfeFE3KrueZmazOiwFFwYJiEUYn+RQt6oFc313g8KFSYrx+Z7+odTH3qqvCp5hjl75n9XYtmDg35A4BD/EQIMYoVhMvdtRy0aXUmQ62KMp6KEu8XbChgo9bQ/G4hsnsJCF+4OWH6K1EuwdB04t89/1O/w1cDnyilFU=',
-    secret: 'c0e4547f7379cbb385259ac33d89911c',
-    options: null,
-    channel: null,
-    created: new Date()
-  }).save()
-  
-  await new LineBot({
-    type: 'line',
-    botname: 'ris-sd4',
-    accesstoken: '+7zVjodcOcGcTwlGrIiRH4qxtf+Q0ZPM8cAbqNQZ8i62b7WQG3EsiSGsF5utYAxBXn1vcqMLgqgxqyVw91/e963jwT3oKbcz9m+HTpQOG/VVOcpQzo1YAObiFBn0fhjCxHcNQCBCz8v7mG0r2tYHuwdB04t89/1O/w1cDnyilFU=',
-    secret: '2563142f120518b1ceefb051edae2086',
-    options: null,
-    channel: null,
-    created: new Date()
-  }).save()
 
   console.log(`LINE-BOT MongoDB Connected.`)
 
