@@ -7,7 +7,7 @@ module.exports = async body => {
     let res = await request({ method: 'POST', url: ngrok, body: body, json: true })
     if (res && res.error) throw new Error(res.error)
   } catch (ex) {
-    console.warn('[webhook-ngrok] fail -- ', ex.message)
-    console.error(ex.stack)
+    // console.warn('[webhook-ngrok] fail -- ', ex.message)
+    // console.error(ex.stack)
   }
 }

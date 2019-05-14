@@ -179,6 +179,26 @@ mongo.open().then(async () => {
     created: Date,
   })
 
+  mongo.set('LineBot', 'db-line-bot', {
+    type: String,
+    accesstoken: String,
+    secret: String,
+    options: Object,
+    channel: mongo.Schema.Mixed,
+    created: Date,
+  })
+
+  const { LineBot } = mongo.get()
+
+  await new LineBot({
+    type: 'line',
+    accesstoken: 'Mv6ULaO86WfeFE3KrueZmazOiwFFwYJiEUYn+RQt6oFc313g8KFSYrx+Z7+odTH3qqvCp5hjl75n9XYtmDg35A4BD/EQIMYoVhMvdtRy0aXUmQ62KMp6KEu8XbChgo9bQ/G4hsnsJCF+4OWH6K1EuwdB04t89/1O/w1cDnyilFU=',
+    secret: 'c0e4547f7379cbb385259ac33d89911c',
+    options: null,
+    channel: null,
+    created: new Date()
+  }).save()
+
   console.log(`LINE-BOT MongoDB Connected.`)
 
   await app.listen(port)
