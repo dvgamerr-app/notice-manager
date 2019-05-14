@@ -28,20 +28,21 @@ app.put('/:bot/:to?', async (req, res) => {
         type: /^R/g.test(to) ? 'room' : /^C/g.test(to) ? 'group' : /^U/g.test(to) ? 'user' : 'replyToken',
         sender: req.body || {},
         sended: false,
+        error: null,
         created: new Date(),
       }).save()
       if (!req.body.type) throw new Error('LINE API fail formatter.')
-      
+      console.log(outbound)
       let { channelAccessToken, channelSecret } = client[bot]
       if (!channelAccessToken || !channelSecret) throw new Error('LINE Channel AccessToken is undefined.')
       
       const line = new sdk.Client({ channelAccessToken, channelSecret })
+      await LineOutbound.update({ _id: outbound._id }, { set: { sended: true } })
       if (!/^[RUC]{1}/g.test(to)) {
         await line.replyMessage(to, req.body)
       } else {
         await line.pushMessage(to, req.body)
       }
-      await LineOutbound.update({ _id: outbound._id }, { set: { sended: true } })
     } else {
       let { hooks } = client[bot]
       if (!hooks) throw new Error('Slack Hooks API is undefined.')
