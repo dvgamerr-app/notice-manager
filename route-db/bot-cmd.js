@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
     
       res.json((await mongo.get('LineCMD').find(filter, null, opts)) || [])
     } else if (id === 'clear') {
-      await mongo.get('LineCMD').updateMany({}, { $set: { updated: new Date(), executed: true, executing: true } })
+      await mongo.get('LineCMD').updateMany({ botname: bot }, { $set: { updated: new Date(), executed: true, executing: true } })
       res.json({ error: null })
     } else {
       await mongo.get('LineCMD').updateOne({ _id: id }, { $set: { updated: new Date(), executed: true, executing: true } })

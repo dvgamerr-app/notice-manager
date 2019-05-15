@@ -13,17 +13,14 @@ module.exports = {
   },
   onCommands: {
     // args, event, client
-    'exec': require('./execute'),
     'id': async (args, event) => {
       let { userId, type, groupId, roomId } = event.source
       if (type === 'room') {
-        return roomId // `*RoomId:* \`${roomId}\``
+        return roomId
       } else if (type === 'group') {
-        return groupId // `*GroupId:* \`${groupId}\``
+        return groupId
       } else {
         return userId
-        // let profile = await client.getProfile(userId)
-        // return `*${profile.displayName}* - ${profile.statusMessage}\n\`${profile.userId}\`\n\`${profile.pictureUrl}\``
       }
     },
     'help': async (args, event) => {
