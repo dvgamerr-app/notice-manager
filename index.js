@@ -71,10 +71,12 @@ const lineInitilize = async () => {
 
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
 
-lineInitilize().then(async () => {
-  await mongo.open()
+mongo.open().then(async () => {
   console.log(`LINE-BOT MongoDB Connected.`)
 
+  await lineInitilize()
+  console.log(`LINE-BOT Initilized.`)
+
   await app.listen(port)
-  console.log(`LINE Messenger Bot Endpoint listening on port ${port}!`)
+  console.log(`LINE-BOT Messenger Endpoint listening on port ${port}!`)
 })
