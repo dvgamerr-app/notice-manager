@@ -7,13 +7,16 @@ module.exports = async (req, res) => {
   let { events } = req.body
   if (!events) return res.end()
   
-  let { LineInbound, LineCMD } = mongo.get()
+  let { LineInbound, LineCMD, LineBot } = mongo.get()
   try {
-    if (!api[bot]) throw new Error('LINE API bot is undefined.')
-    let { onEvents, onCommands, channelAccessToken, channelSecret } = api[bot]
-    if (!channelAccessToken || !channelSecret) throw new Error('LINE Channel AccessToken is undefined.')
+    const client = await LineBot.findOne({ botname: bot })
+    if (!client) throw new Error('LINE API bot is undefined.')
+    let { onEvents, onCommands } = api[bot] || {}
+    let { accesstoken, secret } = client
+    
+    if (!accesstoken || !secret) throw new Error('LINE Channel AccessToken is undefined.')
 
-    const line = new sdk.Client({ channelAccessToken, channelSecret })
+    const line = new sdk.Client({ channelAccessToken: accesstoken, channelSecret: secret })
     const lineSenderObj = msg => typeof msg === 'string' ? { type: 'text', text: msg } : typeof msg === 'function' ? msg() : msg
     const linePushId = ({ source }) => source.type === 'room' ? source.roomId : source.type === 'group' ? source.groupId : source.userId
     const lineMessage = async (e, sender) => {
@@ -58,7 +61,6 @@ module.exports = async (req, res) => {
           let result = await onEvents[e.type].call(this, e, line)
           await lineMessage(e, result)
         } else if (e.type === 'postback') {
-          // let data = querystring.parse(e.postback.data)
           await new LineCMD({
             botname: bot,
             userId: e.source.userId,

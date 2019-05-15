@@ -1,6 +1,4 @@
 module.exports = {
-  party: 'slack',
-  hooks: 'https://hooks.slack.com/services/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',
   commands: {
     'exec': async () => {
     

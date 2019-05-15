@@ -2,9 +2,6 @@ const adminId = 'U6e27176f34129a3cd1386b8849cb0906'
 const helpFlex = require('./flex/help-command')
 
 module.exports = {
-  party: 'line',
-  channelAccessToken: '+7zVjodcOcGcTwlGrIiRH4qxtf+Q0ZPM8cAbqNQZ8i62b7WQG3EsiSGsF5utYAxBXn1vcqMLgqgxqyVw91/e963jwT3oKbcz9m+HTpQOG/VVOcpQzo1YAObiFBn0fhjCxHcNQCBCz8v7mG0r2tYHuwdB04t89/1O/w1cDnyilFU=',
-  channelSecret: '2563142f120518b1ceefb051edae2086',
   onEvents: {
     'join': async (event) => {
       let { groupId } = event.source
