@@ -95,7 +95,7 @@ app.post('/:bot', async (req, res) => {
           let { groups } = /^\/(?<name>[-_a-zA-Z]+)(?<arg>\W.*|)/ig.exec(text) || {}
           // console.log(!groups, groups.name, !onCommands[groups.name])
           let args = (groups.arg || '').trim().split(' ').filter(e => e !== '')
-          await new LineCMD({
+          let cmd = await new LineCMD({
             botname: bot,
             userId: e.source.userId,
             command: groups.name,
@@ -108,8 +108,10 @@ app.post('/:bot', async (req, res) => {
             created: new Date(),
           }).save()
           if (!e.replyToken || !groups || !onCommands[groups.name]) continue
-          
+
+          await LineCMD.updateOne({ _id: cmd._id }, { $set: { executing: true } })
           let result = await onCommands[groups.name].call(this, args, e, line)
+          await LineCMD.updateOne({ _id: cmd._id }, { $set: { executed: true } })
           await lineMessage(e, result)
         } else if (typeof onEvents[e.type] === 'function') {
           let result = await onEvents[e.type].call(this, e, line)
