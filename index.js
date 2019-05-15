@@ -138,57 +138,36 @@ app.post('/:bot', async (req, res) => {
   }
 })
 
+app.get('/db/inbound', async (req, res) => {
+  // let { p } = req.params
+  res.json((await mongo.get('LineInbound').find({}, null, { sort: { created: -1 }, skip: 0, limit: 1000 })) || [])
+  res.end()
+})
+
+app.get('/db/outbound', async (req, res) => {
+  // let { p } = req.params
+  res.json((await mongo.get('LineOutbound').find({}, null, { sort: { created: -1 }, skip: 0, limit: 1000 })) || [])
+  res.end()
+})
+
+app.get('/db/cmd', async (req, res) => {
+  // let { p } = req.params
+  res.json((await mongo.get('LineCMD').find({}, null, { sort: { created: -1 }, limit: 100 })) || [])
+  res.end()
+})
+app.post('/db/cmd/:id', async (req, res) => {
+  try {
+    await mongo.get('LineCMD').updateOne({ _id: req.params.id }, { $set: req.body })
+    res.json({ error: null })
+  } catch (ex) {
+    res.json({ error: ex.stack || ex.message || ex })
+  }
+  res.end()
+})
+
 app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
 
-// process.env.MONGODB_URI = ``
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
-
-mongo.set('LineCMD', 'db-line-cmd', {
-  botname: String,
-  userId: String,
-  command: String,
-  args: Array,
-  text: String,
-  event: Object,
-  executing: Boolean,
-  executed: Boolean,
-  updated: Date,
-  created: Date,
-})
-mongo.set('LineOutbound', 'db-line-outbound', {
-  botname: String,
-  userTo: String,
-  type: String,
-  sender: Object,
-  sended: Boolean,
-  error: String,
-  created: Date,
-})
-
-mongo.set('LineInbound', 'db-line-inbound', {
-  type: String,
-  replyToken: String,
-  source: Object,
-  message: Object,
-  joined: Object,
-  left: Object,
-  postback: Object,
-  things: Object,
-  beacon: Object,
-  timestamp: Number,
-  created: Date,
-})
-
-mongo.set('LineBot', 'db-line-bot', {
-  type: String,
-  botname: String,
-  accesstoken: String,
-  secret: String,
-  options: Object,
-  channel: mongo.Schema.Mixed,
-  created: Date,
-})
-
 mongo.open().then(async () => {
   console.log(`LINE-BOT MongoDB Connected.`)
 
