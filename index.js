@@ -1,6 +1,7 @@
 const express = require('express')
 const request = require('request-promise')
 const bodyParser = require('body-parser')
+const cron = require('node-cron')
 const mongo = require('./mongodb')
 
 const port = process.env.PORT || 4000
@@ -54,8 +55,14 @@ mongo.open().then(async () => {
   console.log(`LINE-BOT MongoDB Connected.`)
   await app.listen(port)
   console.log(`LINE-BOT Messenger Endpoint listening on port ${port}!`)
-
-  lineInitilize().then(() => {
-    console.log(`LINE-BOT Initilized.`)
+ 
+  let job = '0 */6 * * *'
+  console.log(`LINE-BOT Schedule (${job}).`)
+  cron.schedule(job, () => {
+    lineInitilize().then(() => {
+      console.log(`LINE-BOT Initilized.`)
+    }).catch(ex => {
+      console.log(`LINE-BOT Initilize FAIL::${ex.message}`)
+    })
   })
 })
