@@ -50,7 +50,13 @@ const lineInitilize = async () => {
 
 
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
-
+const scheduleTask = () => {
+  lineInitilize().then(() => {
+    console.log(`LINE-BOT Initilized.`)
+  }).catch(ex => {
+    console.log(`LINE-BOT Initilize FAIL::${ex.message}`)
+  })
+}
 mongo.open().then(async () => {
   console.log(`LINE-BOT MongoDB Connected.`)
   await app.listen(port)
@@ -58,11 +64,6 @@ mongo.open().then(async () => {
  
   let job = '0 */6 * * *'
   console.log(`LINE-BOT Schedule (${job}).`)
-  cron.schedule(job, () => {
-    lineInitilize().then(() => {
-      console.log(`LINE-BOT Initilized.`)
-    }).catch(ex => {
-      console.log(`LINE-BOT Initilize FAIL::${ex.message}`)
-    })
-  })
+  scheduleTask()
+  cron.schedule(job, scheduleTask)
 })
