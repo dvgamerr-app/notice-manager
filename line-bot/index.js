@@ -39,6 +39,7 @@ mongo.set('LineInbound', 'db-line-inbound', {
 mongo.set('LineBot', 'db-line-bot', {
   type: String,
   botname: String,
+  name: String,
   accesstoken: String,
   secret: String,
   options: Object,
