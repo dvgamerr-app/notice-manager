@@ -17,8 +17,8 @@ app.put('/:bot/:to?', require('./route-bot/push-message'))
 
 app.get('/db/:bot/cmd', require('./route-db/bot-cmd'))
 app.post('/db/:bot/cmd/:id', require('./route-db/bot-cmd'))
-app.get('/db/:bot/inbound', () => {})
-app.get('/db/:bot/outbound', () => {})
+app.get('/db/:bot/inbound', require('./route-db/inbound'))
+app.get('/db/:bot/outbound', require('./route-db/outbound'))
 
 app.get('/stats', async (req, res) => {
   const { LineBot } = mongo.get()
@@ -42,26 +42,7 @@ app.get('/stats', async (req, res) => {
 })
 
 app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
-// app.get('/db/inbound', async (req, res) => {
-//   // let { p } = req.params
-//   res.json((await mongo.get('LineInbound').find({}, null, { sort: { created: -1 }, skip: 0, limit: 1000 })) || [])
-//   res.end()
-// })
 
-// app.get('/db/outbound', async (req, res) => {
-//   // let { p } = req.params
-//   res.json((await mongo.get('LineOutbound').find({}, null, { sort: { created: -1 }, skip: 0, limit: 1000 })) || [])
-//   res.end()
-// })
-
-// app.get('/db/cmd/:bot', async (req, res) => {
-//   let { bot } = req.params
-//   let opts = { limit: 100 }
-//   let filter = { executed: false, botname: bot }
-
-//   res.json((await mongo.get('LineCMD').find(filter, null, opts)) || [])
-//   res.end()
-// })
 const lineInitilize = async () => {
   const { LineBot } = mongo.get()
       
