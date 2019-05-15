@@ -14,7 +14,7 @@ app.post('/:bot', require('./route-bot/webhook'))
 app.put('/:bot/:to?', require('./route-bot/push-message'))
 
 app.get('/db/:bot/cmd', require('./route-db/bot-cmd'))
-app.get('/db/:bot/cmd/:id', require('./route-db/bot-cmd'))
+app.post('/db/:bot/cmd/:id', require('./route-db/bot-cmd'))
 app.get('/db/:bot/inbound', () => {})
 app.get('/db/:bot/outbound', () => {})
 
@@ -37,15 +37,6 @@ app.get('/db/cmd/:bot', async (req, res) => {
   let filter = { executed: false, botname: bot }
 
   res.json((await mongo.get('LineCMD').find(filter, null, opts)) || [])
-  res.end()
-})
-app.post('/db/cmd/:id', async (req, res) => {
-  try {
-    await mongo.get('LineCMD').updateOne({ _id: req.params.id }, { $set: Object.assign({ updated: new Date() }, req.body) })
-    res.json({ error: null })
-  } catch (ex) {
-    res.json({ error: ex.stack || ex.message || ex })
-  }
   res.end()
 })
 
