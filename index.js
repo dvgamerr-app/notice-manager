@@ -166,7 +166,7 @@ app.get('/db/cmd/:bot', async (req, res) => {
 })
 app.post('/db/cmd/:id', async (req, res) => {
   try {
-    await mongo.get('LineCMD').updateOne({ _id: req.params.id }, { $set: req.body })
+    await mongo.get('LineCMD').updateOne({ _id: req.params.id }, { $set: Object.assign({ updated: new Date() }, req.body) })
     res.json({ error: null })
   } catch (ex) {
     res.json({ error: ex.stack || ex.message || ex })
