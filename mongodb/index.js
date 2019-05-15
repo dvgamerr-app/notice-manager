@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 global._mongo = { connected: () => false }
-
+let tmp = []
 const { mConn, mMapping } = {
   mConn: async (server, dbname, username, password) => {
     const IsAdmin = !!process.env.MONGODB_ADMIN
@@ -18,13 +18,16 @@ const { mConn, mMapping } = {
       await global._mongo.disconection()
     }
   },
-  mMapping: (table) => {
+  mMapping: (table, force = false) => {
     if (!table.id) throw new Error(`mongodb id is undefined.`)
     if (typeof table.schema !== 'object') throw new Error(`mongodb schema is not object.`)
     if (!table.name) throw new Error(`mongodb name is undefined.`)
     if (global._mongo[table.id]) throw new Error(`MongoDB schema name is duplicate '${table.id}'`)
-
-    global._mongo[table.id] = global._mongo.model(table.name, mongoose.Schema(table.schema), table.name)
+    if (global._mongo.connected() || force) {
+      global._mongo[table.id] = global._mongo.model(table.name, mongoose.Schema(table.schema), table.name)
+    } else {
+      tmp.push(table)
+    }
   }
 }
 
@@ -47,6 +50,10 @@ module.exports = {
     return name ? global._mongo[name] : global._mongo
   },
   open: async () => {
-    if (!global._mongo.connected()) await mConn()
+    if (!global._mongo.connected()) {
+      await mConn()
+      for (const db of tmp) mMapping(db, true)
+      tmp = null
+    }
   }
 }

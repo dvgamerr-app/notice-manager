@@ -143,53 +143,53 @@ app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
 // process.env.MONGODB_URI = ``
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
 
+mongo.set('LineCMD', 'db-line-cmd', {
+  botname: String,
+  userId: String,
+  command: String,
+  args: Array,
+  text: String,
+  event: Object,
+  executing: Boolean,
+  executed: Boolean,
+  updated: Date,
+  created: Date,
+})
+mongo.set('LineOutbound', 'db-line-outbound', {
+  botname: String,
+  userTo: String,
+  type: String,
+  sender: Object,
+  sended: Boolean,
+  error: String,
+  created: Date,
+})
+
+mongo.set('LineInbound', 'db-line-inbound', {
+  type: String,
+  replyToken: String,
+  source: Object,
+  message: Object,
+  joined: Object,
+  left: Object,
+  postback: Object,
+  things: Object,
+  beacon: Object,
+  timestamp: Number,
+  created: Date,
+})
+
+mongo.set('LineBot', 'db-line-bot', {
+  type: String,
+  botname: String,
+  accesstoken: String,
+  secret: String,
+  options: Object,
+  channel: mongo.Schema.Mixed,
+  created: Date,
+})
+
 mongo.open().then(async () => {
-  mongo.set('LineCMD', 'db-line-cmd', {
-    botname: String,
-    userId: String,
-    command: String,
-    args: Array,
-    text: String,
-    event: Object,
-    executing: Boolean,
-    executed: Boolean,
-    updated: Date,
-    created: Date,
-  })
-  mongo.set('LineOutbound', 'db-line-outbound', {
-    botname: String,
-    userTo: String,
-    type: String,
-    sender: Object,
-    sended: Boolean,
-    error: String,
-    created: Date,
-  })
-
-  mongo.set('LineInbound', 'db-line-inbound', {
-    type: String,
-    replyToken: String,
-    source: Object,
-    message: Object,
-    joined: Object,
-    left: Object,
-    postback: Object,
-    things: Object,
-    beacon: Object,
-    timestamp: Number,
-    created: Date,
-  })
-
-  mongo.set('LineBot', 'db-line-bot', {
-    type: String,
-    botname: String,
-    accesstoken: String,
-    secret: String,
-    options: Object,
-    channel: mongo.Schema.Mixed,
-    created: Date,
-  })
-
   console.log(`LINE-BOT MongoDB Connected.`)
 
   await app.listen(port)
