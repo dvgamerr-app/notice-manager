@@ -1,13 +1,14 @@
 const express = require('express')
-const querystring = require('querystring')
 const bodyParser = require('body-parser')
 const sdk = require('@line/bot-sdk')
 const request = require('request-promise')
+// const querystring = require('querystring')
+
+const api = require('./line-bot')
 const mongo = require('./mongodb')
 const port = process.env.PORT || 4000
 const app = express()
  
-const api = require('./line-bot')
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -65,10 +66,10 @@ app.post('/:bot', async (req, res) => {
   let { events } = req.body
   if (!events) return res.end()
   
-  let { LineInbound } = mongo.get()
+  let { LineInbound, LineCMD } = mongo.get()
   try {
     if (!api[bot]) throw new Error('LINE API bot is undefined.')
-    let { onEvents, onCommands, onPostBack, channelAccessToken, channelSecret } = api[bot]
+    let { onEvents, onCommands, channelAccessToken, channelSecret } = api[bot]
     if (!channelAccessToken || !channelSecret) throw new Error('LINE Channel AccessToken is undefined.')
 
     const line = new sdk.Client({ channelAccessToken, channelSecret })
@@ -93,13 +94,12 @@ app.post('/:bot', async (req, res) => {
           let { text } = e.message
           let { groups } = /^\/(?<name>[-_a-zA-Z]+)(?<arg>\W.*|)/ig.exec(text) || {}
           // console.log(!groups, groups.name, !onCommands[groups.name])
-          let args = (groups.arg || '').trim().split(' ')
-          let { LineCMD } = mongo.get()
+          let args = (groups.arg || '').trim().split(' ').filter(e => e !== '')
           await new LineCMD({
             botname: bot,
             userId: e.source.userId,
             command: groups.name,
-            args: args,
+            args: args.length > 0 ? args : null,
             text: text,
             event: e,
             executing: false,
@@ -115,15 +115,21 @@ app.post('/:bot', async (req, res) => {
           let result = await onEvents[e.type].call(this, e, line)
           await lineMessage(e, result)
         } else if (e.type === 'postback') {
-          let data = querystring.parse(e.postback.data)
-          if (data.func !== undefined) {
-            if (!onPostBack[data.func]) continue
-            let result = await onPostBack[data.func].call(this, e, data, line)
-            await lineMessage(e, result)
-          } else {
-            console.log(data, e)
-          }
+          // let data = querystring.parse(e.postback.data)
+          await new LineCMD({
+            botname: bot,
+            userId: e.source.userId,
+            command: e.type,
+            args: null,
+            text: e.postback.data,
+            event: e,
+            executing: false,
+            executed: false,
+            updated: null,
+            created: new Date(),
+          }).save()
         } else {
+          // other message type not text
           console.log('e: ', e)
         }
       }
@@ -150,9 +156,12 @@ app.get('/db/outbound', async (req, res) => {
   res.end()
 })
 
-app.get('/db/cmd', async (req, res) => {
-  // let { p } = req.params
-  res.json((await mongo.get('LineCMD').find({}, null, { sort: { created: -1 }, limit: 100 })) || [])
+app.get('/db/cmd/:bot', async (req, res) => {
+  let { bot } = req.params
+  let opts = { limit: 100 }
+  let filter = { executed: false, botname: bot }
+
+  res.json((await mongo.get('LineCMD').find(filter, null, opts)) || [])
   res.end()
 })
 app.post('/db/cmd/:id', async (req, res) => {

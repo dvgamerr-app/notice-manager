@@ -14,13 +14,6 @@ module.exports = {
       await client.pushMessage(adminId, { type: 'text', text: `\`\`\`\n${JSON.stringify(event)}\n\`\`\`` })
     }
   },
-  onPostBack: {
-    // event, data, client
-    'getItems': async (event, data) => {
-      console.log('getItems:', data)
-      return `randomId: ${data.id}`
-    }
-  },
   onCommands: {
     // args, event, client
     'exec': require('./execute'),
