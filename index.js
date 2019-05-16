@@ -27,7 +27,7 @@ app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
 
 const lineInitilize = async () => {
   const { LineBot } = mongo.get()
-  let date = new Date(new Date().setHours(-24)).toISOString().replace(/-/ig,'').substr(0, 8)
+  let date = new Date(new Date() - 86400000).toISOString().replace(/-/ig,'').substr(0, 8)
       
   let data = await LineBot.find({ type: 'line' })
   for (const line of data) {
@@ -48,7 +48,7 @@ const lineInitilize = async () => {
   }
 }
 
-
+process.env.MONGODB_URI = 'mongodb+srv://dbLINE:CZBwk6XtyIGHleJS@line-bot-obya7.gcp.mongodb.net/LINE-BOT'
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
 const scheduleTask = () => {
   lineInitilize().then(() => {
@@ -56,6 +56,13 @@ const scheduleTask = () => {
   }).catch(ex => {
     console.log(`LINE-BOT Initilize FAIL::${ex.message}`)
   })
+}
+const scheduleDenyCMD = async () => {
+  const { LineCMD } = mongo.get()
+  let updated = await LineCMD.updateMany({ created : { $lte: new Date(+new Date() - 300000) }, executing: false }, {
+    $set: { executed: true }
+  })
+  if (updated.n > 0) console.log(`LINE-BOT ${updated.n} cmd is timeout.`)
 }
 mongo.open().then(async () => {
   console.log(`LINE-BOT MongoDB Connected.`)
@@ -66,4 +73,5 @@ mongo.open().then(async () => {
   console.log(`LINE-BOT Schedule (${job}).`)
   scheduleTask()
   cron.schedule(job, scheduleTask)
+  cron.schedule('* * * * *', scheduleDenyCMD)
 })
