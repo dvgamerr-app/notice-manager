@@ -62,7 +62,7 @@ const scheduleDenyCMD = async () => {
   let updated = await LineCMD.updateMany({ created : { $lte: new Date(+new Date() - 300000) }, executing: false }, {
     $set: { executed: true }
   })
-  if (updated.n > 0) console.log(`LINE-BOT ${updated.n} cmd is timeout.`)
+  if (updated.n > 0) console.log(`LINE-BOT ${updated.n} commands is timeout.`)
 }
 mongo.open().then(async () => {
   console.log(`LINE-BOT MongoDB Connected.`)
