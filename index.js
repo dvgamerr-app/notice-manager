@@ -59,7 +59,7 @@ const scheduleTask = () => {
 }
 const scheduleDenyCMD = async () => {
   const { LineCMD } = mongo.get()
-  let updated = await LineCMD.updateMany({ created : { $lte: new Date(+new Date() - 300000) }, executing: false }, {
+  let updated = await LineCMD.updateMany({ created : { $lte: new Date(+new Date() - 300000) }, executing: false, executed: false }, {
     $set: { executed: true }
   })
   if (updated.n > 0) console.log(`LINE-BOT ${updated.n} commands is timeout.`)
