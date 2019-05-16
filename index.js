@@ -69,9 +69,11 @@ mongo.open().then(async () => {
   await app.listen(port)
   console.log(`LINE-BOT Messenger Endpoint listening on port ${port}!`)
  
-  let job = '0 */6 * * *'
-  console.log(`LINE-BOT Schedule (${job}).`)
+  let task = '0 */6 * * *'
+  let deny = '* * * * *'
+  console.log(`LINE-BOT Schedule line stats (${task}).`)
+  console.log(`LINE-BOT Schedule deny cmd (${deny}).`)
   scheduleTask()
-  cron.schedule(job, scheduleTask)
-  cron.schedule('* * * * *', scheduleDenyCMD)
+  cron.schedule(task, scheduleTask)
+  cron.schedule(deny, scheduleDenyCMD)
 })
