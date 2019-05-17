@@ -1,7 +1,7 @@
 const mongo = require('../mongodb')
 
 module.exports = async (req, res) => {
-  const { LineBot } = mongo.get()
+  let { LineInbound, LineOutbound, LineCMD, LineBot } = mongo.get()
   try {
     
     let data = await LineBot.find({ type: 'line' })
@@ -24,9 +24,16 @@ module.exports = async (req, res) => {
     </head>
     <body>
     `.trim())
-    res.write(`<table><thead><tr><td>Name</td><td>Monthly usage</td><td>Limited</td><td>Reply (lastday)</td><td>Push (lastday)</td></tr></thead><tbody>`)
+    res.write(`<table>
+    <thead>
+      <tr><td>Name</td><td>Monthly usage</td><td>Limited</td><td>Reply (lastday)</td><td>Push (lastday)</td><td>Inbound (total)</td><td>Outbound (lastday)</td><td>CMD (total)</td></tr>
+    </thead><tbody>
+    `.trim())
     for (const line of data) {
       let { stats } = line.options
+      let inbound = await LineInbound.count({ botname: line.botname })
+      let outbound = await LineOutbound.count({ botname: line.botname })
+      let cmd = await LineCMD.count({ botname: line.botname })
       res.write(`
         <tr>
           <td><b>${line.name}</b> (${line.botname})</td>
@@ -34,6 +41,9 @@ module.exports = async (req, res) => {
           <td style="text-align: right;">${stats.limited}</td>
           <td style="text-align: right;">${stats.reply}</td>
           <td style="text-align: right;">${stats.push}</td>
+          <td style="text-align: right;">${inbound}</td>
+          <td style="text-align: right;">${outbound}</td>
+          <td style="text-align: right;">${cmd}</td>
         </tr>
       `.trim())
     }

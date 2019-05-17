@@ -24,6 +24,7 @@ mongo.set('LineOutbound', 'db-line-outbound', {
 
 mongo.set('LineInbound', 'db-line-inbound', {
   type: String,
+  botname: String,
   replyToken: String,
   source: Object,
   message: Object,

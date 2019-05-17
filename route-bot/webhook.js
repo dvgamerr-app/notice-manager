@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
 
     if (events.length > 0) {
       for (const e of events) {
-        await new LineInbound(e).save()
+        await new LineInbound(Object.assign(e, { botname: bot })).save()
         if (e.type === 'message' && e.message.type === 'text') {
           let { text } = e.message
           let { groups } = /^\/(?<name>[-_a-zA-Z]+)(?<arg>\W.*|)/ig.exec(text) || {}
@@ -79,8 +79,7 @@ module.exports = async (req, res) => {
         }
       }
     } else {
-      console.log('events: ', events)
-      await new LineInbound(events).save()
+      await new LineInbound(Object.assign(events, { botname: bot })).save()
     }
   } catch (ex) {
     console.log(ex.statusCode === 400 ? ex.statusMessage :  ex)
