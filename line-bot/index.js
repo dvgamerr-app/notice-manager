@@ -1,30 +1,30 @@
 const mongo = require('../mongodb')
 
 mongo.set('LineCMD', 'db-line-cmd', {
-  botname: String,
-  userId: String,
+  botname: { type: String, index: true },
+  userId: { type: String, index: true },
   command: String,
   args: Array,
   text: String,
   event: Object,
-  executing: Boolean,
-  executed: Boolean,
+  executing: { type: Boolean, index: true },
+  executed: { type: Boolean, index: true },
   updated: Date,
-  created: Date,
+  created: { type: Date, index: true },
 })
 mongo.set('LineOutbound', 'db-line-outbound', {
-  botname: String,
+  botname: { type: String, index: true },
   userTo: String,
   type: String,
   sender: Object,
   sended: Boolean,
   error: String,
-  created: Date,
+  created: { type: Date, index: true },
 })
 
 mongo.set('LineInbound', 'db-line-inbound', {
   type: String,
-  botname: String,
+  botname: { type: String, index: true },
   replyToken: String,
   source: Object,
   message: Object,
@@ -33,19 +33,19 @@ mongo.set('LineInbound', 'db-line-inbound', {
   postback: Object,
   things: Object,
   beacon: Object,
-  timestamp: Number,
-  created: Date,
+  timestamp: { type: Number, index: true },
+  created: { type: Date, index: true },
 })
 
 mongo.set('LineBot', 'db-line-bot', {
-  type: String,
-  botname: String,
+  type: { type: String, index: true },
+  botname: { type: String, index: true },
   name: String,
   accesstoken: String,
   secret: String,
   options: Object,
   channel: mongo.Schema.Mixed,
-  created: Date,
+  created: { type: Date, index: true },
 })
 
 module.exports = {
