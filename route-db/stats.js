@@ -4,7 +4,7 @@ module.exports = async (req, res) => {
   let { LineInbound, LineOutbound, LineCMD, LineBot } = mongo.get()
   try {
     
-    let data = await LineBot.find({ type: 'line' })
+    let data = await LineBot.find({ type: 'line' }, null, { sort: { botname: 1 } })
     res.write(`
     <html lang="en">
     <head>
@@ -31,9 +31,9 @@ module.exports = async (req, res) => {
     `.trim())
     for (const line of data) {
       let { stats } = line.options
-      let inbound = await LineInbound.count({ botname: line.botname })
-      let outbound = await LineOutbound.count({ botname: line.botname })
-      let cmd = await LineCMD.count({ botname: line.botname })
+      let inbound = await LineInbound.countDocuments({ botname: line.botname })
+      let outbound = await LineOutbound.countDocuments({ botname: line.botname })
+      let cmd = await LineCMD.countDocuments({ botname: line.botname })
       res.write(`
         <tr>
           <td><b>${line.name}</b> (${line.botname})</td>
