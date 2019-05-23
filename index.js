@@ -74,6 +74,13 @@ mongo.open().then(async () => {
   console.log(`LINE-BOT Schedule line stats (${task}).`)
   console.log(`LINE-BOT Schedule deny cmd (${deny}).`)
   scheduleTask()
-  cron.schedule(task, scheduleTask)
-  cron.schedule(deny, scheduleDenyCMD)
+  cron.schedule(task, () => scheduleTask().catch(ex => {
+    console.error(ex)
+  }))
+  cron.schedule(deny, () => scheduleDenyCMD().catch(ex => {
+    console.error(ex)
+  }))
+}).catch(ex => {
+  console.error(ex)
+  process.exit()
 })
