@@ -80,6 +80,32 @@ mongo.open().then(async () => {
   cron.schedule(deny, () => scheduleDenyCMD().catch(ex => {
     console.error(ex)
   }))
+  // restart line-bot notify.
+
+  let body = {
+    type: 'flex',
+    altText: 'Heroku LINE-Bot has rebooted.',
+    contents: {
+      type: 'bubble',
+      styles: { body: { backgroundColor: '#f3f3f3' } },
+      body: {
+          type: 'box',
+          layout: 'vertical',
+          contents: [
+            { type: 'text', weight: 'bold', text: 'LINE-Bot [Heroku]', size: 'md', color: '#000000' },
+            { type: 'text', weight: 'bold', text: 'has rebooted.', size: 'xs', color: '#f44336' }
+          ]
+        }
+    }
+  }
+  request({
+    method: 'PUT',
+    url: `http://127.0.0.1:${port}/ris-sd3/C31ca657c0955d89dcb049d63bfc32408`,
+    body,
+    json: true
+  }).catch(ex => {
+    console.error(ex)
+  })
 }).catch(ex => {
   console.error(ex)
   process.exit()
