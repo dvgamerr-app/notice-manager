@@ -92,8 +92,9 @@ mongo.open().then(async () => {
           type: 'box',
           layout: 'vertical',
           contents: [
-            { type: 'text', weight: 'bold', text: 'LINE-Bot [Heroku]', size: 'md', color: '#000000' },
-            { type: 'text', weight: 'bold', text: 'has rebooted.', size: 'xs', color: '#f44336' }
+            { type: 'text', weight: 'bold', text: 'LINE-Bot [Heroku]', size: 'sm', color: '#000000' },
+            { type: 'text', weight: 'bold', text: 'has rebooted.', size: 'xxs', color: '#f44336' },
+            { type: 'text', margin: 'md', text: new Date().toISOString(), size: 'xxs', color: '#c3c3c3' }
           ]
         }
     }
