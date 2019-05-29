@@ -95,7 +95,7 @@ mongo.open().then(async () => {
           contents: [
             { type: 'text', weight: 'bold', text: 'LINE-Bot [Heroku]', size: 'sm', color: '#000000' },
             { type: 'text', weight: 'bold', text: 'has rebooted.', size: 'xxs', color: '#f44336' },
-            { type: 'text', margin: 'md', text: moment().add(7, 'hour').format('DD-MM-YYYY HH:mm:ss'), size: 'xxs', color: '#a3a3a3' }
+            { type: 'text', margin: 'md', text: moment().add(7, 'hour').format('YYYY-MM-DD HH:mm:ss'), size: 'xxs', color: '#a3a3a3' }
           ]
         }
     }
