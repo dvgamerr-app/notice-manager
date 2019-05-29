@@ -28,7 +28,7 @@ app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
 
 const lineInitilize = async () => {
   const { LineBot } = mongo.get()
-  let date = new Date(new Date() - 86400000).toISOString().replace(/-/ig,'').substr(0, 8)
+  let date = moment().add(7, 'hour').add(-1, 'day').format('YYYYMMDD')
       
   let data = await LineBot.find({ type: 'line' })
   for (const line of data) {
@@ -95,7 +95,7 @@ mongo.open().then(async () => {
           contents: [
             { type: 'text', weight: 'bold', text: 'LINE-Bot [Heroku]', size: 'sm', color: '#000000' },
             { type: 'text', weight: 'bold', text: 'has rebooted.', size: 'xxs', color: '#f44336' },
-            { type: 'text', margin: 'md', text: moment().format('DD-MM-YYYY HH:mm:ss'), size: 'xxs', color: '#a3a3a3' }
+            { type: 'text', margin: 'md', text: moment().add(7, 'hour').format('DD-MM-YYYY HH:mm:ss'), size: 'xxs', color: '#a3a3a3' }
           ]
         }
     }
