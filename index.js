@@ -3,6 +3,7 @@ const request = require('request-promise')
 const bodyParser = require('body-parser')
 const cron = require('node-cron')
 const mongo = require('./mongodb')
+const moment = require('moment')
 
 const port = process.env.PORT || 4000
 const app = express()
@@ -94,7 +95,7 @@ mongo.open().then(async () => {
           contents: [
             { type: 'text', weight: 'bold', text: 'LINE-Bot [Heroku]', size: 'sm', color: '#000000' },
             { type: 'text', weight: 'bold', text: 'has rebooted.', size: 'xxs', color: '#f44336' },
-            { type: 'text', margin: 'md', text: new Date().toISOString(), size: 'xxs', color: '#c3c3c3' }
+            { type: 'text', margin: 'md', text: moment().format('DD-MM-YYYY HH:mm:ss'), size: 'xxs', color: '#a3a3a3' }
           ]
         }
     }
