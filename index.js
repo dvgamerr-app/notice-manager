@@ -43,7 +43,8 @@ const lineInitilize = async () => {
       usage : consumption.totalUsage,
       limited : quota.type === 'limited' ? quota.value : 0,
       reply: reply.status === 'ready' ? reply.success : reply.status,
-      push: push.status === 'ready' ? push.success : push.status
+      push: push.status === 'ready' ? push.success : push.status,
+      updated: date
     }
     await LineBot.updateOne({ _id: line._id }, { $set: { options: { stats } } })
   }
