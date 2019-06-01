@@ -8,7 +8,7 @@ const moment = require('moment')
 const port = process.env.PORT || 4000
 const app = express()
  
-process.env.MONGODB_URI = 'mongodb+srv://dbLINE:CZBwk6XtyIGHleJS@line-bot-obya7.gcp.mongodb.net/LINE-BOT'
+// process.env.MONGODB_URI = 'mongodb+srv://dbLINE:CZBwk6XtyIGHleJS@line-bot-obya7.gcp.mongodb.net/LINE-BOT'
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
 
 // parse application/x-www-form-urlencoded
@@ -58,11 +58,6 @@ const lineInitilize = async () => {
   }
 }
 
-const scheduleTask = () => {
-  lineInitilize().then(() => {
-    console.log(`LINE-BOT Initilized.`)
-  }).catch(ex => lineError('LINE-BOT', ex))
-}
 const scheduleDenyCMD = async () => {
   const { LineCMD } = mongo.get()
   let updated = await LineCMD.updateMany({ created : { $lte: new Date(+new Date() - 300000) }, executing: false, executed: false }, {
@@ -79,26 +74,27 @@ const scheduleStats = async () => {
   await lineStats(data)
 }
 
+let logs = ''
 mongo.open().then(async () => {
-  console.log(`LINE-BOT MongoDB Connected.`)
   await app.listen(port)
-  console.log(`LINE-BOT Messenger Endpoint listening on port ${port}!`)
+  logs += `[${moment().format('HH:mm:ss')}] listening on port ${port}\n`
  
   // GMT Timezone +0
   let task = '0 5,11,17,23 * * *'
   let deny = '* * * * *'
-  console.log(`LINE-BOT Schedule line stats (${task}).`)
-  console.log(`LINE-BOT Schedule deny cmd (${deny}).`)
-  cron.schedule(task, () => scheduleTask().catch(ex => lineError('LINE-BOT', ex)))
+  
+  lineInitilize().catch(ex => lineError('LINE-BOT', ex))
+  cron.schedule(task, () => lineInitilize().catch(ex => lineError('LINE-BOT', ex)))
   cron.schedule(deny, () => scheduleDenyCMD().catch(ex => lineError('LINE-BOT', ex)))
   cron.schedule('0 0 * * *', () => scheduleStats().catch(ex => lineError('LINE-BOT', ex)))
   cron.schedule('0 20 * * *', async () => {
-    await lineAlert('Heroku schedule kill service.', '#ff9800')
+    await lineAlert('Heroku schedule kill service.', null, '#ff9800')
     process.exit()
   })
+  logs += `[${moment().format('HH:mm:ss')}] Schedule crontab created.`
 
   // restart line-bot notify.
-  lineAlert('Heroku server has rebooted, and ready.').catch(console.error)
+  lineAlert('Heroku server has rebooted, and ready.', logs).catch(console.error)
 }).catch(async ex => {
   await lineError('LINE-BOT', ex)
   process.exit()
