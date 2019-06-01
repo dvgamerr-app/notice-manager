@@ -75,27 +75,29 @@ const scheduleStats = async () => {
 }
 
 let logs = ''
+const pkg = require('./package.json')
+let title = `LINE-BOT v${pkg.version}`
 mongo.open().then(async () => {
   await app.listen(port)
-  logs += `[${moment().format('HH:mm:ss')}] listening on port ${port}\n`
+  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] listening on port ${port}\n`
  
   // GMT Timezone +0
-  let task = '0 5,11,17,23 * * *'
-  let deny = '* * * * *'
-  
-  lineInitilize().catch(ex => lineError('LINE-BOT', ex))
-  cron.schedule(task, () => lineInitilize().catch(ex => lineError('LINE-BOT', ex)))
-  cron.schedule(deny, () => scheduleDenyCMD().catch(ex => lineError('LINE-BOT', ex)))
-  cron.schedule('0 0 * * *', () => scheduleStats().catch(ex => lineError('LINE-BOT', ex)))
+  lineInitilize().catch(ex => lineError(title, ex))
+  cron.schedule('0 5,11,17,23 * * *', () => lineInitilize().catch(ex => lineError(title, ex)))
+  cron.schedule('* * * * *', () => scheduleDenyCMD().catch(ex => lineError(title, ex)))
+  cron.schedule('0 0 * * *', () => scheduleStats().catch(ex => lineError(title, ex)))
   cron.schedule('0 20 * * *', async () => {
-    await lineAlert('Heroku schedule kill service.', null, '#ff9800')
+    await lineAlert(title, 'Heroku schedule kill service.', null, '#ff9800')
     process.exit()
   })
-  logs += `[${moment().format('HH:mm:ss')}] Schedule crontab created.`
+  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Stats bot update crontab every 6 hour.`
+  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Deny cmd crontab every minute.`
+  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Monthly usage every day at 7am.`
+  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] heroku kill service every day at 3am.`
 
   // restart line-bot notify.
-  lineAlert('Heroku server has rebooted, and ready.', logs).catch(console.error)
+  lineAlert(title, 'Heroku server has rebooted, and ready.', logs).catch(console.error)
 }).catch(async ex => {
-  await lineError('LINE-BOT', ex)
+  await lineError(title, ex)
   process.exit()
 })

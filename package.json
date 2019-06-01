@@ -1,6 +1,6 @@
 {
   "name": "ris-line-messenger-bot",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "```\r https://id.heroku.com/login\r USR: thkananek@central.co.th\r PWD: ASD!asd123\r ```",
   "main": "index.js",
   "engines": {
