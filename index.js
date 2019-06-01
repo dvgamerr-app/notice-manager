@@ -87,7 +87,7 @@ mongo.open().then(async () => {
   cron.schedule('* * * * *', () => scheduleDenyCMD().catch(ex => lineError(title, ex)))
   cron.schedule('0 0 * * *', () => scheduleStats().catch(ex => lineError(title, ex)))
   cron.schedule('0 20 * * *', async () => {
-    await lineAlert(title, 'Heroku schedule kill service.', null, '#ff9800')
+    await lineAlert(title, 'Heroku server has terminated yourself.', null, '#ff5722')
     process.exit()
   })
   logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Stats bot update crontab every 6 hour.\n`
@@ -96,7 +96,8 @@ mongo.open().then(async () => {
   logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] heroku kill service every day at 3am.`
 
   // restart line-bot notify.
-  lineAlert(title, 'Heroku server has rebooted, and ready.', logs).catch(console.error)
+  lineAlert(title, 'Heroku server has rebooted, and ready.', logs)
+
 }).catch(async ex => {
   await lineError(title, ex)
   process.exit()
