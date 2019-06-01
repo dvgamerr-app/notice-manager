@@ -1,7 +1,7 @@
 {
   "name": "ris-line-messenger-bot",
   "version": "1.0.1",
-  "description": "",
+  "description": "```\r https://id.heroku.com/login\r USR: thkananek@central.co.th\r PWD: ASD!asd123\r ```",
   "main": "index.js",
   "engines": {
     "node": "10.15.3"
@@ -11,7 +11,7 @@
     "start": "node index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Kananek Thongkam",
   "license": "ISC",
   "dependencies": {
     "@line/bot-sdk": "^6.7.1",
@@ -25,5 +25,13 @@
   },
   "devDependencies": {
     "eslint": "^5.16.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dvgamerr/ris-line-messenger-bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dvgamerr/ris-line-messenger-bot/issues"
+  },
+  "homepage": "https://github.com/dvgamerr/ris-line-messenger-bot#readme"
 }
