@@ -50,7 +50,7 @@ const lineInitilize = async () => {
   }
 }
 
-cron.schedule('0 3 * * *', () => process.exit())
+cron.schedule('0 20 * * *', () => process.exit())
 
 process.env.MONGODB_URI = 'mongodb+srv://dbLINE:CZBwk6XtyIGHleJS@line-bot-obya7.gcp.mongodb.net/LINE-BOT'
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
