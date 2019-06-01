@@ -5,6 +5,7 @@ const cron = require('node-cron')
 const mongo = require('./mongodb')
 const moment = require('moment')
 
+const pkg = require('./package.json')
 const port = process.env.PORT || 4000
 const app = express()
  
@@ -34,6 +35,7 @@ const lineAlert = require('./flex/alert')
 const lineStats = require('./flex/stats')
 const lineError = require('./flex/error')
 
+let title = `LINE-BOT v${pkg.version}`
 const lineInitilize = async () => {
   const { LineBot } = mongo.get()
   let date = moment().add(7, 'hour').add(-1, 'day')
@@ -71,12 +73,10 @@ const scheduleStats = async () => {
   data = data.map(e => {
     return { botname: e.botname, name: e.name, stats: e.options.stats }
   })
-  await lineStats(data)
+  await lineStats(title, data)
 }
 
 let logs = ''
-const pkg = require('./package.json')
-let title = `LINE-BOT v${pkg.version}`
 mongo.open().then(async () => {
   await app.listen(port)
   logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] listening on port ${port}\n`
