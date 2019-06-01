@@ -90,9 +90,9 @@ mongo.open().then(async () => {
     await lineAlert(title, 'Heroku schedule kill service.', null, '#ff9800')
     process.exit()
   })
-  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Stats bot update crontab every 6 hour.`
-  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Deny cmd crontab every minute.`
-  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Monthly usage every day at 7am.`
+  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Stats bot update crontab every 6 hour.\n`
+  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Deny cmd crontab every minute.\n`
+  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Monthly usage every day at 7am.\n`
   logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] heroku kill service every day at 3am.`
 
   // restart line-bot notify.
