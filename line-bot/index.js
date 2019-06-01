@@ -53,5 +53,6 @@ module.exports = {
   'ris-sd4': require('./ris-sd4'),
   'slack-sd3': require('./slack-sd3'),
   'cmgpos-bot': require('./cmgpos-bot'),
+  'health-check': require('./health-check'),
   'gamgoum': require('./gamgoum')
 }
