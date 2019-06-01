@@ -8,6 +8,9 @@ const moment = require('moment')
 const port = process.env.PORT || 4000
 const app = express()
  
+process.env.MONGODB_URI = 'mongodb+srv://dbLINE:CZBwk6XtyIGHleJS@line-bot-obya7.gcp.mongodb.net/LINE-BOT'
+if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
+
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
  
@@ -25,6 +28,11 @@ app.get('/db/:bot/outbound', require('./route-db/outbound'))
 app.get('/stats', require('./route-db/stats'))
 
 app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
+
+const url = `http://127.0.0.1:${port}/ris-sd3/C31ca657c0955d89dcb049d63bfc32408`
+const lineAlert = require('./flex/alert')
+const lineStats = require('./flex/stats')
+const lineError = require('./flex/error')
 
 const lineInitilize = async () => {
   const { LineBot } = mongo.get()
@@ -50,16 +58,10 @@ const lineInitilize = async () => {
   }
 }
 
-cron.schedule('0 20 * * *', () => process.exit())
-
-process.env.MONGODB_URI = 'mongodb+srv://dbLINE:CZBwk6XtyIGHleJS@line-bot-obya7.gcp.mongodb.net/LINE-BOT'
-if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
 const scheduleTask = () => {
   lineInitilize().then(() => {
     console.log(`LINE-BOT Initilized.`)
-  }).catch(ex => {
-    console.log(`LINE-BOT Initilize FAIL::${ex.message}`)
-  })
+  }).catch(ex => lineError(url, ex))
 }
 const scheduleDenyCMD = async () => {
   const { LineCMD } = mongo.get()
@@ -68,50 +70,36 @@ const scheduleDenyCMD = async () => {
   })
   if (updated.n > 0) console.log(`LINE-BOT ${updated.n} commands is timeout.`)
 }
+const scheduleStats = async () => {
+  let { LineBot } = mongo.get() // LineInbound, LineOutbound, LineCMD, 
+  let data = await LineBot.find({ type: 'line' }, null, { sort: { botname: 1 } })
+  data = data.map(e => {
+    return { botname: e.botname, name: e.name, stats: e.options.stats }
+  })
+  await lineStats(url, data)
+}
+
 mongo.open().then(async () => {
   console.log(`LINE-BOT MongoDB Connected.`)
   await app.listen(port)
   console.log(`LINE-BOT Messenger Endpoint listening on port ${port}!`)
  
-  let task = '0 */6 * * *'
+  // GMT Timezone +0
+  let task = '0 5,11,17,23 * * *'
   let deny = '* * * * *'
   console.log(`LINE-BOT Schedule line stats (${task}).`)
   console.log(`LINE-BOT Schedule deny cmd (${deny}).`)
-  scheduleTask()
-  cron.schedule(task, () => scheduleTask().catch(ex => {
-    console.error(ex)
-  }))
-  cron.schedule(deny, () => scheduleDenyCMD().catch(ex => {
-    console.error(ex)
-  }))
-  // restart line-bot notify.
-
-  let body = {
-    type: 'flex',
-    altText: 'Heroku LINE-Bot has rebooted.',
-    contents: {
-      type: 'bubble',
-      styles: { body: { backgroundColor: '#f3f3f3' } },
-      body: {
-          type: 'box',
-          layout: 'vertical',
-          contents: [
-            { type: 'text', weight: 'bold', text: 'LINE-Bot [Heroku]', size: 'sm', color: '#000000' },
-            { type: 'text', weight: 'bold', text: 'has rebooted.', size: 'xxs', color: '#f44336' },
-            { type: 'text', margin: 'md', text: moment().add(7, 'hour').format('YYYY-MM-DD HH:mm:ss'), size: 'xxs', color: '#a3a3a3' }
-          ]
-        }
-    }
-  }
-  request({
-    method: 'PUT',
-    url: `http://127.0.0.1:${port}/ris-sd3/C31ca657c0955d89dcb049d63bfc32408`,
-    body,
-    json: true
-  }).catch(ex => {
-    console.error(ex)
+  cron.schedule(task, () => scheduleTask().catch(ex => lineError(url, ex)))
+  cron.schedule(deny, () => scheduleDenyCMD().catch(ex => lineError(url, ex)))
+  cron.schedule('0 0 * * *', () => scheduleStats().catch(ex => lineError(url, ex)))
+  cron.schedule('0 20 * * *', async () => {
+    await lineAlert(url, 'Heroku schedule kill service.', '#ff9800')
+    process.exit()
   })
-}).catch(ex => {
-  console.error(ex)
+
+  // restart line-bot notify.
+  lineAlert(url, 'Heroku server has rebooted, and ready.').catch(console.error)
+}).catch(async ex => {
+  await lineError(url, ex)
   process.exit()
 })
