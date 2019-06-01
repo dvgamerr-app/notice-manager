@@ -1,7 +1,8 @@
 const request = require('request-promise')
 const moment = require('moment')
+const url = require('./url-bot')
 
-module.exports = async (url, msg, color = '#f44336') => {
+module.exports = async (msg, color = '#f44336') => {
   let body = {
     type: 'flex',
     altText: `LINE-BOT ${msg}`,

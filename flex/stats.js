@@ -1,6 +1,7 @@
 const request = require('request-promise')
+const url = require('./url-bot')
 
-module.exports = async (url, data) => {
+module.exports = async (data) => {
   data = data.map(e => {
     return {
       type: 'box',

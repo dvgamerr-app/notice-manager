@@ -27,16 +27,16 @@ app.get('/db/:bot/outbound', require('./route-db/outbound'))
 
 app.get('/stats', require('./route-db/stats'))
 
+app.use('/static', express.static('./static'))
 app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
 
-const url = `http://127.0.0.1:${port}/ris-sd3/C31ca657c0955d89dcb049d63bfc32408`
 const lineAlert = require('./flex/alert')
 const lineStats = require('./flex/stats')
 const lineError = require('./flex/error')
 
 const lineInitilize = async () => {
   const { LineBot } = mongo.get()
-  let date = moment().add(7, 'hour').add(-1, 'day').format('YYYYMMDD')
+  let date = moment().add(7, 'hour').add(-1, 'day')
       
   let data = await LineBot.find({ type: 'line' })
   for (const line of data) {
@@ -44,15 +44,15 @@ const lineInitilize = async () => {
 
     let quota = await request('https://api.line.me/v2/bot/message/quota', opts)
     let consumption = await request('https://api.line.me/v2/bot/message/quota/consumption', opts)
-    let reply = await request(`https://api.line.me/v2/bot/message/delivery/reply?date=${date}`, opts)
-    let push = await request(`https://api.line.me/v2/bot/message/delivery/push?date=${date}`, opts)
+    let reply = await request(`https://api.line.me/v2/bot/message/delivery/reply?date=${date.format('YYYYMMDD')}`, opts)
+    let push = await request(`https://api.line.me/v2/bot/message/delivery/push?date=${date.format('YYYYMMDD')}`, opts)
 
     let stats = {
       usage : consumption.totalUsage,
       limited : quota.type === 'limited' ? quota.value : 0,
       reply: reply.status === 'ready' ? reply.success : reply.status,
       push: push.status === 'ready' ? push.success : push.status,
-      updated: date
+      updated: date.toDate()
     }
     await LineBot.updateOne({ _id: line._id }, { $set: { options: { stats } } })
   }
@@ -61,7 +61,7 @@ const lineInitilize = async () => {
 const scheduleTask = () => {
   lineInitilize().then(() => {
     console.log(`LINE-BOT Initilized.`)
-  }).catch(ex => lineError(url, ex))
+  }).catch(ex => lineError('LINE-BOT', ex))
 }
 const scheduleDenyCMD = async () => {
   const { LineCMD } = mongo.get()
@@ -76,7 +76,7 @@ const scheduleStats = async () => {
   data = data.map(e => {
     return { botname: e.botname, name: e.name, stats: e.options.stats }
   })
-  await lineStats(url, data)
+  await lineStats(data)
 }
 
 mongo.open().then(async () => {
@@ -89,17 +89,17 @@ mongo.open().then(async () => {
   let deny = '* * * * *'
   console.log(`LINE-BOT Schedule line stats (${task}).`)
   console.log(`LINE-BOT Schedule deny cmd (${deny}).`)
-  cron.schedule(task, () => scheduleTask().catch(ex => lineError(url, ex)))
-  cron.schedule(deny, () => scheduleDenyCMD().catch(ex => lineError(url, ex)))
-  cron.schedule('0 0 * * *', () => scheduleStats().catch(ex => lineError(url, ex)))
+  cron.schedule(task, () => scheduleTask().catch(ex => lineError('LINE-BOT', ex)))
+  cron.schedule(deny, () => scheduleDenyCMD().catch(ex => lineError('LINE-BOT', ex)))
+  cron.schedule('0 0 * * *', () => scheduleStats().catch(ex => lineError('LINE-BOT', ex)))
   cron.schedule('0 20 * * *', async () => {
-    await lineAlert(url, 'Heroku schedule kill service.', '#ff9800')
+    await lineAlert('Heroku schedule kill service.', '#ff9800')
     process.exit()
   })
 
   // restart line-bot notify.
-  lineAlert(url, 'Heroku server has rebooted, and ready.').catch(console.error)
+  lineAlert('Heroku server has rebooted, and ready.').catch(console.error)
 }).catch(async ex => {
-  await lineError(url, ex)
+  await lineError('LINE-BOT', ex)
   process.exit()
 })
