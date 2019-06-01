@@ -7,9 +7,10 @@ const moment = require('moment')
 
 const pkg = require('./package.json')
 const port = process.env.PORT || 4000
+const dev = !(process.env.NODE_ENV === 'production')
 const app = express()
  
-// process.env.MONGODB_URI = 'mongodb+srv://dbLINE:CZBwk6XtyIGHleJS@line-bot-obya7.gcp.mongodb.net/LINE-BOT'
+if (dev) process.env.MONGODB_URI = 'mongodb+srv://dbLINE:CZBwk6XtyIGHleJS@line-bot-obya7.gcp.mongodb.net/LINE-BOT'
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
 
 // parse application/x-www-form-urlencoded
@@ -20,6 +21,7 @@ app.use(bodyParser.json())
 
 app.post('/:bot', require('./route-bot/webhook'))
 app.put('/:bot/:to?', require('./route-bot/push-message'))
+app.put('/flex/:name/:to', require('./route-bot/push-flex'))
 
 app.get('/db/:bot/cmd', require('./route-db/bot-cmd'))
 app.post('/db/:bot/cmd/:id', require('./route-db/bot-cmd'))
@@ -80,24 +82,26 @@ let logs = ''
 mongo.open().then(async () => {
   await app.listen(port)
   logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] listening on port ${port}\n`
- 
-  // GMT Timezone +0
-  lineInitilize().catch(ex => lineError(title, ex))
-  cron.schedule('0 5,11,17,23 * * *', () => lineInitilize().catch(ex => lineError(title, ex)))
-  cron.schedule('* * * * *', () => scheduleDenyCMD().catch(ex => lineError(title, ex)))
-  cron.schedule('0 0 * * *', () => scheduleStats().catch(ex => lineError(title, ex)))
-  cron.schedule('0 20 * * *', async () => {
-    await lineAlert(title, 'Heroku server has terminated yourself.', null, '#ff5722')
-    process.exit()
-  })
-  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Stats bot update crontab every 6 hour.\n`
-  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Deny cmd crontab every minute.\n`
-  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Monthly usage every day at 7am.\n`
-  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] heroku kill service every day at 3am.`
+  if (!dev) {
+    // GMT Timezone +0
+    lineInitilize().catch(ex => lineError(title, ex))
+    cron.schedule('0 5,11,17,23 * * *', () => lineInitilize().catch(ex => lineError(title, ex)))
+    cron.schedule('* * * * *', () => scheduleDenyCMD().catch(ex => lineError(title, ex)))
+    cron.schedule('0 0 * * *', () => scheduleStats().catch(ex => lineError(title, ex)))
+    cron.schedule('0 20 * * *', async () => {
+      await lineAlert(title, 'Heroku server has terminated yourself.', null, '#ff5722')
+      process.exit()
+    })
+    logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Stats bot update crontab every 6 hour.\n`
+    logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Deny cmd crontab every minute.\n`
+    logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Monthly usage every day at 7am.\n`
+    logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] heroku kill service every day at 3am.`
 
-  // restart line-bot notify.
-  lineAlert(title, 'Heroku server has rebooted, and ready.', logs)
-
+    // restart line-bot notify.
+    lineAlert(title, 'Heroku server has rebooted, and ready.', logs)
+  } else {
+    console.log(`development test on port ${port}`)
+  }
 }).catch(async ex => {
   await lineError(title, ex)
   process.exit()

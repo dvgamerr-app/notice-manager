@@ -1,11 +1,11 @@
 const request = require('request-promise')
 const moment = require('moment')
 const url = require('./url-bot')
-const img = 'http://intense-citadel-55702.herokuapp.com/static/transparent.png'
-module.exports = async (app, ex) => {
+const img = 'https://intense-citadel-55702.herokuapp.com/static/transparent.png'
+module.exports = async (app, ex, flex = false) => {
   let body = {
     type: 'flex',
-    altText: `[${app}] ${ex.message}`,
+    altText: `ERROR :: [${app}] ${ex.message}`,
     contents: {
       type: 'bubble',
       styles: { body: { backgroundColor: '#F8F8F8' }, hero: { backgroundColor: '#ee5151' } },
@@ -29,5 +29,5 @@ module.exports = async (app, ex) => {
       }
     }
   }
-  return request({ method: 'PUT', url, body, json: true })
+  return !flex ? request({ method: 'PUT', url, body, json: true }) : body
 }

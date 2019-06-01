@@ -2,7 +2,7 @@ const request = require('request-promise')
 const moment = require('moment')
 const url = require('./url-bot')
 
-module.exports = async (title, msg, line, color = '#009688') => {
+module.exports = async (title, msg, line, color = '#009688', flex = false) => {
   let contents = [
     {
       type: 'box',
@@ -24,12 +24,12 @@ module.exports = async (title, msg, line, color = '#009688') => {
   }
   let body = {
     type: 'flex',
-    altText: `LINE-BOT ${msg}`,
+    altText: `[${title}] ${msg}`,
     contents: {
       type: 'bubble',
       styles: { body: { backgroundColor: '#F8F8F8' } },
       body: { type: 'box', layout: 'vertical', contents: contents }
     }
   }
-  return request({ method: 'PUT', url, body, json: true })
+  return !flex ? request({ method: 'PUT', url, body, json: true }) : body
 }
