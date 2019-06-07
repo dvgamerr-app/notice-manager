@@ -78,10 +78,10 @@ const scheduleStats = async () => {
   await lineStats(title, data)
 }
 
-let logs = ''
+// let logs = ''
 mongo.open().then(async () => {
   await app.listen(port)
-  logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] listening on port ${port}\n`
+  // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] listening on port ${port}\n`
   if (!dev) {
     // GMT Timezone +0
     lineInitilize().catch(ex => lineError(title, ex))
@@ -92,17 +92,23 @@ mongo.open().then(async () => {
       await lineAlert(title, 'Heroku server has terminated yourself.', null, '#ff5722')
       process.exit()
     })
-    logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Stats bot update crontab every 6 hour.\n`
-    logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Deny cmd crontab every minute.\n`
-    logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Monthly usage every day at 7am.\n`
-    logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] heroku kill service every day at 3am.`
+    // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Stats bot update crontab every 6 hour.\n`
+    // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Deny cmd crontab every minute.\n`
+    // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Monthly usage every day at 7am.\n`
+    // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] heroku kill service every day at 3am.`
 
+    const { ServiceStats } = mongo.get()
+    if (!await ServiceStats.find({ name: 'line-bot' })) {
+      await new ServiceStats({ name: 'line-bot', type: 'heroku', desc: 'line bot server.', wan_ip: 'unknow', lan_ip: 'unknow', online: true }).save()
+    }
     // restart line-bot notify.
-    lineAlert(title, 'Heroku server has rebooted, and ready.', logs)
+    lineAlert(title, 'Heroku server has rebooted, and ready.', null)
   } else {
     console.log(`development test on port ${port}`)
   }
 }).catch(async ex => {
-  await lineError(title, ex)
-  process.exit()
+  lineError(title, ex).then(() => {
+    console.log(ex.message)
+    process.exit()
+  })
 })
