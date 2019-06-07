@@ -83,12 +83,14 @@ mongo.open().then(async () => {
   await app.listen(port)
   // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] listening on port ${port}\n`
   if (!dev) {
+    const { ServiceStats } = mongo.get()
     // GMT Timezone +0
     lineInitilize().catch(ex => lineError(title, ex))
     cron.schedule('0 5,11,17,23 * * *', () => lineInitilize().catch(ex => lineError(title, ex)))
     cron.schedule('* * * * *', () => scheduleDenyCMD().catch(ex => lineError(title, ex)))
     cron.schedule('0 0 * * *', () => scheduleStats().catch(ex => lineError(title, ex)))
     cron.schedule('0 20 * * *', async () => {
+      await ServiceStats.updateOne({ name: 'line-bot' }, { $set: { online: false } })
       await lineAlert(title, 'Heroku server has terminated yourself.', null, '#ff5722')
       process.exit()
     })
@@ -97,11 +99,12 @@ mongo.open().then(async () => {
     // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Monthly usage every day at 7am.\n`
     // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] heroku kill service every day at 3am.`
 
-    const { ServiceStats } = mongo.get()
-    if (!await ServiceStats.find({ name: 'line-bot' })) {
+    const bot = await ServiceStats.find({ name: 'line-bot' })
+    if (!bot) {
       await new ServiceStats({ name: 'line-bot', type: 'heroku', desc: 'line bot server.', wan_ip: 'unknow', lan_ip: 'unknow', online: true }).save()
     }
     // restart line-bot notify.
+    await ServiceStats.updateOne({ name: 'line-bot' }, { $set: { online: true } })
     lineAlert(title, 'Heroku server has rebooted, and ready.', null)
   } else {
     console.log(`development test on port ${port}`)
