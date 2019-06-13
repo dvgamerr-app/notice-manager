@@ -10,8 +10,12 @@ const port = process.env.PORT || 4000
 const dev = !(process.env.NODE_ENV === 'production')
 const app = express()
  
-if (dev) process.env.MONGODB_URI = 'mongodb+srv://dbLINE:CZBwk6XtyIGHleJS@line-bot-obya7.gcp.mongodb.net/LINE-BOT'
+if (dev) {
+  process.env.MONGODB_URI = 'mongodb+srv://dbLINE:CZBwk6XtyIGHleJS@line-bot-obya7.gcp.mongodb.net/LINE-BOT'
+  process.env.SLACK_TOKEN = 'xoxp-347432429905-347432429969-652394543731-9444d4cb4169b7f4f7dfa2f4cb99225e'
+}
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
+if (!process.env.SLACK_TOKEN) throw new Error('Token slack is undefined.')
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
