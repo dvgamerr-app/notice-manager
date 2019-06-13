@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
   const { channel } = req.params
   const { UserId, Msg } = req.body
   try {
-    const client = await LineBot.findOne({ botname: 'ris-sd3' })
+    const client = await LineBot.findOne({ botname: 'slack-sd3' })
 
     if (!client.channel && !channel) throw new Error('Slack Hooks API is undefined.')
     let result = await request({
