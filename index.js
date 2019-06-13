@@ -113,7 +113,10 @@ mongo.open().then(async () => {
       await new ServiceStats({ name: 'line-bot', type: 'heroku', desc: 'line bot server.', wan_ip: 'unknow', lan_ip: 'unknow', online: true }).save()
     }
     // restart line-bot notify.
-    web.chat.postMessage({ channel: 'CK6BUP7M0', text: 'Heroku server has rebooted, and ready.', name: title })
+
+    let res = await web.channels.list({})
+    console.log(res)
+    web.chat.postMessage({ channel: 'CK6BUP7M0', text: 'Heroku server has rebooted, and ready.', username: title })
   } else {
     console.log(`development test on port ${port}`)
   }
