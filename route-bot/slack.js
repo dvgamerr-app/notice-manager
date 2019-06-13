@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
       body: {
         channel: `#${channel || 'general'}`,
         username: UserId,
-        text: (Msg || '').replace(/\[NewLine]/ig, '\n'),
+        text: (Msg || '').replace(/newline/ig, '\\n'),
         mrkdwn: true
       },
       json: true
