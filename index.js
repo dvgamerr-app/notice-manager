@@ -13,7 +13,7 @@ const app = express()
  
 if (dev) {
   process.env.MONGODB_URI = 'mongodb+srv://dbLINE:CZBwk6XtyIGHleJS@line-bot-obya7.gcp.mongodb.net/LINE-BOT'
-  process.env.SLACK_TOKEN = 'xoxp-347432429905-347432429969-652394543731-9444d4cb4169b7f4f7dfa2f4cb99225e'
+  process.env.SLACK_TOKEN = 'xoxb-347432429905-658210846064-a7GMT3Pp7PjXkEnZVx613atS'
 }
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
 if (!process.env.SLACK_TOKEN) throw new Error('Token slack is undefined.')
@@ -40,13 +40,18 @@ app.get('/stats', require('./route-db/stats'))
 app.use('/static', express.static('./static'))
 app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
 
-const lineAlert = require('./flex/alert')
-const lineStats = require('./flex/stats')
-const lineError = require('./flex/error')
-
+// const lineAlert = require('./flex/alert')
 // An access token (from your Slack app or custom integration - xoxp, xoxb)
 const token = process.env.SLACK_TOKEN
 const web = new WebClient(token)
+const lineStats = require('./flex/stats')
+const lineError = async (title, ex) => {
+  await web.chat.postMessage({
+    channel: 'CK6BUP7M0',
+    text: `*${ex.message}*${ex.stack ? `\n\n${ex.stack}` : ''}`,
+    username: title
+  })
+}
 
 let title = `LINE-BOT v${pkg.version}`
 const lineInitilize = async () => {
@@ -100,7 +105,7 @@ mongo.open().then(async () => {
     cron.schedule('* * * * *', () => scheduleDenyCMD().catch(ex => lineError(title, ex)))
     cron.schedule('0 0 * * *', () => scheduleStats().catch(ex => lineError(title, ex)))
     cron.schedule('0 20 * * *', async () => {
-      await lineAlert(title, 'Heroku server has terminated yourself.', null, '#ff5722')
+      await web.chat.postMessage({ channel: 'CK6BUP7M0', text: '*Heroku*server has terminated yourself.', username: title })
       process.exit()
     })
     // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Stats bot update crontab every 6 hour.\n`
@@ -113,10 +118,7 @@ mongo.open().then(async () => {
       await new ServiceStats({ name: 'line-bot', type: 'heroku', desc: 'line bot server.', wan_ip: 'unknow', lan_ip: 'unknow', online: true }).save()
     }
     // restart line-bot notify.
-
-    let res = await web.channels.list({})
-    console.log(res)
-    web.chat.postMessage({ channel: 'CK6BUP7M0', text: 'Heroku server has rebooted, and ready.', username: title })
+    web.chat.postMessage({ channel: 'CK6BUP7M0', text: '*Heroku* server has `rebooted`, and ready.', username: title })
   } else {
     console.log(`development test on port ${port}`)
   }
