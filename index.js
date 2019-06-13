@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const cron = require('node-cron')
 const mongo = require('./mongodb')
 const moment = require('moment')
+const { WebClient } = require('@slack/web-api')
 
 const pkg = require('./package.json')
 const port = process.env.PORT || 4000
@@ -42,6 +43,10 @@ app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
 const lineAlert = require('./flex/alert')
 const lineStats = require('./flex/stats')
 const lineError = require('./flex/error')
+
+// An access token (from your Slack app or custom integration - xoxp, xoxb)
+const token = process.env.SLACK_TOKEN
+const web = new WebClient(token)
 
 let title = `LINE-BOT v${pkg.version}`
 const lineInitilize = async () => {
@@ -108,7 +113,7 @@ mongo.open().then(async () => {
       await new ServiceStats({ name: 'line-bot', type: 'heroku', desc: 'line bot server.', wan_ip: 'unknow', lan_ip: 'unknow', online: true }).save()
     }
     // restart line-bot notify.
-    lineAlert(title, 'Heroku server has rebooted, and ready.', null)
+    web.chat.postMessage({ channel: 'CK6BUP7M0', text: 'Heroku server has rebooted, and ready.', name: title })
   } else {
     console.log(`development test on port ${port}`)
   }
