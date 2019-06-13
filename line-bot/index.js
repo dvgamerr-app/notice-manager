@@ -48,6 +48,16 @@ mongo.set('LineBot', 'db-line-bot', {
   created: { type: Date, index: true },
 })
 
+mongo.set('ServiceStats', 'db-service-stats', {
+  name: { type: String, index: true },
+  type: { type: String, index: true },
+  desc: String,
+  wan_ip: String,
+  lan_ip: String,
+  online: { type: Boolean, index: true, default: false },
+  created: { type: Date, index: true, default: Date.now }
+})
+
 module.exports = {
   'ris-sd3': require('./ris-sd3'),
   'ris-sd4': require('./ris-sd4'),
