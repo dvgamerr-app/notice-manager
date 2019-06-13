@@ -22,7 +22,7 @@ app.use(bodyParser.json())
 app.post('/:bot', require('./route-bot/webhook'))
 app.put('/:bot/:to?', require('./route-bot/push-message'))
 app.put('/flex/:name/:to', require('./route-bot/push-flex'))
-app.post('/slack', require('./route-bot/slack'))
+app.post('/slack/:channel', require('./route-bot/slack'))
 
 
 app.get('/db/:bot/cmd', require('./route-db/bot-cmd'))
