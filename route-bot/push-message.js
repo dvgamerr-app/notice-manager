@@ -33,8 +33,9 @@ module.exports = async (req, res) => {
         await line.pushMessage(to, req.body)
       }
     } else {
-      if (!client.channel) throw new Error('Slack Hooks API is undefined.')
-      let result = await request({ url: client.channel, method: 'POST', body: req.body, json: true })
+      let uri = client.channel
+      if (!uri) throw new Error('Slack Hooks API is undefined.')
+      let result = await request({ url: uri, method: 'POST', body: req.body, json: true })
       if (result !== 'ok') throw new Error(result)
     }
     res.json({ error: null })

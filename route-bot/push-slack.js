@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
       body: {
         channel: `#${channel}`,
         username: room[UserId] || UserId,
-        text: (Msg || '').replace(/newline/ig, '`n'),
+        text: (Msg || '').replace(/newline/ig, '\n'),
         mrkdwn: true
       },
       json: true
