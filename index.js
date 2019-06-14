@@ -27,7 +27,7 @@ app.use(bodyParser.json())
 app.post('/:bot', require('./route-bot/webhook'))
 app.put('/:bot/:to?', require('./route-bot/push-message'))
 app.put('/flex/:name/:to', require('./route-bot/push-flex'))
-app.post('/slack/:channel', require('./route-bot/slack'))
+app.post('/slack/:channel', require('./route-bot/push-slack'))
 
 
 app.get('/db/:bot/cmd', require('./route-db/bot-cmd'))
@@ -44,7 +44,7 @@ app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
 // An access token (from your Slack app or custom integration - xoxp, xoxb)
 const token = process.env.SLACK_TOKEN
 const web = new WebClient(token)
-const lineStats = require('./flex/stats')
+const slackStats = require('./flex/stats')
 const lineError = async (title, ex) => {
   await web.chat.postMessage({
     channel: 'CK6BUP7M0',
@@ -57,7 +57,7 @@ let title = `LINE-BOT v${pkg.version}`
 const lineInitilize = async () => {
   const { LineBot } = mongo.get()
   let date = moment().add(7, 'hour').add(-1, 'day')
-      
+
   let data = await LineBot.find({ type: 'line' })
   for (const line of data) {
     const opts = { headers: { 'Authorization': `Bearer ${line.accesstoken}` }, json: true }
@@ -91,7 +91,8 @@ const scheduleStats = async () => {
   data = data.map(e => {
     return { botname: e.botname, name: e.name, stats: e.options.stats }
   })
-  await lineStats(title, data)
+  
+  await web.chat.postMessage(Object.assign({ channel: 'CK6BUP7M0', username: title }, slackStats(title, data)))
 }
 
 // let logs = ''
@@ -105,7 +106,7 @@ mongo.open().then(async () => {
     cron.schedule('* * * * *', () => scheduleDenyCMD().catch(ex => lineError(title, ex)))
     cron.schedule('0 0 * * *', () => scheduleStats().catch(ex => lineError(title, ex)))
     cron.schedule('0 20 * * *', async () => {
-      await web.chat.postMessage({ channel: 'CK6BUP7M0', text: '*Heroku*server has terminated yourself.', username: title })
+      await web.chat.postMessage({ channel: 'CK6BUP7M0', text: '*Heroku* server has terminated yourself.', username: title })
       process.exit()
     })
     // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Stats bot update crontab every 6 hour.\n`
