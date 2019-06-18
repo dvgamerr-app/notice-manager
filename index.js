@@ -3,7 +3,7 @@ const debuger = require('@touno-io/debuger')
 // const request = require('request-promise')
 const bodyParser = require('body-parser')
 // const cron = require('node-cron')
-const mongo = require('./mongodb')
+const mongo = require('./line-bot')
 // const moment = require('moment')
 // const { WebClient } = require('@slack/web-api')
 
@@ -14,7 +14,7 @@ const app = express()
  
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
 if (!process.env.SLACK_TOKEN) throw new Error('Token slack is undefined.')
-
+if (!process.env.LINE_CLIENT || !process.env.LINE_SECRET) throw new Error('LINE secret is undefined.')
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
  
@@ -35,6 +35,8 @@ app.use(bodyParser.json())
 // app.get('/stats', require('./route-db/stats'))
 
 // app.use('/static', express.static('./static'))
+app.get('/_health', (req, res) => res.end('ok'))
+app.get('/notify-bot', require('./route-bot/oauth'))
 app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
 
 // const lineAlert = require('./flex/alert')

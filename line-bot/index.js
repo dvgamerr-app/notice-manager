@@ -57,12 +57,13 @@ mongo.set('ServiceStats', 'db-service-stats', {
   online: { type: Boolean, index: true, default: false },
   created: { type: Date, index: true, default: Date.now }
 })
+mongo.set('ServiceOauth', 'db-service-oauth', {
+  room: { type: String, index: true },
+  state: { type: String, index: true },
+  response_type: String,
+  redirect_uri: String,
+  accessToken: { type: Object, index: true, default: null },
+  created: { type: Date, index: true, default: Date.now }
+})
 
-module.exports = {
-  'ris-sd3': require('./ris-sd3'),
-  'ris-sd4': require('./ris-sd4'),
-  'slack-sd3': require('./slack-sd3'),
-  'cmgpos-bot': require('./cmgpos-bot'),
-  'health-check': require('./health-check'),
-  'gamgoum': require('./gamgoum')
-}
+module.exports = mongo

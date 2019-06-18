@@ -75,14 +75,14 @@ module.exports = async (req, res) => {
           }).save()
         } else {
           // other message type not text
-          console.log('e: ', e)
+          // console.log('e: ', e)
         }
       }
     } else {
       await new LineInbound(Object.assign(events, { botname: bot })).save()
     }
   } catch (ex) {
-    console.log(ex.statusCode === 400 ? ex.statusMessage :  ex)
+    // console.log(ex.statusCode === 400 ? ex.statusMessage :  ex)
   } finally {
     res.end()
   }

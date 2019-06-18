@@ -1,7 +1,6 @@
 const sdk = require('@line/bot-sdk')
 const request = require('request-promise')
 const mongo = require('../mongodb')
- 
 
 module.exports = async (req, res) => {
   let { bot, to } = req.params

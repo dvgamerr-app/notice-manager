@@ -8,7 +8,8 @@
     "node": "10.15.3"
   },
   "scripts": {
-    "dev": "env-cmd node index.js",
+    "dev": "env-cmd nodemon index.js --exec \"npm run eslint && node\"",
+    "eslint": "eslint --ext .js --ignore-path .gitignore .",
     "start": "node index.js"
   },
   "keywords": [],
@@ -31,7 +32,8 @@
   },
   "devDependencies": {
     "env-cmd": "^9.0.3",
-    "eslint": "^5.16.0"
+    "eslint": "^5.16.0",
+    "nodemon": "^1.19.1"
   },
   "repository": {
     "type": "git",
