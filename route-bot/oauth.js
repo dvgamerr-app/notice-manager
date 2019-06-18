@@ -12,7 +12,7 @@ const uuid = length => {
   }
   return result
 }
-
+const hosts = process.env.HOSTNAME || 'http://localhost:4000/'
 const logger = debuger('OAUTH')
 const oauth2 = require('simple-oauth2').create(credentials)
 const mongo = require('../mongodb')
@@ -20,8 +20,8 @@ const mongo = require('../mongodb')
 module.exports = async (req, res) => {
   // Authorization oauth2 URI
   const { code, state } = req.query
-  const room = 'posteam'
-  const redirect_uri = 'http://localhost:4000/notify-bot'
+  const { room } = req.params
+  const redirect_uri = `${hosts}notify-bot`
   const response_type = 'code'
   const scope = 'notify'
   await mongo.open()
@@ -45,6 +45,7 @@ module.exports = async (req, res) => {
       res.end()
     }
   } else {
+    if (!room) return res.redirect(hosts)
     const newState = uuid(16)
     logger.log(`${room} - state ${newState}`)
     try {

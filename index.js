@@ -36,7 +36,7 @@ app.use(bodyParser.json())
 
 // app.use('/static', express.static('./static'))
 app.get('/_health', (req, res) => res.end('ok'))
-app.get('/notify-bot', require('./route-bot/oauth'))
+app.get('/notify-bot/:room?', require('./route-bot/oauth'))
 app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
 
 // const lineAlert = require('./flex/alert')
