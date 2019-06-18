@@ -1,5 +1,6 @@
 {
   "name": "ris-line-messenger-bot",
+  "title": "LINE-NOTIFY",
   "version": "2.3.2",
   "description": "```\r https://id.heroku.com/login\r USR: thkananek@central.co.th\r PWD: ASD!asd123\r ```",
   "main": "index.js",
@@ -7,7 +8,7 @@
     "node": "10.15.3"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "env-cmd node index.js",
     "start": "node index.js"
   },
   "keywords": [],
@@ -17,16 +18,19 @@
     "@line/bot-sdk": "^6.7.1",
     "@slack/events-api": "^2.2.0",
     "@slack/web-api": "^5.0.1",
+    "@touno-io/debuger": "^2.0.2",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "moment": "^2.24.0",
-    "mongoose": "^5.5.15",
+    "mongoose": "^5.6.0",
     "node-cron": "^2.0.3",
     "numeral": "^2.0.6",
     "request": "^2.88.0",
-    "request-promise": "^4.2.4"
+    "request-promise": "^4.2.4",
+    "simple-oauth2": "^2.2.1"
   },
   "devDependencies": {
+    "env-cmd": "^9.0.3",
     "eslint": "^5.16.0"
   },
   "repository": {
