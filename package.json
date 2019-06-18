@@ -1,7 +1,7 @@
 {
   "name": "ris-line-messenger-bot",
   "title": "LINE-NOTIFY",
-  "version": "2.3.2",
+  "version": "3.0.0",
   "description": "```\r https://id.heroku.com/login\r USR: thkananek@central.co.th\r PWD: ASD!asd123\r ```",
   "main": "index.js",
   "engines": {
