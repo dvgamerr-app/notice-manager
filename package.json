@@ -1,6 +1,6 @@
 {
   "name": "ris-line-messenger-bot",
-  "version": "2.2.1",
+  "version": "2.3.1",
   "description": "```\r https://id.heroku.com/login\r USR: thkananek@central.co.th\r PWD: ASD!asd123\r ```",
   "main": "index.js",
   "engines": {
@@ -15,10 +15,12 @@
   "license": "ISC",
   "dependencies": {
     "@line/bot-sdk": "^6.7.1",
+    "@slack/events-api": "^2.2.0",
+    "@slack/web-api": "^5.0.1",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "moment": "^2.24.0",
-    "mongoose": "^5.5.11",
+    "mongoose": "^5.5.15",
     "node-cron": "^2.0.3",
     "numeral": "^2.0.6",
     "request": "^2.88.0",

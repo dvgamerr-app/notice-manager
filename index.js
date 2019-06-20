@@ -4,14 +4,19 @@ const bodyParser = require('body-parser')
 const cron = require('node-cron')
 const mongo = require('./mongodb')
 const moment = require('moment')
+const { WebClient } = require('@slack/web-api')
 
 const pkg = require('./package.json')
 const port = process.env.PORT || 4000
 const dev = !(process.env.NODE_ENV === 'production')
 const app = express()
  
-if (dev) process.env.MONGODB_URI = 'mongodb+srv://dbLINE:CZBwk6XtyIGHleJS@line-bot-obya7.gcp.mongodb.net/LINE-BOT'
+if (dev) {
+  process.env.MONGODB_URI = 'mongodb+srv://dbLINE:CZBwk6XtyIGHleJS@line-bot-obya7.gcp.mongodb.net/LINE-BOT'
+  process.env.SLACK_TOKEN = 'xoxb-347432429905-658210846064-a7GMT3Pp7PjXkEnZVx613atS'
+}
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
+if (!process.env.SLACK_TOKEN) throw new Error('Token slack is undefined.')
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -22,6 +27,8 @@ app.use(bodyParser.json())
 app.post('/:bot', require('./route-bot/webhook'))
 app.put('/:bot/:to?', require('./route-bot/push-message'))
 app.put('/flex/:name/:to', require('./route-bot/push-flex'))
+app.post('/slack/:channel', require('./route-bot/push-slack'))
+
 
 app.get('/db/:bot/cmd', require('./route-db/bot-cmd'))
 app.post('/db/:bot/cmd/:id', require('./route-db/bot-cmd'))
@@ -33,15 +40,24 @@ app.get('/stats', require('./route-db/stats'))
 app.use('/static', express.static('./static'))
 app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
 
-const lineAlert = require('./flex/alert')
-const lineStats = require('./flex/stats')
-const lineError = require('./flex/error')
+// const lineAlert = require('./flex/alert')
+// An access token (from your Slack app or custom integration - xoxp, xoxb)
+const token = process.env.SLACK_TOKEN
+const web = new WebClient(token)
+const slackStats = require('./flex/stats')
+const lineError = async (title, ex) => {
+  await web.chat.postMessage({
+    channel: 'CK6BUP7M0',
+    text: `*${ex.message}*${ex.stack ? `\n\n${ex.stack}` : ''}`,
+    username: title
+  })
+}
 
 let title = `LINE-BOT v${pkg.version}`
 const lineInitilize = async () => {
   const { LineBot } = mongo.get()
   let date = moment().add(7, 'hour').add(-1, 'day')
-      
+
   let data = await LineBot.find({ type: 'line' })
   for (const line of data) {
     const opts = { headers: { 'Authorization': `Bearer ${line.accesstoken}` }, json: true }
@@ -64,10 +80,9 @@ const lineInitilize = async () => {
 
 const scheduleDenyCMD = async () => {
   const { LineCMD } = mongo.get()
-  let updated = await LineCMD.updateMany({ created : { $lte: new Date(+new Date() - 300000) }, executing: false, executed: false }, {
+  await LineCMD.updateMany({ created : { $lte: new Date(+new Date() - 300000) }, executing: false, executed: false }, {
     $set: { executed: true }
   })
-  if (updated.n > 0) console.log(`LINE-BOT ${updated.n} commands is timeout.`)
 }
 const scheduleStats = async () => {
   let { LineBot } = mongo.get() // LineInbound, LineOutbound, LineCMD, 
@@ -75,43 +90,32 @@ const scheduleStats = async () => {
   data = data.map(e => {
     return { botname: e.botname, name: e.name, stats: e.options.stats }
   })
-  await lineStats(title, data)
+  
+  await web.chat.postMessage(Object.assign({ channel: 'CK6BUP7M0', username: title }, slackStats(title, data)))
 }
 
 // let logs = ''
 mongo.open().then(async () => {
   await app.listen(port)
-  // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] listening on port ${port}\n`
   if (!dev) {
     const { ServiceStats } = mongo.get()
-    // GMT Timezone +0
+    // GMT Timezone +7 Asia/Bangkok
     lineInitilize().catch(ex => lineError(title, ex))
-    cron.schedule('0 5,11,17,23 * * *', () => lineInitilize().catch(ex => lineError(title, ex)))
+    cron.schedule('0 0,6,12,18 * * *', () => lineInitilize().catch(ex => lineError(title, ex)))
     cron.schedule('* * * * *', () => scheduleDenyCMD().catch(ex => lineError(title, ex)))
     cron.schedule('0 0 * * *', () => scheduleStats().catch(ex => lineError(title, ex)))
-    cron.schedule('0 20 * * *', async () => {
-      await ServiceStats.updateOne({ name: 'line-bot' }, { $set: { online: false } })
-      await lineAlert(title, 'Heroku server has terminated yourself.', null, '#ff5722')
+    cron.schedule('0 3 * * *', async () => {
+      await web.chat.postMessage({ channel: 'CK6BUP7M0', text: '*Heroku* server has terminated yourself.', username: title })
       process.exit()
     })
-    // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Stats bot update crontab every 6 hour.\n`
-    // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Deny cmd crontab every minute.\n`
-    // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Monthly usage every day at 7am.\n`
-    // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] heroku kill service every day at 3am.`
 
     const bot = await ServiceStats.find({ name: 'line-bot' })
     if (!bot) {
       await new ServiceStats({ name: 'line-bot', type: 'heroku', desc: 'line bot server.', wan_ip: 'unknow', lan_ip: 'unknow', online: true }).save()
     }
     // restart line-bot notify.
-    await ServiceStats.updateOne({ name: 'line-bot' }, { $set: { online: true } })
-    lineAlert(title, 'Heroku server has rebooted, and ready.', null)
-  } else {
-    console.log(`development test on port ${port}`)
+    web.chat.postMessage({ channel: 'CK6BUP7M0', text: '*Heroku* server has `rebooted`, and ready.', username: title })
   }
 }).catch(async ex => {
-  lineError(title, ex).then(() => {
-    console.log(ex.message)
-    process.exit()
-  })
+  lineError(title, ex).then(() => process.exit())
 })
