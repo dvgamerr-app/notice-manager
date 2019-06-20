@@ -1,13 +1,12 @@
 {
   "name": "ris-line-messenger-bot",
   "version": "2.3.1",
-  "description": "```\r https://id.heroku.com/login\r USR: thkananek@central.co.th\r PWD: ASD!asd123\r ```",
+  "description": "LINE BOT Server Notify.",
   "main": "index.js",
   "engines": {
-    "node": "10.15.3"
+    "node": "10.16.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
   "keywords": [],
