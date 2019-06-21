@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const express = require('express')
 const debuger = require('@touno-io/debuger')
 // const request = require('request-promise')
@@ -39,20 +40,29 @@ app.get('/_health', (req, res) => res.end('ok'))
 app.get('/notify-bot/:room?', require('./route-bot/oauth'))
 app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
 
+
 // const lineAlert = require('./flex/alert')
 // An access token (from your Slack app or custom integration - xoxp, xoxb)
-// const token = process.env.SLACK_TOKEN
-// const web = new WebClient(token)
-// const slackStats = require('./flex/stats')
-// const lineError = async (title, ex) => {
-//   await web.chat.postMessage({
-//     channel: 'CK6BUP7M0',
-//     text: `*${ex.message}*${ex.stack ? `\n\n${ex.stack}` : ''}`,
-//     username: title
-//   })
-// }
+const slackStats = require('./flex/stats')
 
-// let title = `LINE-BOT v${pkg.version}`
+const { slackMessage } = require('./slack-bot')
+
+const pkgChannel = 'api-line-bot'
+const pkgName = `LINE-BOT v${pkg.version}`
+const errorToSlack = async ex => {
+  const icon = 'https://api.slack.com/img/blocks/bkb_template_images/notificationsWarningIcon.png'
+  await slackMessage(pkgChannel, pkgName, {
+    text: ex.message,
+    blocks: [
+      {
+        type: 'context',
+        elements: [ { type: 'image', image_url: icon, alt_text: 'ERROR' }, { type: 'mrkdwn', text: `*${ex.message}*` } ]
+      },
+      { type: 'section', text: { type: 'mrkdwn', text: ex.stack ? ex.stack : '' } }
+    ]
+  })
+}
+
 // const lineInitilize = async () => {
 //   const { LineBot } = mongo.get()
 //   let date = moment().add(7, 'hour').add(-1, 'day')
@@ -103,10 +113,10 @@ mongo.open().then(async () => {
   // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] listening on port ${port}\n`
   if (!dev) {
     // GMT Timezone +0
-    // lineInitilize().catch(ex => lineError(title, ex))
-    // cron.schedule('0 5,11,17,23 * * *', () => lineInitilize().catch(ex => lineError(title, ex)))
-    // cron.schedule('* * * * *', () => scheduleDenyCMD().catch(ex => lineError(title, ex)))
-    // cron.schedule('0 0 * * *', () => scheduleStats().catch(ex => lineError(title, ex)))
+    // lineInitilize().catch(errorToSlack)
+    // cron.schedule('0 5,11,17,23 * * *', () => lineInitilize().catch(errorToSlack))
+    // cron.schedule('* * * * *', () => scheduleDenyCMD().catch(errorToSlack))
+    // cron.schedule('0 0 * * *', () => scheduleStats().catch(errorToSlack))
     // cron.schedule('0 20 * * *', async () => {
     //   await web.chat.postMessage({ channel: 'CK6BUP7M0', text: '*Heroku* server has terminated yourself.', username: title })
     //   process.exit()
@@ -127,7 +137,7 @@ mongo.open().then(async () => {
   }
 }).catch(async ex => {
   logger.error(ex)
-  // lineError(title, ex).then(() => {
+  // errorToSlack(ex).then(() => {
   //   console.log(ex.message)
   //   process.exit()
   // })

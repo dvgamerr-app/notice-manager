@@ -11,9 +11,9 @@ module.exports = async (req, res) => {
         stats: e.options.stats
       }
     })
-    return res.json(data)
+    res.json(data)
   } catch (ex) {
-    ex
+    res.json({ error: ex.message })
   }
   res.end()
 }
