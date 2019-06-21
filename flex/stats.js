@@ -8,10 +8,10 @@ module.exports = (app, data) => {
       value: `yesterday usage ${numeral(e.stats.reply + e.stats.push).format('0,0')} (monthly ${numeral(e.stats.usage).format('0,0')}) `
     }
   })
-  let attachments = [
+  let blocks = [
     { fallback: `${app} stats usage daily.`, pretext: `${app} stats usage daily.`, color: '#363636', fields: data }
   ]
   
-  return { attachments }
+  return { blocks }
 }
 // 

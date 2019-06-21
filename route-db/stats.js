@@ -61,6 +61,7 @@ module.exports = async (req, res) => {
     // </html>
     // `.trim())
   } catch (ex) {
+    // eslint-disable-next-line no-console
     console.log(ex)
   }
   res.end()
