@@ -22,7 +22,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/jsons
 app.use(bodyParser.json())
 
-// app.post('/:bot', require('./route-bot/webhook'))
+app.post('/:bot', require('./route-bot/webhook'))
 // app.put('/:bot/:to?', require('./route-bot/push-message'))
 // app.put('/flex/:name/:to', require('./route-bot/push-flex'))
 // app.post('/slack/:channel', require('./route-bot/push-slack'))
@@ -36,31 +36,35 @@ app.use(bodyParser.json())
 // app.get('/stats', require('./route-db/stats'))
 
 // app.use('/static', express.static('./static'))
-app.get('/_health', (req, res) => res.end('ok'))
+app.use('/_health', (req, res) => res.sendStatus(200))
 app.get('/notify-bot/:room?', require('./route-bot/oauth'))
 app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
 
 
 // const lineAlert = require('./flex/alert')
 // An access token (from your Slack app or custom integration - xoxp, xoxb)
-const slackStats = require('./flex/stats')
+// const slackStats = require('./flex/stats')
 
 const { slackMessage } = require('./slack-bot')
 
 const pkgChannel = 'api-line-bot'
 const pkgName = `LINE-BOT v${pkg.version}`
 const errorToSlack = async ex => {
-  const icon = 'https://api.slack.com/img/blocks/bkb_template_images/notificationsWarningIcon.png'
-  await slackMessage(pkgChannel, pkgName, {
-    text: ex.message,
-    blocks: [
-      {
-        type: 'context',
-        elements: [ { type: 'image', image_url: icon, alt_text: 'ERROR' }, { type: 'mrkdwn', text: `*${ex.message}*` } ]
-      },
-      { type: 'section', text: { type: 'mrkdwn', text: ex.stack ? ex.stack : '' } }
-    ]
-  })
+  if (dev) {
+    logger.error(ex)
+  } else {
+    const icon = 'https://api.slack.com/img/blocks/bkb_template_images/notificationsWarningIcon.png'
+    await slackMessage(pkgChannel, pkgName, {
+      text: ex.message,
+      blocks: [
+        {
+          type: 'context',
+          elements: [ { type: 'image', image_url: icon, alt_text: 'ERROR' }, { type: 'mrkdwn', text: `*${ex.message}*` } ]
+        },
+        { type: 'section', text: { type: 'mrkdwn', text: ex.stack ? ex.stack : '' } }
+      ]
+    })
+  }
 }
 
 // const lineInitilize = async () => {
@@ -107,7 +111,6 @@ const errorToSlack = async ex => {
 const logger = debuger(pkg.title)
 logger.log(`MongoDB 'LINE-BOT' Connecting...`)
 mongo.open().then(async () => {
-  logger.log('- Connected.')
   await app.listen(port)
   logger.log(`listening port is ${port}.`)
   // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] listening on port ${port}\n`
@@ -132,13 +135,9 @@ mongo.open().then(async () => {
     // }
     // restart line-bot notify.
     // web.chat.postMessage({ channel: 'CK6BUP7M0', text: '*Heroku* server has `rebooted`, and ready.', username: title })
-  } else {
-    // console.log(`development test on port ${port}`)
   }
 }).catch(async ex => {
-  logger.error(ex)
-  // errorToSlack(ex).then(() => {
-  //   console.log(ex.message)
-  //   process.exit()
-  // })
+  errorToSlack(ex).then(() => {
+    process.exit()
+  })
 })
