@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
-const { join } = require('path')
+// const { join } = require('path')
+// const { readFileSync } = require('fs')
 const express = require('express')
 const debuger = require('@touno-io/debuger')
 // const request = require('request-promise')
@@ -13,7 +14,10 @@ const pkg = require('./package.json')
 const port = process.env.PORT || 4000
 const dev = !(process.env.NODE_ENV === 'production')
 const app = express()
- 
+
+const pkgChannel = 'api-line-bot'
+const pkgName = `LINE-BOT v${pkg.version}`
+
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
 if (!process.env.SLACK_TOKEN) throw new Error('Token slack is undefined.')
 if (!process.env.LINE_CLIENT || !process.env.LINE_SECRET) throw new Error('LINE secret is undefined.')
@@ -34,18 +38,11 @@ app.post('/:bot', require('./route-bot/webhook'))
 // app.get('/db/:bot/inbound', require('./route-db/inbound'))
 // app.get('/db/:bot/outbound', require('./route-db/outbound'))
 
-// app.get('/stats', require('./route-db/stats'))
 app.use('/_health', (req, res) => res.sendStatus(200))
 app.get('/register-bot/:room?', require('./route-bot/oauth'))
 
 // API router
-
-// Dashboard and Static file.
-app.use(express.static(join(__dirname, 'static')))
-app.get('/', (req, res) => {
-  res.sendFile(join(__dirname, './view/index.html'))
-})
-
+app.get('/api/dashboard', require('./route-db/dashboard'))
 
 // const lineAlert = require('./flex/alert')
 // An access token (from your Slack app or custom integration - xoxp, xoxb)
@@ -53,8 +50,6 @@ app.get('/', (req, res) => {
 
 const { slackMessage } = require('./slack-bot')
 
-const pkgChannel = 'api-line-bot'
-const pkgName = `LINE-BOT v${pkg.version}`
 const errorToSlack = async ex => {
   if (dev) {
     logger.error(ex)
