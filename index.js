@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+const { join } = require('path')
 const express = require('express')
 const debuger = require('@touno-io/debuger')
 // const request = require('request-promise')
@@ -34,11 +35,16 @@ app.post('/:bot', require('./route-bot/webhook'))
 // app.get('/db/:bot/outbound', require('./route-db/outbound'))
 
 // app.get('/stats', require('./route-db/stats'))
-
-// app.use('/static', express.static('./static'))
 app.use('/_health', (req, res) => res.sendStatus(200))
-app.get('/notify-bot/:room?', require('./route-bot/oauth'))
-app.get('/', (req, res) => res.end('LINE Messenger Bot Endpoint.'))
+app.get('/register-bot/:room?', require('./route-bot/oauth'))
+
+// API router
+
+// Dashboard and Static file.
+app.use(express.static(join(__dirname, 'static')))
+app.get('/', (req, res) => {
+  res.sendFile(join(__dirname, './view/index.html'))
+})
 
 
 // const lineAlert = require('./flex/alert')

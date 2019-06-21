@@ -48,6 +48,24 @@ mongo.set('LineBot', 'db-line-bot', {
   created: { type: Date, index: true },
 })
 
+mongo.set('ServiceBot', 'db-service-bot', {
+  name: String,
+  service: { type: String, index: true },
+  client: String,
+  secret: String,
+  created: { type: Date, index: true },
+})
+
+mongo.set('ServiceOauth', 'db-service-oauth', {
+  service: { type: String, index: true },
+  room: { type: String, index: true },
+  state: { type: String, index: true },
+  response_type: String,
+  redirect_uri: String,
+  accessToken: { type: Object, index: true, default: null },
+  created: { type: Date, index: true, default: Date.now }
+})
+
 mongo.set('ServiceStats', 'db-service-stats', {
   name: { type: String, index: true },
   type: { type: String, index: true },
@@ -55,14 +73,6 @@ mongo.set('ServiceStats', 'db-service-stats', {
   wan_ip: String,
   lan_ip: String,
   online: { type: Boolean, index: true, default: false },
-  created: { type: Date, index: true, default: Date.now }
-})
-mongo.set('ServiceOauth', 'db-service-oauth', {
-  room: { type: String, index: true },
-  state: { type: String, index: true },
-  response_type: String,
-  redirect_uri: String,
-  accessToken: { type: Object, index: true, default: null },
   created: { type: Date, index: true, default: Date.now }
 })
 
