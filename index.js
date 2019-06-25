@@ -124,7 +124,6 @@ mongo.open().then(async () => {
     // restart line-bot notify.
     await slackMessage(pkgChannel, pkgName, '*Heroku* server has `rebooted`, and ready.')
   }
-  await scheduleStats()
 }).catch(async ex => {
   errorToSlack(ex).then(() => process.exit())
 })
