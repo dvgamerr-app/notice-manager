@@ -14,9 +14,6 @@ const { mConn, mMapping } = {
     if (ready !== 1) throw new Error(`MongoDB Connection, ${MONGODB_URI}/${dbname} (State is ${ready})`)
 
     global._mongo.connected = () => global._mongo.readyState === 1
-    global._mongo.close = async () => {
-      await global._mongo.disconection()
-    }
   },
   mMapping: (table, force = false) => {
     if (!table.id) throw new Error(`mongodb id is undefined.`)

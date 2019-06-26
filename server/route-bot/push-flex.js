@@ -9,13 +9,13 @@ module.exports = async (req, res) => {
   req.params.bot = 'health-check'
   let { app, message, detail } = req.body
   if (!app || !message) return res.json({ error: 'app, message, detail is undefined.' })
-
+  let data = { params: req.params }
   if (name === 'error') {
-    req.body = await flex.error(app, { message, stack: detail }, true)
-    await linePush(req, res)
+    data.body = await flex.error(app, { message, stack: detail }, true)
+    await linePush(data, res)
   } else if (name === 'alert') {
-    req.body = await flex.alert(app, message, detail, '#009688', true)
-    await linePush(req, res)
+    data.body = await flex.alert(app, message, detail, '#009688', true)
+    await linePush(data, res)
   } else {
     res.json({ error: 'flex message is undefined.' })
   }
