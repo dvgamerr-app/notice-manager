@@ -20,8 +20,8 @@ const mongo = require('../mongodb')
 module.exports = async (req, res) => {
   // Authorization oauth2 URI
   const { code, state } = req.query
-  const { room } = req.params
-  const redirect_uri = `${hosts}notify-bot`
+  const { room, service } = req.params
+  const redirect_uri = `${hosts}register-bot`
   const response_type = 'code'
   const scope = 'notify'
   await mongo.open()
@@ -45,15 +45,15 @@ module.exports = async (req, res) => {
       res.end()
     }
   } else {
-    if (!room) return res.redirect(hosts)
+    if (!service || !room) return res.redirect(hosts)
     const newState = uuid(16)
-    logger.log(`${room} - state ${newState}`)
+    logger.log(`${service} in ${room} new state is '${newState}'`)
     try {
-      const token = await ServiceOauth.findOne({ room })
+      const token = await ServiceOauth.findOne({ service, room })
       if (token) {
-        await ServiceOauth.updateOne({ room }, { $set: { state: newState } })
+        await ServiceOauth.updateOne({ service, room }, { $set: { state: newState } })
       } else {
-        await new ServiceOauth({ room, response_type, redirect_uri, state: newState }).save()
+        await new ServiceOauth({ service, room, response_type, redirect_uri, state: newState }).save()
       }
       const authorizationUri = oauth2.authorizationCode.authorizeURL({ response_type, redirect_uri, scope, state: newState })
       return res.redirect(authorizationUri)
