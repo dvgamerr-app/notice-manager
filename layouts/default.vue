@@ -4,9 +4,6 @@
       <b-navbar type="dark" variant="dark">
         <b-container>
           <b-navbar-brand href="/">LINE Notify</b-navbar-brand>
-          <b-nav-form>
-            <b-form-input class="mr-sm-2" placeholder="Search"></b-form-input>
-          </b-nav-form>
         </b-container>
       </b-navbar>
     </header>
