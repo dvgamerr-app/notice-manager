@@ -48,25 +48,6 @@ app.get('/api/dashboard', require('./route-db/dashboard'))
 // An access token (from your Slack app or custom integration - xoxp, xoxb)
 // const slackStats = require('./flex/stats')
 
-const { slackMessage } = require('./slack-bot')
-
-const errorToSlack = async ex => {
-  if (dev) {
-    logger.error(ex)
-  } else {
-    const icon = 'https://api.slack.com/img/blocks/bkb_template_images/notificationsWarningIcon.png'
-    await slackMessage(pkgChannel, pkgName, {
-      text: ex.message,
-      blocks: [
-        {
-          type: 'context',
-          elements: [ { type: 'image', image_url: icon, alt_text: 'ERROR' }, { type: 'mrkdwn', text: `*${ex.message}*` } ]
-        },
-        { type: 'section', text: { type: 'mrkdwn', text: ex.stack ? ex.stack : '' } }
-      ]
-    })
-  }
-}
 
 // const lineInitilize = async () => {
 //   const { LineBot } = mongo.get()

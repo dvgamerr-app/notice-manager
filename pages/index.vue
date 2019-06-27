@@ -17,8 +17,16 @@
           d
         </b-col>
       </b-row>
-      <h3>LINE Notify</h3>
-      <hr>
+      
+      <div v-for="e in service" :key="e._id">
+        <h5 v-text="e.name" />
+        <hr>
+        <ul>
+          <li v-for="r in e.room" :key="r._id">
+            {{ r.room }}
+          </li>
+        </ul>
+      </div>
     </b-col>
   </b-row>
 </template>
@@ -26,7 +34,16 @@
 <script>
 
 export default {
-  components: {
+  data: () => ({
+    service: []
+  }),
+  async asyncData ({ $axios }) {
+    let uri = '/api/dashboard'
+    let { data, status, statusText } = await $axios(uri)
+    if (status !== 200) throw new Error(`Server Down '${uri}' is ${statusText}.`)
+    return {
+      service: data
+    }
   }
 }
 </script>

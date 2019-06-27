@@ -60,11 +60,11 @@ app.post('/:bot', require('./route-bot/webhook'))
 
 app.use('/_health', (req, res) => res.sendStatus(200))
 app.get('/register-bot/:service?/:room?', require('./route-bot/oauth'))
+app.put('/:service/:room', require('./route-bot/notify'))
 
+app.get('/api/check/stats', require('./route-check/stats'))
 // API router
 app.get('/api/dashboard', require('./route-db/dashboard'))
-
-
 
 logger.log(`MongoDB 'LINE-BOT' Connecting...`)
 mongo.open().then(async () => {

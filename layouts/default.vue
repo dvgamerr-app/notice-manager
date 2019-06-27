@@ -12,7 +12,7 @@
     </b-container>
     <footer>
       <b-container>
-        <p>Copyright © 2019 Touno™, all rights reserved ∙ Design By <a href="https://mr.touno.io/" target="_blank">Kananek T.</a></p>
+        <p>Design By <a href="https://mr.touno.io/" target="_blank">Kananek T.</a></p>
       </b-container>
     </footer>
 
