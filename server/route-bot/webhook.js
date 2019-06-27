@@ -1,5 +1,7 @@
 const mongo = require('../mongodb')
- 
+const debuger = require('@touno-io/debuger')
+
+const logger = debuger('WEBHOOK')
 module.exports = async (req, res) => {
   let { bot } = req.params
   let { events } = req.body
@@ -12,17 +14,6 @@ module.exports = async (req, res) => {
     let { accesstoken, secret } = client
     
     if (!accesstoken || !secret) throw new Error('LINE Channel AccessToken is undefined.')
-    // const lineMessage = async (e, sender) => {
-    //   if (!sender) return
-
-    //   if (typeof e === 'string') {
-    //     await line.pushMessage(e, lineSenderObj(sender))
-    //   } else if (e.replyToken) {
-    //     await line.replyMessage(e.replyToken, lineSenderObj(sender))
-    //   } else {
-    //     await line.pushMessage(linePushId(e), lineSenderObj(sender))
-    //   }
-    // }
 
     if (events.length > 0) {
       for (const e of events) {
@@ -63,7 +54,8 @@ module.exports = async (req, res) => {
       await new LineInbound(Object.assign(events, { botname: bot })).save()
     }
   } catch (ex) {
-    // console.log(ex.statusCode === 400 ? ex.statusMessage :  ex)
+    logger.error(ex)
+    res.sendStatus(404)
   } finally {
     res.end()
   }

@@ -1,4 +1,4 @@
-const mongo = require('../mongodb')
+const mongo = require('../../mongodb')
 
 module.exports = async (req, res) => {
   let { ServiceBot, ServiceOauth } = mongo.get() // LineInbound, LineOutbound, LineCMD, 

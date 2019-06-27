@@ -10,7 +10,7 @@ mongo.set('LineCMD', 'db-line-cmd', {
   executing: { type: Boolean, index: true },
   executed: { type: Boolean, index: true },
   updated: Date,
-  created: { type: Date, index: true },
+  created: { type: Date, index: true, default: Date.now }
 })
 mongo.set('LineOutbound', 'db-line-outbound', {
   botname: { type: String, index: true },
@@ -19,7 +19,7 @@ mongo.set('LineOutbound', 'db-line-outbound', {
   sender: Object,
   sended: Boolean,
   error: String,
-  created: { type: Date, index: true },
+  created: { type: Date, index: true, default: Date.now }
 })
 
 mongo.set('LineInbound', 'db-line-inbound', {
@@ -34,7 +34,7 @@ mongo.set('LineInbound', 'db-line-inbound', {
   things: Object,
   beacon: Object,
   timestamp: { type: Number, index: true },
-  created: { type: Date, index: true },
+  created: { type: Date, index: true, default: Date.now }
 })
 
 mongo.set('LineBot', 'db-line-bot', {
@@ -45,7 +45,7 @@ mongo.set('LineBot', 'db-line-bot', {
   secret: String,
   options: Object,
   channel: mongo.Schema.Mixed,
-  created: { type: Date, index: true },
+  created: { type: Date, index: true, default: Date.now }
 })
 
 mongo.set('ServiceBot', 'db-service-bot', {
@@ -53,7 +53,7 @@ mongo.set('ServiceBot', 'db-service-bot', {
   service: { type: String, index: true },
   client: String,
   secret: String,
-  created: { type: Date, index: true },
+  created: { type: Date, index: true, default: Date.now }
 })
 
 mongo.set('ServiceOauth', 'db-service-oauth', {

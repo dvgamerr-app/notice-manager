@@ -10,7 +10,7 @@
     <b-container>
       <nuxt />
     </b-container>
-    <footer>
+    <footer class="mt-3">
       <b-container>
         <p>Design By <a href="https://mr.touno.io/" target="_blank">Kananek T.</a></p>
       </b-container>

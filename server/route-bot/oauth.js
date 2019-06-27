@@ -1,9 +1,4 @@
 const debuger = require('@touno-io/debuger')
-const credentials = {
-  client: { id: process.env.LINE_CLIENT, secret: process.env.LINE_SECRET },
-  auth: { tokenHost: 'https://notify-bot.line.me/' },
-  options: { bodyFormat: 'form' }
-}
 const uuid = length => {
   let result = ''
   let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -14,7 +9,6 @@ const uuid = length => {
 }
 const hosts = process.env.HOSTNAME || 'http://localhost:4000/'
 const logger = debuger('OAUTH')
-const oauth2 = require('simple-oauth2').create(credentials)
 const mongo = require('../mongodb')
 
 module.exports = async (req, res) => {
@@ -25,15 +19,27 @@ module.exports = async (req, res) => {
   const response_type = 'code'
   const scope = 'notify'
   await mongo.open()
-  const { ServiceOauth } = mongo.get()
+  const { ServiceOauth, ServiceBot } = mongo.get()
+
   if (code) {
-    const tokenConfig = {
-      code,
-      redirect_uri,
-      client_id: credentials.client.id,
-      client_secret: credentials.client.secret
-    }
     try {
+      let oauth = await ServiceOauth.findOne({ state })
+
+      let bot = await ServiceBot.findOne({ service: oauth.service })
+      let credentials = {
+        client: { id: bot.client, secret: bot.secret },
+        auth: { tokenHost: 'https://notify-bot.line.me/' },
+        options: { bodyFormat: 'form' }
+      }
+      const oauth2 = require('simple-oauth2').create(credentials)
+  
+      const tokenConfig = {
+        code,
+        redirect_uri,
+        client_id: credentials.client.id,
+        client_secret: credentials.client.secret
+      }
+
       const result = await oauth2.authorizationCode.getToken(tokenConfig)
       const access = oauth2.accessToken.create(result)
       await ServiceOauth.updateOne({ state }, { $set: { accessToken: access.token.access_token } })
@@ -45,7 +51,18 @@ module.exports = async (req, res) => {
       res.end()
     }
   } else {
-    if (!service || !room) return res.redirect(hosts)
+    if (!service || !room) return res.sendStatus(404)
+
+    let bot = await ServiceBot.findOne({ service })
+    if (!bot) return res.sendStatus(404)
+  
+    let credentials = {
+      client: { id: bot.client, secret: bot.secret },
+      auth: { tokenHost: 'https://notify-bot.line.me/' },
+      options: { bodyFormat: 'form' }
+    }
+    const oauth2 = require('simple-oauth2').create(credentials)
+
     const newState = uuid(16)
     logger.log(`${service} in ${room} new state is '${newState}'`)
     try {
