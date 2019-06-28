@@ -1,6 +1,6 @@
-const mongo = require('../../mongodb')
+import mongo from '../../mongodb'
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   let data = req.body
   console.log(data)
   let { ServiceBot } = mongo.get() // LineInbound, LineOutbound, LineCMD, ServiceOauth
@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
     if (await ServiceBot.findOne({ name: data.name })) throw new Error('name is duplicate.')
 
     await new ServiceBot({
-      name: data.display,
+      name: data.name,
       service: data.name,
       client: data.client_id,
       secret: data.client_secret

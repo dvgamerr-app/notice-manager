@@ -1,9 +1,6 @@
 
 module.exports = {
   mode: 'universal',
-  /*
-  ** Headers of the page
-  */
   head: {
     title: 'Dashboard - LINE Notify',
     meta: [
@@ -15,38 +12,22 @@ module.exports = {
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
     ]
   },
-  /*
-  ** Customize the progress-bar color
-  */
   loading: { color: '#fff' },
-  /*
-  ** Global CSS
-  */
   css: [
     './assets/basic.css'
   ],
-  /*
-  ** Plugins to load before mounting the App
-  */
-  plugins: [
-  ],
-  /*
-  ** Nuxt.js modules
-  */
   modules: [
-    // Doc: https://bootstrap-vue.js.org/docs/
+    'nuxt-fontawesome',
     'bootstrap-vue/nuxt',
-    // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
   ],
-  /*
-  ** Axios module configuration
-  ** See https://axios.nuxtjs.org/options
-  */
+  fontawesome: {
+    component: 'fa',
+    imports: [
+      { icons: ['fas'], set: '@fortawesome/free-solid-svg-icons' }
+    ]
+  },
   axios: { baseURL: process.env.AXIOS_BASE_URL || 'http://localhost:4000/' },
-  /*
-  ** Build configuration
-  */
   build: {
   }
 }

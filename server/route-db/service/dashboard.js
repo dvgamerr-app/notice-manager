@@ -1,6 +1,6 @@
-const mongo = require('../../mongodb')
+import mongo from '../../mongodb'
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   let { ServiceBot, ServiceOauth } = mongo.get() // LineInbound, LineOutbound, LineCMD, 
   try {
     let service = await ServiceBot.find({}, null, { sort: { name: 1 } })
@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
       _id: e._id,
       name: e.name,
       service: e.service,
-      room: room.filter(r => r.service === e.service).map(e => ({ service: e.service, room: e.room, _id: e._id }))
+      room: room.filter(r => r.service === e.service && r.accessToken).map(e => ({ service: e.service, room: e.room, name: e.name, _id: e._id }))
     }))
     res.json(groups)
   } catch (ex) {

@@ -1,4 +1,6 @@
-const debuger = require('@touno-io/debuger')
+import debuger from '@touno-io/debuger'
+import mongo from '../mongodb'
+import { getStatus } from '../api-notify'
 const uuid = length => {
   let result = ''
   let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -9,20 +11,20 @@ const uuid = length => {
 }
 const hosts = process.env.HOSTNAME || 'http://localhost:4000/'
 const logger = debuger('OAUTH')
-const mongo = require('../mongodb')
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   // Authorization oauth2 URI
-  const { code, state } = req.query
+  const { code, state, error } = req.query
   const { room, service } = req.params
   const redirect_uri = `${hosts}register-bot`
   const response_type = 'code'
   const scope = 'notify'
-  await mongo.open()
-  const { ServiceOauth, ServiceBot } = mongo.get()
+  
+  try {
+    await mongo.open()
+    const { ServiceOauth, ServiceBot } = mongo.get()
 
-  if (code) {
-    try {
+    if (code) {
       let oauth = await ServiceOauth.findOne({ state })
 
       let bot = await ServiceBot.findOne({ service: oauth.service })
@@ -32,7 +34,7 @@ module.exports = async (req, res) => {
         options: { bodyFormat: 'form' }
       }
       const oauth2 = require('simple-oauth2').create(credentials)
-  
+
       const tokenConfig = {
         code,
         redirect_uri,
@@ -42,43 +44,40 @@ module.exports = async (req, res) => {
 
       const result = await oauth2.authorizationCode.getToken(tokenConfig)
       const access = oauth2.accessToken.create(result)
-      await ServiceOauth.updateOne({ state }, { $set: { accessToken: access.token.access_token } })
-      res.json({ ok: true })
-    } catch (ex) {
-      logger.error(ex)
-      res.json({ ok: false, error: ex.message || ex })
-    } finally {
-      res.end()
-    }
-  } else {
-    if (!service || !room) return res.sendStatus(404)
+      let { body } = await getStatus(access.token.access_token)
 
-    let bot = await ServiceBot.findOne({ service })
-    if (!bot) return res.sendStatus(404)
-  
-    let credentials = {
-      client: { id: bot.client, secret: bot.secret },
-      auth: { tokenHost: 'https://notify-bot.line.me/' },
-      options: { bodyFormat: 'form' }
-    }
-    const oauth2 = require('simple-oauth2').create(credentials)
+      await ServiceOauth.updateOne({ state }, { $set: { name: body.target, accessToken: access.token.access_token } })
+      return res.redirect(hosts)
+    } else if (error) {
+      return res.redirect(hosts)
+    } else {
+      if (!service || !room) return res.sendStatus(404)
 
-    const newState = uuid(16)
-    logger.log(`${service} in ${room} new state is '${newState}'`)
-    try {
+      let bot = await ServiceBot.findOne({ service })
+      if (!bot) return res.sendStatus(404)
+    
+      let credentials = {
+        client: { id: bot.client, secret: bot.secret },
+        auth: { tokenHost: 'https://notify-bot.line.me/' },
+        options: { bodyFormat: 'form' }
+      }
+      const oauth2 = require('simple-oauth2').create(credentials)
+
+      const newState = uuid(16)
+      logger.log(`${service} in ${room} new state is '${newState}'`)
       const token = await ServiceOauth.findOne({ service, room })
       if (token) {
         await ServiceOauth.updateOne({ service, room }, { $set: { state: newState } })
       } else {
-        await new ServiceOauth({ service, room, response_type, redirect_uri, state: newState }).save()
+        await new ServiceOauth({ name: room, service, room, response_type, redirect_uri, state: newState }).save()
       }
       const authorizationUri = oauth2.authorizationCode.authorizeURL({ response_type, redirect_uri, scope, state: newState })
       return res.redirect(authorizationUri)
-    } catch (ex) {
-      logger.error(ex)
-      res.json({ ok: false, error: ex.message || ex })
-    } finally {
-      res.end()
     }
+  } catch (ex) {
+    logger.error(ex)
+    res.json({ error: ex.message || ex })
+  } finally {
+    res.end()
   }
 }

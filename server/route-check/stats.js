@@ -4,7 +4,7 @@ import mongo from '../mongodb'
 
 const logger = debuger('Notify')
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   // Authorization oauth2 URI
   await mongo.open()
   const { ServiceOauth } = mongo.get()
@@ -26,10 +26,10 @@ module.exports = async (req, res) => {
       }
     }
 
-    res.json({ ok: true, status: result })
+    res.json(result)
   } catch (ex) {
     logger.error(ex)
-    res.json({ ok: false, error: ex.message || ex })
+    res.json({ error: ex.message || ex })
   } finally {
     res.end()
   }

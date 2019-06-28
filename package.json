@@ -38,11 +38,15 @@
     "@babel/core": "^7.4.5",
     "@babel/node": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
+    "@fortawesome/fontawesome-svg-core": "^1.2.19",
+    "@fortawesome/free-solid-svg-icons": "^5.9.0",
+    "@fortawesome/vue-fontawesome": "^0.1.6",
     "env-cmd": "^9.0.3",
     "eslint": "^6.0.1",
     "eslint-plugin-vue": "^5.2.3",
     "node-sass": "^4.12.0",
     "nodemon": "^1.19.1",
+    "nuxt-fontawesome": "^0.4.0",
     "sass-loader": "^7.1.0"
   },
   "repository": {

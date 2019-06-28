@@ -9,6 +9,15 @@ import config from '../nuxt.config.js'
 import mongo from './line-bot'
 import { slackMessage } from './slack-bot'
 
+import postBotHandler from './route-bot/webhook'
+import getRegisterBotServiceRoomHandler from './route-bot/oauth'
+import putServiceRoomHandler from './route-bot/notify'
+import putRevokeServiceRoomHandler from './route-bot/revoke'
+import getServiceDashboardHandler from './route-db/service/dashboard'
+import postServicehandler from './route-db/service/new'
+import getCheckStats from './route-check/stats'
+
+const getHealthStatusHandler = (req, res) => res.sendStatus(200)
 const app = express()
 const port = process.env.PORT || 4000
 const host = process.env.HOST || '127.0.0.1'
@@ -47,7 +56,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/jsons
 app.use(bodyParser.json())
 
-app.post('/:bot', require('./route-bot/webhook'))
+app.post('/:bot', postBotHandler)
 // app.put('/:bot/:to?', require('./route-bot/push-message'))
 // app.put('/flex/:name/:to', require('./route-bot/push-flex'))
 // app.post('/slack/:channel', require('./route-bot/push-slack'))
@@ -58,14 +67,15 @@ app.post('/:bot', require('./route-bot/webhook'))
 // app.get('/db/:bot/inbound', require('./route-db/inbound'))
 // app.get('/db/:bot/outbound', require('./route-db/outbound'))
 
-app.use('/_health', (req, res) => res.sendStatus(200))
-app.get('/register-bot/:service?/:room?', require('./route-bot/oauth'))
-app.put('/:service/:room', require('./route-bot/notify'))
+app.use('/_health', getHealthStatusHandler)
+app.get('/register-bot/:service?/:room?', getRegisterBotServiceRoomHandler)
+app.put('/notify/:service/:room', putServiceRoomHandler)
+app.put('/revoke/:service/:room', putRevokeServiceRoomHandler)
 
 // API router
-app.get('/api/service/dashboard', require('./route-db/service/dashboard'))
-app.post('/api/service', require('./route-db/service/new'))
-app.get('/api/check/stats', require('./route-check/stats'))
+app.get('/api/service/dashboard', getServiceDashboardHandler)
+app.post('/api/service', postServicehandler)
+app.get('/api/check/stats', getCheckStats)
 
 logger.log(`MongoDB 'LINE-BOT' Connecting...`)
 mongo.open().then(async () => {

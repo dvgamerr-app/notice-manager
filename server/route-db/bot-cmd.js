@@ -1,6 +1,6 @@
-const mongo = require('../mongodb')
- 
-module.exports = async (req, res) => {
+import mongo from '../mongodb'
+
+export default async (req, res) => {
   let { bot, id } = req.params
   try {
     let updated = { updated: new Date() }

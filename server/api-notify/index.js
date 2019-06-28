@@ -16,3 +16,11 @@ export const pushMessage = async (accessToken, message) => request({
   resolveWithFullResponse: true,
   json: true
 })
+
+export const setRevoke = async (accessToken) => request({
+  method: 'POST',
+  headers: { 'Authorization': `Bearer ${accessToken}` },
+  url: 'https://notify-api.line.me/api/revoke',
+  resolveWithFullResponse: true,
+  json: true
+})

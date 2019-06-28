@@ -59,6 +59,7 @@ mongo.set('ServiceBot', 'db-service-bot', {
 mongo.set('ServiceOauth', 'db-service-oauth', {
   service: { type: String, index: true },
   room: { type: String, index: true },
+  name: String,
   state: { type: String, index: true },
   response_type: String,
   redirect_uri: String,

@@ -1,8 +1,9 @@
-const mongo = require('../mongodb')
-const debuger = require('@touno-io/debuger')
+import mongo from '../mongodb'
+import debuger from '@touno-io/debuger'
 
 const logger = debuger('WEBHOOK')
-module.exports = async (req, res) => {
+
+export default async (req, res) => {
   let { bot } = req.params
   let { events } = req.body
   if (!events) return res.end()

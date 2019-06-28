@@ -1,21 +1,22 @@
 import debuger from '@touno-io/debuger'
-import { pushMessage } from '../api-notify'
 import mongo from '../mongodb'
+import { setRevoke } from '../api-notify'
 
 const logger = debuger('Notify')
 
 export default async (req, res) => {
   // Authorization oauth2 URI
   const { room, service } = req.params
-  const { message } = req.body
+  const { revoke } = req.body
+  await mongo.open()
+  const { ServiceOauth } = mongo.get()
   try {
-    await mongo.open()
-    const { ServiceOauth } = mongo.get()
-
     const token = await ServiceOauth.findOne({ service, room })
-    if (!token || !token.accessToken) throw new Error('Service and room not register.')
-    let { headers } = await pushMessage(token.accessToken, message)
-    res.json({ remaining: parseInt(headers['x-ratelimit-remaining']) })
+    if (!token) throw new Error('Service and room not register.')
+    if (revoke !== 'agree') throw new Error('Please confirm revoke parameter')
+    await setRevoke(token.accessToken)
+    await ServiceOauth.updateOne({ service, room }, { $set: { accessToken: null } })
+    res.json({})
   } catch (ex) {
     logger.error(ex)
     res.status(ex.error ? ex.error.status : 500)
