@@ -1,6 +1,6 @@
 import debuger from '@touno-io/debuger'
 import mongo from '../mongodb'
-import { getStatus } from '../api-notify'
+import { getStatus, setRevoke } from '../api-notify'
 const uuid = length => {
   let result = ''
   let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -40,6 +40,14 @@ export default async (req, res) => {
         redirect_uri,
         client_id: credentials.client.id,
         client_secret: credentials.client.secret
+      }
+      
+      if (oauth.accessToken) {
+        try {
+          await setRevoke(oauth.accessToken)
+        } catch (ex) {
+          logger.error(ex)
+        }
       }
 
       const result = await oauth2.authorizationCode.getToken(tokenConfig)

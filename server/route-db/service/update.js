@@ -4,14 +4,11 @@ export default async (req, res) => {
   let data = req.body
   let { ServiceBot } = mongo.get() // LineInbound, LineOutbound, LineCMD, ServiceOauth
   try {
-    if (await ServiceBot.findOne({ service: data.name })) throw new Error('name is duplicate.')
-  
-    await new ServiceBot({
+    await ServiceBot.updateOne({ _id: data._id }, {
       name: data.name,
-      service: data.name,
-      client: data.client_id,
-      secret: data.client_secret
-    }).save()
+      active: data.active
+    })
+    res.json({})
   } catch (ex) {
     res.json({ error: ex.message })
   }

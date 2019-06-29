@@ -53,6 +53,11 @@ mongo.set('ServiceBot', 'db-service-bot', {
   service: { type: String, index: true },
   client: String,
   secret: String,
+  limit: {
+    reset: Number,
+    remaining: Number
+  },
+  active: { type: Boolean, index: true, default: true },
   created: { type: Date, index: true, default: Date.now }
 })
 

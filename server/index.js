@@ -15,6 +15,8 @@ import putServiceRoomHandler from './route-bot/notify'
 import putRevokeServiceRoomHandler from './route-bot/revoke'
 import getServiceDashboardHandler from './route-db/service/dashboard'
 import postServicehandler from './route-db/service/new'
+import postCheckHandler from './route-db/service/check'
+import postUpdateHandler from './route-db/service/update'
 import getCheckStats from './route-check/stats'
 
 const getHealthStatusHandler = (req, res) => res.sendStatus(200)
@@ -74,6 +76,8 @@ app.put('/revoke/:service/:room', putRevokeServiceRoomHandler)
 
 // API router
 app.get('/api/service/dashboard', getServiceDashboardHandler)
+app.post('/api/service/check', postCheckHandler)
+app.post('/api/service/update', postUpdateHandler)
 app.post('/api/service', postServicehandler)
 app.get('/api/check/stats', getCheckStats)
 
