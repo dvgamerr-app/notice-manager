@@ -19,6 +19,13 @@ import postCheckHandler from './route-db/service/check'
 import postUpdateHandler from './route-db/service/update'
 import getCheckStats from './route-check/stats'
 
+import putBotMessageHandler from './route-bot/push-message'
+import putSlackMessageHandler from './route-bot/push-slack'
+
+import getBotCMDHandler from './route-db/bot-cmd'
+import getBotInboundHandler from './route-db/inbound'
+import getBotOutboundHandler from './route-db/outbound'
+
 const getHealthStatusHandler = (req, res) => res.sendStatus(200)
 const app = express()
 const port = process.env.PORT || 4000
@@ -59,15 +66,14 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 app.post('/:bot', postBotHandler)
-// app.put('/:bot/:to?', require('./route-bot/push-message'))
+app.put('/:bot/:to?', putBotMessageHandler)
 // app.put('/flex/:name/:to', require('./route-bot/push-flex'))
-// app.post('/slack/:channel', require('./route-bot/push-slack'))
+app.post('/slack/:channel', putSlackMessageHandler)
 
-
-// app.get('/db/:bot/cmd', require('./route-db/bot-cmd'))
-// app.post('/db/:bot/cmd/:id', require('./route-db/bot-cmd'))
-// app.get('/db/:bot/inbound', require('./route-db/inbound'))
-// app.get('/db/:bot/outbound', require('./route-db/outbound'))
+app.get('/db/:bot/cmd', getBotCMDHandler)
+app.post('/db/:bot/cmd/:id', getBotCMDHandler)
+app.get('/db/:bot/inbound', getBotInboundHandler)
+app.get('/db/:bot/outbound', getBotOutboundHandler)
 
 app.use('/_health', getHealthStatusHandler)
 app.get('/register-bot/:service?/:room?', getRegisterBotServiceRoomHandler)

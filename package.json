@@ -8,9 +8,11 @@
   },
   "scripts": {
     "dev": "env-cmd nodemon server/index.js --exec \"npm run eslint && babel-node\"",
+    "build":"babel -d ./.build ./server -s",
     "eslint": "eslint --ext .js --ignore-path .eslintignore .",
-    "start": "node server/index.js"
+    "start": "node .build/index.js"
   },
+  "heroku-run-build-script": true,
   "keywords": [],
   "author": "Kananek Thongkam",
   "license": "ISC",

@@ -11,7 +11,7 @@ export default async (req, res) => {
   let outbound = null
   
   await mongo.open()
-  const { ServiceBot, ServiceOauth, LineOutbound } = mongo.get()
+  const { ServiceOauth, LineOutbound } = mongo.get()
 
   try {
     outbound = await new LineOutbound({
@@ -33,7 +33,7 @@ export default async (req, res) => {
       image: parseInt(headers['x-ratelimit-imageremaining']),
       reset: parseInt(headers['x-ratelimit-reset']) * 1000
     }
-    await ServiceBot.updateOne({ room, service }, { $set: { 'limit.remaining': result.remaining, 'limit.reset': result.reset } })
+    await ServiceOauth.updateOne({ room, service }, { $set: { limit: result } })
     await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: true } })
     res.json(result)
   } catch (ex) {
