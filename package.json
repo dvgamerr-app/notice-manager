@@ -17,6 +17,9 @@
   "author": "Kananek Thongkam",
   "license": "ISC",
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.19",
+    "@fortawesome/free-solid-svg-icons": "^5.9.0",
+    "@fortawesome/vue-fontawesome": "^0.1.6",
     "@line/bot-sdk": "^6.8.0",
     "@nuxtjs/axios": "^5.3.6",
     "@slack/events-api": "^2.2.0",
@@ -31,6 +34,7 @@
     "node-cron": "^2.0.3",
     "numeral": "^2.0.6",
     "nuxt": "^2.0.0",
+    "nuxt-fontawesome": "^0.4.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "simple-oauth2": "^2.2.1"
@@ -40,15 +44,11 @@
     "@babel/core": "^7.4.5",
     "@babel/node": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
-    "@fortawesome/fontawesome-svg-core": "^1.2.19",
-    "@fortawesome/free-solid-svg-icons": "^5.9.0",
-    "@fortawesome/vue-fontawesome": "^0.1.6",
     "env-cmd": "^9.0.3",
     "eslint": "^6.0.1",
     "eslint-plugin-vue": "^5.2.3",
     "node-sass": "^4.12.0",
     "nodemon": "^1.19.1",
-    "nuxt-fontawesome": "^0.4.0",
     "sass-loader": "^7.1.0"
   },
   "repository": {
