@@ -1,6 +1,6 @@
 {
   "name": "ris-line-notify",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "LINE BOT Server Notify.",
   "main": "index.js",
   "engines": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "env-cmd nodemon server/index.js --exec \"npm run eslint && babel-node\"",
-    "build":"babel -d ./.build ./server -s",
+    "build": "babel -d ./.build ./server -s",
     "eslint": "eslint --ext .js --ignore-path .eslintignore .",
     "start": "node .build/index.js"
   },
