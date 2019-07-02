@@ -14,6 +14,8 @@ export default async (req, res) => {
   const { ServiceOauth, LineOutbound } = mongo.get()
 
   try {
+    if (typeof message !== 'string') throw new Error('Message is undefined.')
+
     outbound = await new LineOutbound({
       botname: service,
       userTo: room,
@@ -27,7 +29,7 @@ export default async (req, res) => {
     const token = await ServiceOauth.findOne({ service, room })
     if (!token || !token.accessToken) throw new Error('Service and room not register.')
 
-    let { headers } = await pushMessage(token.accessToken, message)
+    let { headers } = await pushMessage(token.accessToken, message.replace(/\\n|newline/ig, '\n'))
     let result = {
       remaining: parseInt(headers['x-ratelimit-remaining']),
       image: parseInt(headers['x-ratelimit-imageremaining']),
@@ -38,7 +40,7 @@ export default async (req, res) => {
     res.json(result)
   } catch (ex) {
     logger.error(ex)
-    await LineOutbound.updateOne({ _id: outbound._id }, { $set: { error: ex.message || ex.toString() } })
+    if (outbound) await LineOutbound.updateOne({ _id: outbound._id }, { $set: { error: ex.message || ex.toString() } })
     res.status(ex.error ? ex.error.status : 500)
     res.json({ error: (ex.error ? ex.error.message : ex.message || ex) })
   } finally {
