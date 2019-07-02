@@ -1,4 +1,5 @@
 import express from 'express'
+import cron from 'node-cron'
 import debuger from '@touno-io/debuger'
 import bodyParser from 'body-parser'
 import { Nuxt, Builder } from 'nuxt'
@@ -7,7 +8,8 @@ import { Nuxt, Builder } from 'nuxt'
 import pkg from '../package.json'
 import config from '../nuxt.config.js'
 import mongo from './line-bot'
-import { slackMessage } from './slack-bot'
+import { slackMessage, slackError } from './helper'
+import { cmdExpire, statsPushMessage } from './helper/schedule'
 
 import postBotHandler from './route-bot/webhook'
 import getRegisterBotServiceRoomHandler from './route-bot/oauth'
@@ -35,24 +37,6 @@ const pkgChannel = 'api-line-bot'
 const pkgName = `LINE-BOT v${pkg.version}`
 const logger = debuger(pkg.title)
 
-const errorToSlack = async ex => {
-  if (dev) {
-    logger.error(ex)
-  } else {
-    const icon = 'https://api.slack.com/img/blocks/bkb_template_images/notificationsWarningIcon.png'
-    await slackMessage(pkgChannel, pkgName, {
-      text: ex.message,
-      blocks: [
-        {
-          type: 'context',
-          elements: [ { type: 'image', image_url: icon, alt_text: 'ERROR' }, { type: 'mrkdwn', text: `*${ex.message}*` } ]
-        },
-        { type: 'section', text: { type: 'mrkdwn', text: ex.stack ? ex.stack : '' } }
-      ]
-    })
-  }
-}
-// const cron = require('node-cron')
 // const moment = require('moment')
 // const { WebClient } = require('@slack/web-api')
 
@@ -91,7 +75,6 @@ logger.log(`MongoDB 'LINE-BOT' Connecting...`)
 mongo.open().then(async () => {
   // Init Nuxt.js
   const nuxt = new Nuxt(config)
-
   if (dev) {
     const builder = new Builder(nuxt)
     await builder.build()
@@ -102,31 +85,16 @@ mongo.open().then(async () => {
   app.use(nuxt.render)
   await app.listen(port, host)
   logger.log(`listening port is ${port}.`)
-  // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] listening on port ${port}\n`
   if (!dev) {
-    // GMT Timezone +0
-    // lineInitilize().catch(errorToSlack)
-    // cron.schedule('0 5,11,17,23 * * *', () => lineInitilize().catch(errorToSlack))
-    // cron.schedule('* * * * *', () => scheduleDenyCMD().catch(errorToSlack))
-    // cron.schedule('0 0 * * *', () => scheduleStats().catch(errorToSlack))
-    // cron.schedule('0 20 * * *', async () => {
-    //   await web.chat.postMessage({ channel: 'CK6BUP7M0', text: '*Heroku* server has terminated yourself.', username: title })
-    //   process.exit()
-    // })
-    // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Stats bot update crontab every 6 hour.\n`
-    // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Deny cmd crontab every minute.\n`
-    // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] Monthly usage every day at 7am.\n`
-    // logs += `[${moment().add(7, 'hour').format('HH:mm:ss')}] heroku kill service every day at 3am.`
-
-    // const { ServiceStats } = mongo.get()
-    // if (!await ServiceStats.find({ name: 'line-bot' })) {
-    //   await new ServiceStats({ name: 'line-bot', type: 'heroku', desc: 'line bot server.', wan_ip: 'unknow', lan_ip: 'unknow', online: true }).save()
-    // }
-    // restart line-bot notify.
-    // web.chat.postMessage({ channel: 'CK6BUP7M0', text: '*Heroku* server has `rebooted`, and ready.', username: title })
+    // lineInitilize().catch(slackError)    cron.schedule('0 */3 * * *', () => lineInitilize().catch(slackError)
+    cron.schedule('* * * * *', () => cmdExpire().catch(slackError))
+    cron.schedule('0 0 * * *', () => statsPushMessage().catch(slackError))
+    cron.schedule('0 3 * * *', async () => {
+      await slackMessage(pkgChannel, pkgName, '*Heroku* server has terminated yourself.')
+      process.exit()
+    })
+    await slackMessage(pkgChannel, pkgName, '*Heroku* server has `rebooted`, and ready.')
   }
-}).catch(async ex => {
-  errorToSlack(ex).then(() => {
-    process.exit()
-  })
-})
+}).catch(ex => slackError(ex).then(() => {
+  process.exit()
+}))
