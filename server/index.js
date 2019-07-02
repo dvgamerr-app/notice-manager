@@ -9,7 +9,7 @@ import pkg from '../package.json'
 import config from '../nuxt.config.js'
 import mongo from './line-bot'
 import { slackMessage, slackError } from './helper'
-import { cmdExpire, statsPushMessage } from './helper/schedule'
+import { lineInitilize, cmdExpire, statsPushMessage } from './helper/schedule'
 
 import postBotHandler from './route-bot/webhook'
 import getRegisterBotServiceRoomHandler from './route-bot/oauth'
@@ -86,7 +86,8 @@ mongo.open().then(async () => {
   await app.listen(port, host)
   logger.log(`listening port is ${port}.`)
   if (!dev) {
-    // lineInitilize().catch(slackError)    cron.schedule('0 */3 * * *', () => lineInitilize().catch(slackError)
+    lineInitilize().catch(slackError)
+    cron.schedule('0 */3 * * *', () => lineInitilize().catch(slackError), { })
     cron.schedule('* * * * *', () => cmdExpire().catch(slackError))
     cron.schedule('0 0 * * *', () => statsPushMessage().catch(slackError))
     cron.schedule('0 3 * * *', async () => {
