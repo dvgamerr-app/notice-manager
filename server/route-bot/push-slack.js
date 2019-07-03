@@ -7,7 +7,7 @@ export default async (req, res) => {
   const { channel } = req.params
   let outbound = null
   try {
-    let data = sender || { message }
+    let data = sender || { text: message }
     if (icon) data.icon_url = `https://intense-citadel-55702.herokuapp.com/${icon}.png`
     outbound = await new LineOutbound({
       botname: username,
