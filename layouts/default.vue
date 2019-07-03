@@ -4,6 +4,11 @@
       <b-navbar type="dark" variant="dark">
         <b-container>
           <b-navbar-brand href="/">LINE Notify</b-navbar-brand>
+              
+          <b-navbar-nav class="ml-auto">
+            <b-nav-item to="/" :active="$route.name == 'index'">Dashboard</b-nav-item>
+            <b-nav-item to="/documentation" :active="$route.name == 'documentation'">Documentation</b-nav-item>
+          </b-navbar-nav>
         </b-container>
       </b-navbar>
     </header>

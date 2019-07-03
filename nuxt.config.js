@@ -12,9 +12,9 @@ module.exports = {
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
     ]
   },
-  loading: { color: '#fff' },
+  loading: { color: '#343a40' },
   css: [
-    './assets/basic.css'
+    './assets/basic.scss'
   ],
   modules: [
     'nuxt-fontawesome',
@@ -24,7 +24,8 @@ module.exports = {
   fontawesome: {
     component: 'fa',
     imports: [
-      { icons: ['fas'], set: '@fortawesome/free-solid-svg-icons' }
+      { icons: ['fas'], set: '@fortawesome/free-solid-svg-icons' },
+      { icons: ['fab'], set: '@fortawesome/free-brands-svg-icons' }
     ]
   },
   axios: { baseURL: process.env.AXIOS_BASE_URL || 'https://intense-citadel-55702.herokuapp.com/' },
