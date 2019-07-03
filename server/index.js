@@ -52,7 +52,7 @@ app.use(bodyParser.json())
 app.post('/:bot', postBotHandler)
 app.put('/:bot/:to?', putBotMessageHandler)
 // app.put('/flex/:name/:to', require('./route-bot/push-flex'))
-app.post('/slack/:channel', putSlackMessageHandler)
+app.put('/slack/:channel', putSlackMessageHandler)
 
 app.get('/db/:bot/cmd', getBotCMDHandler)
 app.post('/db/:bot/cmd/:id', getBotCMDHandler)
