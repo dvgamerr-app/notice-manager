@@ -22,6 +22,7 @@ import postUpdateHandler from './route-db/service/update'
 import getCheckStats from './route-check/stats'
 
 import putBotMessageHandler from './route-bot/push-message'
+import putBotFlexHandler from './route-bot/push-flex'
 import putSlackMessageHandler from './route-bot/push-slack'
 
 import getBotCMDHandler from './route-db/bot-cmd'
@@ -49,17 +50,19 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/jsons
 app.use(bodyParser.json())
 
+app.use('/_health', getHealthStatusHandler)
 app.post('/:bot', postBotHandler)
 app.put('/:bot/:to?', putBotMessageHandler)
-// app.put('/flex/:name/:to', require('./route-bot/push-flex'))
-app.put('/slack/:channel', putSlackMessageHandler)
+app.put('/flex/:name/:to', putBotFlexHandler)
+app.put('/slack/mii/:channel', putSlackMessageHandler)
 
+// API Get Database
 app.get('/db/:bot/cmd', getBotCMDHandler)
 app.post('/db/:bot/cmd/:id', getBotCMDHandler)
 app.get('/db/:bot/inbound', getBotInboundHandler)
 app.get('/db/:bot/outbound', getBotOutboundHandler)
 
-app.use('/_health', getHealthStatusHandler)
+// API Notify
 app.get('/register-bot/:service?/:room?', getRegisterBotServiceRoomHandler)
 app.put('/notify/:service/:room', putServiceRoomHandler)
 app.put('/revoke/:service/:room', putRevokeServiceRoomHandler)
