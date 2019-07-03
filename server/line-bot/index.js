@@ -44,7 +44,7 @@ mongo.set('LineBot', 'db-line-bot', {
   accesstoken: String,
   secret: String,
   options: Object,
-  channel: mongo.Schema.Mixed,
+  active: { type: Boolean, index: true, default: true },
   created: { type: Date, index: true, default: Date.now }
 })
 

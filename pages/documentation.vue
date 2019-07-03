@@ -111,7 +111,9 @@ export default {
     let { data, status, statusText } = await $axios(dashboard)
     if (status !== 200) throw new Error(`Server Down '${dashboard}' is ${statusText}.`)
     return {
-      service: data.groups,
+      service: data.service,
+      bot: data.bot,
+      slack: data.slack,
       hosts: data.hosts
     }
   },

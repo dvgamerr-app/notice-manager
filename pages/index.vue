@@ -105,7 +105,7 @@
               <li v-if="!e.room || e.room.length == 0" style="color: #989898;">No room join.</li>
               <li v-for="r in e.room" :key="r._id">
                 <b-btn v-if="btn.trash !== r._id" variant="icon" size="sm" @click.prevent="() => btn.trash = r._id">
-                  <fa :icon="btn.trash !== 'wait' ? 'trash-alt' : 'circle-notch'" :spin="btn.trash === r._id" />
+                  <fa :icon="btn.remove !== r._id ? 'trash-alt' : 'circle-notch'" :spin="btn.remove === r._id" />
                 </b-btn>
                 <div v-else style="display: inline;">
                   <b-btn variant="icon" size="sm" @click.prevent="() => btn.trash = null">
@@ -120,7 +120,17 @@
             </ul>
           </div>
           <h5><fa :icon="['fab','line']" /> <b>LINE BOT</b></h5>
+          <div v-for="e in bot" :key="e._id">
+            <h6>{{ e.name }} <small>({{e.stats.limited}})</small></h6>
+            <b-progress :max="e.stats.limited" show-progress variant="info" height=".9rem" class="mb-3">
+              <b-progress-bar :value="e.stats.usage" :label-html="String(e.stats.usage)"></b-progress-bar>
+            </b-progress>
+          </div>
           <h5><fa :icon="['fab','slack-hash']" /> <b>Slack</b></h5>
+          <div v-for="e in slack" :key="e._id" class="mb-1 slack-channel">
+            <h6 class="mb-0">{{ e.name }} <small>({{ e.members }})</small></h6>
+            <div v-if="e.topic.value" class="topic">{{ e.topic.value}} </div>
+          </div>
         </b-col>
       </b-row>
     </b-col>
@@ -164,13 +174,17 @@ export default {
       service: '',
       room: ''
     },
-    service: []
+    service: [],
+    bot: [],
+    slack: []
   }),
   async asyncData ({ $axios }) {
     let { data, status, statusText } = await $axios(dashboard)
     if (status !== 200) throw new Error(`Server Down '${dashboard}' is ${statusText}.`)
     return {
-      service: data.groups,
+      service: data.service,
+      bot: data.bot,
+      slack: data.slack,
       hosts: data.hosts
     }
   },
@@ -260,12 +274,13 @@ export default {
       })
     },
     async onRevokeToken (r) {
-      this.btn.trash = 'wait'
+      this.btn.trash = null
+      this.btn.remove = r._id
       let { data } = await this.$axios.put(`/revoke/${r.service}/${r.room}`, { revoke: 'agree' })
       if (data.error) return console.log(data.error)
 
       await this.updateService()
-      this.btn.trash = null
+      this.btn.remove = null
     },
     async onSaveName (e, i) {
       await this.$axios.post('/api/service/update', { name: this.edit.service, _id: e._id })
@@ -288,7 +303,19 @@ export default {
   .card {
     border: none;
   }
-
+  .slack-channel {
+    .topic {
+      color: #7b7b7b;
+      font-size: .7rem;
+    }
+  }
+  .progress {
+    .progress-bar {
+      color: #404040 !important;
+    }
+    font-weight: bold;
+    font-size: .65rem;
+  }
   .edit-name {
     border-color: transparent;
     outline: 0;

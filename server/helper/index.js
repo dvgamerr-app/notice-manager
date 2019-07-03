@@ -10,16 +10,17 @@ const logger = debuger(pkg.title)
 const token = process.env.SLACK_TOKEN
 const web = new WebClient(token)
 
-const getChannal = async room => {
+export const getChannal = async room => {
   let obj = null
-  for (const channel of (await web.channels.list()).channels) {
+  let list = (await web.channels.list()).channels
+  for (const channel of list) {
     if (channel.name === room) {
       obj = channel
       break
     }
   }
-  if (!obj) throw new Error('channels is undefined.')
-  return obj
+  if (!obj && room) throw new Error('channels is undefined.')
+  return obj || list
 }
 
 export const slackMessage = async (room, name, sender = { text: 'hello world.' }) => {
