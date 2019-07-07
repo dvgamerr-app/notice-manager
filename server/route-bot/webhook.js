@@ -81,6 +81,7 @@ export default async (req, res) => {
     }
   } catch (ex) {
     logger.error(ex)
+    console.log(ex)
     res.sendStatus(404)
   } finally {
     res.end()
