@@ -188,6 +188,9 @@ export default {
       hosts: data.hosts
     }
   },
+  head: () => ({
+    title: 'Dashboard - LINE Notify'
+  }),
   methods: {
     showToast (msg) {
       this.$bvToast.toast(msg, {
@@ -203,8 +206,9 @@ export default {
     },
     async updateService () {
       let { data } = await this.$axios(dashboard)
-      this.service = data.groups
       this.hosts = data.hosts
+      this.service = data.service
+      this.$forceUpdate()
     },
     async onSubmit (e) {
       if (!this.row.name || !this.checkName(this.row.name)) {
