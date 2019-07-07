@@ -1,5 +1,7 @@
-import mongo from '../mongodb'
+import sdk from '@line/bot-sdk'
 import debuger from '@touno-io/debuger'
+import mongo from '../mongodb'
+import { onEvents, onCommands } from '../line-bot/cmd'
 
 const logger = debuger('WEBHOOK')
 
@@ -16,15 +18,29 @@ export default async (req, res) => {
     
     if (!accesstoken || !secret) throw new Error('LINE Channel AccessToken is undefined.')
 
+    const line = new sdk.Client({ channelAccessToken: accesstoken, channelSecret: secret })
+    const lineSenderObj = msg => typeof msg === 'string' ? { type: 'text', text: msg } : typeof msg === 'function' ? msg() : msg
+    const linePushId = ({ source }) => source[`${source.type}Id`]
+    const lineMessage = async (e, sender) => {
+      if (!sender) return
+
+      if (typeof e === 'string') {
+        await line.pushMessage(e, lineSenderObj(sender))
+      } else if (e.replyToken) {
+        await line.replyMessage(e.replyToken, lineSenderObj(sender))
+      } else {
+        await line.pushMessage(linePushId(e), lineSenderObj(sender))
+      }
+    }
+
     if (events.length > 0) {
       for (const e of events) {
         await new LineInbound(Object.assign(e, { botname: bot })).save()
         if (e.type === 'message' && e.message.type === 'text') {
           let { text } = e.message
           let { groups } = /^\/(?<name>[-_a-zA-Z]+)(?<arg>\W.*|)/ig.exec(text) || {}
-          // console.log(!groups, groups.name, !onCommands[groups.name])
           let args = (groups.arg || '').trim().split(' ').filter(e => e !== '')
-          await new LineCMD({
+          let cmd = await new LineCMD({
             botname: bot,
             userId: e.source.userId,
             command: groups.name,
@@ -36,6 +52,15 @@ export default async (req, res) => {
             updated: null,
             created: new Date(),
           }).save()
+          if (!e.replyToken || !groups || !onCommands[groups.name]) continue
+
+          await LineCMD.updateOne({ _id: cmd._id }, { $set: { executing: true } })
+          let result = await onCommands[groups.name].call(this, args, e, line)
+          await LineCMD.updateOne({ _id: cmd._id }, { $set: { executed: true } })
+          await lineMessage(e, result)
+        } else if (typeof onEvents[e.type] === 'function') {
+          let result = await onEvents[e.type].call(this, e, line)
+          await lineMessage(e, result)
         } else if (e.type === 'postback') {
           await new LineCMD({
             botname: bot,
