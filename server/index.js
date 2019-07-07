@@ -20,6 +20,8 @@ import postServicehandler from './route-db/service/new'
 import postCheckHandler from './route-db/service/check'
 import postUpdateHandler from './route-db/service/update'
 import getCheckStats from './route-check/stats'
+import getStatsBot from './route-check/stats-bot'
+import getStatsSlack from './route-check/stats-slack'
 
 import putBotMessageHandler from './route-bot/push-message'
 import putBotFlexHandler from './route-bot/push-flex'
@@ -73,6 +75,8 @@ app.post('/api/service/check', postCheckHandler)
 app.post('/api/service/update', postUpdateHandler)
 app.post('/api/service', postServicehandler)
 app.get('/api/check/stats', getCheckStats)
+app.get('/api/stats/bot', getStatsBot)
+app.get('/api/stats/slack', getStatsSlack)
 
 logger.log(`MongoDB 'LINE-BOT' Connecting...`)
 mongo.open().then(async () => {

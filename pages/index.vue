@@ -38,14 +38,14 @@
                       <ol>
                         <li>Add <b>LINE Notify</b> friend.</li>
                         <b-img class="qr-code" src="~assets/notify-qr.png" />
-                        <li style="padding:5px 0">
+                        <li class="pt-1 pb-1">
                           <b-dropdown dropright :text="`Select Service${ add.service ? ` : ${add.service}` : ''}`" variant="outline-info">
                             <b-dropdown-item href="#" v-for="e in service" :key="e._id" @click.prevent="onChangeService(e)">
                               <span v-text="e.name" />
                             </b-dropdown-item>
                           </b-dropdown>
                         </li>
-                        <li style="padding:5px 0">
+                        <li class="pt-1 pb-1">
                           <b-input-group>
                             <b-input-group-text>Room name is</b-input-group-text>
                             <b-form-input ref="room" maxlength="20" :state="check.room" v-model.trim="add.room" @keyup.enter="onJoinRoom($event)" />
@@ -88,18 +88,18 @@
         </b-col>
         <b-col md="4">
           <h5><fa icon="bell" /> <b>LINE Notify</b></h5>
-          <div v-for="(e, i) in service" :key="e._id">
+          <div v-for="(e, i) in service" :key="e._id" @mouseover="() => edit.show = e._id" @mouseleave="() => edit.show = null">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom mb-1">
               <b-form-input v-if="edit.mode === e._id" class="edit-name col-10" maxlength="20" v-model.trim="edit.service" @keyup.enter="onSaveName(e, i)" />
               <h6 v-if="edit.mode !== e._id" v-text="e.name" />
-              <div class="menu-notify">
+              <div v-if="edit.show === e._id" class="menu-notify">
                 <b-btn v-if="edit.mode !== e._id" class="edit" variant="icon" size="sm" @click="onUpdateName(e)"><fa icon="edit" /></b-btn>
                 <b-btn v-if="edit.mode !== e._id" class="trash" v-b-modal="'trash-' + e._id" variant="icon" size="sm"><fa icon="trash-alt" /></b-btn>
-                <b-modal :id="'trash-' + e._id" title="Delete service?" no-fade ok-title="Sure, Delete it." cancel-title="No, Thank."
-                  ok-variant="danger" cancel-variant="default">
-                  Your want to delete service '{{ e.name }}' ?
-                </b-modal>
               </div>
+              <b-modal :id="'trash-' + e._id" title="Delete service?" no-fade ok-title="Sure, Delete it." cancel-title="No, Thank."
+                ok-variant="danger" cancel-variant="default">
+                Your want to delete service '{{ e.name }}' ?
+              </b-modal>
             </div>
             <ul class="line-notify">
               <li v-if="!e.room || e.room.length == 0" style="color: #989898;">No room join.</li>
@@ -119,14 +119,20 @@
               </li>
             </ul>
           </div>
-          <h5><fa :icon="['fab','line']" /> <b>LINE BOT</b></h5>
+          <h5>
+            <fa :icon="['fab','line']" /> <b>LINE BOT</b>
+            <b-btn variant="icon" size="sync" @click="onSyncBot"><fa icon="sync-alt" :spin="sync.bot" /></b-btn>
+          </h5>
           <div v-for="e in bot" :key="e._id">
             <h6>{{ e.name }} <small>({{e.stats.limited}})</small></h6>
             <b-progress :max="e.stats.limited" show-progress variant="info" height=".9rem" class="mb-3">
               <b-progress-bar :value="e.stats.usage" :label-html="String(e.stats.usage)"></b-progress-bar>
             </b-progress>
           </div>
-          <h5><fa :icon="['fab','slack-hash']" /> <b>Slack</b></h5>
+          <h5>
+            <fa :icon="['fab','slack-hash']" /> <b>Slack</b>
+            <b-btn variant="icon" size="sync" @click="onSyncSlack"><fa icon="sync-alt" :spin="sync.slack" /></b-btn>
+          </h5>
           <div v-for="e in slack" :key="e._id" class="mb-1 slack-channel">
             <h6 class="mb-0">{{ e.name }} <small>({{ e.members }})</small></h6>
             <div v-if="e.topic.value" class="topic">{{ e.topic.value}} </div>
@@ -150,6 +156,10 @@ export default {
         to: '[userTo_replyTo]'
       }
     },
+    sync: {
+      bot: false,
+      slack: false
+    },
     check: {
       room: null,
       service: null,
@@ -167,6 +177,7 @@ export default {
       client_secret: ''
     },
     edit: {
+      show: null,
       service: '',
       mode: null
     },
@@ -208,6 +219,12 @@ export default {
       let { data } = await this.$axios(dashboard)
       this.hosts = data.hosts
       this.service = data.service
+      this.$forceUpdate()
+    },
+    async updateStats () {
+      let { data } = await this.$axios(dashboard)
+      this.bot = data.bot
+      this.slack = data.slack
       this.$forceUpdate()
     },
     async onSubmit (e) {
@@ -298,6 +315,20 @@ export default {
     async onUpdateName (e) {
       this.edit.mode = e._id
       this.edit.service = e.name
+    },
+    async onSyncBot () {
+      if (this.sync.bot) return
+      this.sync.bot = true
+      await this.$axios('/api/stats/bot')
+      await this.updateStats()
+      this.sync.bot = false
+    },
+    async onSyncSlack () {
+      if (this.sync.slack) return
+      this.sync.slack = true
+      await this.$axios('/api/stats/slack')
+      await this.updateStats()
+      this.sync.slack = false
     }
   }
 }
@@ -312,6 +343,11 @@ export default {
       color: #7b7b7b;
       font-size: .7rem;
     }
+  }
+  .btn-sync {
+    padding: 2px 6px;
+    margin-top: -7px;
+    color: #e2e2e2;
   }
   .progress {
     .progress-bar {

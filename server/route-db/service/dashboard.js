@@ -21,7 +21,7 @@ export default async (req, res) => {
         _id: e._id,
         name: e.name,
         botname: e.botname,
-        stats: e.options.stats
+        stats: e.options ? e.options.stats : {}
       })),
       slack: slack.map(e => ({
         name: e.name,
