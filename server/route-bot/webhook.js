@@ -52,6 +52,7 @@ export default async (req, res) => {
             updated: null,
             created: new Date(),
           }).save()
+
           if (!e.replyToken || !groups || !onCommands[groups.name]) continue
 
           await LineCMD.updateOne({ _id: cmd._id }, { $set: { executing: true } })
