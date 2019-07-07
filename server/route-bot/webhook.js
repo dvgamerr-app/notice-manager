@@ -1,4 +1,4 @@
-import sdk from '@line/bot-sdk'
+import * as sdk from '@line/bot-sdk'
 import debuger from '@touno-io/debuger'
 import mongo from '../mongodb'
 import { onEvents, onCommands } from '../line-bot/cmd'

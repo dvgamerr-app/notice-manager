@@ -1,4 +1,4 @@
-import sdk from '@line/bot-sdk'
+import * as sdk from '@line/bot-sdk'
 import mongo from '../line-bot'
 
 export default async (req, res) => {
