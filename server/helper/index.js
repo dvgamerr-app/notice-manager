@@ -11,8 +11,6 @@ export const pkgName = `LINE-BOT v${pkg.version}`
 const token = process.env.SLACK_TOKEN
 const web = new WebClient(token)
 
-console.log(token)
-
 export const getChannal = async (room) => {
   let obj = null
 
