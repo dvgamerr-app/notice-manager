@@ -38,9 +38,6 @@ const host = process.env.HOST || '127.0.0.1'
 const dev = !(process.env.NODE_ENV === 'production')
 const logger = debuger(pkg.title)
 
-// const moment = require('moment')
-// const { WebClient } = require('@slack/web-api')
-
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -97,8 +94,8 @@ mongo.open().then(async () => {
       await slackMessage(pkgChannel, pkgName, 'Server has *terminated* yourself.')
       process.exit()
     })
-    await slackMessage(pkgChannel, pkgName, '*Heroku: LINE-BOT* (intense-citadel-55702)\nhas `rebooted`, and ready.')
   }
+  await slackMessage(pkgChannel, pkgName, '*Heroku: LINE-BOT* (intense-citadel-55702)\nhas `rebooted`, and ready.')
 }).catch(ex => slackError(ex).then(() => {
   process.exit()
 }))

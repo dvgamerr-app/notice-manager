@@ -1,7 +1,6 @@
 import mongo from '../../mongodb'
 import { getChannal } from '../../helper'
 
-const hosts = process.env.HOSTNAME || 'http://localhost:4000/'
 export default async (req, res) => {
   let { LineBot, ServiceBot, ServiceOauth } = mongo.get() // LineInbound, LineOutbound, LineCMD, 
   try {
@@ -10,7 +9,6 @@ export default async (req, res) => {
     let service = await ServiceBot.find({ active: true }, null, { sort: { name: 1 } })
     let room = await ServiceOauth.find({ accessToken: { $ne: null } }, null, { sort: { name: 1 } })
     res.json({ 
-      hosts,
       service: service.map(e => ({
         _id: e._id,
         name: e.name,

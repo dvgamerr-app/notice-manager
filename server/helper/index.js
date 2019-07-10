@@ -5,11 +5,15 @@ import pkg from '../../package.json'
 const dev = !(process.env.NODE_ENV === 'production')
 const logger = debuger(pkg.title)
 
-export const pkgChannel = 'api-line-bot'
+export const pkgChannel = 'heroku-notify'
 export const pkgName = `LINE-BOT v${pkg.version}`
 
-export const getChannal = async (room, web = null) => {
-  if (!web) return
+const token = process.env.SLACK_TOKEN
+const web = new WebClient(token)
+
+console.log(token)
+
+export const getChannal = async (room) => {
   let obj = null
 
   let list = (await web.channels.list()).channels
@@ -26,10 +30,7 @@ export const getChannal = async (room, web = null) => {
 export const slackMessage = async (room, name, sender = { text: 'hello world.' }) => {
   if (!room || !process.env.SLACK_TOKEN) return
 
-  const token = process.env.SLACK_TOKEN
-  const web = new WebClient(token)
-
-  let channel = await getChannal(room, web)
+  let channel = await getChannal(room)
   if (typeof sender === 'string') sender = { text: sender }
   
   await web.chat.postMessage(Object.assign({
