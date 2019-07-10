@@ -94,8 +94,8 @@ mongo.open().then(async () => {
       await slackMessage(pkgChannel, pkgName, 'Server has *terminated* yourself.')
       process.exit()
     })
+    await slackMessage(pkgChannel, pkgName, '*Heroku: LINE-BOT* (intense-citadel-55702)\nhas `rebooted`, and ready.')
   }
-  await slackMessage(pkgChannel, pkgName, '*Heroku: LINE-BOT* (intense-citadel-55702)\nhas `rebooted`, and ready.')
 }).catch(ex => slackError(ex).then(() => {
   process.exit()
 }))
