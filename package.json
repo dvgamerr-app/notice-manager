@@ -1,6 +1,6 @@
 {
   "name": "ris-line-notify",
-  "version": "4.2.7",
+  "version": "4.2.8",
   "description": "LINE BOT Server Notify.",
   "main": "index.js",
   "engines": {
