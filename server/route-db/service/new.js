@@ -1,4 +1,5 @@
 import mongo from '../../mongodb'
+import { slackMessage, pkgName, pkgChannel } from '../../helper'
 
 export default async (req, res) => {
   let data = req.body
@@ -12,6 +13,7 @@ export default async (req, res) => {
       client: data.client_id,
       secret: data.client_secret
     }).save()
+    await slackMessage(pkgChannel, pkgName, `Notify service add '${data.name}'.`)
   } catch (ex) {
     res.json({ error: ex.message })
   }

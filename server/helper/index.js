@@ -3,12 +3,14 @@ import debuger from '@touno-io/debuger'
 import pkg from '../../package.json'
 
 const dev = !(process.env.NODE_ENV === 'production')
-const pkgChannel = 'api-line-bot'
-const pkgName = `LINE-BOT v${pkg.version}`
 const logger = debuger(pkg.title)
 
 const token = process.env.SLACK_TOKEN
 const web = new WebClient(token)
+
+
+export const pkgChannel = 'api-line-bot'
+export const pkgName = `LINE-BOT v${pkg.version}`
 
 export const getChannal = async room => {
   let obj = null

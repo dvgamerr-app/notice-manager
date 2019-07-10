@@ -1,6 +1,8 @@
 import debuger from '@touno-io/debuger'
 import mongo from '../mongodb'
 import { getStatus, setRevoke } from '../api-notify'
+import { slackMessage, pkgName, pkgChannel } from '../helper'
+
 const uuid = length => {
   let result = ''
   let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -79,6 +81,7 @@ export default async (req, res) => {
       } else {
         await new ServiceOauth({ name: room, service, room, response_type, redirect_uri, state: newState }).save()
       }
+      await slackMessage(pkgChannel, pkgName, `Notify *${service}* join room *${room}*.`)
       const authorizationUri = oauth2.authorizationCode.authorizeURL({ response_type, redirect_uri, scope, state: newState })
       return res.redirect(authorizationUri)
     }
