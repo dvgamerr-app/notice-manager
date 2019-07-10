@@ -56,6 +56,9 @@ export default async (req, res) => {
       const access = oauth2.accessToken.create(result)
       let { body } = await getStatus(access.token.access_token)
 
+      let data = await ServiceOauth.findOne({ state })
+      await slackMessage(pkgChannel, pkgName, `Notify *${data.service}* join room *${data.room}*.`)
+      
       await ServiceOauth.updateOne({ state }, { $set: { name: body.target, accessToken: access.token.access_token } })
       return res.redirect(hosts)
     } else if (error) {
@@ -81,7 +84,6 @@ export default async (req, res) => {
       } else {
         await new ServiceOauth({ name: room, service, room, response_type, redirect_uri, state: newState }).save()
       }
-      await slackMessage(pkgChannel, pkgName, `Notify *${service}* join room *${room}*.`)
       const authorizationUri = oauth2.authorizationCode.authorizeURL({ response_type, redirect_uri, scope, state: newState })
       return res.redirect(authorizationUri)
     }
