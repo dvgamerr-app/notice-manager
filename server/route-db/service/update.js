@@ -1,5 +1,5 @@
 import mongo from '../../mongodb'
-import { slackMessage, pkgName, pkgChannel } from '../helper'
+import { slackMessage, pkgName, pkgChannel } from '../../helper'
 
 export default async (req, res) => {
   let data = req.body
