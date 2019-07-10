@@ -16,7 +16,7 @@
           curl -X PUT {{api.server}}/notify/{{api.notify.service ? api.notify.service : '[service_name]'}}/{{api.notify.room ? api.notify.room : '[room_id]'}} -H "Content-Type: application/json" -d "{ \"message\": \"Testing\nMessage\" }"
           </code>
         </p>
-        <b-card title="Sample API">
+        <b-card v-if="service && service.length > 0" title="Sample API">
           <b-form inline>
             <label class="mr-2" for="select-service">Service: </label>
             <b-dropdown id="select-service" class="mr-2" :text="`${ api.notify.service ? api.notify.service : '[service_name]'}`" variant="outline-info">
@@ -57,7 +57,7 @@
           curl -X PUT {{api.server}}/{{api.bot.name ? api.bot.name : '[name]'}}/{{api.bot.to ? api.bot.to : '[id]'}} -H "Content-Type: application/json" -d "{ \"type\":\"text\",\"text\":\"Testing\nMessage\" }"
           </code>
         </p>
-        <b-card title="Sample API">
+        <b-card v-if="bot && bot.length > 0" title="Sample API">
           <b-form inline>
             <label class="mr-2" for="select-botname">Bot Name: </label>
             <b-dropdown id="select-botname" class="mr-2" :text="`${ api.bot.name ? api.bot.name : '[name]'}`" variant="outline-info">
@@ -84,7 +84,7 @@
           curl -X PUT {{api.server}}/flex/{{api.flex.name ? api.flex.name : '[name]'}}/{{api.flex.to ? api.flex.to : '[id]'}} -H "Content-Type: application/json" -d "{ \"type\":\"text\",\"text\":\"Testing\nMessage\" }"
           </code>
         </p>
-        <b-card title="Sample API">
+        <b-card v-if="bot && bot.length > 0" title="Sample API">
           <b-form inline>
             <label class="mr-2">Botname:</label>
             <b class="mr-3">health-check</b>
@@ -120,24 +120,6 @@ const dashboard = '/api/service/dashboard'
 
 export default {
   data: () => ({
-    api: {
-      server: 'http://s-thcw-posweb01.pos.cmg.co.th:3000',
-      notify: {
-        test: '',
-        service: null,
-        room: null
-      },
-      bot: {
-        test: '',
-        name: null,
-        to: null
-      },
-      flex: {
-        test: '',
-        name: null,
-        to: null
-      }
-    },
     check: {
       room: null,
       service: null,
@@ -238,14 +220,32 @@ export default {
     bot: [],
     slack: []
   }),
-  async asyncData ({ $axios }) {
+  async asyncData ({ env, $axios }) {
     let { data, status, statusText } = await $axios(dashboard)
     if (status !== 200) throw new Error(`Server Down '${dashboard}' is ${statusText}.`)
     return {
-      service: data.service,
-      bot: data.bot,
-      slack: data.slack,
-      hosts: data.hosts
+      api: {
+        hosts: env.HOST_API,
+        server: env.PROXY_API || env.HOST_API,
+        notify: {
+          test: '',
+          service: null,
+          room: null
+        },
+        bot: {
+          test: '',
+          name: null,
+          to: null
+        },
+        flex: {
+          test: '',
+          name: null,
+          to: null
+        }
+      },
+      service: data.service || [],
+      bot: data.bot || [],
+      slack: data.slack || []
     }
   },
   head: () => ({

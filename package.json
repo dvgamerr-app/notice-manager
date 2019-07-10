@@ -1,5 +1,5 @@
 {
-  "name": "ris-line-notify",
+  "name": "line-notify",
   "version": "4.2.11",
   "description": "LINE BOT Server Notify.",
   "main": "index.js",
@@ -7,7 +7,7 @@
     "node": "10.16.0"
   },
   "scripts": {
-    "dev": "env-cmd nodemon server/index.js --exec \"npm run eslint && babel-node\"",
+    "dev": "env-cmd nodemon --watch server server/index.js --exec \"npm run eslint && babel-node\"",
     "build": "babel -d ./.build ./server -s && nuxt build",
     "eslint": "eslint --ext .js --ignore-path .eslintignore .",
     "start": "node .build/index.js"
@@ -54,10 +54,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dvgamerr/ris-line-notify.git"
+    "url": "git+https://github.com/touno-io/line-notify.git"
   },
   "bugs": {
-    "url": "https://github.com/dvgamerr/ris-line-notify/issues"
+    "url": "https://github.com/touno-io/line-notify/issues"
   },
-  "homepage": "https://github.com/dvgamerr/ris-line-notify#readme"
+  "homepage": "https://github.com/touno-io/line-notify#readme"
 }

@@ -1,12 +1,8 @@
 import numeral from 'numeral'
 import moment from 'moment'
 import request from 'request-promise'
-import { slackMessage } from './index'
+import { slackMessage, pkgChannel, pkgName } from './index'
 import mongo from '../line-bot'
-import pkg from '../../package.json'
-
-const pkgChannel = 'api-line-bot'
-const pkgName = `LINE-BOT v${pkg.version}`
 
 const slackStats = (app, data) => {
   data = data.map(e => {

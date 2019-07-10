@@ -28,7 +28,9 @@ module.exports = {
       { icons: ['fab'], set: '@fortawesome/free-brands-svg-icons' }
     ]
   },
-  axios: { baseURL: process.env.AXIOS_BASE_URL || 'https://intense-citadel-55702.herokuapp.com/' },
-  build: {
+  axios: { baseURL: process.env.HOST_API || process.env.AXIOS_BASE_URL || 'http://localhost:4000' },
+  env: {
+    PROXY_API: process.env.PROXY_API || 'http://localhost:4000',
+    HOST_API: process.env.HOST_API || 'http://localhost:4000'
   }
 }

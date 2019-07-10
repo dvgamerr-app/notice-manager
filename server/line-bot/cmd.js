@@ -2,7 +2,7 @@ import helpFlex from './flex-help'
 import { slackMessage } from '../helper'
 
 import pkg from '../../package.json'
-const pkgChannel = 'api-line-bot'
+const pkgChannel = 'heroku-notify'
 const pkgName = `LINE-BOT v${pkg.version}`
 
 export const onEvents = {

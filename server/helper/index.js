@@ -5,15 +5,13 @@ import pkg from '../../package.json'
 const dev = !(process.env.NODE_ENV === 'production')
 const logger = debuger(pkg.title)
 
-const token = process.env.SLACK_TOKEN
-const web = new WebClient(token)
-
-
 export const pkgChannel = 'api-line-bot'
 export const pkgName = `LINE-BOT v${pkg.version}`
 
-export const getChannal = async room => {
+export const getChannal = async (room, web = null) => {
+  if (!web) return
   let obj = null
+
   let list = (await web.channels.list()).channels
   for (const channel of list) {
     if (channel.name === room) {
@@ -26,8 +24,12 @@ export const getChannal = async room => {
 }
 
 export const slackMessage = async (room, name, sender = { text: 'hello world.' }) => {
-    if (!room) return
-  let channel = await getChannal(room)
+  if (!room || !process.env.SLACK_TOKEN) return
+
+  const token = process.env.SLACK_TOKEN
+  const web = new WebClient(token)
+
+  let channel = await getChannal(room, web)
   if (typeof sender === 'string') sender = { text: sender }
   
   await web.chat.postMessage(Object.assign({

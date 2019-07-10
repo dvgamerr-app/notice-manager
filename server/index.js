@@ -8,7 +8,7 @@ import { Nuxt, Builder } from 'nuxt'
 import pkg from '../package.json'
 import config from '../nuxt.config.js'
 import mongo from './line-bot'
-import { slackMessage, slackError } from './helper'
+import { slackMessage, slackError, pkgChannel, pkgName } from './helper'
 import { lineInitilize, cmdExpire, statsPushMessage } from './helper/schedule'
 
 import postBotHandler from './route-bot/webhook'
@@ -36,16 +36,12 @@ const app = express()
 const port = process.env.PORT || 4000
 const host = process.env.HOST || '127.0.0.1'
 const dev = !(process.env.NODE_ENV === 'production')
-const pkgChannel = 'api-line-bot'
-const pkgName = `LINE-BOT v${pkg.version}`
 const logger = debuger(pkg.title)
 
 // const moment = require('moment')
 // const { WebClient } = require('@slack/web-api')
 
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
-if (!process.env.SLACK_TOKEN) throw new Error('Token slack is undefined.')
-if (!process.env.LINE_CLIENT || !process.env.LINE_SECRET) throw new Error('LINE secret is undefined.')
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
  

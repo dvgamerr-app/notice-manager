@@ -17,7 +17,10 @@
     </b-container>
     <footer class="mt-3">
       <b-container>
-        <p>Design By <a href="https://mr.touno.io/" target="_blank">Kananek T.</a></p>
+        <p>
+          The source code is licensed <a href="http://opensource.org/licenses/mit-license.php">MIT</a>,
+          Design By <a href="https://mr.touno.io/" target="_blank">Kananek T.</a>
+        </p>
       </b-container>
     </footer>
 

@@ -16,8 +16,8 @@
                         <li>Create name</li>
                         <b-form-input :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmit($event)" />
                         <li>Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.</li>
-                        <li>Input <b>Service URL</b> <code>{{ hosts }}</code></li>
-                        <li>Input <b>Callback URL</b> <code>{{ hosts }}register-bot</code></li>
+                        <li>Input <b>Service URL</b> <code>{{ api.hosts }}/</code></li>
+                        <li>Input <b>Callback URL</b> <code>{{ api.hosts }}/register-bot</code></li>
                         <li>Click <b>Argee and Contuiue</b> and click <b>Add</b>.</li>
                         <li>Goto <a href="https://notify-bot.line.me/my/services/" target="_blank">My Services</a> and click your service.</li>
                         <li>Check your email becouse client secret will be valid only after verifying your email address.</li>
@@ -88,6 +88,9 @@
         </b-col>
         <b-col md="4">
           <h5><fa icon="bell" /> <b>LINE Notify</b></h5>
+          <div v-if="!service || service.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
+            No service notify.
+          </div>
           <div v-for="(e, i) in service" :key="e._id" @mouseover="() => edit.show = e._id" @mouseleave="() => edit.show = null">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom mb-1">
               <b-form-input v-if="edit.mode === e._id" class="edit-name col-10" maxlength="20" v-model.trim="edit.service" @keyup.enter="onSaveName(e, i)" />
@@ -123,6 +126,9 @@
             <fa :icon="['fab','line']" /> <b>LINE BOT</b>
             <b-btn variant="icon" size="sync" @click="onSyncBot"><fa icon="sync-alt" :spin="sync.bot" /></b-btn>
           </h5>
+          <div v-if="!bot || bot.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
+            No bot line.
+          </div>
           <div v-for="e in bot" :key="e._id">
             <h6>{{ e.name }} <small>({{e.stats.limited}})</small></h6>
             <b-progress :max="e.stats.limited" show-progress variant="info" height=".9rem" class="mb-3">
@@ -133,6 +139,9 @@
             <fa :icon="['fab','slack-hash']" /> <b>Slack</b>
             <b-btn variant="icon" size="sync" @click="onSyncSlack"><fa icon="sync-alt" :spin="sync.slack" /></b-btn>
           </h5>
+          <div v-if="!bot || bot.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
+            Slack not config.
+          </div>
           <div v-for="e in slack" :key="e._id" class="mb-1 slack-channel">
             <h6 class="mb-0">{{ e.name }} <small>({{ e.members }})</small></h6>
             <div v-if="e.topic.value" class="topic">{{ e.topic.value}} </div>
@@ -149,13 +158,6 @@ const dashboard = '/api/service/dashboard'
 
 export default {
   data: () => ({
-    api: {
-      server: 'http://s-thcw-posweb01.pos.cmg.co.th:3000',
-      bot: {
-        name: '[botname]',
-        to: '[userTo_replyTo]'
-      }
-    },
     sync: {
       bot: false,
       slack: false
@@ -189,14 +191,21 @@ export default {
     bot: [],
     slack: []
   }),
-  async asyncData ({ $axios }) {
+  async asyncData ({ env, $axios }) {
     let { data, status, statusText } = await $axios(dashboard)
     if (status !== 200) throw new Error(`Server Down '${dashboard}' is ${statusText}.`)
     return {
+      api: {
+        hosts: env.HOST_API,
+        server: env.PROXY_API || env.HOST_API,
+        bot: {
+          name: null,
+          to: null
+        }
+      },
       service: data.service,
       bot: data.bot,
-      slack: data.slack,
-      hosts: data.hosts
+      slack: data.slack
     }
   },
   head: () => ({
