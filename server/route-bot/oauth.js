@@ -57,8 +57,8 @@ export default async (req, res) => {
       let { body } = await getStatus(access.token.access_token)
 
       let data = await ServiceOauth.findOne({ state })
-      await slackMessage(pkgChannel, pkgName, `Notify *${data.service}* join room *${data.room}*.`)
-      
+      await slackMessage(pkgChannel, pkgName, `Join room *${body.target}* with service *${data.service}*.`)
+
       await ServiceOauth.updateOne({ state }, { $set: { name: body.target, accessToken: access.token.access_token } })
       return res.redirect(hosts)
     } else if (error) {

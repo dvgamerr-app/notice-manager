@@ -98,10 +98,10 @@ mongo.open().then(async () => {
     cron.schedule('* * * * *', () => cmdExpire().catch(slackError))
     cron.schedule('0 0 * * *', () => statsPushMessage().catch(slackError))
     cron.schedule('0 3 * * *', async () => {
-      await slackMessage(pkgChannel, pkgName, '*Heroku* server has terminated yourself.')
+      await slackMessage(pkgChannel, pkgName, 'Server has *terminated* yourself.')
       process.exit()
     })
-    await slackMessage(pkgChannel, pkgName, '*Heroku* server has `rebooted`, and ready.')
+    await slackMessage(pkgChannel, pkgName, '*Heroku: LINE-BOT* (intense-citadel-55702)\nhas `rebooted`, and ready.')
   }
 }).catch(ex => slackError(ex).then(() => {
   process.exit()

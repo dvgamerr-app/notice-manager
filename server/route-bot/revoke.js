@@ -17,7 +17,7 @@ export default async (req, res) => {
     if (revoke !== 'agree') throw new Error('Please confirm revoke parameter')
     await setRevoke(token.accessToken)
 
-    await slackMessage(pkgChannel, pkgName, `Notify *${service}* revoke room *${room}*.`)
+    await slackMessage(pkgChannel, pkgName, `Rovoke room *${room}* from *${service}*.`)
     await ServiceOauth.updateOne({ service, room }, { $set: { accessToken: null } })
     res.json({})
   } catch (ex) {
