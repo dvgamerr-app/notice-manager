@@ -6,30 +6,41 @@
           <b-tabs content-class="mt-3" fill no-fade>
             <b-tab active>
               <template slot="title">
-                <fa icon="bell" /> <b>LINE Notify</b>
+                <fa icon="bell" /> <b><span class="d-none d-md-inline">LINE</span> Notify</b>
               </template>
               <b-form>
                 <b-row class="mb-2">
                   <b-col>
-                    <b-card title="1. How to new Service Notify?">
-                      <ol>
-                        <li>Create name</li>
-                        <b-form-input :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmit($event)" />
-                        <li>Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.</li>
-                        <li>Input <b>Service URL</b> <code>{{ api.hosts }}/</code></li>
-                        <li>Input <b>Callback URL</b> <code>{{ api.hosts }}/register-bot</code></li>
-                        <li>Click <b>Argee and Contuiue</b> and click <b>Add</b>.</li>
-                        <li>Goto <a href="https://notify-bot.line.me/my/services/" target="_blank">My Services</a> and click your service.</li>
-                        <li>Check your email becouse client secret will be valid only after verifying your email address.</li>
-                        <li>Copy <b>client id</b> and input this.</li>
-                        <b-form-input maxlength="32" :state="check.client_id" v-model.trim="row.client_id" @keyup.enter="onSubmit($event)" />
-                        <li>Copy <b>client secret</b> and input this.</li>
-                        <b-form-input maxlength="64" :state="check.client_secret" v-model.trim="row.client_secret" @keyup.enter="onSubmit($event)" />
-                      </ol>
-                      <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" :disabled="btn.submit" @click="onSubmit($event)">
-                        <fa v-if="btn.submit" icon="circle-notch" spin /> Create notify
-                      </b-btn>
-                    </b-card>
+                    <h4>How to create new service?</h4>
+                    <ol>
+                      <li class="pt-1 pb-1">
+                        <b-input-group>
+                          <b-input-group-text>Name</b-input-group-text>
+                          <b-form-input maxlength="40" :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmit($event)" />
+                        </b-input-group>
+                      </li>
+                      <li>Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.</li>
+                      <li>Input <b>Service URL</b> <code>{{ api.hosts }}/</code></li>
+                      <li>Input <b>Callback URL</b> <code>{{ api.hosts }}/register-bot</code></li>
+                      <li>Click <b>Argee and Contuiue</b> and click <b>Add</b>.</li>
+                      <li>Goto <a href="https://notify-bot.line.me/my/services/" target="_blank">My Services</a> and click your service.</li>
+                      <li>Check your email becouse client secret will be valid only after verifying your email address.</li>
+                      <li class="pt-1 pb-1">
+                        <b-input-group>
+                          <b-input-group-text>Client ID</b-input-group-text>
+                          <b-form-input maxlength="32" :state="check.client_id" v-model.trim="row.client_id" @keyup.enter="onSubmit($event)" />
+                        </b-input-group>
+                      </li>
+                      <li class="pt-1 pb-1">
+                        <b-input-group>
+                          <b-input-group-text>Client Secret</b-input-group-text>
+                          <b-form-input maxlength="64" :state="check.client_secret" v-model.trim="row.client_secret" @keyup.enter="onSubmit($event)" />
+                        </b-input-group>
+                      </li>
+                    </ol>
+                    <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" :disabled="btn.submit" @click="onSubmit($event)">
+                      <fa v-if="btn.submit" icon="circle-notch" spin /> Create notify
+                    </b-btn>
                   </b-col>
                 </b-row>
                 <b-row class="mb-2">
@@ -65,7 +76,7 @@
             </b-tab>
             <b-tab>
               <template slot="title">
-                <fa :icon="['fab','line']" /> <b>LINE BOT</b>
+                <fa :icon="['fab','line']" /> <b><span class="d-none d-md-inline">LINE</span> BOT</b>
               </template>
               <b-row class="mb-2">
                 <b-col>
@@ -248,18 +259,24 @@ export default {
     async onSubmit (e) {
       if (!this.row.name || !this.checkName(this.row.name)) {
         this.check.service = false
+        this.check.client_id = null
+        this.check.client_secret = null
         this.showToast('Name is empty or not a-z,0-9, and - .')
         return e.preventDefault()
       }
 
       if (!this.row.client_id) {
         this.check.client_id = false
+        this.check.service = null
+        this.check.client_secret = null
         this.showToast('client_id is empty.')
         return e.preventDefault()
       }
 
       if (!this.row.client_secret) {
         this.check.client_secret = false
+        this.check.client_id = null
+        this.check.service = null
         this.showToast('client_secret is empty.')
         return e.preventDefault()
       }
@@ -353,9 +370,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 .dashboard {
-  .card {
-    border: none;
-  }
   .slack-channel {
     .topic {
       color: #7b7b7b;
