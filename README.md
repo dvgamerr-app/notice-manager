@@ -8,7 +8,7 @@
 
 #### Dashboard
 ![Dashboard](https://raw.githubusercontent.com/touno-io/line-notify/master/docs/dashboard.png)
-![Documentation]https://raw.githubusercontent.com/touno-io/line-notify/master/docs/documentation.png)
+![Documentation](https://raw.githubusercontent.com/touno-io/line-notify/master/docs/documentation.png)
 
 ### Installation
 ```bash
