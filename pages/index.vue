@@ -131,8 +131,9 @@
           </div>
           <div v-for="e in bot" :key="e._id">
             <h6>{{ e.name }} <small>({{e.stats.limited}})</small></h6>
-            <b-progress :max="e.stats.limited" show-progress variant="info" height=".9rem" class="mb-3">
-              <b-progress-bar :value="e.stats.usage" :label-html="String(e.stats.usage)"></b-progress-bar>
+            <b-progress :max="100" variant="info" height=".9rem" class="mb-3">
+              <b-progress-bar :value="getLimitPercent(e.stats.usage, e.stats.limited)" :label-html="String(e.stats.usage)"></b-progress-bar>
+              <b-progress-bar :value="getDayPercent(e.stats.usage, e.stats.limited)" :show-value="false" variant="default"></b-progress-bar>
             </b-progress>
           </div>
           <h5>
@@ -153,7 +154,7 @@
 </template>
 
 <script>
-
+import moment from 'moment'
 const dashboard = '/api/service/dashboard'
 
 export default {
@@ -212,6 +213,14 @@ export default {
     title: 'Dashboard - LINE Notify'
   }),
   methods: {
+    getLimitPercent (value, max) {
+      return Math.round(value * 100 / max)
+    },
+    getDayPercent (value, max) {
+      let limit = this.getLimitPercent(value, max)
+      let day = Math.round(moment().date() * 100 / moment().endOf('month').date())
+      return limit >= day ? 0 : day - limit
+    },
     showToast (msg) {
       this.$bvToast.toast(msg, {
         toaster: 'b-toaster-bottom-right',
@@ -411,6 +420,9 @@ export default {
         font-size: 0.77rem;
       }
     }
+  }
+  .bg-default {
+    background-color: #ccd0d4;
   }
 }
 

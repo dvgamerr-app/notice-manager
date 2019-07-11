@@ -11,14 +11,14 @@ const uuid = length => {
   }
   return result
 }
-const hosts = process.env.HOSTNAME || 'http://localhost:4000/'
+const hosts = process.env.HOST_API || 'http://localhost:4000/'
 const logger = debuger('OAUTH')
 
 export default async (req, res) => {
   // Authorization oauth2 URI
   const { code, state, error } = req.query
   const { room, service } = req.params
-  const redirect_uri = `${hosts}register-bot`
+  const redirect_uri = `${hosts}/register-bot`
   const response_type = 'code'
   const scope = 'notify'
   

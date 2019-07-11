@@ -6,6 +6,10 @@
 - LINE Notify
 - Slack
 
+#### Dashboard
+![Dashboard](https://octodex.github.com/images/yaktocat.png)
+![Documentation](https://octodex.github.com/images/yaktocat.png)
+
 ### Installation
 ```bash
 git clone https://github.com/touno-io/line-notify.git line-notify
