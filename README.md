@@ -7,8 +7,8 @@
 - Slack
 
 #### Dashboard
-![Dashboard](https://octodex.github.com/images/yaktocat.png)
-![Documentation](https://octodex.github.com/images/yaktocat.png)
+![Dashboard](https://raw.githubusercontent.com/touno-io/line-notify/master/docs/dashboard.png)
+![Documentation]https://raw.githubusercontent.com/touno-io/line-notify/master/docs/documentation.png)
 
 ### Installation
 ```bash
