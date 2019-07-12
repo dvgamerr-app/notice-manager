@@ -47,7 +47,7 @@ export const logingExpire = async (month = 3) => {
       }
     }
   ]
-  if (dataIn.n || dataOut.n || dataCmd.n) await slackMessage(pkgChannel, pkgName, { pretext: msg, blocks })
+  await slackMessage(pkgChannel, pkgName, { pretext: msg, blocks })
 }
 
 export const statsPushMessage = async () => {
