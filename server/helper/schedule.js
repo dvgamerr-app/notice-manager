@@ -29,8 +29,25 @@ export const logingExpire = async (month = 3) => {
   let dataIn = await LineInbound.deleteMany({ created: { $lte: expire } })
   let dataOut = await LineOutbound.deleteMany({ created: { $lte: expire } })
   let dataCmd = await LineCMD.deleteMany({ created: { $lte: expire } })
-
-  console.log(dataIn, dataOut, dataCmd)
+  let msg = 'Logging *LINT-BOT* documents expire over 3 months.'
+	let blocks = [
+    {
+      type: 'section',
+      text: { type: 'mrkdwn', text: msg }
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: ([
+          dataIn.n ? `• Line Inbound ${dataIn.n} rows.` : null,
+          dataOut.n ? `• Line Outbound ${dataOut.n} rows.` : null,
+          dataCmd.n ? `• Line CMD ${dataCmd.n} rows.` : null
+        ]).filter(e => e !== null).join('\n')
+      }
+    }
+  ]
+  if (dataIn.n || dataOut.n || dataCmd.n) await slackMessage(pkgChannel, pkgName, { pretext: msg, blocks })
 }
 
 export const statsPushMessage = async () => {
