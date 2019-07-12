@@ -21,6 +21,17 @@ export const cmdExpire = async () => {
     $set: { executed: true }
   })
 }
+export const logingExpire = async (month = 3) => {
+  if (month <= 0) return
+  let expire = moment().startOf('month').add(month * -1, 'month').toDate()
+  let { LineOutbound, LineInbound, LineCMD } = mongo.get() // LineInbound, LineOutbound, LineCMD, 
+  
+  let dataIn = await LineInbound.deleteMany({ created: { $lte: expire } })
+  let dataOut = await LineOutbound.deleteMany({ created: { $lte: expire } })
+  let dataCmd = await LineCMD.deleteMany({ created: { $lte: expire } })
+
+  console.log(dataIn, dataOut, dataCmd)
+}
 
 export const statsPushMessage = async () => {
   let { LineBot } = mongo.get() // LineInbound, LineOutbound, LineCMD, 
