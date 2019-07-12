@@ -86,13 +86,12 @@ mongo.open().then(async () => {
   await app.listen(port, host)
   logger.log(`listening port is ${port}.`)
   if (!dev) {
-    await logingExpire()
-    await statsPushMessage()
     lineInitilize().catch(slackError)
     cron.schedule('0 */3 * * *', () => lineInitilize().catch(slackError), { })
     cron.schedule('* * * * *', () => cmdExpire().catch(slackError))
-    cron.schedule('0 0 * * *', () => statsPushMessage().catch(slackError))
-    cron.schedule('0 3 * * *', async () => {
+    cron.schedule('5 0 * * *', () => statsPushMessage().catch(slackError))
+    cron.schedule('0 3 * * *', () => logingExpire().catch(slackError))
+    cron.schedule('5 3 * * *', async () => {
       await slackMessage(pkgChannel, pkgName, 'Server has *terminated* yourself.')
       process.exit()
     })

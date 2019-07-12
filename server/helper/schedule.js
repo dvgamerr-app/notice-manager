@@ -1,3 +1,4 @@
+import numeral from 'numeral'
 import moment from 'moment'
 import request from 'request-promise'
 import { slackMessage, pkgChannel, pkgName } from './index'
@@ -17,7 +18,7 @@ export const logingExpire = async (month = 3) => {
   let dataIn = await LineInbound.deleteMany({ created: { $lte: expire } })
   let dataOut = await LineOutbound.deleteMany({ created: { $lte: expire } })
   let dataCmd = await LineCMD.deleteMany({ created: { $lte: expire } })
-  let msg = 'Logging *LINT-BOT* documents expire over 3 months.'
+  let msg = `Logging documents delete if over ${month} months.`
 	let blocks = [
     {
       type: 'section',
@@ -28,28 +29,55 @@ export const logingExpire = async (month = 3) => {
       text: {
         type: 'mrkdwn',
         text: ([
-          dataIn.n ? `• Line Inbound ${dataIn.n} rows.` : null,
-          dataOut.n ? `• Line Outbound ${dataOut.n} rows.` : null,
-          dataCmd.n ? `• Line CMD ${dataCmd.n} rows.` : null
+          dataIn.n ? `• *Line Inbound* ${dataIn.n} rows.` : null,
+          dataOut.n ? `• *Line Outbound* ${dataOut.n} rows.` : null,
+          dataCmd.n ? `• *Line CMD* ${dataCmd.n} rows.` : null
         ]).filter(e => e !== null).join('\n')
       }
     }
   ]
-  await slackMessage(pkgChannel, pkgName, { text: msg, blocks })
+  if (dataIn.n || dataOut.n || dataCmd.n) await slackMessage(pkgChannel, pkgName, { text: msg, blocks })
 }
 
 export const statsPushMessage = async () => {
-  let { LineBot, LineOutbound } = mongo.get()
-  let linebot = await LineBot.find({ type: 'line' }, null, { sort: { botname: 1 } })
-  for (const line of linebot) {
-    
+  const { LineBot, ServiceBot, LineOutbound } = mongo.get()
+  const inDate = moment().startOf('month').toDate()
+  const msg = `Logging usage of month report.`
+  const format = (name, n) => `• *${name}* ${numeral(n).format('0,0')} rows.`
+	let blocks = [
+    { type: 'section', text: { type: 'mrkdwn', text: msg } }
+  ]
+
+  let linebot = [ `*LINE BOT*` ]
+  for (const bot of (await LineBot.find({ type: 'line' }, null, { sort: { botname: 1 } }))) {
     let count = await LineOutbound.countDocuments({
-      botname: line.botname,
-      created: { $gte: moment().startOf('month').toDate() }
+      botname: bot.botname,
+      type: { $in: [ 'group', 'user', 'room' ] },
+      created: { $gte: inDate }
     })
-    console.log(`- ${line.botname} usage ${count} `)
+    linebot.push(format(bot.name, count))
   }
+  blocks.push({
+    type: 'section',
+    text: { type: 'mrkdwn', text: linebot.join('\n') }
+  })
+
+  let linenoti = [ `*LINE Notify*` ]
+  for (const bot of (await ServiceBot.find({ active: true }, null, { sort: { service: 1 } }))) {
+    let count = await LineOutbound.countDocuments({
+      botname: bot.service,
+      type: 'notify',
+      created: { $gte: inDate }
+    })
+    linenoti.push(format(bot.name, count))
+  }
+  blocks.push({
+    type: 'section',
+    text: { type: 'mrkdwn', text: linenoti.join('\n') }
+  })
+  await slackMessage(pkgChannel, pkgName, { text: msg, blocks })
 }
+
 export const lineInitilize = async () => {
   const { LineBot } = mongo.get()
   let date = moment().add(-1, 'day')
