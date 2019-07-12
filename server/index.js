@@ -87,6 +87,7 @@ mongo.open().then(async () => {
   logger.log(`listening port is ${port}.`)
   if (!dev) {
     await logingExpire()
+    await statsPushMessage()
     lineInitilize().catch(slackError)
     cron.schedule('0 */3 * * *', () => lineInitilize().catch(slackError), { })
     cron.schedule('* * * * *', () => cmdExpire().catch(slackError))

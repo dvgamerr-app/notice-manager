@@ -1,19 +1,7 @@
-import numeral from 'numeral'
 import moment from 'moment'
 import request from 'request-promise'
 import { slackMessage, pkgChannel, pkgName } from './index'
 import mongo from '../line-bot'
-
-const slackStats = (app, data) => {
-  data = data.map(e => {
-    return {
-      type: `mrkdwn`,
-      text: `*${e.name}* ${e.stats.limited ? ` (limit ${e.stats.limited})` : ''} *:*\n${numeral(e.stats.reply + e.stats.push).format('0,0')} (monthly ${numeral(e.stats.usage).format('0,0')}) `
-    }
-  })
-  
-  return { pretext: `${app} stats usage daily.`, blocks: [ { type: `section`, fields: data } ] }
-}
 
 export const cmdExpire = async () => {
   const { LineCMD } = mongo.get()
@@ -47,17 +35,20 @@ export const logingExpire = async (month = 3) => {
       }
     }
   ]
-  await slackMessage(pkgChannel, pkgName, { pretext: msg, blocks })
+  await slackMessage(pkgChannel, pkgName, { text: msg, blocks })
 }
 
 export const statsPushMessage = async () => {
-  let { LineBot } = mongo.get() // LineInbound, LineOutbound, LineCMD, 
-  let data = await LineBot.find({ type: 'line' }, null, { sort: { botname: 1 } })
-  data = data.map(e => {
-    return { botname: e.botname, name: e.name, stats: e.options.stats }
-  })
-  
-  await slackMessage(pkgChannel, pkgName, slackStats(pkgName, data))
+  let { LineBot, LineOutbound } = mongo.get()
+  let linebot = await LineBot.find({ type: 'line' }, null, { sort: { botname: 1 } })
+  for (const line of linebot) {
+    
+    let count = await LineOutbound.countDocuments({
+      botname: line.botname,
+      created: { $gte: moment().startOf('month').toDate() }
+    })
+    console.log(`- ${line.botname} usage ${count} `)
+  }
 }
 export const lineInitilize = async () => {
   const { LineBot } = mongo.get()
