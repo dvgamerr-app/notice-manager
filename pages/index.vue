@@ -251,7 +251,6 @@ export default {
   }),
   async asyncData ({ req, redirect, env, $axios }) {
     if (process.server && !/localhost|herokuapp\.com/ig.test(req.headers.host)) {
-      console.log('headers', req.headers)
       redirect('https://intense-citadel-55702.herokuapp.com')
       return
     }
