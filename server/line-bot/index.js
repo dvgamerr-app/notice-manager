@@ -38,7 +38,6 @@ mongo.set('LineInbound', 'db-line-inbound', {
 })
 
 mongo.set('LineBot', 'db-line-bot', {
-  type: { type: String, index: true },
   botname: { type: String, index: true },
   name: String,
   accesstoken: String,
@@ -73,14 +72,12 @@ mongo.set('ServiceOauth', 'db-service-oauth', {
   created: { type: Date, index: true, default: Date.now }
 })
 
-mongo.set('ServiceStats', 'db-service-stats', {
-  name: { type: String, index: true },
+mongo.set('ChatWebhook', 'db-chat-webhook', {
   type: { type: String, index: true },
-  desc: String,
-  wan_ip: String,
-  lan_ip: String,
-  online: { type: Boolean, index: true, default: false },
+  botname: { type: String, index: true },
+  name: String,
+  uri: String,
+  active: { type: Boolean, index: true, default: true },
   created: { type: Date, index: true, default: Date.now }
 })
-
 module.exports = mongo

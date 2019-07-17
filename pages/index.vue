@@ -16,7 +16,7 @@
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Name</b-input-group-text>
-                          <b-form-input maxlength="40" :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmit($event)" />
+                          <b-form-input size="sm" maxlength="40" :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmit($event)" />
                         </b-input-group>
                       </li>
                       <li>Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.</li>
@@ -28,13 +28,13 @@
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Client ID</b-input-group-text>
-                          <b-form-input maxlength="32" :state="check.client_id" v-model.trim="row.client_id" @keyup.enter="onSubmit($event)" />
+                          <b-form-input size="sm" maxlength="32" :state="check.client_id" v-model.trim="row.client_id" @keyup.enter="onSubmit($event)" />
                         </b-input-group>
                       </li>
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Client Secret</b-input-group-text>
-                          <b-form-input maxlength="64" :state="check.client_secret" v-model.trim="row.client_secret" @keyup.enter="onSubmit($event)" />
+                          <b-form-input size="sm" maxlength="64" :state="check.client_secret" v-model.trim="row.client_secret" @keyup.enter="onSubmit($event)" />
                         </b-input-group>
                       </li>
                     </ol>
@@ -78,22 +78,66 @@
               <template slot="title">
                 <fa :icon="['fab','line']" /> <b><span class="d-none d-md-inline">LINE</span> BOT</b>
               </template>
-              <b-row class="mb-2">
-                <b-col>
-                  <h5>README</h5>
-                  <p class="sample-code p-2 mt-1 border">
-                    <code>
-                    curl -X PUT {{api.server}}/{{api.bot.name}}/{{api.bot.to}} -H "Content-Type: application/json" -d "{ \"message\": \"Testing\nMessage\" }"
-                    </code>
-                  </p>
-                </b-col>
-              </b-row>
+              <b-form>
+                <b-row class="mb-2">
+                  <b-col>
+                    <h4>How to create new Lline bot?</h4>
+                    <ol>
+                      <li class="pt-1 pb-1">
+                        <b-input-group>
+                          <b-input-group-text>Name</b-input-group-text>
+                          <b-form-input maxlength="40" size="sm" :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmit($event)" />
+                        </b-input-group>
+                      </li>
+                      <li class="pt-1 pb-1">
+                        <b-input-group>
+                          <b-input-group-text>Client ID</b-input-group-text>
+                          <b-form-input maxlength="32" size="sm" :state="check.client_id" v-model.trim="row.client_id" @keyup.enter="onSubmit($event)" />
+                        </b-input-group>
+                      </li>
+                      <li class="pt-1 pb-1">
+                        <b-input-group>
+                          <b-input-group-text>Client Secret</b-input-group-text>
+                          <b-form-input maxlength="64" size="sm" :state="check.client_secret" v-model.trim="row.client_secret" @keyup.enter="onSubmit($event)" />
+                        </b-input-group>
+                      </li>
+                    </ol>
+                    <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" :disabled="btn.submit" @click="onSubmit($event)">
+                      <fa v-if="btn.submit" icon="circle-notch" spin /> Create LINE BOT
+                    </b-btn>
+                  </b-col>
+                </b-row>
+              </b-form>
             </b-tab>
             <b-tab>
               <template slot="title">
-                <fa :icon="['fab','slack-hash']" /> <b>Slack</b>
+                <fa icon="link" /> <b>Webhook</b>
               </template>
-              <p>I'm the second tab</p>
+              <b-form horizontal>
+                <h4>How to add webhook?</h4>
+                <b-row class="mb-2">
+                  <b-col>
+                    <b-form-group label-cols-lg="2" label-cols-sm="2" label-cols="3" label-size="sm" label="Type:" label-for="input-sm">
+                      <b-form-input id="input-sm" size="sm" maxlength="40" v-model.trim="row.type" />
+                    </b-form-group>
+                  </b-col>
+                  <b-col>
+                    <b-form-group label-cols-lg="2" label-cols-sm="2" label-cols="3" label-size="sm" label="Name:" label-for="input-sm">
+                      <b-form-input id="input-sm" size="sm" maxlength="40" v-model.trim="row.webhook" />
+                    </b-form-group>
+                  </b-col>
+                </b-row>
+                <b-row class="mb-2">
+                  <b-col>
+                    <b-form-group label-cols-lg="1" label-cols-sm="1" label-cols="1" label-size="sm" label="URL:" label-for="input-sm">
+                      <b-form-input id="input-sm" size="sm" maxlength="500" v-model.trim="row.url" />
+                    </b-form-group>
+                  </b-col>
+                </b-row>
+                <b-btn :variant="btn.webhook ? 'outline-secondary' : 'primary'" :disabled="btn.webhook" @click="onWebhookSubmit($event)">
+                  <fa v-if="btn.webhook" icon="circle-notch" spin /> Add Webhook
+                </b-btn>
+              </b-form>
             </b-tab>
           </b-tabs>
         </b-col>
@@ -148,13 +192,12 @@
             </b-progress>
           </div>
           <h5>
-            <fa :icon="['fab','slack-hash']" /> <b>Slack</b>
-            <b-btn variant="icon" size="sync" @click="onSyncSlack"><fa icon="sync-alt" :spin="sync.slack" /></b-btn>
+            <fa icon="link" /> <b>Webhook</b>
           </h5>
-          <div v-if="!bot || bot.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
-            Slack not config.
+          <div v-if="!webhook || webhook.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
+            Webhook not config.
           </div>
-          <div v-for="e in slack" :key="e._id" class="mb-1 slack-channel">
+          <div v-for="e in webhook" :key="e._id" class="mb-1 webhook-channel">
             <h6 class="mb-0">{{ e.name }} <small>({{ e.members }})</small></h6>
             <div v-if="e.topic.value" class="topic">{{ e.topic.value}} </div>
           </div>
@@ -172,7 +215,7 @@ export default {
   data: () => ({
     sync: {
       bot: false,
-      slack: false
+      webhook: false
     },
     check: {
       room: null,
@@ -188,7 +231,10 @@ export default {
     row: {
       name: '',
       client_id: '',
-      client_secret: ''
+      client_secret: '',
+      url: '',
+      type: '',
+      webhook: ''
     },
     edit: {
       show: null,
@@ -201,9 +247,14 @@ export default {
     },
     service: [],
     bot: [],
-    slack: []
+    webhook: []
   }),
-  async asyncData ({ env, $axios }) {
+  async asyncData ({ req, redirect, env, $axios }) {
+    if (process.server && !/localhost|herokuapp\.com/ig.test(req.headers.host)) {
+      redirect('https://intense-citadel-55702.herokuapp.com')
+      return
+    }
+
     let { data, status, statusText } = await $axios(dashboard)
     if (status !== 200) throw new Error(`Server Down '${dashboard}' is ${statusText}.`)
     return {
@@ -217,7 +268,7 @@ export default {
       },
       service: data.service,
       bot: data.bot,
-      slack: data.slack
+      webhook: data.webhook
     }
   },
   head: () => ({
@@ -253,7 +304,7 @@ export default {
     async updateStats () {
       let { data } = await this.$axios(dashboard)
       this.bot = data.bot
-      this.slack = data.slack
+      this.webhook = data.webhook
       this.$forceUpdate()
     },
     async onSubmit (e) {
@@ -357,20 +408,13 @@ export default {
       await this.$axios('/api/stats/bot')
       await this.updateStats()
       this.sync.bot = false
-    },
-    async onSyncSlack () {
-      if (this.sync.slack) return
-      this.sync.slack = true
-      await this.$axios('/api/stats/slack')
-      await this.updateStats()
-      this.sync.slack = false
     }
   }
 }
 </script>
 <style lang="scss" scoped>
 .dashboard {
-  .slack-channel {
+  .webhook-channel {
     .topic {
       color: #7b7b7b;
       font-size: .7rem;

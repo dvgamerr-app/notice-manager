@@ -1,10 +1,9 @@
 import mongo from '../../mongodb'
-import { getChannal } from '../../helper'
 
 export default async (req, res) => {
-  let { LineBot, ServiceBot, ServiceOauth } = mongo.get() // LineInbound, LineOutbound, LineCMD, 
+  let { LineBot, ServiceBot, ServiceOauth, ChatWebhook } = mongo.get() // LineInbound, LineOutbound, LineCMD, 
   try {
-    let slack = await getChannal()
+    let webhook = await ChatWebhook.find({ active: true }, null, { sort: { botname: 1 } })
     let bot = await LineBot.find({ active: true }, null, { sort: { botname: 1 } })
     let service = await ServiceBot.find({ active: true }, null, { sort: { name: 1 } })
     let room = await ServiceOauth.find({ accessToken: { $ne: null } }, null, { sort: { name: 1 } })
@@ -21,10 +20,10 @@ export default async (req, res) => {
         botname: e.botname,
         stats: e.options ? e.options.stats : {}
       })),
-      slack: slack.map(e => ({
+      webhook: webhook.map(e => ({
+        botname: e.botname,
         name: e.name,
-        topic: e.topic,
-        members: e.members.length
+        type: e.type
       }))
     })
   } catch (ex) {

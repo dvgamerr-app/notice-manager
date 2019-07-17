@@ -105,7 +105,7 @@
     </b-row>
     <b-row class="mt-5">
       <b-col>
-        <h4><fa :icon="['fab','slack-hash']" /> <b>Slack</b></h4>
+        <h4><fa icon="link" /> <b>Webhook</b></h4>
         <h5 class="mt-1">Push Message API</h5>
       </b-col>
     </b-row>
@@ -245,7 +245,7 @@ export default {
       },
       service: data.service || [],
       bot: data.bot || [],
-      slack: data.slack || []
+      webhook: data.webhook || []
     }
   },
   head: () => ({
