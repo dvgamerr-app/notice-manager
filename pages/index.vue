@@ -250,7 +250,7 @@ export default {
     webhook: []
   }),
   async asyncData ({ req, redirect, env, $axios }) {
-    if (process.server && !/localhost|herokuapp\.com/ig.test(req.headers.host)) {
+    if (process.server && (req.headers['x-host'] || !/localhost\.com/ig.test(req.headers.host))) {
       redirect('https://intense-citadel-55702.herokuapp.com')
       return
     }
