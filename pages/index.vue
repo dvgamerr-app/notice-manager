@@ -16,7 +16,7 @@
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Name</b-input-group-text>
-                          <b-form-input size="sm" maxlength="40" :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmit($event)" />
+                          <b-form-input size="sm" maxlength="40" :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmitNotify($event)" />
                         </b-input-group>
                       </li>
                       <li>Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.</li>
@@ -28,17 +28,17 @@
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Client ID</b-input-group-text>
-                          <b-form-input size="sm" maxlength="32" :state="check.client_id" v-model.trim="row.client_id" @keyup.enter="onSubmit($event)" />
+                          <b-form-input size="sm" maxlength="32" :state="check.client_id" v-model.trim="row.client_id" @keyup.enter="onSubmitNotify($event)" />
                         </b-input-group>
                       </li>
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Client Secret</b-input-group-text>
-                          <b-form-input size="sm" maxlength="64" :state="check.client_secret" v-model.trim="row.client_secret" @keyup.enter="onSubmit($event)" />
+                          <b-form-input size="sm" maxlength="64" :state="check.client_secret" v-model.trim="row.client_secret" @keyup.enter="onSubmitNotify($event)" />
                         </b-input-group>
                       </li>
                     </ol>
-                    <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" :disabled="btn.submit" @click="onSubmit($event)">
+                    <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" :disabled="btn.submit" @click="onSubmitNotify($event)">
                       <fa v-if="btn.submit" icon="circle-notch" spin /> Create notify
                     </b-btn>
                   </b-col>
@@ -81,28 +81,28 @@
               <b-form>
                 <b-row class="mb-2">
                   <b-col>
-                    <h4>How to create new Lline bot?</h4>
+                    <h4>How to create new Line bot?</h4>
                     <ol>
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Name</b-input-group-text>
-                          <b-form-input maxlength="40" size="sm" :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmit($event)" />
+                          <b-form-input maxlength="40" size="sm" :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmitBot($event)" />
                         </b-input-group>
                       </li>
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Client ID</b-input-group-text>
-                          <b-form-input maxlength="32" size="sm" :state="check.client_id" v-model.trim="row.client_id" @keyup.enter="onSubmit($event)" />
+                          <b-form-input maxlength="32" size="sm" :state="check.client_id" v-model.trim="row.client_id" @keyup.enter="onSubmitBot($event)" />
                         </b-input-group>
                       </li>
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Client Secret</b-input-group-text>
-                          <b-form-input maxlength="64" size="sm" :state="check.client_secret" v-model.trim="row.client_secret" @keyup.enter="onSubmit($event)" />
+                          <b-form-input maxlength="64" size="sm" :state="check.client_secret" v-model.trim="row.client_secret" @keyup.enter="onSubmitBot($event)" />
                         </b-input-group>
                       </li>
                     </ol>
-                    <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" :disabled="btn.submit" @click="onSubmit($event)">
+                    <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" :disabled="btn.submit" @click="onSubmitBot($event)">
                       <fa v-if="btn.submit" icon="circle-notch" spin /> Create LINE BOT
                     </b-btn>
                   </b-col>
@@ -134,7 +134,7 @@
                     </b-form-group>
                   </b-col>
                 </b-row>
-                <b-btn :variant="btn.webhook ? 'outline-secondary' : 'primary'" :disabled="btn.webhook" @click="onWebhookSubmit($event)">
+                <b-btn :variant="btn.webhook ? 'outline-secondary' : 'primary'" :disabled="btn.webhook" @click="onSubmitWebhook($event)">
                   <fa v-if="btn.webhook" icon="circle-notch" spin /> Add Webhook
                 </b-btn>
               </b-form>
@@ -307,7 +307,13 @@ export default {
       this.webhook = data.webhook
       this.$forceUpdate()
     },
-    async onSubmit (e) {
+    async onSubmitWebhook (e) {
+      e
+    },
+    async onSubmitBot (e) {
+      e
+    },
+    async onSubmitNotify (e) {
       if (!this.row.name || !this.checkName(this.row.name)) {
         this.check.service = false
         this.check.client_id = null
