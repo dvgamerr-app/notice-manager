@@ -98,10 +98,9 @@ mongo.open().then(async () => {
     cron.schedule('* * * * *', () => cmdExpire().catch(catchException))
     cron.schedule('5 0 * * *', () => loggingPushMessage().catch(catchException))
     cron.schedule('5 3 * * *', async () => {
-      // await slackMessage(pkgChannel, pkgName, 'Server has **terminated** yourself for `reboot` herokuapp every day.')
+      await webhookMessage('teams', 'heroku', { text: 'Server has **terminated** yourself for `reboot` herokuapp every day.' })
       process.exit()
     })
-    // await slackMessage(pkgChannel, pkgName, '*Heroku: LINE-BOT* (intense-citadel-55702)\nhas `rebooted`, and ready.')
   }
 }).catch(ex => catchException(ex).then(() => {
   process.exit()
