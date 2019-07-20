@@ -1,18 +1,44 @@
-
 module.exports = {
   mode: 'universal',
   head: {
-    title: 'LINE Notify',
-    meta: [
-      { charset: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: process.env.npm_package_description || '' }
-    ],
-    link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
-    ]
+    titleTemplate: title => `${title ? `${title} · ` : ''}LINE-Notify`
   },
-  loading: { color: '#343a40' },
+  meta: [
+    { charset: 'utf-8' },
+    { name: 'application-name', content: 'LINE-Notify' },
+    { name: 'name', content: 'LINE-Notify' },
+    { name: 'description', content: process.env.npm_package_description || '', id: 'desc' },
+    { 'http-equiv': 'X-UA-Compatible', content: 'IE=edge' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' },
+    { name: 'apple-mobile-web-app-capable', content: 'yes' },
+    { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+    { name: 'MobileOptimized', content: 'width' },
+    { name: 'HandheldFriendly', content: 'true' },
+    { name: 'author', content: 'Mr. Kananek Thongkam' }
+  ],
+  manifest: {
+    name: 'Notify',
+    lang: 'en',
+    description: '',
+    short_name: 'Notify',
+    icons: [
+      { src: '/favicon.ico', sizes: '16x16' }
+    ],
+    start_url: '/sign-in',
+    display: 'standalone',
+    orientation: 'portrait',
+    theme_color: '#ffffff',
+    background_color: '#ffffff',
+    browser_action: {
+      default_icon: '/favicon.ico',
+      default_popup: '/sign-in'
+    }
+  },
+  icons: {
+    sizes: [ 32, 57, 72, 144, 512 ]
+  },
+  workbox: { },
+  loading: false,
   css: [
     './assets/basic.scss'
   ],

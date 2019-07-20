@@ -272,7 +272,7 @@ export default {
     }
   },
   head: () => ({
-    title: 'Dashboard - LINE Notify'
+    title: 'Dashboard'
   }),
   methods: {
     getLimitPercent (value, max) {

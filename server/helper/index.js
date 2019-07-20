@@ -1,5 +1,7 @@
 import { WebClient } from '@slack/web-api'
 import debuger from '@touno-io/debuger'
+import request from 'request-promise'
+import mongo from '../line-bot'
 import pkg from '../../package.json'
 
 const dev = !(process.env.NODE_ENV === 'production')
@@ -53,4 +55,10 @@ export const slackError = async ex => {
       ]
     })
   }
+}
+
+export const webhookMessage = async (type, botname, body) => {
+  const { ChatWebhook } = mongo.get()
+  const chat = await ChatWebhook.findOne({ type, botname })
+  await request.post(chat.uri, { body, json: true })
 }

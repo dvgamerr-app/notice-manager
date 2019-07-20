@@ -8,8 +8,8 @@ import { Nuxt, Builder } from 'nuxt'
 import pkg from '../package.json'
 import config from '../nuxt.config.js'
 import mongo from './line-bot'
-import { slackMessage, slackError, pkgChannel, pkgName } from './helper'
-import { lineInitilize, cmdExpire, statsPushMessage, logingExpire } from './helper/schedule'
+import { webhookMessage } from './helper'
+import { lineInitilize, cmdExpire, loggingPushMessage } from './helper/schedule'
 
 import postBotHandler from './route-bot/webhook'
 import getRegisterBotServiceRoomHandler from './route-bot/oauth'
@@ -72,6 +72,13 @@ app.get('/api/stats/bot', getStatsBot)
 app.get('/api/stats/slack', getStatsSlack)
 
 logger.log(`MongoDB 'LINE-BOT' Connecting...`)
+
+const catchException = async (ex) => {
+  await webhookMessage('teams', 'heroku', {
+    text: `**${ex.message}**
+${ex.stack}`
+  })
+}
 mongo.open().then(async () => {
   // Init Nuxt.js
   const nuxt = new Nuxt(config)
@@ -86,17 +93,16 @@ mongo.open().then(async () => {
   await app.listen(port, host)
   logger.log(`listening port is ${port}.`)
   if (!dev) {
-    lineInitilize().catch(slackError)
-    cron.schedule('0 */3 * * *', () => lineInitilize().catch(slackError), { })
-    cron.schedule('* * * * *', () => cmdExpire().catch(slackError))
-    cron.schedule('5 0 * * *', () => statsPushMessage().catch(slackError))
-    cron.schedule('0 3 * * *', () => logingExpire().catch(slackError))
+    lineInitilize().catch(catchException)
+    cron.schedule('0 */3 * * *', () => lineInitilize().catch(catchException), { })
+    cron.schedule('* * * * *', () => cmdExpire().catch(catchException))
+    cron.schedule('5 0 * * *', () => loggingPushMessage().catch(catchException))
     cron.schedule('5 3 * * *', async () => {
-      await slackMessage(pkgChannel, pkgName, 'Server has *terminated* yourself.')
+      // await slackMessage(pkgChannel, pkgName, 'Server has **terminated** yourself for `reboot` herokuapp every day.')
       process.exit()
     })
-    await slackMessage(pkgChannel, pkgName, '*Heroku: LINE-BOT* (intense-citadel-55702)\nhas `rebooted`, and ready.')
+    // await slackMessage(pkgChannel, pkgName, '*Heroku: LINE-BOT* (intense-citadel-55702)\nhas `rebooted`, and ready.')
   }
-}).catch(ex => slackError(ex).then(() => {
+}).catch(ex => catchException(ex).then(() => {
   process.exit()
 }))

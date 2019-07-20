@@ -249,7 +249,7 @@ export default {
     }
   },
   head: () => ({
-    title: 'Documentation - LINE Notify'
+    title: 'Documentation'
   }),
   computed: {
     getBotnameSample () {

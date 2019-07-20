@@ -1,81 +1,77 @@
 import numeral from 'numeral'
 import moment from 'moment'
 import request from 'request-promise'
-import { slackMessage, pkgChannel, pkgName } from './index'
+import { webhookMessage } from './index'
 import mongo from '../line-bot'
 
-export const cmdExpire = async () => {
-  const { LineCMD } = mongo.get()
-  await LineCMD.updateMany({ created : { $lte: new Date(+new Date() - 300000) }, executing: false, executed: false }, {
-    $set: { executed: true }
-  })
+const cardMessage = (summary, title, sections) => {
+  return {
+    "@context": "https://schema.org/extensions",
+    "@type": "MessageCard",
+    "themeColor": "0072C6",
+    sections,
+    summary,
+    title
+  }
 }
-export const logingExpire = async (month = 3) => {
+
+const loggingExpire = async (month = 3) => {
   if (month <= 0) return
-  let expire = moment().startOf('month').add(month * -1, 'month').toDate()
+  let expire = moment().add(month * -1, 'month').toDate()
   let { LineOutbound, LineInbound, LineCMD } = mongo.get() // LineInbound, LineOutbound, LineCMD, 
   
   let dataIn = await LineInbound.deleteMany({ created: { $lte: expire } })
   let dataOut = await LineOutbound.deleteMany({ created: { $lte: expire } })
   let dataCmd = await LineCMD.deleteMany({ created: { $lte: expire } })
-  let msg = `Logging documents delete if over ${month} months.`
-	let blocks = [
-    {
-      type: 'section',
-      text: { type: 'mrkdwn', text: msg }
-    },
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: ([
-          dataIn.n ? `• *Line Inbound* ${dataIn.n} rows.` : null,
-          dataOut.n ? `• *Line Outbound* ${dataOut.n} rows.` : null,
-          dataCmd.n ? `• *Line CMD* ${dataCmd.n} rows.` : null
-        ]).filter(e => e !== null).join('\n')
-      }
-    }
-  ]
-  if (dataIn.n || dataOut.n || dataCmd.n) await slackMessage(pkgChannel, pkgName, { text: msg, blocks })
+  let rows = dataIn.n + dataOut.n + dataCmd.n
+  return rows > 0 ? {
+    facts: [
+      { name: 'Delete it', value: `${numeral(rows).format('0,0')} rows.`  }
+    ],
+    text: `Logging documents delete if over ${month} months.`
+  } : null
 }
 
-export const statsPushMessage = async () => {
+const loggingStats = async () => {
   const { LineBot, ServiceBot, LineOutbound } = mongo.get()
-  const inDate = moment().startOf('month').toDate()
-  const msg = `Logging usage of month report.`
-  const format = (name, n) => `• *${name}* ${numeral(n).format('0,0')} rows.`
-	let blocks = [
-    { type: 'section', text: { type: 'mrkdwn', text: msg } }
-  ]
+  const startOfMonth = moment().startOf('month').toDate()
 
-  let linebot = [ `*LINE BOT*` ]
-  for (const bot of (await LineBot.find({ type: 'line' }, null, { sort: { botname: 1 } }))) {
-    let count = await LineOutbound.countDocuments({
-      botname: bot.botname,
-      type: { $in: [ 'group', 'user', 'room' ] },
-      created: { $gte: inDate }
-    })
-    linebot.push(format(bot.name, count))
-  }
-  blocks.push({
-    type: 'section',
-    text: { type: 'mrkdwn', text: linebot.join('\n') }
-  })
+  let facts = []
 
-  let linenoti = [ `*LINE Notify*` ]
   for (const bot of (await ServiceBot.find({ active: true }, null, { sort: { service: 1 } }))) {
     let count = await LineOutbound.countDocuments({
       botname: bot.service,
       type: 'notify',
-      created: { $gte: inDate }
+      created: { $gte: startOfMonth }
     })
-    linenoti.push(format(bot.name, count))
+    facts.push({ name: `Notify: ${bot.name}`, value: `used ${count} times` })
   }
-  blocks.push({
-    type: 'section',
-    text: { type: 'mrkdwn', text: linenoti.join('\n') }
+
+  for (const bot of (await LineBot.find({ type: 'line' }, null, { sort: { botname: 1 } }))) {
+    let count = await LineOutbound.countDocuments({
+      botname: bot.botname,
+      type: { $in: [ 'group', 'user', 'room' ] },
+      created: { $gte: startOfMonth }
+    })
+    facts.push({ name: `BOT: ${bot.name}`, value: `used ${count} times` })
+  }
+
+  return { facts, text: `Logging usage of daily report.` }
+}
+
+export const cmdExpire = async () => {
+  const { LineCMD } = mongo.get()
+  await LineCMD.updateMany({ created : { $lte: moment().add(-3, 'minute').toDate() }, executing: false, executed: false }, {
+    $set: { executed: true }
   })
-  await slackMessage(pkgChannel, pkgName, { text: msg, blocks })
+}
+
+export const loggingPushMessage = async () => {
+  let fect1 = await loggingStats()
+  let fect2 = await loggingExpire()
+
+  let body = cardMessage('[Heroku] LINE-Notify daily stats.','LINE-Notify daily stats.', ([ fect1, fect2 ]).filter(e => e !== null))
+  await webhookMessage('teams', 'line-notify', body)
 }
 
 export const lineInitilize = async () => {

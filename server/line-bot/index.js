@@ -80,4 +80,5 @@ mongo.set('ChatWebhook', 'db-chat-webhook', {
   active: { type: Boolean, index: true, default: true },
   created: { type: Date, index: true, default: Date.now }
 })
+
 module.exports = mongo

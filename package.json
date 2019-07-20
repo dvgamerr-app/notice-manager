@@ -1,7 +1,7 @@
 {
   "name": "line-notify",
   "version": "4.2.16",
-  "description": "LINE BOT Server Notify.",
+  "description": "Server notify message to 3party.",
   "main": "index.js",
   "engines": {
     "node": "10.16.0"
@@ -14,7 +14,7 @@
   },
   "heroku-run-build-script": true,
   "keywords": [],
-  "author": "Kananek Thongkam",
+  "author": "Mr. Kananek Thongkam",
   "license": "ISC",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.19",
