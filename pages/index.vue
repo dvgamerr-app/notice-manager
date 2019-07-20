@@ -198,8 +198,7 @@
             Webhook not config.
           </div>
           <div v-for="e in webhook" :key="e._id" class="mb-1 webhook-channel">
-            <h6 class="mb-0">{{ e.name }} <small>({{ e.members }})</small></h6>
-            <div v-if="e.topic.value" class="topic">{{ e.topic.value}} </div>
+            <div class="topic" v-text="e.type + ' - ' + e.name" />
           </div>
         </b-col>
       </b-row>
