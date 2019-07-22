@@ -51,7 +51,7 @@ app.post('/:bot', postBotHandler)
 app.put('/:bot/:to?', putBotMessageHandler)
 app.put('/flex/:name/:to', putBotFlexHandler)
 app.put('/slack/mii/:channel', putSlackMessageHandler)
-app.put('/teams/:webhook', putWebhookMessageHandler)
+app.put('/hook/:type/:webhook', putWebhookMessageHandler)
 
 // API Get Database
 app.get('/db/:bot/cmd', getBotCMDHandler)
