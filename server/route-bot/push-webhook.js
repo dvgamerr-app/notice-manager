@@ -3,19 +3,19 @@ import { webhookMessage } from '../helper'
 
 export default async (req, res) => {
   const { LineOutbound } = mongo.get()
-  const { webhook } = req.params
+  const { type, webhook } = req.params
   let outbound = null
   try {
     outbound = await new LineOutbound({
       botname: webhook,
-      userTo: 'teams',
+      userTo: type,
       type: 'webhook',
       sender: req.body,
       sended: false,
       error: null,
       created: new Date(),
     }).save()
-    await webhookMessage('teams', webhook, req.body)
+    await webhookMessage(type, webhook, req.body)
     await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: true } })
     res.json({ error: null })
   } catch (ex) {
