@@ -1,5 +1,5 @@
 import mongo from '../line-bot'
-import { webhookMessage } from './helper'
+import { webhookMessage } from '../helper'
 
 export default async (req, res) => {
   const { LineOutbound } = mongo.get()
