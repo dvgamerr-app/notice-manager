@@ -1,7 +1,7 @@
 import debuger from '@touno-io/debuger'
 import mongo from '../mongodb'
 import { setRevoke } from '../api-notify'
-import { slackMessage, pkgName, pkgChannel } from '../helper'
+import { webhookMessage, pkgName } from '../helper'
 
 const logger = debuger('Notify')
 
@@ -17,8 +17,8 @@ export default async (req, res) => {
     if (revoke !== 'agree') throw new Error('Please confirm revoke parameter')
     await setRevoke(token.accessToken)
 
-    await slackMessage(pkgChannel, pkgName, `Rovoke room *${room}* from *${service}*.`)
     await ServiceOauth.updateOne({ service, room }, { $set: { accessToken: null } })
+    await webhookMessage('teams', 'line-notify', `${pkgName}<br>Rovoke room *${room}* from *${service}*.`)
     res.json({})
   } catch (ex) {
     logger.error(ex)

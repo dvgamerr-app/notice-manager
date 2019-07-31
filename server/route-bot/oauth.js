@@ -1,7 +1,7 @@
 import debuger from '@touno-io/debuger'
 import mongo from '../mongodb'
 import { getStatus, setRevoke } from '../api-notify'
-import { slackMessage, pkgName, pkgChannel } from '../helper'
+import { webhookMessage, pkgName } from '../helper'
 
 const uuid = length => {
   let result = ''
@@ -57,9 +57,9 @@ export default async (req, res) => {
         const access = oauth2.accessToken.create(result)
         let { body } = await getStatus(access.token.access_token)
 
-        let data = await ServiceOauth.findOne({ state })
-        await slackMessage(pkgChannel, pkgName, `Join room *${body.target}* with service *${data.service}*.`)
+        let data = await ServiceOauth.findOne({ state })        
         await ServiceOauth.updateOne({ state }, { $set: { name: body.target, accessToken: access.token.access_token } })
+        await webhookMessage('teams', 'line-notify', `${pkgName}<br>Join room *${body.target}* with service *${data.service}*.`)
       } catch (ex) {
         await ServiceOauth.updateOne({ state }, { $set: { active: false } })
       }

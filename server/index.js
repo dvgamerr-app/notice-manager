@@ -25,7 +25,7 @@ import getStatsSlack from './route-check/stats-slack'
 
 import putBotMessageHandler from './route-bot/push-message'
 import putBotFlexHandler from './route-bot/push-flex'
-import putSlackMessageHandler from './route-bot/push-slack'
+// import putSlackMessageHandler from './route-bot/push-slack'
 import putWebhookMessageHandler from './route-bot/push-webhook'
 
 import getBotCMDHandler from './route-db/bot-cmd'
@@ -50,7 +50,7 @@ app.use('/_health', getHealthStatusHandler)
 app.post('/:bot', postBotHandler)
 app.put('/:bot/:to?', putBotMessageHandler)
 app.put('/flex/:name/:to', putBotFlexHandler)
-app.put('/slack/mii/:channel', putSlackMessageHandler)
+// app.put('/slack/mii/:channel', putSlackMessageHandler)
 app.put('/hook/:type/:webhook', putWebhookMessageHandler)
 
 // API Get Database

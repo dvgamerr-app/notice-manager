@@ -1,9 +1,5 @@
 import helpFlex from './flex-help'
-import { slackMessage } from '../helper'
-
-import pkg from '../../package.json'
-const pkgChannel = 'heroku-notify'
-const pkgName = `LINE-BOT v${pkg.version}`
+import { webhookMessage, pkgName } from '../helper'
 
 export const onEvents = {
   'join': async (event) => {
@@ -11,7 +7,7 @@ export const onEvents = {
     return sourceId
   },
   'leave': async (event) => {
-    await slackMessage(pkgChannel, pkgName, `Bot your remove from \`${event.source.type}\`.`)
+    await webhookMessage('teams', 'line-notify', `${pkgName}<br>Bot your remove from \`${event.source.type}\`.`)
   }
 }
 
