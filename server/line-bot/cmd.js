@@ -7,7 +7,7 @@ export const onEvents = {
     return sourceId
   },
   'leave': async (event) => {
-    await webhookMessage('teams', 'line-notify', `${pkgName}<br>Bot your remove from \`${event.source.type}\`.`)
+    await webhookMessage('teams', 'line-notify', { text: `${pkgName}<br>Bot your remove from ${event.source.type}.` })
   }
 }
 

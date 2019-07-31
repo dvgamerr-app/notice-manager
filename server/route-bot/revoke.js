@@ -18,7 +18,7 @@ export default async (req, res) => {
     await setRevoke(token.accessToken)
 
     await ServiceOauth.updateOne({ service, room }, { $set: { accessToken: null } })
-    await webhookMessage('teams', 'line-notify', `${pkgName}<br>Rovoke room *${room}* from *${service}*.`)
+    await webhookMessage('teams', 'line-notify', { text: `${pkgName}<br>Rovoke room *${room}* from *${service}*.` })
     res.json({})
   } catch (ex) {
     logger.error(ex)

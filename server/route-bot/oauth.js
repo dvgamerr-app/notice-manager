@@ -59,7 +59,7 @@ export default async (req, res) => {
 
         let data = await ServiceOauth.findOne({ state })        
         await ServiceOauth.updateOne({ state }, { $set: { name: body.target, accessToken: access.token.access_token } })
-        await webhookMessage('teams', 'line-notify', `${pkgName}<br>Join room *${body.target}* with service *${data.service}*.`)
+        await webhookMessage('teams', 'line-notify', { text: `${pkgName}<br>Join room *${body.target}* with service *${data.service}*.` })
       } catch (ex) {
         await ServiceOauth.updateOne({ state }, { $set: { active: false } })
       }

@@ -13,7 +13,7 @@ export default async (req, res) => {
       client: data.client_id,
       secret: data.client_secret
     }).save()
-    await webhookMessage('teams', 'line-notify', `${pkgName}<br>Notify service add '${data.name}'.`)
+    await webhookMessage('teams', 'line-notify', { text: `${pkgName}<br>Notify service add '${data.name}'.` })
   } catch (ex) {
     res.json({ error: ex.message })
   }
