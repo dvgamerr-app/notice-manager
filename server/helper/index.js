@@ -58,6 +58,7 @@ export const pkgName = `LINE-BOT v${pkg.version}`
 // }
 
 export const webhookMessage = async (type, botname, body) => {
+  await mongo.open()
   const { ChatWebhook } = mongo.get()
   const chat = await ChatWebhook.findOne({ type, botname })
   await request.post(chat.uri, { body, json: true })
