@@ -275,11 +275,11 @@ export default {
   }),
   methods: {
     getLimitPercent (value, max) {
-      return Math.round(value * 100 / max)
+      return Math.round(value * max / max)
     },
     getDayPercent (value, max) {
       let limit = this.getLimitPercent(value, max)
-      let day = Math.round(moment().date() * 100 / moment().endOf('month').date())
+      let day = Math.round(moment().date() * max / moment().endOf('month').date())
       // value: 0 max: 1000 limit 0 day 3
       return limit >= day ? 0 : day - limit
     },
