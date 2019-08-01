@@ -186,7 +186,7 @@
           </div>
           <div v-for="e in bot" :key="e._id">
             <h6>{{ e.name }} <small>({{e.stats.limited}})</small></h6>
-            <b-progress :max="100" variant="info" height=".9rem" class="mb-3">
+            <b-progress :max="e.stats.limited" variant="info" height=".9rem" class="mb-3">
               <b-progress-bar :value="getLimitPercent(e.stats.usage, e.stats.limited)" :label-html="String(e.stats.usage)"></b-progress-bar>
               <b-progress-bar :value="getDayPercent(e.stats.usage, e.stats.limited)" :show-value="false" variant="default"></b-progress-bar>
             </b-progress>
