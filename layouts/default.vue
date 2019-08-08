@@ -1,7 +1,7 @@
 <template>
   <div>
     <header>
-      <b-navbar>
+      <b-navbar class="navtop">
         <b-container fluid>
           <b-navbar-brand href="/">
             <span class="logo-main">LINE</span>
@@ -16,6 +16,21 @@
           </b-navbar-nav>
         </b-container>
       </b-navbar>
+      <b-container fluid>
+        <b-row>
+          <b-col class="menu nav nav-pills border-bottom" md="12">
+            <nuxt-link to="/notify" class="nav-link">
+              <fa icon="bell" /> <span class="d-none d-md-inline">LINE</span> Notify
+            </nuxt-link>
+            <nuxt-link to="/bot" class="nav-link">
+              <fa :icon="['fab','line']" /> <span class="d-none d-md-inline">LINE</span> BOT
+            </nuxt-link>
+            <nuxt-link to="/webhook" class="nav-link">
+              <fa icon="link" /> Webhook
+            </nuxt-link>
+          </b-col>
+        </b-row>
+      </b-container>
     </header>
     <no-ssr>
       <div slot="placeholder" class="d-flex justify-content-center m-5">

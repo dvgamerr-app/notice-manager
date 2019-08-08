@@ -1,20 +1,32 @@
 <template>
 <b-container fluid>
-  <b-tabs class="aside-bar" pills card vertical no-fade nav-wrapper-class="aside overflow-auto border-right">
-    <b-tab title="Create Service">
-      <template slot="title">
-        <fa icon="plus" /> New Service
-      </template>
-      <nuxt-child name="manager" />
-    </b-tab>
-    <b-tab title="Service Manager" active>
-      <!-- sadasd -->
-    </b-tab>
-    <b-tab title="API Reference">
-      <!-- sadasd -->
-    </b-tab>
-  </b-tabs>
-  <nuxt-child />
+  <b-row>
+    <b-col class="d-none" md="4">
+      <h5>
+        <fa :icon="['fab','line']" /> <b>LINE BOT</b>
+        <b-btn variant="icon" size="sync" @click="onSyncBot"><fa icon="sync-alt" :spin="sync.bot" /></b-btn>
+      </h5>
+      <div v-if="!bot || bot.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
+        No bot line.
+      </div>
+      <div v-for="e in bot" :key="e._id">
+        <h6>{{ e.name }} <small>({{e.stats.limited}})</small></h6>
+        <b-progress :max="e.stats.limited" variant="info" height=".9rem" class="mb-3">
+          <b-progress-bar :value="getLimitPercent(e.stats.usage, e.stats.limited)" :label-html="String(e.stats.usage)"></b-progress-bar>
+          <b-progress-bar :value="getDayPercent(e.stats.usage, e.stats.limited)" :show-value="false" variant="default"></b-progress-bar>
+        </b-progress>
+      </div>
+      <h5>
+        <fa icon="link" /> <b>Webhook</b>
+      </h5>
+      <div v-if="!webhook || webhook.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
+        Webhook not config.
+      </div>
+      <div v-for="e in webhook" :key="e._id" class="mb-1 webhook-channel">
+        <div class="topic" v-text="e.type + ' - ' + e.name" />
+      </div>
+    </b-col>
+  </b-row>
 </b-container>
 </template>
 

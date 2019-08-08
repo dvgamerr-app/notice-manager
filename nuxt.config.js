@@ -41,7 +41,10 @@ module.exports = {
     sizes: [ 32, 57, 72, 144, 512 ]
   },
   workbox: { },
-  loading: false,
+  loading: {
+    color: '#00B900',
+    height: '2px'
+  },
   css: [
     './assets/basic.scss'
   ],
