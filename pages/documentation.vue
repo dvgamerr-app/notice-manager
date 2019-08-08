@@ -1,116 +1,118 @@
 <template>
-<b-row class="docs mt-5 mb-5">
-  <b-col>
-    <b-row>
-      <b-col>
-        <h4><fa icon="bell" /> <b>LINE Notify</b></h4>
-        <h5 class="mt-1">Push Message API</h5>
-        <pre class="language-html" data-type="put"><code class="text-white">/notify/:service/:room</code></pre>
-        <h6>Parameter</h6> 
-        <b-table bordered small :items="url1.param.items" :fields="url1.param.fields"></b-table>
-        <h6>Body</h6>
-        <b-table bordered small :items="url1.body.items" :fields="url1.body.fields"></b-table>
-        <h6>Example code</h6>
-        <p class="sample-code p-2 mt-1 border">
-          <code>
-          curl -X PUT {{api.server}}/notify/{{api.notify.service ? api.notify.service : '[service_name]'}}/{{api.notify.room ? api.notify.room : '[room_id]'}} -H "Content-Type: application/json" -d "{ \"message\": \"Testing\nMessage\" }"
-          </code>
-        </p>
-        <b-card v-if="service && service.length > 0" title="Sample API">
-          <b-form inline>
-            <label class="mr-2" for="select-service">Service: </label>
-            <b-dropdown id="select-service" class="mr-2" :text="`${ api.notify.service ? api.notify.service : '[service_name]'}`" variant="outline-info">
-              <b-dropdown-item href="#" v-for="e in getServiceSample" :key="e._id" @click.prevent="onSampleChangeService(e)">
-                <span v-text="e.name" />
-              </b-dropdown-item>
-            </b-dropdown>
-            <label class="mr-2" for="select-room">Room: </label>
-            <b-dropdown id="select-room" class="mr-4" :text="`${ api.notify.room ? api.notify.room : '[room_id]'}`" variant="outline-info">
-              <b-dropdown-item href="#" v-for="e in getRoomSample" :key="e._id" @click.prevent="onSampleChangeRoom(e)">
-                <span v-text="e.name" />
-              </b-dropdown-item>
-            </b-dropdown>
-            <b-button variant="outline-warning" @click.prevent="onTestNotify()">Testing</b-button>
-          </b-form>
-          <h6>Response</h6>
-          <p class="sample-code"><code v-html="api.notify.test || '[show after click testing api.]'" /></p>
-        </b-card>
-      </b-col>
-    </b-row>
-    
-    <b-row class="mt-5">
-      <b-col>
-        <h4><fa :icon="['fab','line']" /> <b>LINE BOT</b></h4>
-        <h5 class="mt-1">Push Message API</h5>
-        <pre class="language-html" data-type="put"><code class="text-white">/:botname/:id</code></pre>
-        <h6>Parameter</h6> 
-        <b-table bordered small :items="url2.param.items" :fields="url2.param.fields"></b-table>
-        <h6>Body</h6>
-        <b-table bordered small :items="url2.body.items" :fields="url2.body.fields"></b-table>
-        <p>
-          Messages sent with the Messaging API can be divided into two categories: <b>reply messages</b> and <b>push messages</b>.<br>
-          for more detailed information about messages, see Message objects in the <a href="https://developers.line.biz/en/docs/messaging-api/message-types/">Messaging API</a> reference.
-        </p>
-        <h6>Example code</h6>
-        <p class="sample-code p-2 mt-1 border">
-          <code>
-          curl -X PUT {{api.server}}/{{api.bot.name ? api.bot.name : '[name]'}}/{{api.bot.to ? api.bot.to : '[id]'}} -H "Content-Type: application/json" -d "{ \"type\":\"text\",\"text\":\"Testing\nMessage\" }"
-          </code>
-        </p>
-        <b-card v-if="bot && bot.length > 0" title="Sample API">
-          <b-form inline>
-            <label class="mr-2" for="select-botname">Bot Name: </label>
-            <b-dropdown id="select-botname" class="mr-2" :text="`${ api.bot.name ? api.bot.name : '[name]'}`" variant="outline-info">
-              <b-dropdown-item href="#" v-for="e in getBotnameSample" :key="e._id" @click.prevent="onSampleChangeBotname(e)">
-                <span v-text="e.name" />
-              </b-dropdown-item>
-            </b-dropdown>
-            <label class="mr-2" for="select-botname">userId : </label>
-            <b-input class="mr-4 col-4" v-model="api.bot.to" />
-            <b-button variant="outline-warning" @click.prevent="onTestBot()">Testing</b-button>
-          </b-form>
-          <h6>Response</h6>
-          <p class="sample-code"><code v-html="api.bot.test || '[show after click testing api.]'" /></p>
-        </b-card>
-        <h5 class="mt-3">Push Flex Message API</h5>
-        <pre class="language-html" data-type="put"><code class="text-white">/flex/:name/:id</code></pre>
-        <h6>Parameter</h6> 
-        <b-table bordered small :items="url3.param.items" :fields="url3.param.fields"></b-table>
-        <h6>Body</h6>
-        <b-table bordered small :items="url3.body.items" :fields="url3.body.fields"></b-table>
-        <h6>Example code</h6>
-        <p class="sample-code p-2 mt-1 border">
-          <code>
-          curl -X PUT {{api.server}}/flex/{{api.flex.name ? api.flex.name : '[name]'}}/{{api.flex.to ? api.flex.to : '[id]'}} -H "Content-Type: application/json" -d "{ \"type\":\"text\",\"text\":\"Testing\nMessage\" }"
-          </code>
-        </p>
-        <b-card v-if="bot && bot.length > 0" title="Sample API">
-          <b-form inline>
-            <label class="mr-2">Botname:</label>
-            <b class="mr-3">health-check</b>
-            <label class="mr-2" for="select-botname">Flex: </label>
-            <b-dropdown class="mr-2" :text="`${ api.flex.name ? api.flex.name : '[name]'}`" variant="outline-info" :state="false">
-              <b-dropdown-item href="#" v-for="(e, i) in ['alert','error']" :key="i" @click.prevent="onSampleChangeFlex(e)">
-                <span v-text="e" />
-              </b-dropdown-item>
-            </b-dropdown>
-            <label class="mr-2" for="select-botname">userId : </label>
-            <b-input class="mr-4 col-4" v-model="api.flex.to" />
-            <b-button variant="outline-warning" @click.prevent="onTestFlex()">Testing</b-button>
-          </b-form>
-          <h6>Response</h6>
-          <p class="sample-code"><code v-html="api.flex.test || '[show after click testing api.]'" /></p>
-        </b-card>
-      </b-col>
-    </b-row>
-    <b-row class="mt-5">
-      <b-col>
-        <h4><fa icon="link" /> <b>Webhook</b></h4>
-        <h5 class="mt-1">Push Message API</h5>
-      </b-col>
-    </b-row>
-  </b-col>
-</b-row>
+<b-container>
+  <b-row class="docs mt-5 mb-5">
+    <b-col>
+      <b-row>
+        <b-col>
+          <h4><fa icon="bell" /> <b>LINE Notify</b></h4>
+          <h5 class="mt-1">Push Message API</h5>
+          <pre class="language-html" data-type="put"><code class="text-white">/notify/:service/:room</code></pre>
+          <h6>Parameter</h6> 
+          <b-table bordered small :items="url1.param.items" :fields="url1.param.fields"></b-table>
+          <h6>Body</h6>
+          <b-table bordered small :items="url1.body.items" :fields="url1.body.fields"></b-table>
+          <h6>Example code</h6>
+          <p class="sample-code p-2 mt-1 border">
+            <code>
+            curl -X PUT {{api.server}}/notify/{{api.notify.service ? api.notify.service : '[service_name]'}}/{{api.notify.room ? api.notify.room : '[room_id]'}} -H "Content-Type: application/json" -d "{ \"message\": \"Testing\nMessage\" }"
+            </code>
+          </p>
+          <b-card v-if="service && service.length > 0" title="Sample API">
+            <b-form inline>
+              <label class="mr-2" for="select-service">Service: </label>
+              <b-dropdown id="select-service" class="mr-2" :text="`${ api.notify.service ? api.notify.service : '[service_name]'}`" variant="outline-info">
+                <b-dropdown-item href="#" v-for="e in getServiceSample" :key="e._id" @click.prevent="onSampleChangeService(e)">
+                  <span v-text="e.name" />
+                </b-dropdown-item>
+              </b-dropdown>
+              <label class="mr-2" for="select-room">Room: </label>
+              <b-dropdown id="select-room" class="mr-4" :text="`${ api.notify.room ? api.notify.room : '[room_id]'}`" variant="outline-info">
+                <b-dropdown-item href="#" v-for="e in getRoomSample" :key="e._id" @click.prevent="onSampleChangeRoom(e)">
+                  <span v-text="e.name" />
+                </b-dropdown-item>
+              </b-dropdown>
+              <b-button variant="outline-warning" @click.prevent="onTestNotify()">Testing</b-button>
+            </b-form>
+            <h6>Response</h6>
+            <p class="sample-code"><code v-html="api.notify.test || '[show after click testing api.]'" /></p>
+          </b-card>
+        </b-col>
+      </b-row>
+      
+      <b-row class="mt-5">
+        <b-col>
+          <h4><fa :icon="['fab','line']" /> <b>LINE BOT</b></h4>
+          <h5 class="mt-1">Push Message API</h5>
+          <pre class="language-html" data-type="put"><code class="text-white">/:botname/:id</code></pre>
+          <h6>Parameter</h6> 
+          <b-table bordered small :items="url2.param.items" :fields="url2.param.fields"></b-table>
+          <h6>Body</h6>
+          <b-table bordered small :items="url2.body.items" :fields="url2.body.fields"></b-table>
+          <p>
+            Messages sent with the Messaging API can be divided into two categories: <b>reply messages</b> and <b>push messages</b>.<br>
+            for more detailed information about messages, see Message objects in the <a href="https://developers.line.biz/en/docs/messaging-api/message-types/">Messaging API</a> reference.
+          </p>
+          <h6>Example code</h6>
+          <p class="sample-code p-2 mt-1 border">
+            <code>
+            curl -X PUT {{api.server}}/{{api.bot.name ? api.bot.name : '[name]'}}/{{api.bot.to ? api.bot.to : '[id]'}} -H "Content-Type: application/json" -d "{ \"type\":\"text\",\"text\":\"Testing\nMessage\" }"
+            </code>
+          </p>
+          <b-card v-if="bot && bot.length > 0" title="Sample API">
+            <b-form inline>
+              <label class="mr-2" for="select-botname">Bot Name: </label>
+              <b-dropdown id="select-botname" class="mr-2" :text="`${ api.bot.name ? api.bot.name : '[name]'}`" variant="outline-info">
+                <b-dropdown-item href="#" v-for="e in getBotnameSample" :key="e._id" @click.prevent="onSampleChangeBotname(e)">
+                  <span v-text="e.name" />
+                </b-dropdown-item>
+              </b-dropdown>
+              <label class="mr-2" for="select-botname">userId : </label>
+              <b-input class="mr-4 col-4" v-model="api.bot.to" />
+              <b-button variant="outline-warning" @click.prevent="onTestBot()">Testing</b-button>
+            </b-form>
+            <h6>Response</h6>
+            <p class="sample-code"><code v-html="api.bot.test || '[show after click testing api.]'" /></p>
+          </b-card>
+          <h5 class="mt-3">Push Flex Message API</h5>
+          <pre class="language-html" data-type="put"><code class="text-white">/flex/:name/:id</code></pre>
+          <h6>Parameter</h6> 
+          <b-table bordered small :items="url3.param.items" :fields="url3.param.fields"></b-table>
+          <h6>Body</h6>
+          <b-table bordered small :items="url3.body.items" :fields="url3.body.fields"></b-table>
+          <h6>Example code</h6>
+          <p class="sample-code p-2 mt-1 border">
+            <code>
+            curl -X PUT {{api.server}}/flex/{{api.flex.name ? api.flex.name : '[name]'}}/{{api.flex.to ? api.flex.to : '[id]'}} -H "Content-Type: application/json" -d "{ \"type\":\"text\",\"text\":\"Testing\nMessage\" }"
+            </code>
+          </p>
+          <b-card v-if="bot && bot.length > 0" title="Sample API">
+            <b-form inline>
+              <label class="mr-2">Botname:</label>
+              <b class="mr-3">health-check</b>
+              <label class="mr-2" for="select-botname">Flex: </label>
+              <b-dropdown class="mr-2" :text="`${ api.flex.name ? api.flex.name : '[name]'}`" variant="outline-info" :state="false">
+                <b-dropdown-item href="#" v-for="(e, i) in ['alert','error']" :key="i" @click.prevent="onSampleChangeFlex(e)">
+                  <span v-text="e" />
+                </b-dropdown-item>
+              </b-dropdown>
+              <label class="mr-2" for="select-botname">userId : </label>
+              <b-input class="mr-4 col-4" v-model="api.flex.to" />
+              <b-button variant="outline-warning" @click.prevent="onTestFlex()">Testing</b-button>
+            </b-form>
+            <h6>Response</h6>
+            <p class="sample-code"><code v-html="api.flex.test || '[show after click testing api.]'" /></p>
+          </b-card>
+        </b-col>
+      </b-row>
+      <b-row class="mt-5">
+        <b-col>
+          <h4><fa icon="link" /> <b>Webhook</b></h4>
+          <h5 class="mt-1">Push Message API</h5>
+        </b-col>
+      </b-row>
+    </b-col>
+  </b-row>
+</b-container>
 </template>
 
 

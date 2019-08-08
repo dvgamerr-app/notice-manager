@@ -1,7 +1,7 @@
 <template>
   <div>
     <header>
-      <b-navbar class="border-bottom">
+      <b-navbar>
         <b-container fluid>
           <b-navbar-brand href="/">
             <span class="logo-main">LINE</span>
@@ -10,15 +10,17 @@
           </b-navbar-brand>
               
           <b-navbar-nav class="ml-auto">
-            <b-nav-item to="/" :active="$route.name == 'index'">Dashboard</b-nav-item>
-            <b-nav-item to="/documentation" :active="$route.name == 'documentation'">Documentation</b-nav-item>
+            <b-nav-item to="/" :active="$route.name == 'index'">
+              Dashboard
+            </b-nav-item>
+            <b-nav-item to="/documentation" :active="$route.name == 'documentation'">
+              Documentation
+            </b-nav-item>
           </b-navbar-nav>
         </b-container>
       </b-navbar>
     </header>
-    <b-container fluid>
-      <nuxt />
-    </b-container>
+    <nuxt />
     <footer class="mt-3">
       <b-container fluid>
         <p>
