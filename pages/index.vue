@@ -4,6 +4,7 @@
     <b-col>
       <b-row>
         <b-col md="12">
+          <!-- <nuxt-child  -->
           <b-tabs class="atop" content-class="mt-3" pills card no-fade>
             <b-tab active>
               <template slot="title">
