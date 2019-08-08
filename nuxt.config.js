@@ -1,7 +1,11 @@
 module.exports = {
   mode: 'universal',
   head: {
-    titleTemplate: title => `${title ? `${title} · ` : ''}LINE-Notify`
+    titleTemplate: title => `${title ? `${title} · ` : ''}LINE-Notify`,
+    link: [
+      // You don't need that line anymore!
+      { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,700' }
+    ]
   },
   meta: [
     { charset: 'utf-8' },
