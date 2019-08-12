@@ -1,24 +1,24 @@
 <template>
 <b-container fluid>
-  <b-tabs class="aside-bar" pills card vertical no-fade nav-wrapper-class="aside overflow-auto border-right">
+  <b-tabs class="aside-bar" pills card vertical no-fade nav-wrapper-class="aside overflow-auto w-fix-280 flex-shrink-0 flex-grow-0 position-relative border-right">
     <b-tab title="Create Service">
       <template slot="title">
         <fa icon="plus" /> New Service
       </template>
-      <nuxt-child name="manager" />
+      <notify-new :api="api" />
     </b-tab>
     <b-tab title="Service Manager" active>
-      <!-- sadasd -->
+      <div>bbb</div>
     </b-tab>
     <b-tab title="API Reference">
-      <!-- sadasd -->
+      <div>ccc</div>
     </b-tab>
   </b-tabs>
-  <nuxt-child />
 </b-container>
 </template>
 
 <script>
+import notifyNew from '../components/notify/new'
 
 import moment from 'moment'
 const dashboard = '/api/service/dashboard'
@@ -41,6 +41,9 @@ export default {
     bot: [],
     webhook: []
   }),
+  components: {
+    notifyNew
+  },
   async asyncData ({ req, redirect, env, $axios }) {
     if (process.server && req.headers['x-host'] && !/localhost\.com/ig.test(req.headers.host)) {
       redirect('https://intense-citadel-55702.herokuapp.com')
@@ -62,8 +65,6 @@ export default {
       bot: data.bot,
       webhook: data.webhook
     }
-  },
-  components: {
   },
   methods: {
     getLimitPercent (value, max) {

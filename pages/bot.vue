@@ -41,6 +41,12 @@ export default {
       bot: false,
       webhook: false
     },
+    check: {
+      room: null,
+      service: null,
+      client_id: null,
+      client_secret: null
+    },
     btn: {
       trash: null,
       remove: null

@@ -37,7 +37,7 @@
         <b-spinner />
       </div>
       <nuxt />
-      <footer class="mt-3">
+      <footer>
         <b-container fluid>
           <p>
             The source code is licensed <a href="http://opensource.org/licenses/mit-license.php">MIT</a>,

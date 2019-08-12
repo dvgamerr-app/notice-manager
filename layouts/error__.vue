@@ -8,7 +8,7 @@ export default {
 </script>
 <style>
 .error {
-  height: calc(100vh - 10.9em);
+  height: calc(100vh - 9.84em);
 
 }
 .error::before {
