@@ -2,36 +2,30 @@
   <b-form>
     <b-row class="mb-2">
       <b-col>
-        <h4>How to create new service?</h4>
+        <h4>How to add LINE-Notify to room?</h4>
         <ol>
-          <li>Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.</li>
+          <li>Add <b>LINE Notify</b> friend.</li>
+          <b-img class="qr-code" src="~assets/notify-qr.png" />
           <li class="pt-1 pb-1">
-            <b-input-group>
-              <b-input-group-text>Create name</b-input-group-text>
-              <b-form-input size="sm" maxlength="40" :state="check.service" v-model.trim="data.name" @keyup.enter="onSubmitNotify($event)" />
-            </b-input-group>
-          </li>
-          <li>Input <b>Service URL</b> <code>{{ api.hosts }}/</code></li>
-          <li>Input <b>Callback URL</b> <code>{{ api.hosts }}/register-bot</code></li>
-          <li>Click <b>Argee and Contuiue</b> and click <b>Add</b>.</li>
-          <li>Goto <a href="https://notify-bot.line.me/my/services/" target="_blank">My Services</a> and click your service.</li>
-          <li>Check your email becouse client secret will be valid only after verifying your email address.</li>
-          <li class="pt-1 pb-1">
-            <b-input-group>
-              <b-input-group-text>Copy Client ID</b-input-group-text>
-              <b-form-input size="sm" maxlength="32" :state="check.client_id" v-model.trim="data.client_id" @keyup.enter="onSubmitNotify($event)" />
-            </b-input-group>
+            <b-dropdown dropright :text="`Select Service${ add.service ? ` : ${add.service}` : ''}`" variant="outline-info">
+              <b-dropdown-item href="#" v-for="e in service" :key="e._id" @click.prevent="onChangeService(e)">
+                <span v-text="e.name" />
+              </b-dropdown-item>
+            </b-dropdown>
           </li>
           <li class="pt-1 pb-1">
             <b-input-group>
-              <b-input-group-text>Copy Client Secret</b-input-group-text>
-              <b-form-input size="sm" maxlength="64" :state="check.client_secret" v-model.trim="data.client_secret" @keyup.enter="onSubmitNotify($event)" />
+              <b-input-group-text>Room name</b-input-group-text>
+              <b-form-input size="sm" ref="room" maxlength="20" :state="check.room" v-model.trim="add.room" @keyup.enter="onJoinRoom($event)" />
             </b-input-group>
           </li>
+          <li>Your line account choose room and click <b>agree and connect</b>.</li>
+          <li>Invite <b>LINE Notify</b> to room your select.</li>
         </ol>
-        <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" :disabled="btn.submit" @click="onSubmitNotify($event)">
-          <fa v-if="btn.submit" icon="circle-notch" spin /> Create notify
-        </b-btn>
+        <b-card-text>After your remember step and click <b>join room</b>.</b-card-text>
+        <b-link @click="onJoinRoom($event)">
+          <fa icon="external-link-alt" /> Join room
+        </b-link>
       </b-col>
     </b-row>
   </b-form>
