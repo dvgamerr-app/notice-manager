@@ -1,14 +1,26 @@
 // import { WebClient } from '@slack/web-api'
-// import debuger from '@touno-io/debuger'
+import debuger from '@touno-io/debuger'
 import request from 'request-promise'
 import mongo from '../line-bot'
+import { pushMessage } from '../api-notify'
 import pkg from '../../package.json'
 
 // const dev = !(process.env.NODE_ENV === 'production')
-// const logger = debuger(pkg.title)
+const logger = debuger(pkg.title)
 
 export const pkgChannel = 'heroku-notify'
 export const pkgName = `LINE-BOT v${pkg.version}`
+
+export const notifyLogs = async ex => {
+  await mongo.open()
+  const { ServiceOauth } = mongo.get()
+  const logs = await ServiceOauth.findOne({ service: 'log', room: 'slog' })
+  if (ex instanceof Error) {
+    ex = ex.message ? `${(ex.message || '').substring(0, 200)}*\n${(ex.stack || '').substring(0, 200)}` : ex
+  }
+  if (!logs || !logs.accessToken) return logger.log(ex)
+  await pushMessage(logs.accessToken, `*${pkgName}*\n\n${ex}`)
+}
 
 // const token = process.env.SLACK_TOKEN
 // const web = new WebClient(token)

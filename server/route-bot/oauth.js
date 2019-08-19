@@ -1,7 +1,7 @@
 import debuger from '@touno-io/debuger'
 import mongo from '../mongodb'
 import { getStatus, setRevoke } from '../api-notify'
-import { webhookMessage, pkgName } from '../helper'
+import { notifyLogs } from '../helper'
 
 const uuid = length => {
   let result = ''
@@ -59,7 +59,7 @@ export default async (req, res) => {
 
         let data = await ServiceOauth.findOne({ state })        
         await ServiceOauth.updateOne({ state }, { $set: { name: body.target, accessToken: access.token.access_token } })
-        await webhookMessage('teams', 'line-notify', { text: `${pkgName}<br>Join room *${body.target}* with service *${data.service}*.` })
+        await notifyLogs(`Join room *${body.target}* with service *${data.service}*`)
       } catch (ex) {
         await ServiceOauth.updateOne({ state }, { $set: { active: false } })
       }
