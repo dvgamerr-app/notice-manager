@@ -40,11 +40,11 @@ const dev = !(process.env.NODE_ENV === 'production')
 const logger = debuger(pkg.title)
 
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }))
- 
-// parse application/jsons
-app.use(bodyParser.json())
+
+const bodyOptions = { limit: '50mb', extended: true }
+// parse application/x-www-form-urlencoded and application/jsons
+app.use(bodyParser.urlencoded(bodyOptions))
+app.use(bodyParser.json(bodyOptions))
 
 app.use('/_health', getHealthStatusHandler)
 app.post('/:bot', postBotHandler)
