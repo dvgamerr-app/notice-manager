@@ -8,7 +8,7 @@ import { Nuxt, Builder } from 'nuxt'
 import pkg from '../package.json'
 import config from '../nuxt.config.js'
 import mongo from './line-bot'
-import { webhookMessage } from './helper'
+import { notifyLogs } from './helper'
 import { lineInitilize, cmdExpire, loggingPushMessage } from './helper/schedule'
 
 import postBotHandler from './route-bot/webhook'
@@ -75,12 +75,6 @@ app.get('/api/stats/slack', getStatsSlack)
 
 logger.log(`MongoDB 'LINE-BOT' Connecting...`)
 
-const catchException = async (ex) => {
-  await webhookMessage('teams', 'heroku', {
-    text: `**${ex.message}**
-${ex.stack}`
-  })
-}
 mongo.open().then(async () => {
   // Init Nuxt.js
   const nuxt = new Nuxt(config)
@@ -93,17 +87,19 @@ mongo.open().then(async () => {
 
   app.use(nuxt.render)
   await app.listen(port, host)
+  await notifyLogs(`Server has listening port is ${port}.`)
   logger.log(`listening port is ${port}.`)
+  
   if (!dev) {
-    lineInitilize().catch(catchException)
-    cron.schedule('0 */3 * * *', () => lineInitilize().catch(catchException), { })
-    cron.schedule('* * * * *', () => cmdExpire().catch(catchException))
-    cron.schedule('5 0 * * *', () => loggingPushMessage().catch(catchException))
+    lineInitilize().catch(notifyLogs)
+    cron.schedule('0 */3 * * *', () => lineInitilize().catch(notifyLogs), { })
+    cron.schedule('* * * * *', () => cmdExpire().catch(notifyLogs))
+    cron.schedule('5 0 * * *', () => loggingPushMessage().catch(notifyLogs))
     cron.schedule('5 3 * * *', async () => {
-      await webhookMessage('teams', 'heroku', { text: 'Server has **terminated** yourself for `reboot` herokuapp every day.' })
+      await notifyLogs('Server has *terminated* yourself for `reboot` herokuapp every day.')
       process.exit()
     })
   }
-}).catch(ex => catchException(ex).then(() => {
+}).catch(ex => notifyLogs(ex).then(() => {
   process.exit()
 }))
