@@ -16,10 +16,10 @@ export const notifyLogs = async ex => {
   const { ServiceOauth } = mongo.get()
   const logs = await ServiceOauth.findOne({ service: 'log', room: 'slog' })
   if (ex instanceof Error) {
-    ex = ex.message ? `${(ex.message || '').substring(0, 200)}*\n${(ex.stack || '').substring(0, 200)}` : ex
+    ex = ex.message ? `*${(ex.message || '').substring(0, 200)}*\n${(ex.stack || '').substring(0, 200)}` : ex
   }
   if (!logs || !logs.accessToken) return logger.log(ex)
-  await pushMessage(logs.accessToken, `*${pkgName}*\n\n${ex}`)
+  await pushMessage(logs.accessToken, `*${pkgName}* ... ${ex}`)
 }
 
 // const token = process.env.SLACK_TOKEN
