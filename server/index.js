@@ -27,6 +27,7 @@ import putBotMessageHandler from './route-bot/push-message'
 import putBotFlexHandler from './route-bot/push-flex'
 // import putSlackMessageHandler from './route-bot/push-slack'
 import putWebhookMessageHandler from './route-bot/push-webhook'
+import postWebhookNotifyHandler from './route-bot/webhook/post-notify'
 
 import getBotCMDHandler from './route-db/bot-cmd'
 import getBotInboundHandler from './route-db/inbound'
@@ -52,6 +53,7 @@ app.put('/:bot/:to?', putBotMessageHandler)
 app.put('/flex/:name/:to', putBotFlexHandler)
 // app.put('/slack/mii/:channel', putSlackMessageHandler)
 app.put('/hook/:type/:webhook', putWebhookMessageHandler)
+app.post('/webhook/:website/:name', postWebhookNotifyHandler)
 
 // API Get Database
 app.get('/db/:bot/cmd', getBotCMDHandler)
@@ -87,10 +89,11 @@ mongo.open().then(async () => {
 
   app.use(nuxt.render)
   await app.listen(port, host)
-  await notifyLogs(`Server has listening port is ${port}.`)
   logger.log(`listening port is ${port}.`)
   
   if (!dev) {
+    await notifyLogs(`Server has listening port is ${port}.`)
+
     lineInitilize().catch(notifyLogs)
     cron.schedule('0 */3 * * *', () => lineInitilize().catch(notifyLogs), { })
     cron.schedule('* * * * *', () => cmdExpire().catch(notifyLogs))
