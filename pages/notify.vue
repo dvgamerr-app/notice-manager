@@ -5,20 +5,20 @@
       <template slot="title">
         <fa icon="plus" /> New Service
       </template>
-      <notify-new :api="api" />
+      <notify-new />
     </b-tab>
     <b-tab title="Join Room">
       <template slot="title">
         <fa icon="plus" /> Join Room
       </template>
-      <notify-join :api="api" />
+      <notify-join />
     </b-tab>
     <b-tab title="Service Manager" active>
-      <notify-list :api="api" :list="list" />
+      <notify-list />
     </b-tab>
     <b-tab title="API Reference">
-      <notify-api :api="api" :sample="sample">
-        <b-card slot="sample" v-if="service && service.length > 0" title="Sample API">
+      <notify-api :sample="sample">
+        <b-card slot="sample" v-if="list && list.length > 0" title="Sample API">
           <b-form inline>
             <label class="mr-2" for="select-service">Service: </label>
             <b-dropdown id="select-service" class="mr-2" :text="`${ sample.service ? sample.service : '[service_name]'}`" variant="outline-info">
@@ -48,6 +48,11 @@ import notifyNew from '../components/notify/new'
 import notifyJoin from '../components/notify/join'
 import notifyList from '../components/notify/list'
 import notifyApi from '../components/notify/api'
+
+import Api from '../model/api'
+import Notify from '../model/notify'
+import Bot from '../model/bot'
+import Webhook from '../model/webhook'
 
 import moment from 'moment'
 
@@ -85,17 +90,19 @@ export default {
       return
     }
 
-    const dashboard = '/api/service/dashboard'
-    let { data, status, statusText } = await $axios(dashboard)
-    if (status !== 200) throw new Error(`Server Down '${dashboard}' is ${statusText}.`)
+    if (!Api.query().first()) {
+      await Api.insert({
+        data: { id: 1, hostname: env.HOST_API, proxyname: env.PROXY_API || env.HOST_API }
+      })
 
-    return {
-      api: {
-        hosts: env.HOST_API,
-        server: env.PROXY_API || env.HOST_API
-      },
-      list: data.service
+      let { data, status, statusText } = await $axios('/api/service/dashboard')
+      if (status !== 200) throw new Error(`Server Down '/api/service/dashboard' is ${statusText}.`)
+
+      for (const item of data.service) await Notify.insert({ data: item })
+      for (const item of data.bot) await Bot.insert({ data: item })
+      for (const item of data.webhook) await Webhook.insert({ data: item })
     }
+    return { }
   },
   methods: {
     getLimitPercent (value, max) {

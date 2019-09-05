@@ -1,18 +1,19 @@
 // User Model
 import { Model } from '@vuex-orm/core'
 
-export default class User extends Model {
+export default class Webhook extends Model {
   static get entity() {
-    return 'users'
+    return 'webhook'
   }
 
   // List of all fields (schema) of the post model. `this.attr` is used
   // for the generic field type. The argument is the default value.
   static fields () {
     return {
-      id: this.attr(null),
+      _id: this.attr(null),
+      botname: this.attr(''),
       name: this.attr(''),
-      email: this.attr('')
+      type: this.attr(''),
     }
   }
 }

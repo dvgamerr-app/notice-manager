@@ -8,7 +8,7 @@
           <b-img class="qr-code" src="~assets/notify-qr.png" />
           <li class="pt-1 pb-1">
             <b-dropdown dropright :text="`Select Service${ add.service ? ` : ${add.service}` : ''}`" variant="outline-info">
-              <b-dropdown-item href="#" v-for="e in service" :key="e._id" @click.prevent="onChangeService(e)">
+              <b-dropdown-item href="#" v-for="e in list()" :key="e._id" @click.prevent="onChangeService(e)">
                 <span v-text="e.name" />
               </b-dropdown-item>
             </b-dropdown>
@@ -31,11 +31,11 @@
   </b-form>
 </template>
 <script>
+import Api from '../../model/api'
+import Notify from '../../model/notify'
 
 export default {
-  props: [ 'api' ],
   data: () => ({
-    list: [],
     check: {
       room: null,
       service: null,
@@ -44,14 +44,6 @@ export default {
     },
     btn: {
       submit: false
-    },
-    data: {
-      name: '',
-      client_id: '',
-      client_secret: '',
-      url: '',
-      type: '',
-      webhook: ''
     },
     add: {
       service: '',
@@ -71,6 +63,12 @@ export default {
   //   }
   // },
   methods: {
+    list () {
+      return Notify.all()
+    },
+    api () {
+      return Api.query().first()
+    },
     onChangeService (e) {
       let vm = this
       vm.add.service = e.service
@@ -90,48 +88,32 @@ export default {
     checkName (name) {
       return !/[^0-9a-z.-]+/g.test(name)
     },
-    async onSubmitNotify (e) {
-      if (!this.data.name || !this.checkName(this.data.name)) {
-        this.check.service = false
-        this.check.client_id = null
-        this.check.client_secret = null
-        this.showToast('Name is empty or not a-z,0-9, and - .')
+    async onJoinRoom (e) {
+      if (!this.add.service) {
+        this.showToast('Select service name in dropdown.')
         return e.preventDefault()
       }
-
-      if (!this.data.client_id) {
-        this.check.client_id = false
-        this.check.service = null
-        this.check.client_secret = null
-        this.showToast('client_id is empty.')
+      if (!this.add.room) {
+        this.check.room = false
+        this.showToast('Input room name.')
         return e.preventDefault()
       }
-
-      if (!this.data.client_secret) {
-        this.check.client_secret = false
-        this.check.client_id = null
-        this.check.service = null
-        this.showToast('client_secret is empty.')
+      if (!this.checkName(this.add.room)) {
+        this.check.room = false
+        this.showToast('Name verify a-z,0-9, and - .')
         return e.preventDefault()
       }
-
-      this.btn.submit = true
-      try {
-        let res = await this.$axios.post('/api/service', this.data)
-        if (res.error) throw new Error(res.error)
-        
-        this.data.name = ''
-        this.data.client_id = ''
-        this.data.client_secret = ''
-        this.check.service = null
-        this.check.client_id = null
-        this.check.client_secret = null
-        // await this.updateService()
-      } catch (ex) {
-        console.error(ex)
+      let { data } = await this.$axios.post('/api/service/check', { room: this.add.room, service: this.add.service })
+      if (data.error) {
+        this.check.room = false
+        this.showToast(data.error)
+        return e.preventDefault()
       }
-      this.btn.submit = false
-    },
+      this.check.room = true
+      window.location.href = `/register-bot/${this.add.service}/${this.add.room || ''}`
+      return e.preventDefault()
+      // this.$router.push(`/register-bot/${this.add.service}/${this.add.room || ''}`, () => this.$router.go(0))
+    }
   }
 }
 </script>

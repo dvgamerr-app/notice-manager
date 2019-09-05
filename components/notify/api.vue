@@ -9,7 +9,7 @@
     <h6>Example code</h6>
     <p class="sample-code p-2 mt-1 border">
       <code>
-      curl -X PUT {{api.server}}/notify/{{sample.service ? sample.service : '[service_name]'}}/{{sample.room ? sample.room : '[room_id]'}} -H "Content-Type: application/json" -d "{ \"message\": \"Testing\nMessage\" }"
+      curl -X PUT {{api().proxyname}}/notify/{{sample.service ? sample.service : '[service_name]'}}/{{sample.room ? sample.room : '[room_id]'}} -H "Content-Type: application/json" -d "{ \"message\": \"Testing\nMessage\" }"
       </code>
     </p>
     <slot name="sample"></slot>
@@ -17,8 +17,10 @@
 </template>
 
 <script>
+import Api from '../../model/api'
+
 export default {
-  props: [ 'api', 'sample' ],
+  props: [ 'sample' ],
   data: () => ({
     param: {
       fields: [
@@ -42,5 +44,10 @@ export default {
       ]
     }
   }),
+  methods: {
+    api () {
+      return Api.query().first()
+    }
+  }
 }
 </script>
