@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div v-if="!$props.list || $props.list.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
+    <div v-if="!list() || list().length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
       No service notify.
     </div>
-    <div v-for="e in $props.list" :key="e._id" @mouseover="() => edit.show = e._id" @mouseleave="() => edit.show = null">
+    <div v-for="e in list()" :key="e._id" @mouseover="() => edit.show = e._id" @mouseleave="() => edit.show = null">
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom mb-1">
         <h6 v-text="e.name" />
         <div v-if="edit.show === e._id" class="menu-notify">
@@ -36,25 +36,10 @@
   </div>
 </template>
 <script>
-// const dashboard = '/api/service/dashboard'
+import Api from '../../model/api'
+import Notify from '../../model/notify'
 
 export default {
-  props: {
-    api: {
-      type: Object,
-      default: () => ({})
-    },
-    list: {
-      type: Array,
-      default: () => []
-    },
-    dataUpdate: {
-      type: Array,
-      default: () => {
-        console.log('default function.')
-      }
-    }
-  },
   data: () => ({
     btn: {
       trash: null
@@ -67,6 +52,12 @@ export default {
     }
   }),
   methods: {
+    api () {
+      return Api.query().first()
+    },
+    list () {
+      return Notify.all()
+    },
     onChangeService (e) {
       let vm = this
       vm.add.service = e.service

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const fs = require('fs')
+// const fs = require('fs')
 
 global._mongo = { connected: () => false }
 let tmp = []
@@ -14,13 +14,13 @@ const { mConn, mMapping } = {
       useCreateIndex: true,
       useNewUrlParser: true,
       connectTimeoutMS: 10000,
-      server: {
-        ssl: true,
-        sslValidate: true,
-        sslCA: [ fs.readFileSync('C:/ProgramData/MongoDB/cert/ca.crt', 'utf8') ],
-        sslCert: fs.readFileSync('C:/ProgramData/MongoDB/cert/client.crt', 'utf8'),
-        sslKey: fs.readFileSync('C:/ProgramData/MongoDB/cert/client.key', 'utf8')
-      }
+      // server: {
+      //   ssl: true,
+      //   sslValidate: true,
+      //   sslCA: [ fs.readFileSync('C:/ProgramData/MongoDB/cert/ca.crt', 'utf8') ],
+      //   sslCert: fs.readFileSync('C:/ProgramData/MongoDB/cert/client.crt', 'utf8'),
+      //   sslKey: fs.readFileSync('C:/ProgramData/MongoDB/cert/client.key', 'utf8')
+      // }
     })
     const ready = global._mongo.readyState
     if (ready !== 1) throw new Error(`MongoDB Connection, ${MONGODB_URI}/${dbname} (State is ${ready})`)
