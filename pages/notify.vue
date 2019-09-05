@@ -1,20 +1,17 @@
 <template>
 <b-container fluid>
   <b-tabs class="aside-bar" pills card vertical no-fade nav-wrapper-class="aside overflow-auto w-fix-280 flex-shrink-0 flex-grow-0 position-relative border-right">
-    <b-tab title="New Service">
-      <template slot="title">
-        <fa icon="plus" /> New Service
-      </template>
-      <notify-new />
-    </b-tab>
-    <b-tab title="Join Room">
+    <!-- <b-tab title="Join Room">
       <template slot="title">
         <fa icon="plus" /> Join Room
       </template>
       <notify-join />
-    </b-tab>
+    </b-tab> -->
     <b-tab title="Service Manager" active>
-      <notify-list />
+      <b-row>
+        <b-col lg="8"><notify-new /></b-col>
+        <b-col lg="4"><notify-list /></b-col>
+      </b-row>
     </b-tab>
     <b-tab title="API Reference">
       <notify-api :sample="sample">
@@ -45,7 +42,7 @@
 
 <script>
 import notifyNew from '../components/notify/new'
-import notifyJoin from '../components/notify/join'
+// import notifyJoin from '../components/notify/join'
 import notifyList from '../components/notify/list'
 import notifyApi from '../components/notify/api'
 
@@ -80,7 +77,7 @@ export default {
   }),
   components: {
     notifyNew,
-    notifyJoin,
+    // notifyJoin,
     notifyList,
     notifyApi
   },
@@ -98,9 +95,15 @@ export default {
       let { data, status, statusText } = await $axios('/api/service/dashboard')
       if (status !== 200) throw new Error(`Server Down '/api/service/dashboard' is ${statusText}.`)
 
-      for (const item of data.service) await Notify.insert({ data: item })
-      for (const item of data.bot) await Bot.insert({ data: item })
-      for (const item of data.webhook) await Webhook.insert({ data: item })
+      for (const item of data.service) {
+        await Notify.insert({ data: item })
+      }
+      for (const item of data.bot) {
+        await Bot.insert({ data: item })
+      }
+      for (const item of data.webhook) {
+        await Webhook.insert({ data: item })
+      }
     }
     return { }
   },

@@ -21,6 +21,7 @@ export default async (req, res) => {
         stats: e.options ? e.options.stats : {}
       })),
       webhook: webhook.map(e => ({
+        _id: e._id,
         botname: e.botname,
         name: e.name,
         type: e.type
