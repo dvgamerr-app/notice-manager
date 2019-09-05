@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const fs = require('fs')
 
 global._mongo = { connected: () => false }
 let tmp = []
@@ -9,7 +10,18 @@ const { mConn, mMapping } = {
     const MONGODB_SERVER = server || process.env.MONGODB_SERVER || 'localhost:27017'
 
     let MONGODB_URI = process.env.MONGODB_URI || `mongodb://${MONGODB_ACCOUNT}${MONGODB_SERVER}/${dbname}?authMode=scram-sha1${IsAdmin ? '&authSource=admin' : ''}`
-    global._mongo = await mongoose.createConnection(MONGODB_URI, { useCreateIndex: true, useNewUrlParser: true, connectTimeoutMS: 10000 })
+    global._mongo = await mongoose.createConnection(MONGODB_URI, {
+      useCreateIndex: true,
+      useNewUrlParser: true,
+      connectTimeoutMS: 10000,
+      server: {
+        ssl: true,
+        sslValidate: true,
+        sslCA: [ fs.readFileSync('C:/ProgramData/MongoDB/cert/ca.crt', 'utf8') ],
+        sslCert: fs.readFileSync('C:/ProgramData/MongoDB/cert/client.crt', 'utf8'),
+        sslKey: fs.readFileSync('C:/ProgramData/MongoDB/cert/client.key', 'utf8')
+      }
+    })
     const ready = global._mongo.readyState
     if (ready !== 1) throw new Error(`MongoDB Connection, ${MONGODB_URI}/${dbname} (State is ${ready})`)
 

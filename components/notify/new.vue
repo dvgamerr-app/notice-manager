@@ -11,8 +11,8 @@
               <b-form-input size="sm" maxlength="40" :state="check.service" v-model.trim="data.name" @keyup.enter="onSubmitNotify($event)" />
             </b-input-group>
           </li>
-          <li>Input <b>Service URL</b> <code>{{ api.hosts }}/</code></li>
-          <li>Input <b>Callback URL</b> <code>{{ api.hosts }}/register-bot</code></li>
+          <li>Input <b>Service URL</b> <code>{{ api().hostname }}/</code></li>
+          <li>Input <b>Callback URL</b> <code>{{ api().hostname }}/register-bot</code></li>
           <li>Click <b>Argee and Contuiue</b> and click <b>Add</b>.</li>
           <li>Goto <a href="https://notify-bot.line.me/my/services/" target="_blank">My Services</a> and click your service.</li>
           <li>Check your email becouse client secret will be valid only after verifying your email address.</li>
@@ -37,9 +37,10 @@
   </b-form>
 </template>
 <script>
+import Api from '../../model/api'
+import Notify from '../../model/notify';
 
 export default {
-  props: [ 'api' ],
   data: () => ({
     list: [],
     check: {
@@ -77,12 +78,12 @@ export default {
   //   }
   // },
   methods: {
+    api () {
+      return Api.query().first()
+    },
     onChangeService (e) {
       let vm = this
       vm.add.service = e.service
-      vm.$nextTick(() => {
-        vm.$refs.room.focus()
-      })
     },
     showToast (msg) {
       this.$bvToast.toast(msg, {
@@ -125,16 +126,23 @@ export default {
       try {
         let res = await this.$axios.post('/api/service', this.data)
         if (res.error) throw new Error(res.error)
-        
+        // await this.updateService()
+        await Notify.insert({
+          _id: null,
+          name: this.data.name ,
+          service: this.data.name,
+          room: []
+        })
+
         this.data.name = ''
         this.data.client_id = ''
         this.data.client_secret = ''
         this.check.service = null
         this.check.client_id = null
         this.check.client_secret = null
-        // await this.updateService()
+        this.showToast('Successful.')
       } catch (ex) {
-        console.error(ex)
+        this.showToast(ex.stack || ex.message)
       }
       this.btn.submit = false
     },
