@@ -32,7 +32,7 @@
         </b-row>
       </b-container>
     </header>
-    <no-ssr>
+    <client-only>
       <div slot="placeholder" class="d-flex justify-content-center m-5">
         <b-spinner />
       </div>
@@ -45,6 +45,6 @@
           </p>
         </b-container>
       </footer>
-    </no-ssr>
+    </client-only>
   </div>
 </template>
