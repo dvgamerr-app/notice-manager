@@ -6,20 +6,16 @@ test:
   tags:
     - windows
     - cmd
-  variables: 
-    ErrorActionPreference: stop 
   only:
     - master
   script:
-    - "C:\\Program Files\\heroku\\bin\\heroku.cmd" whoami
+    - heroku whoami
 
 deploy:
   stage: deploy
   tags:
     - windows
     - cmd
-  variables: 
-    ErrorActionPreference: stop 
   only:
     - master
   script:
