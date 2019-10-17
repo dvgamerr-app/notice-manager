@@ -19,5 +19,5 @@ deploy:
   only:
     - master
   script:
-    - git remote add heroku https://git.heroku.com/intense-citadel-55702.git 
-    - git push heroku master --tags
+    - heroku git:remote -a %HEROKU_APP_NAME%
+    - git push -u heroku --tags
