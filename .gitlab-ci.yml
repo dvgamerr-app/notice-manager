@@ -3,6 +3,9 @@ variables:
 
 test:
   stage: test
+  tags:
+    - windows
+    - cmd
   variables: 
     ErrorActionPreference: stop 
   only:
@@ -10,8 +13,11 @@ test:
   script:
     - heroku whoami
 
-deploy1:
+deploy:
   stage: deploy
+  tags:
+    - windows
+    - cmd
   variables: 
     ErrorActionPreference: stop 
   only:
