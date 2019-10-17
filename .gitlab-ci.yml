@@ -11,7 +11,7 @@ test:
   only:
     - master
   script:
-    - "C:\Program Files\heroku\bin\heroku.cmd" whoami
+    - "C:\\Program Files\\heroku\\bin\\heroku.cmd" whoami
 
 deploy:
   stage: deploy
