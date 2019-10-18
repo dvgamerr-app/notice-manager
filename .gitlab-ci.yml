@@ -1,10 +1,12 @@
 deploy:
+  environment: production
   stage: deploy
   tags:
     - windows
     - cmd
   only:
-    - tags
+    - master
   script:
     - gem install dpl
-    - start /wait "deploy" "dpl --provider=heroku --app=$HEROKU_APP_NAME --api-key=$HEROKU_API_KEY" # security add the heroku api to CI/CD setting
+    - dpl --provider=heroku --app=%HEROKU_APP_NAME% --api-key=%HEROKU_API_KEY%
+    - echo Deploy %HEROKU_APP_NAME%
