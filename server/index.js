@@ -40,7 +40,6 @@ const host = process.env.HOST || '127.0.0.1'
 const dev = !(process.env.NODE_ENV === 'production')
 const logger = debuger(pkg.title)
 
-if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
 // parse application/x-www-form-urlencoded and application/jsons
 const bodyOptions = { limit: '50mb', extended: true }
 app.use(bodyParser.urlencoded(bodyOptions))
