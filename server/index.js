@@ -80,11 +80,11 @@ app.get('/api/check/stats', getCheckStats)
 app.get('/api/stats/bot', getStatsBot)
 app.get('/api/stats/slack', getStatsSlack)
 
-app.use(Sentry.Handlers.errorHandler())
-
 app.get('/debug-sentry', () => {
   throw new Error('My first Sentry error!')
 })
+
+app.use(Sentry.Handlers.errorHandler())
 
 logger.log(`MongoDB 'LINE-BOT' Connecting...`)
 
