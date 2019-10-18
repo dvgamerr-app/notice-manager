@@ -8,7 +8,7 @@ import { Nuxt, Builder } from 'nuxt'
 import pkg from '../package.json'
 import config from '../nuxt.config.js'
 import mongo from './line-bot'
-import { webhookMessage } from './helper'
+import { notifyLogs } from './helper'
 import { lineInitilize, cmdExpire, loggingPushMessage } from './helper/schedule'
 
 import postBotHandler from './route-bot/webhook'
@@ -27,6 +27,7 @@ import putBotMessageHandler from './route-bot/push-message'
 import putBotFlexHandler from './route-bot/push-flex'
 // import putSlackMessageHandler from './route-bot/push-slack'
 import putWebhookMessageHandler from './route-bot/push-webhook'
+import postWebhookNotifyHandler from './route-bot/webhook/post-notify'
 
 import getBotCMDHandler from './route-db/bot-cmd'
 import getBotInboundHandler from './route-db/inbound'
@@ -40,18 +41,19 @@ const dev = !(process.env.NODE_ENV === 'production')
 const logger = debuger(pkg.title)
 
 if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }))
- 
-// parse application/jsons
-app.use(bodyParser.json())
+// parse application/x-www-form-urlencoded and application/jsons
+const bodyOptions = { limit: '50mb', extended: true }
+app.use(bodyParser.urlencoded(bodyOptions))
+app.use(bodyParser.json(bodyOptions))
 
-app.use('/_health', getHealthStatusHandler)
+app.use('/ ', getHealthStatusHandler)
 app.post('/:bot', postBotHandler)
 app.put('/:bot/:to?', putBotMessageHandler)
 app.put('/flex/:name/:to', putBotFlexHandler)
 // app.put('/slack/mii/:channel', putSlackMessageHandler)
 app.put('/hook/:type/:webhook', putWebhookMessageHandler)
+app.post('/webhook/:website/:name', postWebhookNotifyHandler)
+
 
 // API Get Database
 app.get('/db/:bot/cmd', getBotCMDHandler)
@@ -75,12 +77,6 @@ app.get('/api/stats/slack', getStatsSlack)
 
 logger.log(`MongoDB 'LINE-BOT' Connecting...`)
 
-const catchException = async (ex) => {
-  await webhookMessage('teams', 'heroku', {
-    text: `**${ex.message}**
-${ex.stack}`
-  })
-}
 mongo.open().then(async () => {
   // Init Nuxt.js
   const nuxt = new Nuxt(config)
@@ -95,15 +91,17 @@ mongo.open().then(async () => {
   await app.listen(port, host)
   logger.log(`listening port is ${port}.`)
   if (!dev) {
-    lineInitilize().catch(catchException)
-    cron.schedule('0 */3 * * *', () => lineInitilize().catch(catchException), { })
-    cron.schedule('* * * * *', () => cmdExpire().catch(catchException))
-    cron.schedule('5 0 * * *', () => loggingPushMessage().catch(catchException))
+    await notifyLogs(`Server has listening port is ${port}.`)
+    
+    lineInitilize().catch(notifyLogs)
+    cron.schedule('0 */3 * * *', () => lineInitilize().catch(notifyLogs), { })
+    cron.schedule('* * * * *', () => cmdExpire().catch(notifyLogs))
+    cron.schedule('5 0 * * *', () => loggingPushMessage().catch(notifyLogs))
     cron.schedule('5 3 * * *', async () => {
-      await webhookMessage('teams', 'heroku', { text: 'Server has **terminated** yourself for `reboot` herokuapp every day.' })
+      await notifyLogs('Server has *terminated* yourself for `reboot` herokuapp every day.')
       process.exit()
     })
   }
-}).catch(ex => catchException(ex).then(() => {
+}).catch(ex => notifyLogs(ex).then(() => {
   process.exit()
 }))

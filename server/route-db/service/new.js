@@ -1,5 +1,5 @@
 import mongo from '../../mongodb'
-import { webhookMessage, pkgName } from '../../helper'
+import { notifyLogs } from '../../helper'
 
 export default async (req, res) => {
   let data = req.body
@@ -13,7 +13,7 @@ export default async (req, res) => {
       client: data.client_id,
       secret: data.client_secret
     }).save()
-    await webhookMessage('teams', 'line-notify', { text: `${pkgName}<br>Notify service add '${data.name}'.` })
+    await notifyLogs(`Notify service add *${data.name}*`)
   } catch (ex) {
     res.json({ error: ex.message })
   }

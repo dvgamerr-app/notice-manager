@@ -1,7 +1,7 @@
 import debuger from '@touno-io/debuger'
 import mongo from '../mongodb'
 import { setRevoke } from '../api-notify'
-import { webhookMessage, pkgName } from '../helper'
+import { notifyLogs } from '../helper'
 
 const logger = debuger('Notify')
 
@@ -18,7 +18,7 @@ export default async (req, res) => {
     await setRevoke(token.accessToken)
 
     await ServiceOauth.updateOne({ service, room }, { $set: { accessToken: null } })
-    await webhookMessage('teams', 'line-notify', { text: `${pkgName}<br>Rovoke room *${room}* from *${service}*.` })
+    await notifyLogs(`Rovoke room *${room}* from *${service}*`)
     res.json({})
   } catch (ex) {
     logger.error(ex)

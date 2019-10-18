@@ -1,12 +1,16 @@
 module.exports = {
   mode: 'universal',
   head: {
-    titleTemplate: title => `${title ? `${title} · ` : ''}LINE-Notify`
+    titleTemplate: title => `${title ? `${title} · ` : ''}LINE-Notify`,
+    link: [
+      // You don't need that line anymore!
+      { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,700' }
+    ]
   },
   meta: [
     { charset: 'utf-8' },
-    { name: 'application-name', content: 'LINE-Notify' },
-    { name: 'name', content: 'LINE-Notify' },
+    { name: 'application-name', content: 'LINE Notify Manager' },
+    { name: 'name', content: 'LINE Notify Manager' },
     { name: 'description', content: process.env.npm_package_description || '', id: 'desc' },
     { 'http-equiv': 'X-UA-Compatible', content: 'IE=edge' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' },
@@ -24,21 +28,24 @@ module.exports = {
     icons: [
       { src: '/favicon.ico', sizes: '16x16' }
     ],
-    start_url: '/sign-in',
+    start_url: '/',
     display: 'standalone',
     orientation: 'portrait',
     theme_color: '#ffffff',
     background_color: '#ffffff',
     browser_action: {
       default_icon: '/favicon.ico',
-      default_popup: '/sign-in'
+      default_popup: '/'
     }
   },
   icons: {
     sizes: [ 32, 57, 72, 144, 512 ]
   },
   workbox: { },
-  loading: false,
+  loading: {
+    color: '#00B900',
+    height: '2px'
+  },
   css: [
     './assets/basic.scss'
   ],

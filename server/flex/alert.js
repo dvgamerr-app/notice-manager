@@ -9,7 +9,7 @@ module.exports = async (title, msg, line, color = '#009688', flex = false) => {
       layout: 'baseline',
       contents: [
         { type: 'text', weight: 'bold', text: title, size: 'sm', color: color },
-        { type: 'text', weight: 'bold', text: moment().add(7, 'hour').format('D MMM YYYY HH:mm:ss'), size: 'xxs', align: 'end', color: '#9E9E9E' }
+        { type: 'text', weight: 'bold', text: moment().format('D MMM YYYY HH:mm:ss'), size: 'xxs', align: 'end', color: '#9E9E9E' }
       ]
     },
     
