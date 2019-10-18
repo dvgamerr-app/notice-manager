@@ -1,7 +1,7 @@
 import * as sdk from '@line/bot-sdk'
 import debuger from '@touno-io/debuger'
-import mongo from '../mongodb'
-import { onEvents, onCommands } from '../line-bot/cmd'
+import mongo from '../../mongodb'
+import { onEvents, onCommands } from '../../line-bot/cmd'
 
 const logger = debuger('WEBHOOK')
 
