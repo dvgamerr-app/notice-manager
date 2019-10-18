@@ -7,6 +7,5 @@ deploy:
   only:
     - master
   script:
-    - gem install dpl
-    - dpl --provider=heroku --app=%HEROKU_APP_NAME% --api-key=%HEROKU_API_KEY%
     - echo Deploy %HEROKU_APP_NAME%
+    - dpl --provider=heroku --app=%HEROKU_APP_NAME% --api-key=%HEROKU_API_KEY%
