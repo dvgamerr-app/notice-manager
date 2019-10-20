@@ -35,7 +35,7 @@ import getBotInboundHandler from './route-db/inbound'
 import getBotOutboundHandler from './route-db/outbound'
 
 
-Sentry.init({ dsn: 'https://38909eb87f8a41e688697c6b6f5dc81c@sentry.io/1784216' })
+Sentry.init({ dsn: process.env.SENTRY_DSN })
 
 const getHealthStatusHandler = (req, res) => res.sendStatus(200)
 const app = express()
@@ -79,10 +79,6 @@ app.post('/api/service', postServicehandler)
 app.get('/api/check/stats', getCheckStats)
 app.get('/api/stats/bot', getStatsBot)
 app.get('/api/stats/slack', getStatsSlack)
-
-app.get('/debug-sentry', () => {
-  throw new Error('My first Sentry error!')
-})
 
 app.use(Sentry.Handlers.errorHandler())
 
