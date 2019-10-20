@@ -1,19 +1,8 @@
 import numeral from 'numeral'
 import moment from 'moment'
 import request from 'request-promise'
-import { webhookMessage } from './index'
+import { notifyLogs } from './index'
 import mongo from '../line-bot'
-
-const cardMessage = (summary, title, sections) => {
-  return {
-    "@context": "https://schema.org/extensions",
-    "@type": "MessageCard",
-    "themeColor": "0072C6",
-    sections,
-    summary,
-    title
-  }
-}
 
 const loggingExpire = async (month = 3) => {
   if (month <= 0) return
@@ -24,39 +13,41 @@ const loggingExpire = async (month = 3) => {
   let dataOut = await LineOutbound.deleteMany({ created: { $lte: expire } })
   let dataCmd = await LineCMD.deleteMany({ created: { $lte: expire } })
   let rows = dataIn.n + dataOut.n + dataCmd.n
-  return rows > 0 ? {
-    facts: [
-      { name: 'Delete it', value: `${numeral(rows).format('0,0')} rows.`  }
-    ],
-    text: `Logging documents delete if over ${month} months.`
-  } : null
+  return rows > 0 ? [
+    '',
+    '---------------------------------------------------------',
+    `Logging documents delete if over ${month} months.`,
+    ` - Delete it ${numeral(rows).format('0,0')} rows.`
+  ] : null
 }
 
 const loggingStats = async () => {
   const { LineBot, ServiceBot, LineOutbound } = mongo.get()
-  const startOfMonth = moment().startOf('month').toDate()
-
+  const dayFrom = moment().startOf('day').add(-1, 'day').toDate()
+  const dayTo = moment().startOf('day').toDate()
   let facts = []
 
+  facts.push(`*Notify*`)
   for (const bot of (await ServiceBot.find({ active: true }, null, { sort: { service: 1 } }))) {
     let count = await LineOutbound.countDocuments({
       botname: bot.service,
       type: 'notify',
-      created: { $gte: startOfMonth }
+      created: { $gte: dayFrom, $lt: dayTo }
     })
-    facts.push({ name: `Notify: ${bot.name}`, value: `used ${count} times` })
+    if (count > 0) facts.push(` - ${bot.name} used ${count} times`)
   }
 
+  facts.push(`*BOT*`)
   for (const bot of (await LineBot.find({ type: 'line' }, null, { sort: { botname: 1 } }))) {
     let count = await LineOutbound.countDocuments({
       botname: bot.botname,
       type: { $in: [ 'group', 'user', 'room' ] },
-      created: { $gte: startOfMonth }
+      created: { $gte: dayFrom, $lt: dayTo }
     })
-    facts.push({ name: `BOT: ${bot.name}`, value: `used ${count} times` })
+    if (count > 0) facts.push(` - ${bot.name} used ${count} times`)
   }
 
-  return { facts, text: `Logging usage of daily report.` }
+  return facts
 }
 
 export const cmdExpire = async () => {
@@ -68,10 +59,11 @@ export const cmdExpire = async () => {
 
 export const loggingPushMessage = async () => {
   let fect1 = await loggingStats()
-  let fect2 = await loggingExpire()
+  let fect2 = await loggingExpire(3)
 
-  let body = cardMessage('[Heroku] LINE-Notify daily stats.','LINE-Notify daily stats.', ([ fect1, fect2 ]).filter(e => e !== null))
-  await webhookMessage('teams', 'line-notify', body)
+  let body = `[Heroku] *LINE-Notify* daily stats.\n${fect1.join('\n')}${fect2 ? fect2.join('\n') : ''}`
+  
+  await notifyLogs(body)
 }
 
 export const lineInitilize = async () => {

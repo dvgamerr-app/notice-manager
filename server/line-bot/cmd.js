@@ -1,13 +1,15 @@
 import helpFlex from './flex-help'
-import { webhookMessage, pkgName } from '../helper'
+import { notifyLogs } from '../helper'
 
 export const onEvents = {
   'join': async (event) => {
     let sourceId = event.source[`${event.source.type}Id`]
+    await notifyLogs(`Bot your join in ${event.source.type} (${sourceId}).`)
     return sourceId
   },
   'leave': async (event) => {
-    await webhookMessage('teams', 'line-notify', { text: `${pkgName}<br>Bot your remove from ${event.source.type}.` })
+    let sourceId = event.source[`${event.source.type}Id`]
+    await notifyLogs(`Bot your leave from ${event.source.type} (${sourceId}).`)
   }
 }
 

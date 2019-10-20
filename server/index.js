@@ -97,9 +97,9 @@ mongo.open().then(async () => {
   app.use(nuxt.render)
   await app.listen(port, host)
   logger.log(`listening port is ${port}.`)
+  await loggingPushMessage()
   if (!dev) {
     await notifyLogs(`Server has listening port is ${port}.`)
-    
     lineInitilize().catch(notifyLogs)
     cron.schedule('0 */3 * * *', () => lineInitilize().catch(notifyLogs), { })
     cron.schedule('* * * * *', () => cmdExpire().catch(notifyLogs))
