@@ -9,7 +9,7 @@ const objectSwitchCaseSender = async (botname, userTo, sender) => {
     sender = JSON.parse(sender.payload)
     if (sender.username.toLowerCase() === 'gitlab') {
       const fixedMessageSlack = (msg = '') => {
-        return msg.replace(/\u003c/ig, '`').replace(/\u003e/ig, '`').replace(/http:\/\/.*?\|/ig, '')
+        return msg.replace(/\u003c/ig, '`').replace(/\u003e/ig, '` ').replace(/http:\/\/.*?\|/ig, '')
       }
       let message = sender.fallback
       if (sender.attachments.length > 0) {
