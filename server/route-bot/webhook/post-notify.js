@@ -2,7 +2,7 @@ import mongo from '../../mongodb'
 import { sendNotify } from '../../helper'
 
 const objectSwitchCaseSender = async (botname, userTo, sender) => {
-  if (sender.app && sender.app_uuid) {
+  if (sender.app && sender.git_log) {
     // Heroku Message.
     await sendNotify(botname, userTo, ` ... *${sender.app} ${sender.release}*\n${sender.git_log}`)
   } else if (typeof sender.payload === 'string') {
