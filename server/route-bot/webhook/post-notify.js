@@ -1,8 +1,28 @@
 import mongo from '../../mongodb'
+import { sendNotify } from '../../helper'
+
+const objectSwitchCaseSender = async (botname, userTo, sender) => {
+  if (sender.app && sender.app_uuid) {
+    // Heroku Message.
+    await sendNotify(botname, userTo, ` ... *${sender.app} ${sender.release}*\n${sender.git_log}`)
+  } else if (typeof sender.payload === 'string') {
+    sender = JSON.parse(sender.payload)
+    if (sender.username.toLowerCase() === 'gitlab') {
+      const fixedMessageSlack = (msg = '') => {
+        return msg.replace(/\u003c/ig, '`').replace(/\u003e/ig, '`').replace(/http:\/\/.*?\|/ig, '')
+      }
+      let message = sender.fallback
+      if (sender.attachments.length > 0) {
+        for (const attach of sender.attachments) message += `\n${attach.text}`
+      }
+      await sendNotify(`gitlab-${sender.channel || 'notify'}`, 'notification', fixedMessageSlack(message))
+    }
+  }
+}
 
 export default async (req, res) => {
   // Authorization oauth2 URI
-  const { website, name } = req.params
+  const { botname, userTo } = req.params
   // const { message } = req.body
   let outbound = null
   
@@ -10,29 +30,18 @@ export default async (req, res) => {
   const { LineOutbound } = mongo.get()
 
   try {
-  //   if (typeof message !== 'string') throw new Error('Message is undefined.')
-
     outbound = await new LineOutbound({
-      botname: website,
-      userTo: name,
+      botname,
+      userTo,
       type: 'notify',
       sender: req.body || {},
       sended: false,
       error: null,
       created: new Date(),
     }).save()
-
-  //   const token = await ServiceOauth.findOne({ service, room })
-  //   if (!token || !token.accessToken) throw new Error('Service and room not register.')
-
-  //   let { headers } = await pushMessage(token.accessToken, message.replace(/\\n|newline/ig, '\n'))
-  //   let result = {
-  //     remaining: parseInt(headers['x-ratelimit-remaining']),
-  //     image: parseInt(headers['x-ratelimit-imageremaining']),
-  //     reset: parseInt(headers['x-ratelimit-reset']) * 1000
-  //   }
-  //   await ServiceOauth.updateOne({ room, service }, { $set: { limit: result } })
-  //   await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: true } })
+    
+    await objectSwitchCaseSender(botname, userTo, req.body)
+    await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: true } })
     res.json({})
   } catch (ex) {
     if (outbound) await LineOutbound.updateOne({ _id: outbound._id }, { $set: { error: ex.message || ex.toString() } })

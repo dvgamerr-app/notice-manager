@@ -19,6 +19,15 @@ export const notifyLogs = async ex => {
   await pushMessage(logs.accessToken, `*${pkgName}* ... ${ex}`)
 }
 
+export const sendNotify = async (service, room, message) => {
+  if (!service || !room) return logger.log('No service, No room.')
+
+  await mongo.open()
+  const { ServiceOauth } = mongo.get()
+  const oauth = await ServiceOauth.findOne({ service, room })
+  if (!oauth || !oauth.accessToken) return logger.log(`Oauth: ${service} in ${room}, No access token.`)
+  await pushMessage(oauth.accessToken, message)
+}
 // const token = process.env.SLACK_TOKEN
 // const web = new WebClient(token)
 
