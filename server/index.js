@@ -108,6 +108,7 @@ mongo.open().then(async () => {
       process.exit()
     })
   }
-}).catch(ex => notifyLogs(ex).then(() => {
+}).catch(ex => {
+  Sentry.captureException(ex)
   process.exit()
-}))
+})
