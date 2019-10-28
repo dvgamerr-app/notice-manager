@@ -10,7 +10,7 @@ import pkg from '../package.json'
 import config from '../nuxt.config.js'
 import mongo from './line-bot'
 import { notifyLogs } from './helper'
-import { lineInitilize, cmdExpire, loggingPushMessage } from './helper/schedule'
+import { lineInitilize, cmdExpire, checkMongoConn, loggingPushMessage } from './helper/schedule'
 
 import postBotHandler from './route-bot/webhook'
 import getRegisterBotServiceRoomHandler from './route-bot/oauth'
@@ -102,6 +102,7 @@ mongo.open().then(async () => {
     lineInitilize().catch(notifyLogs)
     cron.schedule('0 */3 * * *', () => lineInitilize().catch(notifyLogs), { })
     cron.schedule('* * * * *', () => cmdExpire().catch(notifyLogs))
+    cron.schedule('* * * * *', () => checkMongoConn().catch(notifyLogs))
     cron.schedule('5 0 * * *', () => loggingPushMessage().catch(notifyLogs))
     cron.schedule('5 3 * * *', async () => {
       await notifyLogs('Server has *terminated* yourself for `reboot` herokuapp every day.')

@@ -1,6 +1,7 @@
 import numeral from 'numeral'
 import moment from 'moment'
 import request from 'request-promise'
+import * as Sentry from '@sentry/node'
 import { notifyLogs } from './index'
 import mongo from '../line-bot'
 
@@ -64,6 +65,14 @@ export const loggingPushMessage = async () => {
   let body = `[Heroku] *LINE-Notify* daily stats.\n${fect1.join('\n')}${fect2 ? fect2.join('\n') : ''}`
   
   await notifyLogs(body)
+}
+
+export const checkMongoConn = async () => {
+  await mongo.open()
+  if (!mongo.connected()) {
+    Sentry.captureMessage('MongoDB Connection fail.', Sentry.Severity.Critical)
+    process.exit(0)
+  }
 }
 
 export const lineInitilize = async () => {
