@@ -63,12 +63,12 @@ let endpoint = []
 app.post('/ams/sns/:subscription', (req, res) => {
   const { subscription } = req.params
   webhookLogger(req, res, async () => {
-    console.log(subscription, res.body)
+    console.log(subscription, req.body)
   }, 'amazon', 'sns')
   endpoint[subscription] = {
     arn: req.headers['x-amz-sns-topic-arn'],
     type: req.headers['x-amz-sns-message-type'],
-    id: req.headers['x-amz-sns-message-id']
+    id: req.headers['x-amz-sns-message-id']  
   }
   res.json({})
 })
