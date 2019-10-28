@@ -28,6 +28,36 @@ export const sendNotify = async (service, room, message) => {
   if (!oauth || !oauth.accessToken) return logger.log(`Oauth: ${service} in ${room}, No access token.`)
   await pushMessage(oauth.accessToken, message)
 }
+
+export const webhookLogger = async (req, res, callback, botname = 'webhook', userTo = 'user') => {
+  // Authorization oauth2 URI
+  let outbound = null
+  await mongo.open()
+  const { LineOutbound } = mongo.get()
+
+  try {
+    outbound = await new LineOutbound({
+      botname,
+      userTo,
+      type: 'notify',
+      sender: req.body || {},
+      sended: false,
+      error: null,
+      created: new Date(),
+    }).save()
+    
+    await callback(req, res)
+    await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: true } })
+    res.json({})
+  } catch (ex) {
+    if (outbound) await LineOutbound.updateOne({ _id: outbound._id }, { $set: { error: ex.message || ex.toString() } })
+    res.status(ex.error ? ex.error.status : 500)
+    res.json({ error: (ex.error ? ex.error.message : ex.message || ex) })
+  } finally {
+    res.end()
+  }
+}
+
 // const token = process.env.SLACK_TOKEN
 // const web = new WebClient(token)
 
