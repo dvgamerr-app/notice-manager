@@ -17,6 +17,11 @@ const objectSwitchCaseSender = async (botname, userTo, sender) => {
       }
       await sendNotify(`gitlab-${sender.channel || 'notify'}`, 'notification', fixedMessageSlack(message))
     }
+  } else {
+    console.log('----------------------------------')
+    console.log(botname, userTo)
+    console.log(sender)
+    console.log('----------------------------------')
   }
 }
 
