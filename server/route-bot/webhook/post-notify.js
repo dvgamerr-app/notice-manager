@@ -44,7 +44,7 @@ export default async (req, res) => {
       error: null,
       created: new Date(),
     }).save()
-    
+    console.log(req.headers)
     await objectSwitchCaseSender(botname, userTo, req.body)
     await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: true } })
     res.json({})
