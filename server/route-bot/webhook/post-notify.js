@@ -47,7 +47,26 @@ export default async (req, res) => {
     console.log(req.headers)
     await objectSwitchCaseSender(botname, userTo, req.body)
     await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: true } })
-    res.json({})
+
+    // 'x-amz-sns-message-type': 'SubscriptionConfirmation',
+    // 'x-amz-sns-message-id': '94264ed2-73c3-4cc1-8441-edc5b75606d8',
+    // 'x-amz-sns-topic-arn': 'arn:aws:sns:ap-southeast-1:622994377449:alarm-system-fail',
+    // 'x-request-id': 'ea8ef621-fdbc-4b64-80c0-56d43bde983a',
+    // 'x-forwarded-for': '54.240.199.86',
+    // 'x-request-start': '1572245550473',
+    
+    if (req.headers['x-amz-sns-message-type']) {
+      res.write(`<ConfirmSubscriptionResponse xmlns="http://sns.amazonaws.com/doc/2010-03-31/">
+  <ConfirmSubscriptionResult>
+    <SubscriptionArn>arn:aws:sns:ap-southeast-1:622994377449:alarm-system-fail</SubscriptionArn>
+  </ConfirmSubscriptionResult>
+  <ResponseMetadata>
+    <RequestId>ea8ef621-fdbc-4b64-80c0-56d43bde983a</RequestId>
+  </ResponseMetadata>
+</ConfirmSubscriptionResponse>`)
+    } else {
+      res.json({})
+    }
   } catch (ex) {
     if (outbound) await LineOutbound.updateOne({ _id: outbound._id }, { $set: { error: ex.message || ex.toString() } })
     res.status(ex.error ? ex.error.status : 500)
