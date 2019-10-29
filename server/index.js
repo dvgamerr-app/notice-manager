@@ -31,7 +31,7 @@ import putWebhookMessageHandler from './route-bot/push-webhook'
 import postWebhookNotifyHandler from './route-bot/webhook/post-notify'
 
 import getBotCMDHandler from './route-db/bot-cmd'
-import getBotEnpointHandler from './route-db/bot-endpoint'
+import getBotEndpointHandler from './route-db/bot-endpoint'
 import getBotInboundHandler from './route-db/inbound'
 import getBotOutboundHandler from './route-db/outbound'
 
@@ -61,8 +61,8 @@ app.put('/hook/:type/:webhook', putWebhookMessageHandler)
 app.post('/webhook/:botname/:userTo', postWebhookNotifyHandler)
 
 // API Get Database
-app.get('/db/bot', getBotEnpointHandler)
 app.get('/db/cmd', getBotCMDHandler)
+app.get('/db/cmd/endpoint', getBotEndpointHandler)
 app.get('/db/:bot/cmd', getBotCMDHandler)
 app.post('/db/:bot/cmd/:id', getBotCMDHandler)
 app.get('/db/:bot/inbound', getBotInboundHandler)
