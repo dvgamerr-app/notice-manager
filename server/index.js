@@ -52,7 +52,7 @@ app.use(bodyParser.json(bodyOptions))
 
 app.use(Sentry.Handlers.requestHandler())
 
-app.use('/ ', getHealthStatusHandler)
+app.use('/_health', getHealthStatusHandler)
 app.post('/:bot', postBotHandler)
 app.put('/:bot/:to?', putBotMessageHandler)
 app.put('/flex/:name/:to', putBotFlexHandler)
