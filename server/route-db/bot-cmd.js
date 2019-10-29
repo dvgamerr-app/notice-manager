@@ -4,7 +4,10 @@ export default async (req, res) => {
   let { bot, id } = req.params
   try {
     if (!bot) {
-      let data = await mongo.get('LineCMD').find({}, null, { limit: 100, sort: { created: -1, executed: 1 } })
+      let data = await mongo.get('LineCMD').find({ 
+        executed: false,
+        executing: false
+      }, null, { limit: 100, sort: { created: -1, executed: 1 } })
       res.json(data || [])
     } else if (!id) {
       let filter = { executed: false, executing: false, botname: bot }
