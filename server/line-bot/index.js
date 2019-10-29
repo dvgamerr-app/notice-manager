@@ -12,6 +12,15 @@ mongo.set('LineCMD', 'db-line-cmd', {
   updated: Date,
   created: { type: Date, index: true, default: Date.now }
 })
+mongo.set('LineCMDWebhook', 'db-line-cmd-webhook', {
+  botname: { type: String, index: true },
+  command: String,
+  method: { type: String, default: 'POST' },
+  url: String,
+  active: { type: Boolean, index: true, default: true },
+  created: { type: Date, index: true, default: Date.now }
+})
+
 mongo.set('LineOutbound', 'db-line-outbound', {
   botname: { type: String, index: true },
   userTo: String,
