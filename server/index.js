@@ -9,7 +9,7 @@ import * as Sentry from '@sentry/node'
 import pkg from '../package.json'
 import config from '../nuxt.config.js'
 import mongo from './line-bot'
-import { notifyLogs, webhookLogger } from './helper'
+import { notifyLogs } from './helper'
 import { lineInitilize, cmdExpire, checkMongoConn, loggingPushMessage } from './helper/schedule'
 
 import postBotHandler from './route-bot/webhook'
@@ -59,33 +59,8 @@ app.put('/flex/:name/:to', putBotFlexHandler)
 app.put('/hook/:type/:webhook', putWebhookMessageHandler)
 app.post('/webhook/:botname/:userTo', postWebhookNotifyHandler)
 
-let endpoint = []
-app.post('/ams/sns/:subscription', (req, res) => {
-  const { subscription } = req.params
-  webhookLogger(req, res, async () => {
-    console.log(subscription, req.body)
-  }, 'amazon', 'sns')
-  endpoint[subscription] = {
-    arn: req.headers['x-amz-sns-topic-arn'],
-    type: req.headers['x-amz-sns-message-type'],
-    id: req.headers['x-amz-sns-message-id']  
-  }
-  res.json({})
-})
-app.get('/ams/sns/:subscription', (req, res) => {
-  const { subscription } = req.params
-  if (!endpoint[subscription]) endpoint[subscription] = {}
-  res.end(`<ConfirmSubscriptionResponse xmlns="http://sns.amazonaws.com/doc/2010-03-31/">
-  <ConfirmSubscriptionResult>
-    <SubscriptionArn>${endpoint[subscription].arn}</SubscriptionArn>
-  </ConfirmSubscriptionResult>
-  <ResponseMetadata>
-    <RequestId>${endpoint[subscription].id}</RequestId>
-  </ResponseMetadata>
-</ConfirmSubscriptionResponse>`)
-})
-
 // API Get Database
+app.get('/db/cmd', getBotCMDHandler)
 app.get('/db/:bot/cmd', getBotCMDHandler)
 app.post('/db/:bot/cmd/:id', getBotCMDHandler)
 app.get('/db/:bot/inbound', getBotInboundHandler)
