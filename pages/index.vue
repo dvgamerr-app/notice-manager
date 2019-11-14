@@ -1,17 +1,21 @@
 <template>
   <b-row class="dashboard mt-5 mb-5">
     <b-col>
-      <b-row>
-        <b-col md="8">
-          <b-tabs content-class="mt-3" fill no-fade>
-            <b-tab active>
-              <template slot="title">
-                <fa icon="bell" /> <b><span class="d-none d-md-inline">LINE</span> Notify</b>
-              </template>
+      <b-tabs content-class="mt-3" no-fade>
+        <b-tab active>
+          <template slot="title">
+            <fa icon="bell" /> <b><span class="d-none d-md-inline">LINE</span> Notify</b>
+          </template>
+          <b-row>
+            <b-col md="8">
               <b-form>
                 <b-row class="mb-2">
                   <b-col>
-                    <h4>How to create new service?</h4>
+                    <h4>README</h4>
+                    <p>
+                      ให้สร้าง service ก่อนเพื่อเชื่อมต่อ token กับ line notify แล้วค่อเอา service ที่สร้างไป join เข้าห้องที่ต้องให้ใช้งาน notify.
+                    </p>
+                    <h3>วิธีสร้าง service ใหม่</h3>
                     <ol>
                       <li class="pt-1 pb-1">
                         <b-input-group>
@@ -19,12 +23,12 @@
                           <b-form-input size="sm" maxlength="40" :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmitNotify($event)" />
                         </b-input-group>
                       </li>
-                      <li>Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.</li>
-                      <li>Input <b>Service URL</b> <code>{{ api.hosts }}/</code></li>
-                      <li>Input <b>Callback URL</b> <code>{{ api.hosts }}/register-bot</code></li>
-                      <li>Click <b>Argee and Contuiue</b> and click <b>Add</b>.</li>
-                      <li>Goto <a href="https://notify-bot.line.me/my/services/" target="_blank">My Services</a> and click your service.</li>
-                      <li>Check your email becouse client secret will be valid only after verifying your email address.</li>
+                      <li class="pt-1 pb-1">Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.</li>
+                      <li class="pt-1 pb-1">Input <b>Service URL</b> <code>{{ api.hosts }}/</code></li>
+                      <li class="pt-1 pb-1">Input <b>Callback URL</b> <code>{{ api.hosts }}/register-bot</code></li>
+                      <li class="pt-1 pb-1">Click <b>Argee and Contuiue</b> and click <b>Add</b>.</li>
+                      <li class="pt-1 pb-1">Goto <a href="https://notify-bot.line.me/my/services/" target="_blank">My Services</a> and click your service.</li>
+                      <li class="pt-1 pb-1"><span class="badge badge-warning">IMPORTANT</span> Check your mailbox becouse client secret will be valid after verify in email.</li>
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Client ID</b-input-group-text>
@@ -45,39 +49,79 @@
                 </b-row>
                 <b-row class="mb-2">
                   <b-col>
-                    <b-card title="2. How to add LINE-Notify to room?">
-                      <ol>
-                        <li>Add <b>LINE Notify</b> friend.</li>
-                        <b-img class="qr-code" src="~assets/notify-qr.png" />
-                        <li class="pt-1 pb-1">
-                          <b-dropdown dropright :text="`Select Service${ add.service ? ` : ${add.service}` : ''}`" variant="outline-info">
-                            <b-dropdown-item href="#" v-for="e in service" :key="e._id" @click.prevent="onChangeService(e)">
-                              <span v-text="e.name" />
-                            </b-dropdown-item>
-                          </b-dropdown>
-                        </li>
-                        <li class="pt-1 pb-1">
-                          <b-input-group>
-                            <b-input-group-text>Room name is</b-input-group-text>
-                            <b-form-input ref="room" maxlength="20" :state="check.room" v-model.trim="add.room" @keyup.enter="onJoinRoom($event)" />
-                          </b-input-group>
-                        </li>
-                        <li>Your line account choose room and click <b>agree and connect</b>.</li>
-                        <li>Invite <b>LINE Notify</b> to room your select.</li>
-                      </ol>
-                      <b-card-text>After your remember step and click <b>join room</b>.</b-card-text>
-                      <b-link @click="onJoinRoom($event)">
-                        <fa icon="external-link-alt" /> Join room
-                      </b-link>
-                    </b-card>
+                    <h3>วิธีเอา service ที่สร้าง join เข้ากลุ่มที่ต้องการใช้งาน</h3>
+                    <ol>
+                      <li>Add <b>LINE Notify</b> friend.</li>
+                      <b-img class="qr-code" src="~assets/notify-qr.png" />
+                      <li class="pt-1 pb-1">
+                        <b-dropdown dropright :text="`Select Service${ add.service ? ` : ${add.service}` : ''}`" variant="outline-info">
+                          <b-dropdown-item href="#" v-for="e in service" :key="e._id" @click.prevent="onChangeService(e)">
+                            <span v-text="e.name" />
+                          </b-dropdown-item>
+                        </b-dropdown>
+                      </li>
+                      <li class="pt-1 pb-1">
+                        <b-input-group>
+                          <b-input-group-text>Room name is</b-input-group-text>
+                          <b-form-input ref="room" maxlength="20" :state="check.room" v-model.trim="add.room" @keyup.enter="onJoinRoom($event)" />
+                        </b-input-group>
+                      </li>
+                      <li>Your line account choose room and click <b>agree and connect</b>.</li>
+                      <li>Invite <b>LINE Notify</b> to room your select.</li>
+                    </ol>
+                    <p>After your remember step and click <b>join room</b>.</p>
+                    <b-link @click="onJoinRoom($event)">
+                      <fa icon="external-link-alt" /> Join room
+                    </b-link>
                   </b-col>
                 </b-row>
               </b-form>
-            </b-tab>
-            <b-tab>
-              <template slot="title">
-                <fa :icon="['fab','line']" /> <b><span class="d-none d-md-inline">LINE</span> BOT</b>
-              </template>
+            </b-col>
+            <b-col md="4">
+              <h5><fa icon="bell" /> <b>LINE Notify</b></h5>
+              <div v-if="!service || service.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
+                No service notify.
+              </div>
+              <div v-for="(e, i) in service" :key="e._id" @mouseover="() => edit.show = e._id" @mouseleave="() => edit.show = null">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom mb-1">
+                  <b-form-input v-if="edit.mode === e._id" class="edit-name col-10" maxlength="20" v-model.trim="edit.service" @keyup.enter="onSaveName(e, i)" />
+                  <h6 v-if="edit.mode !== e._id" v-text="e.name" />
+                  <div v-if="edit.show === e._id" class="menu-notify">
+                    <b-btn v-if="edit.mode !== e._id" class="edit" variant="icon" size="sm" @click="onUpdateName(e)"><fa icon="edit" /></b-btn>
+                    <b-btn v-if="edit.mode !== e._id" class="trash" v-b-modal="'trash-' + e._id" variant="icon" size="sm"><fa icon="trash-alt" /></b-btn>
+                  </div>
+                  <b-modal :id="'trash-' + e._id" title="Delete service?" no-fade ok-title="Sure, Delete it." cancel-title="No, Thank."
+                    ok-variant="danger" cancel-variant="default" @ok="onDeleteService(e)">
+                    Your want to delete service '{{ e.name }}' ?
+                  </b-modal>
+                </div>
+                <ul class="line-notify">
+                  <li v-if="!e.room || e.room.length == 0" style="color: #989898;">No room join.</li>
+                  <li v-for="r in e.room" :key="r._id">
+                    <b-btn v-if="btn.trash !== r._id" variant="icon" size="sm" @click.prevent="() => btn.trash = r._id">
+                      <fa :icon="btn.remove !== r._id ? 'trash-alt' : 'circle-notch'" :spin="btn.remove === r._id" />
+                    </b-btn>
+                    <div v-else style="display: inline;">
+                      <b-btn variant="icon" size="sm" @click.prevent="() => btn.trash = null">
+                        <fa icon="times" />
+                      </b-btn>
+                      <b-btn variant="icon" class="text-danger" size="sm" @click.prevent="onRevokeToken(r)">
+                        <fa icon="trash-alt" />
+                      </b-btn>
+                    </div>
+                    {{ r.room }} ({{ r.name }})
+                  </li>
+                </ul>
+              </div>
+            </b-col>
+          </b-row>
+        </b-tab>
+        <b-tab>
+          <template slot="title">
+            <fa :icon="['fab','line']" /> <b><span class="d-none d-md-inline">LINE</span> BOT</b>
+          </template>
+          <b-row>
+            <b-col md="8">
               <b-form>
                 <b-row class="mb-2">
                   <b-col>
@@ -108,11 +152,86 @@
                   </b-col>
                 </b-row>
               </b-form>
-            </b-tab>
-            <b-tab>
-              <template slot="title">
-                <fa icon="link" /> <b>Webhook</b>
-              </template>
+            </b-col>
+            <b-col md="4">
+              <h5>
+                <fa :icon="['fab','line']" /> <b>LINE BOT</b>
+                <b-btn variant="icon" size="sync" @click="onSyncBot"><fa icon="sync-alt" :spin="sync.bot" /></b-btn>
+              </h5>
+              <div v-if="!bot || bot.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
+                No bot line.
+              </div>
+              <div v-for="e in bot" :key="e._id">
+                <h6>{{ e.name }} <small>({{e.stats.limited}})</small></h6>
+                <b-progress :max="e.stats.limited" variant="info" height=".9rem" class="mb-3">
+                  <b-progress-bar :value="getLimitPercent(e.stats.usage, e.stats.limited)" :label-html="String(e.stats.usage)"></b-progress-bar>
+                  <b-progress-bar :value="getDayPercent(e.stats.usage, e.stats.limited)" :show-value="false" variant="default"></b-progress-bar>
+                </b-progress>
+              </div>
+            </b-col>
+          </b-row>
+        </b-tab>
+        <b-tab>
+          <template slot="title">
+            <fa :icon="['fab','line']" /> <b><span class="d-none d-md-inline">LINE</span> CMD</b>
+          </template>
+          <b-row>
+            <b-col md="8">
+              <b-form>
+                <b-row class="mb-2">
+                  <b-col>
+                    <h4>How to create new Line bot?</h4>
+                    <ol>
+                      <li class="pt-1 pb-1">
+                        <b-input-group>
+                          <b-input-group-text>Name</b-input-group-text>
+                          <b-form-input maxlength="40" size="sm" :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmitBot($event)" />
+                        </b-input-group>
+                      </li>
+                      <li class="pt-1 pb-1">
+                        <b-input-group>
+                          <b-input-group-text>Client ID</b-input-group-text>
+                          <b-form-input maxlength="32" size="sm" :state="check.client_id" v-model.trim="row.client_id" @keyup.enter="onSubmitBot($event)" />
+                        </b-input-group>
+                      </li>
+                      <li class="pt-1 pb-1">
+                        <b-input-group>
+                          <b-input-group-text>Client Secret</b-input-group-text>
+                          <b-form-input maxlength="64" size="sm" :state="check.client_secret" v-model.trim="row.client_secret" @keyup.enter="onSubmitBot($event)" />
+                        </b-input-group>
+                      </li>
+                    </ol>
+                    <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" :disabled="btn.submit" @click="onSubmitBot($event)">
+                      <fa v-if="btn.submit" icon="circle-notch" spin /> Create LINE BOT
+                    </b-btn>
+                  </b-col>
+                </b-row>
+              </b-form>
+            </b-col>
+            <b-col md="4">
+              <h5>
+                <fa :icon="['fab','line']" /> <b>LINE BOT</b>
+                <b-btn variant="icon" size="sync" @click="onSyncBot"><fa icon="sync-alt" :spin="sync.bot" /></b-btn>
+              </h5>
+              <div v-if="!bot || bot.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
+                No bot line.
+              </div>
+              <div v-for="e in bot" :key="e._id">
+                <h6>{{ e.name }} <small>({{e.stats.limited}})</small></h6>
+                <b-progress :max="e.stats.limited" variant="info" height=".9rem" class="mb-3">
+                  <b-progress-bar :value="getLimitPercent(e.stats.usage, e.stats.limited)" :label-html="String(e.stats.usage)"></b-progress-bar>
+                  <b-progress-bar :value="getDayPercent(e.stats.usage, e.stats.limited)" :show-value="false" variant="default"></b-progress-bar>
+                </b-progress>
+              </div>
+            </b-col>
+          </b-row>
+        </b-tab>
+        <b-tab>
+          <template slot="title">
+            <fa icon="link" /> <b>Webhook</b>
+          </template>
+          <b-row>
+            <b-col md="8">
               <b-form horizontal>
                 <h4>How to add webhook?</h4>
                 <b-row class="mb-2">
@@ -138,70 +257,22 @@
                   <fa v-if="btn.webhook" icon="circle-notch" spin /> Add Webhook
                 </b-btn>
               </b-form>
-            </b-tab>
-          </b-tabs>
-        </b-col>
-        <b-col md="4">
-          <h5><fa icon="bell" /> <b>LINE Notify</b></h5>
-          <div v-if="!service || service.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
-            No service notify.
-          </div>
-          <div v-for="(e, i) in service" :key="e._id" @mouseover="() => edit.show = e._id" @mouseleave="() => edit.show = null">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom mb-1">
-              <b-form-input v-if="edit.mode === e._id" class="edit-name col-10" maxlength="20" v-model.trim="edit.service" @keyup.enter="onSaveName(e, i)" />
-              <h6 v-if="edit.mode !== e._id" v-text="e.name" />
-              <div v-if="edit.show === e._id" class="menu-notify">
-                <b-btn v-if="edit.mode !== e._id" class="edit" variant="icon" size="sm" @click="onUpdateName(e)"><fa icon="edit" /></b-btn>
-                <b-btn v-if="edit.mode !== e._id" class="trash" v-b-modal="'trash-' + e._id" variant="icon" size="sm"><fa icon="trash-alt" /></b-btn>
+            </b-col>
+            <b-col md="4">
+              <h5>
+                <fa icon="link" /> <b>Webhook</b>
+              </h5>
+              <div v-if="!webhook || webhook.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
+                Webhook not config.
               </div>
-              <b-modal :id="'trash-' + e._id" title="Delete service?" no-fade ok-title="Sure, Delete it." cancel-title="No, Thank."
-                ok-variant="danger" cancel-variant="default">
-                Your want to delete service '{{ e.name }}' ?
-              </b-modal>
-            </div>
-            <ul class="line-notify">
-              <li v-if="!e.room || e.room.length == 0" style="color: #989898;">No room join.</li>
-              <li v-for="r in e.room" :key="r._id">
-                <b-btn v-if="btn.trash !== r._id" variant="icon" size="sm" @click.prevent="() => btn.trash = r._id">
-                  <fa :icon="btn.remove !== r._id ? 'trash-alt' : 'circle-notch'" :spin="btn.remove === r._id" />
-                </b-btn>
-                <div v-else style="display: inline;">
-                  <b-btn variant="icon" size="sm" @click.prevent="() => btn.trash = null">
-                    <fa icon="times" />
-                  </b-btn>
-                  <b-btn variant="icon" class="text-danger" size="sm" @click.prevent="onRevokeToken(r)">
-                    <fa icon="trash-alt" />
-                  </b-btn>
-                </div>
-                {{ r.room }} ({{ r.name }})
-              </li>
-            </ul>
-          </div>
-          <h5>
-            <fa :icon="['fab','line']" /> <b>LINE BOT</b>
-            <b-btn variant="icon" size="sync" @click="onSyncBot"><fa icon="sync-alt" :spin="sync.bot" /></b-btn>
-          </h5>
-          <div v-if="!bot || bot.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
-            No bot line.
-          </div>
-          <div v-for="e in bot" :key="e._id">
-            <h6>{{ e.name }} <small>({{e.stats.limited}})</small></h6>
-            <b-progress :max="e.stats.limited" variant="info" height=".9rem" class="mb-3">
-              <b-progress-bar :value="getLimitPercent(e.stats.usage, e.stats.limited)" :label-html="String(e.stats.usage)"></b-progress-bar>
-              <b-progress-bar :value="getDayPercent(e.stats.usage, e.stats.limited)" :show-value="false" variant="default"></b-progress-bar>
-            </b-progress>
-          </div>
-          <h5>
-            <fa icon="link" /> <b>Webhook</b>
-          </h5>
-          <div v-if="!webhook || webhook.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
-            Webhook not config.
-          </div>
-          <div v-for="e in webhook" :key="e._id" class="mb-1 webhook-channel">
-            <div class="topic" v-text="e.type + ' - ' + e.name" />
-          </div>
-        </b-col>
-      </b-row>
+              <div v-for="e in webhook" :key="e._id" class="mb-1 webhook-channel">
+                <div class="topic" v-text="e.type + ' - ' + e.name" />
+              </div>
+            </b-col>
+          </b-row>
+
+        </b-tab>
+      </b-tabs>
     </b-col>
   </b-row>
 </template>
@@ -378,6 +449,9 @@ export default {
       }
       this.check.room = true
       this.$router.push(`/register-bot/${this.add.service}/${this.add.room || ''}`, () => this.$router.go(0))
+    },
+    async onDeleteService (e) {
+      console.log(e)
     },
     onChangeService (e) {
       let vm = this
