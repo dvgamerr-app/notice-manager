@@ -1,10 +1,8 @@
 import * as sdk from '@line/bot-sdk'
-import debuger from '@touno-io/debuger'
 import mongo from '../../mongodb'
 import { onEvents, onCommands } from '../../line-bot/cmd'
 
 const _VERIFY_TOKEN = '00000000000000000000000000000000'
-const logger = debuger('WEBHOOK')
 
 export default async (req, res) => {
   let { bot } = req.params
@@ -83,7 +81,7 @@ export default async (req, res) => {
       await new LineInbound(Object.assign(events, { botname: bot })).save()
     }
   } catch (ex) {
-    logger.error(ex)
+    console.error(ex)
     res.sendStatus(404)
   } finally {
     res.end()
