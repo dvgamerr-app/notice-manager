@@ -10,14 +10,13 @@ const getID = e => {
 const getRoom = async (botname, id, type) => {
   await mongo.open()
   let LineBotRoom = mongo.get('LineBotRoom')
-  return LineBotRoom.findOne({ botname, id, type }) || {}
+  return (await LineBotRoom.findOne({ botname, id, type })) || {}
 }
 const verifyRoom = async (botname, name) => {
   await mongo.open()
   let LineBotRoom = mongo.get('LineBotRoom')
   return LineBotRoom.findOne({ botname, name })
 }
-
 
 const joinBotRoom = async (botname, id, type) => {
   let room = await getRoom(botname, id, type)
@@ -57,7 +56,7 @@ export const onCommands = {
     if (!room) return
 
     const _active = (room.active) ? 'ON' : '`OFF`'
-    const _api = (room.name && room.active) ? `\nAPI:* ${api}/${botname}/${room.name}` : ''
+    const _api = (room.name && room.active) ? `\n*API:* ${api}/${botname}/${room.name}` : ''
     return `*ID:* \`${getID(event)}\`\n*Name:* ${room.name ? room.name : '`None`'}\n*Active:* ${_active}${_api}`
   },
   'join': async (botname, args, event) => {
