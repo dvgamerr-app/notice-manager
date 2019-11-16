@@ -1,27 +1,90 @@
 import helpFlex from './flex-help'
 import { notifyLogs } from '../helper'
+import mongo from '../mongodb'
+const api = process.env.PROXY_API || 'http://localhost:4000'
+
+const getID = e => e.source[`${e.source.type}Id`]
+const getRoom = async (botname, id, type) => {
+  await mongo.open()
+  let LineBotRoom = mongo.get('LineBotRoom')
+  return await LineBotRoom.findOne({ botname, id, type }) || {}
+}
+const verifyRoom = async (botname, name) => {
+  await mongo.open()
+  let LineBotRoom = mongo.get('LineBotRoom')
+  return (await LineBotRoom.findOne({ botname, name }))
+}
+
+
+const joinBotRoom = async (botname, id, type) => {
+  let room = await getRoom(botname, id, type)
+  let LineBotRoom = mongo.get('LineBotRoom')
+  if (room._id) {
+    await LineBotRoom.updateOne({ _id: room._id }, { $set: { active: true } })
+  } else {
+    await new LineBotRoom({ botname, id, type, name: '' }).save()
+  }
+  return room
+}
+
+const leaveBotRoom = async (botname, id, type) => {
+  await mongo.open()
+  return mongo.get('LineBotRoom').updateOne({ botname, id, type }, { $set: { active: false } })
+}
+const renameBotRoom = async (botname, id, type, name) => {
+  await mongo.open()
+  return mongo.get('LineBotRoom').updateOne({ botname, id, type }, { $set: { name } })
+}
 
 export const onEvents = {
-  'join': async (event) => {
-    let sourceId = event.source[`${event.source.type}Id`]
-    await notifyLogs(`Bot your join in ${event.source.type} (${sourceId}).`)
-    return sourceId
+  'join': async (botname, event) => {
+    await joinBotRoom(botname, getID(event), event.source.type)
+    await notifyLogs(`Bot your join in ${event.source.type} (${getID(event)}).`)
+    return 'มาเลยๆ'
   },
-  'leave': async (event) => {
-    let sourceId = event.source[`${event.source.type}Id`]
-    await notifyLogs(`Bot your leave from ${event.source.type} (${sourceId}).`)
+  'leave': async (botname, event) => {
+    await leaveBotRoom(botname, getID(event), event.source.type)
+    await notifyLogs(`Bot your leave from ${event.source.type} (${getID(event)}).`)
   }
 }
 
 export const onCommands = {
-  'id': async (args, event) => {
-    let sourceId = event.source[`${event.source.type}Id`]
-    return sourceId
+  'id': async (botname, args, event) => {
+    const room = await getRoom(botname, getID(event), event.source.type)
+    const _active = room.active ? 'ON' : '`OFF`'
+    const _api = room.name && room.active ? `\nAPI:* ${api}/${botname}/${room.name}` : ''
+    return `*ID:* ${```${getID(event)}```}\n*Name:* ${room.name ? room.name : '`None`'}\n*Active:* ${_active}${_api}`
   },
-  'help': async (args, event) => {
+  'join': async (botname, args, event) => {
+    await joinBotRoom(botname, getID(event), event.source.type)
+    return 'มาเลยๆ'
+  },
+  'room': async (botname, args) => {
+    let [ name, ] = args || []
+    if (!name) return
+    if (verifyRoom(botname, name)) return ```${name}`` ใช้แล้ว`
+    
+    await renameBotRoom(botname, getID(event), event.source.type, name)
+    return 'เย้!'
+  },
+  'leave': async (botname, args, event, line) => {
+    await leaveBotRoom(botname, getID(event), event.source.type)
+    if (event.source.type === 'user') return `ไม่! จะอยู่`
+
+    await line.replyMessage(event.replyToken, { type: 'text', text: 'ไปก็ได้' })
+    if (event.source.type === 'group') {
+      await line.leaveGroup(getID(event))
+    } else if (event.source.type === 'room') {
+      await line.leaveRoom(getID(event))
+    }
+  },
+  'help': async (botname, args, event) => {
     if (event.source.type === 'user') return helpFlex
   },
-  'api': async () => {
-    return `https://intense-citadel-55702.herokuapp.com/documentation` 
+  'api': async (botname, args, event) => {
+    const room = await getRoom(botname, getID(event), event.source.type)
+    const url = `${api}${botname}/${room.name && room.active ? room.name : getID(event)}`
+    let curl = '```\n' + `curl -X PUT ${url} -H "Content-Type: application/json" -d "{"type":"text","text":"*BOT* Testing Message"}"` + '\n```'
+    return curl
   }
 }

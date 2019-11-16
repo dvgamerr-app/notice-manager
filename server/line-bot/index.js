@@ -56,6 +56,15 @@ mongo.set('LineBot', 'db-line-bot', {
   created: { type: Date, index: true, default: Date.now }
 })
 
+mongo.set('LineBotRoom', 'db-line-bot-room', {
+  botname: { type: String, index: true },
+  name: String,
+  type: String,
+  id: String,
+  active: { type: Boolean, index: true, default: true },
+  created: { type: Date, index: true, default: Date.now }
+})
+
 mongo.set('ServiceBot', 'db-service-bot', {
   name: String,
   service: { type: String, index: true },

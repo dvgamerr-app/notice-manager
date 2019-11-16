@@ -13,9 +13,9 @@
                   <b-col>
                     <h4>README</h4>
                     <p>
-                      ให้สร้าง service ก่อนเพื่อเชื่อมต่อ token กับ line notify แล้วค่อเอา service ที่สร้างไป join เข้าห้องที่ต้องให้ใช้งาน notify.
+                      ให้สร้าง service ก่อนเพื่อเชื่อมต่อ token กับ line notify แล้วค่อยเอา service ที่สร้างไป join เข้าห้องที่ต้องให้ใช้งาน notify.
                     </p>
-                    <h3>วิธีสร้าง service ใหม่</h3>
+                    <h3>วิธีเพิ่ม service ใหม่</h3>
                     <ol>
                       <li class="pt-1 pb-1">
                         <b-input-group>
@@ -28,7 +28,7 @@
                       <li class="pt-1 pb-1">Input <b>Callback URL</b> <code>{{ api.hosts }}/register-bot</code></li>
                       <li class="pt-1 pb-1">Click <b>Argee and Contuiue</b> and click <b>Add</b>.</li>
                       <li class="pt-1 pb-1">Goto <a href="https://notify-bot.line.me/my/services/" target="_blank">My Services</a> and click your service.</li>
-                      <li class="pt-1 pb-1"><span class="badge badge-warning">IMPORTANT</span> Check your mailbox becouse client secret will be valid after verify in email.</li>
+                      <li class="pt-1 pb-1"><span class="badge badge-warning">IMPORTANT</span> <b>Check your mailbox becouse client secret will be valid after verify in email.</b></li>
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Client ID</b-input-group-text>
@@ -49,7 +49,7 @@
                 </b-row>
                 <b-row class="mb-2">
                   <b-col>
-                    <h3>วิธีเอา service ที่สร้าง join เข้ากลุ่มที่ต้องการใช้งาน</h3>
+                    <h3>วิธีใช้ service ที่สร้าง join เข้ากลุ่มที่ต้องการใช้งาน</h3>
                     <ol>
                       <li>Add <b>LINE Notify</b> friend.</li>
                       <b-img class="qr-code" src="~assets/notify-qr.png" />
@@ -125,7 +125,7 @@
               <b-form>
                 <b-row class="mb-2">
                   <b-col>
-                    <h4>How to create new Line bot?</h4>
+                    <h4>วิธีเพิ่ม Bot เพื่อใช้งาน API.</h4>
                     <ol>
                       <li class="pt-1 pb-1">
                         <b-input-group>
