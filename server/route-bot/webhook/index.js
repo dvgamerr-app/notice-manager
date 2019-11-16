@@ -3,6 +3,7 @@ import debuger from '@touno-io/debuger'
 import mongo from '../../mongodb'
 import { onEvents, onCommands } from '../../line-bot/cmd'
 
+const _VERIFY_TOKEN = '00000000000000000000000000000000'
 const logger = debuger('WEBHOOK')
 
 export default async (req, res) => {
@@ -35,6 +36,7 @@ export default async (req, res) => {
 
     if (events.length > 0) {
       for (const e of events) {
+        if (e.replyToken === _VERIFY_TOKEN) continue
         await new LineInbound(Object.assign(e, { botname: bot })).save()
         if (e.type === 'message' && e.message.type === 'text') {
           let { text } = e.message
@@ -56,11 +58,11 @@ export default async (req, res) => {
           if (!e.replyToken || !groups || !onCommands[groups.name]) continue
 
           await LineCMD.updateOne({ _id: cmd._id }, { $set: { executing: true } })
-          let result = await onCommands[groups.name].call(this, args, e, line)
+          let result = await onCommands[groups.name].call(this, bot, args, e, line)
           await LineCMD.updateOne({ _id: cmd._id }, { $set: { executed: true } })
           await lineMessage(e, result)
         } else if (typeof onEvents[e.type] === 'function') {
-          let result = await onEvents[e.type].call(this, e, line)
+          let result = await onEvents[e.type].call(this, bot, e, line)
           await lineMessage(e, result)
         } else if (e.type === 'postback') {
           await new LineCMD({
@@ -82,7 +84,6 @@ export default async (req, res) => {
     }
   } catch (ex) {
     logger.error(ex)
-    console.log(ex)
     res.sendStatus(404)
   } finally {
     res.end()
