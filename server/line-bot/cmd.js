@@ -43,7 +43,7 @@ export const onEvents = {
   'join': async (botname, event) => {
     await joinBotRoom(botname, getID(event), event.source.type)
     await notifyLogs(`Bot your join in ${event.source.type} (${getID(event)}).`)
-    return 'มาเลยๆ'
+    return 'มาแล้วๆ'
   },
   'leave': async (botname, event) => {
     await leaveBotRoom(botname, getID(event), event.source.type)
@@ -60,7 +60,7 @@ export const onCommands = {
   },
   'join': async (botname, args, event) => {
     await joinBotRoom(botname, getID(event), event.source.type)
-    return 'มาเลยๆ'
+    return 'มาแล้วๆ'
   },
   'room': async (botname, args, event) => {
     if (!args || !args[0]) return null
