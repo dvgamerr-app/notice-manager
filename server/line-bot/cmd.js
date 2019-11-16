@@ -3,16 +3,19 @@ import { notifyLogs } from '../helper'
 import mongo from '../mongodb'
 const api = process.env.PROXY_API || 'http://localhost:4000'
 
-const getID = e => e.source[`${e.source.type}Id`]
+const getID = e => {
+  if (!e || !e.source) throw new Error('getID() :: Event is unknow source.')
+  return e.source[`${e.source.type}Id`]
+}
 const getRoom = async (botname, id, type) => {
   await mongo.open()
   let LineBotRoom = mongo.get('LineBotRoom')
-  return await LineBotRoom.findOne({ botname, id, type }) || {}
+  return LineBotRoom.findOne({ botname, id, type }) || {}
 }
 const verifyRoom = async (botname, name) => {
   await mongo.open()
   let LineBotRoom = mongo.get('LineBotRoom')
-  return (await LineBotRoom.findOne({ botname, name }))
+  return LineBotRoom.findOne({ botname, name })
 }
 
 
@@ -59,13 +62,12 @@ export const onCommands = {
     await joinBotRoom(botname, getID(event), event.source.type)
     return 'มาเลยๆ'
   },
-  'room': async (botname, args) => {
-    let [ name, ] = args || []
-    if (!name) return
-    if (verifyRoom(botname, name)) return ```${name}`` ใช้แล้ว`
-    
+  'room': async (botname, args, event) => {
+    if (!args || !args[0]) return null
+
+    if (await verifyRoom(botname, args[0])) return ```${args[0]}`` ใช้แล้ว`
     await renameBotRoom(botname, getID(event), event.source.type, name)
-    return 'เย้!'
+    return `เย้! ``${args[0]}```
   },
   'leave': async (botname, args, event, line) => {
     await leaveBotRoom(botname, getID(event), event.source.type)
@@ -83,7 +85,7 @@ export const onCommands = {
   },
   'api': async (botname, args, event) => {
     const room = await getRoom(botname, getID(event), event.source.type)
-    const url = `${api}${botname}/${room.name && room.active ? room.name : getID(event)}`
+    const url = `${api}/${botname}/${room.name && room.active ? room.name : getID(event)}`
     let curl = '```\n' + `curl -X PUT ${url} -H "Content-Type: application/json" -d "{"type":"text","text":"*BOT* Testing Message"}"` + '\n```'
     return curl
   }

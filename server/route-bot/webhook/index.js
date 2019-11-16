@@ -41,7 +41,7 @@ export default async (req, res) => {
         if (e.type === 'message' && e.message.type === 'text') {
           let { text } = e.message
           let { groups } = /^\/(?<name>[-_a-zA-Z]+)(?<arg>\W.*|)/ig.exec(text) || {}
-          let args = (groups.arg || '').trim().split(' ').filter(e => e !== '')
+          let args = groups.arg.trim().split(' ').filter(e => e !== '')
           let cmd = await new LineCMD({
             botname: bot,
             userId: e.source.userId,
