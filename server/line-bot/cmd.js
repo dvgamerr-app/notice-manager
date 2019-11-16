@@ -58,7 +58,7 @@ export const onCommands = {
 
     const _active = (room.active) ? 'ON' : '`OFF`'
     const _api = (room.name && room.active) ? `\nAPI:* ${api}/${botname}/${room.name}` : ''
-    return `*ID:* ${```${getID(event)}```}\n*Name:* ${room.name ? room.name : '`None`'}\n*Active:* ${_active}${_api}`
+    return `*ID:* \`${getID(event)}\`\n*Name:* ${room.name ? room.name : '`None`'}\n*Active:* ${_active}${_api}`
   },
   'join': async (botname, args, event) => {
     await joinBotRoom(botname, getID(event), event.source.type)
@@ -68,9 +68,9 @@ export const onCommands = {
     const room = await getRoom(botname, getID(event), event.source.type)
     if (!room || !args || !args[0]) return
 
-    if (await verifyRoom(botname, args[0])) return ```${args[0]}`` ใช้แล้ว`
+    if (await verifyRoom(botname, args[0])) return `\`${args[0]}\` ใช้แล้ว`
     await renameBotRoom(botname, getID(event), event.source.type, args[0])
-    return `เย้! ``${args[0]}```
+    return `เย้! \`${args[0]}\``
   },
   'leave': async (botname, args, event, line) => {
     await leaveBotRoom(botname, getID(event), event.source.type)
