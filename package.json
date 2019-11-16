@@ -4,7 +4,7 @@
   "description": "Server notify message to 3party.",
   "main": "index.js",
   "engines": {
-    "node": "10.16.0"
+    "node": "12.13.0"
   },
   "scripts": {
     "dev": "env-cmd nodemon --watch server server/index.js --exec \"npm run eslint && babel-node\"",
