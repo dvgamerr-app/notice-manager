@@ -54,11 +54,13 @@
                       <li>Add <b>LINE Notify</b> friend.</li>
                       <b-img class="qr-code" src="~assets/notify-qr.png" />
                       <li class="pt-1 pb-1">
-                        <b-dropdown dropright :text="`Select Service${ add.service ? ` : ${add.service}` : ''}`" variant="outline-info">
+                        <model-select :options="service" v-model="add.service" placeholder="Select service" />
+
+                        <!-- <b-dropdown dropright :text="`Select Service${ add.service ? ` : ${add.service}` : ''}`" variant="outline-info">
                           <b-dropdown-item href="#" v-for="e in service" :key="e._id" @click.prevent="onChangeService(e)">
                             <span v-text="e.name" />
                           </b-dropdown-item>
-                        </b-dropdown>
+                        </b-dropdown> -->
                       </li>
                       <li class="pt-1 pb-1">
                         <b-input-group>
@@ -85,14 +87,14 @@
               <div v-for="(e, i) in service" :key="e._id" @mouseover="() => edit.show = e._id" @mouseleave="() => edit.show = null">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom mb-1">
                   <b-form-input v-if="edit.mode === e._id" class="edit-name col-10" maxlength="20" v-model.trim="edit.service" @keyup.enter="onSaveName(e, i)" />
-                  <h6 v-if="edit.mode !== e._id" v-text="e.name" />
+                  <h6 v-if="edit.mode !== e._id" v-text="e.text" />
                   <div v-if="edit.show === e._id" class="menu-notify">
                     <b-btn v-if="edit.mode !== e._id" class="edit" variant="icon" size="sm" @click="onUpdateName(e)"><fa icon="edit" /></b-btn>
                     <b-btn v-if="edit.mode !== e._id" class="trash" v-b-modal="'trash-' + e._id" variant="icon" size="sm"><fa icon="trash-alt" /></b-btn>
                   </div>
                   <b-modal :id="'trash-' + e._id" title="Delete service?" no-fade ok-title="Sure, Delete it." cancel-title="No, Thank."
                     ok-variant="danger" cancel-variant="default" @ok="onDeleteService(e)">
-                    Your want to delete service '{{ e.name }}' ?
+                    Your want to delete service '{{ e.text }}' ?
                   </b-modal>
                 </div>
                 <ul class="line-notify">
@@ -109,7 +111,7 @@
                         <fa icon="trash-alt" />
                       </b-btn>
                     </div>
-                    {{ r.room }} ({{ r.name }})
+                    {{ r.value }} ({{ r.text }})
                   </li>
                 </ul>
               </div>
@@ -279,9 +281,13 @@
 
 <script>
 import moment from 'moment'
+import { ModelSelect } from 'vue-search-select'
 const dashboard = '/api/service/dashboard'
 
 export default {
+  components: {
+    ModelSelect
+  },
   data: () => ({
     sync: {
       bot: false,
@@ -480,7 +486,7 @@ export default {
     },
     async onUpdateName (e) {
       this.edit.mode = e._id
-      this.edit.service = e.name
+      this.edit.service = e.text
     },
     async onSyncBot () {
       if (this.sync.bot) return
