@@ -1,12 +1,22 @@
 import * as sdk from '@line/bot-sdk'
 import mongo from '../line-bot'
+import debuger from '@touno-io/debuger'
 
+const logger = debuger('LINE-BOT')
 export default async (req, res) => {
   let { bot, to } = req.params
   
-  const { LineOutbound, LineBot } = mongo.get()
+  const { LineOutbound, LineBot, LineBotRoom } = mongo.get()
   let outbound = null
   try {
+    if (!/^[RUC]{1}/g.test(to) && (!/[0-9a-f]*/.test(to) || to.length !== 32)) {
+      logger.log(' - Find:', bot, to)
+      let room = await LineBotRoom.findOne({ botname: bot, name: to })
+      if (!room || !room.active) throw new Error('Room name is unknow.')
+      to = room.id
+    }
+    logger.log('TO:', to)
+
     const client = await LineBot.findOne({ botname: bot })
     if (!client) throw new Error('LINE API bot is undefined.')
     outbound = await new LineOutbound({
