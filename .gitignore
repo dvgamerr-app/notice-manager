@@ -77,3 +77,4 @@ typings/
 .fusebox/
 
 package-lock.json
+codealike.json
