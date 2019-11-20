@@ -7,7 +7,7 @@ const logger = debuger('Notify')
 export default async (req, res) => {
   // Authorization oauth2 URI
   const { room, service } = req.params
-  const { message } = req.body
+  const { message, imageThumbnail, imageFullsize, stickerPackageId, stickerId, notificationDisabled } = req.body
   let outbound = null
   
   await mongo.open()
@@ -29,7 +29,14 @@ export default async (req, res) => {
     const token = await ServiceOauth.findOne({ service, room })
     if (!token || !token.accessToken) throw new Error('Service and room not register.')
 
-    let { headers } = await pushMessage(token.accessToken, message.replace(/\\n|newline/ig, '\n'))
+    let { headers } = await pushMessage(token.accessToken, {
+      message: message.replace(/\\n|newline/ig, '\n'),
+      imageThumbnail,
+      imageFullsize,
+      stickerPackageId,
+      stickerId,
+      notificationDisabled
+    })
     let result = {
       remaining: parseInt(headers['x-ratelimit-remaining']),
       image: parseInt(headers['x-ratelimit-imageremaining']),
