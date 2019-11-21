@@ -12,6 +12,7 @@ export const pushMessage = async (accessToken, message) => {
   if (typeof message === 'string') {
     message = { message }
   }
+  console.log('pushMessage:', message)
   return request({
     method: 'POST',
     headers: { 'Authorization': `Bearer ${accessToken}` },
