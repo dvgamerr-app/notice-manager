@@ -32,11 +32,11 @@ export default async (req, res) => {
     let sender = {
       message: message.replace(/\\n|newline/ig, '\n')
     }
-    if (imageThumbnail) sender.imageThumbnail = imageThumbnail
-    if (imageFullsize) sender.imageFullsize = imageFullsize
-    if (stickerPackageId) sender.stickerPackageId = stickerPackageId
-    if (stickerId) sender.stickerId = stickerId
-    if (notificationDisabled) sender.notificationDisabled = notificationDisabled
+    if (imageThumbnail != undefined) sender.imageThumbnail = imageThumbnail
+    if (imageFullsize != undefined) sender.imageFullsize = imageFullsize
+    if (stickerPackageId != undefined) sender.stickerPackageId = stickerPackageId
+    if (stickerId != undefined) sender.stickerId = stickerId
+    if (notificationDisabled != undefined) sender.notificationDisabled = notificationDisabled
 
     let { headers } = await pushMessage(token.accessToken, sender)
     let result = {
