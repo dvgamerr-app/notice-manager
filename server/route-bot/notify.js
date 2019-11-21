@@ -29,14 +29,16 @@ export default async (req, res) => {
     const token = await ServiceOauth.findOne({ service, room })
     if (!token || !token.accessToken) throw new Error('Service and room not register.')
 
-    let { headers } = await pushMessage(token.accessToken, {
-      message: message.replace(/\\n|newline/ig, '\n'),
-      imageThumbnail,
-      imageFullsize,
-      stickerPackageId,
-      stickerId,
-      notificationDisabled
-    })
+    let sender = {
+      message: message.replace(/\\n|newline/ig, '\n')
+    }
+    if (imageThumbnail) sender.imageThumbnail = imageThumbnail
+    if (imageFullsize) sender.imageFullsize = imageFullsize
+    if (stickerPackageId) sender.stickerPackageId = stickerPackageId
+    if (stickerId) sender.stickerId = stickerId
+    if (notificationDisabled) sender.notificationDisabled = notificationDisabled
+
+    let { headers } = await pushMessage(token.accessToken, sender)
     let result = {
       remaining: parseInt(headers['x-ratelimit-remaining']),
       image: parseInt(headers['x-ratelimit-imageremaining']),
