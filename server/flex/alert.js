@@ -2,33 +2,62 @@ const request = require('request-promise')
 const moment = require('moment')
 const url = require('./url-bot')
 
-module.exports = async (title, msg, line, color = '#009688', flex = false) => {
-  let contents = [
-    {
-      type: 'box',
-      layout: 'baseline',
-      contents: [
-        { type: 'text', weight: 'bold', text: title, size: 'sm', color: color },
-        { type: 'text', weight: 'bold', text: moment().format('D MMM YYYY HH:mm:ss'), size: 'xxs', align: 'end', color: '#9E9E9E' }
-      ]
-    },
-    
-  ]
-  if (line) {
-    contents.push({ type: 'text', weight: 'bold', text: msg, size: 'xxs', color: '#607d8b' })
-    contents.push({ type: 'separator', margin: 'sm' })
-    contents.push({ type: 'text', margin: 'md', text: line, wrap: true, size: 'xxs', color: '#9e9e9e' })
+module.exports = async (title, msg, detail, color = '#009688', flex = false) => {
+  let contents = [ ]
+
+  if (/\n/.test(msg)) {
+    let [ header1, header2 ] = msg.split(/\n/)
+    contents.push({ type: 'text', weight: 'bold', text: header1, size: 'xs', color: '#666666', decoration: 'none', gravity: 'top', offsetTop: '2px' })
+    contents.push({ type: 'text', weight: 'regular', text: header2, size: 'xxs', color: '#666666', decoration: 'none', style: 'normal', gravity: 'top', wrap: true })
+    msg = header1
   } else {
-    contents.push({ type: 'separator', margin: 'sm' })
-    contents.push({ type: 'text', margin: 'md', weight: 'bold', text: msg, wrap: true, size: 'xxs', color: '#607d8b' })
+    contents.push({ type: 'text', weight: 'regular', text: msg, size: 'xxs', color: '#666666', decoration: 'none', style: 'normal', gravity: 'top', wrap: true })
   }
+
+  if (detail) {
+    contents.push({ type: 'separator', margin: 'sm' })
+    contents.push({ type: 'text', weight: 'regular', text: detail, size: 'xxs', color: '#939393', decoration: 'none', style: 'normal', gravity: 'top', wrap: true, margin: 'sm' })
+  }
+
+ moment().format('D MMM YYYY HH:mm:ss')
   let body = {
     type: 'flex',
-    altText: `[${title}] ${msg}`,
+    altText: `แจ้งเตือน ${msg}`,
     contents: {
       type: 'bubble',
-      styles: { body: { backgroundColor: '#F8F8F8' } },
-      body: { type: 'box', layout: 'vertical', contents: contents }
+      size: 'giga',
+      header: {
+        type: 'box',
+        layout: 'vertical',
+        contents: [
+          {
+            type: 'box',
+            layout: 'vertical',
+            contents: [
+              { type: 'text', text: 'แจ้งเตือน', color: '#ffffff66', size: 'xxs' },
+              { type: 'text', text: title, color: '#ffffff', size: 'md', flex: 4, weight: 'bold' }
+            ]
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            position: 'absolute',
+            offsetEnd: '10px',
+            offsetTop: '15px',
+            contents: [
+              { type: 'text', weight: 'bold', text:  moment().format('D MMM YYYY HH:mm:ss'), size: 'xxs', align: 'end', color: '#ffffff99' }
+            ]
+          }
+        ],
+        spacing: 'md',
+        paddingTop: '5px',
+        paddingStart: '10px',
+        paddingEnd: '10px',
+        paddingBottom: '5px',
+        cornerRadius: 'none',
+        backgroundColor: color
+      },
+      body: { type: 'box', layout: 'vertical', paddingAll: '5px', paddingStart: '10px', cornerRadius: 'none', contents: contents }
     }
   }
   return !flex ? request({ method: 'PUT', url, body, json: true }) : body
