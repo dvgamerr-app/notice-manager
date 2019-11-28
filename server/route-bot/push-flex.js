@@ -4,8 +4,9 @@ import flexError from '../flex/error'
 
 export default async (req, res) => {
   let { name } = req.params
-  req.params.bot = 'health-check'
-  let { app, message, detail } = req.body
+  let { app, message, detail, botname } = req.body
+  req.params.bot = botname || 'health-check'
+
   if (!app || !message) return res.json({ error: 'app, message, detail is undefined.' })
   let data = { params: req.params }
   if (name === 'error') {
