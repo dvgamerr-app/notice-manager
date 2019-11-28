@@ -5,19 +5,17 @@ import * as Sentry from '@sentry/node'
 import { notifyLogs } from './index'
 import mongo from '../line-bot'
 
-const loggingExpire = async (month = 3) => {
-  if (month <= 0) return
-  let expire = moment().add(month * -1, 'month').toDate()
+const loggingExpire = async () => {
   let { LineOutbound, LineInbound, LineCMD } = mongo.get() // LineInbound, LineOutbound, LineCMD, 
   
-  let dataIn = await LineInbound.deleteMany({ created: { $lte: expire } })
-  let dataOut = await LineOutbound.deleteMany({ created: { $lte: expire } })
-  let dataCmd = await LineCMD.deleteMany({ created: { $lte: expire } })
+  let dataIn = await LineInbound.deleteMany({ created: { $lte: moment().add(24 * -1, 'month').toDate() } })
+  let dataOut = await LineOutbound.deleteMany({ created: { $lte: moment().add(24 * -1, 'month').toDate() } })
+  let dataCmd = await LineCMD.deleteMany({ created: { $lte: moment().add(12 * -1, 'month').toDate() } })
   let rows = dataIn.n + dataOut.n + dataCmd.n
   return rows > 0 ? [
     '',
     '---------------------------------------------------------',
-    `Logging documents delete if over ${month} months.`,
+    `Logging documents delete if over year.`,
     ` - Delete it ${numeral(rows).format('0,0')} rows.`
   ] : null
 }
@@ -60,7 +58,7 @@ export const cmdExpire = async () => {
 
 export const loggingPushMessage = async () => {
   let fect1 = await loggingStats()
-  let fect2 = await loggingExpire(3)
+  let fect2 = await loggingExpire()
 
   let body = `[Heroku] *LINE-Notify* daily stats.\n${fect1.join('\n')}${fect2 ? fect2.join('\n') : ''}`
   
