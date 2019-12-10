@@ -13,7 +13,7 @@
         <h6>Example code</h6>
         <p class="sample-code p-2 mt-1 border">
           <code>
-          curl -X PUT {{api.server}}/notify/{{api.notify.service ? api.notify.service : '[service_name]'}}/{{api.notify.room ? api.notify.room : '[room_id]'}} -H "Content-Type: application/json" -d "{ \"message\": \"Testing\nMessage\" }"
+          curl -X PUT {{api.server}}/notify/{{api.notify.service ? api.notify.service : '[service_name]'}}/{{api.notify.room ? api.notify.room : '[room_name]'}} -H "Content-Type: application/json" -d "{ \"message\": \"Testing\nMessage\" }"
           </code>
         </p>
         <b-card v-if="service && service.length > 0" title="Sample API">
@@ -21,13 +21,13 @@
             <label class="mr-2" for="select-service">Service: </label>
             <b-dropdown id="select-service" class="mr-2" :text="`${ api.notify.service ? api.notify.service : '[service_name]'}`" variant="outline-info">
               <b-dropdown-item href="#" v-for="e in getServiceSample" :key="e._id" @click.prevent="onSampleChangeService(e)">
-                <span v-text="e.name" />
+                <span v-text="e.text" />
               </b-dropdown-item>
             </b-dropdown>
             <label class="mr-2" for="select-room">Room: </label>
-            <b-dropdown id="select-room" class="mr-4" :text="`${ api.notify.room ? api.notify.room : '[room_id]'}`" variant="outline-info">
+            <b-dropdown id="select-room" class="mr-4" :text="`${ api.notify.room ? api.notify.room : '[room_name]'}`" variant="outline-info">
               <b-dropdown-item href="#" v-for="e in getRoomSample" :key="e._id" @click.prevent="onSampleChangeRoom(e)">
-                <span v-text="e.name" />
+                <span v-text="e.text" />
               </b-dropdown-item>
             </b-dropdown>
             <b-button variant="outline-warning" @click.prevent="onTestNotify()">Testing</b-button>
@@ -311,7 +311,8 @@ export default {
       this.api.notify.room = '[room_name]'
     },
     onSampleChangeRoom (e) {
-      this.api.notify.room = e.room
+      console.log(e)
+      this.api.notify.room = e.value
     }
   }
 }

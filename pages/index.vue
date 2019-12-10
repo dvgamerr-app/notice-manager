@@ -47,7 +47,7 @@
                     </b-btn>
                   </b-col>
                 </b-row>
-                <b-row class="mb-2">
+                <b-row class="mb-2 mt-5">
                   <b-col>
                     <h3>วิธีใช้ service ที่สร้าง join เข้ากลุ่มที่ต้องการใช้งาน</h3>
                     <ol>
@@ -457,7 +457,9 @@ export default {
       this.$router.push(`/register-bot/${this.add.service}/${this.add.room || ''}`, () => this.$router.go(0))
     },
     async onDeleteService (e) {
-      console.log(e)
+      if (e.room.length > 0) return this.showToast('Please remove room join all before remove service.')
+      await this.$axios.post('/api/service/update', { _id: e._id, active: false })
+      await this.updateService()
     },
     onChangeService (e) {
       let vm = this
@@ -469,7 +471,7 @@ export default {
     async onRevokeToken (r) {
       this.btn.trash = null
       this.btn.remove = r._id
-      let { data } = await this.$axios.put(`/revoke/${r.service}/${r.room}`, { revoke: 'agree' })
+      let { data } = await this.$axios.put(`/revoke/${r.service}/${r.value}`, { revoke: 'agree' })
       if (data.error) return console.log(data.error)
 
       await this.updateService()
@@ -480,9 +482,7 @@ export default {
       this.service[i].name = this.edit.service
       this.edit.mode = null
       this.edit.service = ''
-    },
-    async onSaveActive () {
-      await this.$axios.post('/api/service/update', { active: false })
+      await this.updateService()
     },
     async onUpdateName (e) {
       this.edit.mode = e._id

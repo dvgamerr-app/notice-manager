@@ -3,7 +3,6 @@ module.exports = {
   head: {
     titleTemplate: title => `${title ? `${title} · ` : ''}LINE-Notify`,
     link: [
-      // You don't need that line anymore!
       { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,700' }
     ]
   },
@@ -52,7 +51,7 @@ module.exports = {
   modules: [
     'nuxt-fontawesome',
     'bootstrap-vue/nuxt',
-    '@nuxtjs/axios',
+    '@nuxtjs/axios'
   ],
   fontawesome: {
     component: 'fa',
