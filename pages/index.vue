@@ -164,10 +164,10 @@
                 No bot line.
               </div>
               <div v-for="e in bot" :key="e._id">
-                <h6>{{ e.name }} <small>({{e.stats.limited}})</small></h6>
-                <b-progress :max="e.stats.limited" variant="info" height=".9rem" class="mb-3">
-                  <b-progress-bar :value="getLimitPercent(e.stats.usage, e.stats.limited)" :label-html="String(e.stats.usage)"></b-progress-bar>
-                  <b-progress-bar :value="getDayPercent(e.stats.usage, e.stats.limited)" :show-value="false" variant="default"></b-progress-bar>
+                <b>{{ e.text }} <small>({{ getUsage(e) }})</small></b>
+                <b-progress :max="e.stats.limited" variant="info" height=".9rem" class="mb-3" :animated="e.wait">
+                  <b-progress-bar v-if="!e.wait" :value="getLimitPercent(e.stats.usage, e.stats.limited)" :label-html="String(e.stats.usage)"></b-progress-bar>
+                  <b-progress-bar :value="e.wait ? e.stats.limited : getDayPercent(e.stats.usage, e.stats.limited)" :show-value="false" variant="default"></b-progress-bar>
                 </b-progress>
               </div>
             </b-col>
@@ -212,18 +212,10 @@
             </b-col>
             <b-col md="4">
               <h5>
-                <fa :icon="['fab','line']" /> <b>LINE BOT</b>
-                <b-btn variant="icon" size="sync" @click="onSyncBot"><fa icon="sync-alt" :spin="sync.bot" /></b-btn>
+                <fa :icon="['fab','line']" /> <b>LINE CMD</b>
               </h5>
-              <div v-if="!bot || bot.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
+              <div v-if="!cmd || cmd.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
                 No bot line.
-              </div>
-              <div v-for="e in bot" :key="e._id">
-                <h6>{{ e.name }} <small>({{e.stats.limited}})</small></h6>
-                <b-progress :max="e.stats.limited" variant="info" height=".9rem" class="mb-3">
-                  <b-progress-bar :value="getLimitPercent(e.stats.usage, e.stats.limited)" :label-html="String(e.stats.usage)"></b-progress-bar>
-                  <b-progress-bar :value="getDayPercent(e.stats.usage, e.stats.limited)" :show-value="false" variant="default"></b-progress-bar>
-                </b-progress>
               </div>
             </b-col>
           </b-row>
@@ -280,6 +272,7 @@
 </template>
 
 <script>
+import numeral from 'numeral'
 import moment from 'moment'
 import { ModelSelect } from 'vue-search-select'
 const dashboard = '/api/service/dashboard'
@@ -290,6 +283,7 @@ export default {
   },
   data: () => ({
     sync: {
+      cmd: false,
       bot: false,
       webhook: false
     },
@@ -323,6 +317,7 @@ export default {
     },
     service: [],
     bot: [],
+    cmd: [],
     webhook: []
   }),
   async asyncData ({ req, redirect, env, $axios }) {
@@ -351,6 +346,9 @@ export default {
     title: 'Dashboard'
   }),
   methods: {
+    getUsage ({ stats }) {
+      return numeral(stats.limited - stats.usage).format('0,0')
+    },
     getLimitPercent (value, max) {
       return Math.round(value * max / max)
     },
@@ -491,8 +489,12 @@ export default {
     async onSyncBot () {
       if (this.sync.bot) return
       this.sync.bot = true
-      await this.$axios('/api/stats/bot')
-      await this.updateStats()
+      for (let e of this.bot) {
+        e.wait = true
+        let { data } = await this.$axios(`/api/stats/bot/${e._id}`)
+        e.stats = data
+        e.wait = false
+      }
       this.sync.bot = false
     }
   }

@@ -3,8 +3,7 @@ deploy:
   stage: deploy
   tags:
     - windows
-    - cmd
   only:
-    - master
+    - tags
   script:
-    - echo Deploy %HEROKU_APP_NAME%
+    - dpl --provider=heroku --app=intense-citadel-55702 --api-key=$HEROKU_API_KEY

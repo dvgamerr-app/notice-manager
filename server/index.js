@@ -79,7 +79,7 @@ app.post('/api/service/check', postCheckHandler)
 app.post('/api/service/update', postUpdateHandler)
 app.post('/api/service', postServicehandler)
 app.get('/api/check/stats', getCheckStats)
-app.get('/api/stats/bot', getStatsBot)
+app.get('/api/stats/bot/:id', getStatsBot)
 app.get('/api/stats/slack', getStatsSlack)
 
 app.use(Sentry.Handlers.errorHandler())
