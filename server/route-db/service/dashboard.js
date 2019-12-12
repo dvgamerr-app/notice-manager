@@ -20,7 +20,7 @@ export default async (req, res) => {
         text: e.name,
         value: e.botname,
         stats: e.options && e.options.stats ? e.options.stats : {},
-        room: room.filter(r => r.active).map(e => ({ botname: e.botname, value: e.name, text: e.name, _id: e._id }))
+        room: room.filter(r => r.botname === e.botname && r.active).map(e => ({ botname: e.botname, value: e.name, text: e.name, _id: e._id }))
       })),
       webhook: webhook.map(e => ({
         _id: e._id,

@@ -20,7 +20,7 @@
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Name</b-input-group-text>
-                          <b-form-input size="sm" maxlength="40" :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmitNotify($event)" />
+                          <b-form-input size="sm" maxlength="40" :state="check.service" v-model.trim="addnoti.name" @keyup.enter="onSubmitNotify($event)" />
                         </b-input-group>
                       </li>
                       <li class="pt-1 pb-1">Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.</li>
@@ -32,13 +32,13 @@
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Client ID</b-input-group-text>
-                          <b-form-input size="sm" maxlength="32" :state="check.client_id" v-model.trim="row.client_id" @keyup.enter="onSubmitNotify($event)" />
+                          <b-form-input size="sm" maxlength="32" :state="check.client_id" v-model.trim="addnoti.client_id" @keyup.enter="onSubmitNotify($event)" />
                         </b-input-group>
                       </li>
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Client Secret</b-input-group-text>
-                          <b-form-input size="sm" maxlength="64" :state="check.client_secret" v-model.trim="row.client_secret" @keyup.enter="onSubmitNotify($event)" />
+                          <b-form-input size="sm" maxlength="64" :state="check.client_secret" v-model.trim="addnoti.client_secret" @keyup.enter="onSubmitNotify($event)" />
                         </b-input-group>
                       </li>
                     </ol>
@@ -54,19 +54,17 @@
                       <li>Add <b>LINE Notify</b> friend.</li>
                       <b-img class="qr-code" src="~assets/notify-qr.png" />
                       <li class="pt-1 pb-1">
-                        <model-select :options="service" v-model="add.service" placeholder="Select service" />
-
-                        <!-- <b-dropdown dropright :text="`Select Service${ add.service ? ` : ${add.service}` : ''}`" variant="outline-info">
-                          <b-dropdown-item href="#" v-for="e in service" :key="e._id" @click.prevent="onChangeService(e)">
-                            <span v-text="e.name" />
-                          </b-dropdown-item>
-                        </b-dropdown> -->
-                      </li>
-                      <li class="pt-1 pb-1">
-                        <b-input-group>
-                          <b-input-group-text>Room name is</b-input-group-text>
-                          <b-form-input ref="room" maxlength="20" :state="check.room" v-model.trim="add.room" @keyup.enter="onJoinRoom($event)" />
-                        </b-input-group>
+                        <b-row>
+                          <b-col cols="5">
+                            <model-select :options="service" v-model="add.service" placeholder="Select service" />
+                          </b-col>
+                          <b-col cols="7">
+                            <b-input-group>
+                              <b-input-group-text>Room name is</b-input-group-text>
+                              <b-form-input ref="room" maxlength="20" :state="check.room" v-model.trim="add.room" @keyup.enter="onJoinRoom($event)" />
+                            </b-input-group>
+                          </b-col>
+                        </b-row>
                       </li>
                       <li>Your line account choose room and click <b>agree and connect</b>.</li>
                       <li>Invite <b>LINE Notify</b> to room your select.</li>
@@ -132,19 +130,19 @@
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Name</b-input-group-text>
-                          <b-form-input maxlength="40" size="sm" :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmitBot($event)" />
+                          <b-form-input maxlength="40" size="sm" :state="check.botname" v-model.trim="addbot.name" @keyup.enter="onSubmitBot($event)" />
                         </b-input-group>
                       </li>
                       <li class="pt-1 pb-1">
                         <b-input-group>
-                          <b-input-group-text>Client ID</b-input-group-text>
-                          <b-form-input maxlength="32" size="sm" :state="check.client_id" v-model.trim="row.client_id" @keyup.enter="onSubmitBot($event)" />
+                          <b-input-group-text>Access Token</b-input-group-text>
+                          <b-form-input maxlength="256" size="sm" :state="check.bot_id" v-model.trim="addbot.client_id" @keyup.enter="onSubmitBot($event)" />
                         </b-input-group>
                       </li>
                       <li class="pt-1 pb-1">
                         <b-input-group>
-                          <b-input-group-text>Client Secret</b-input-group-text>
-                          <b-form-input maxlength="64" size="sm" :state="check.client_secret" v-model.trim="row.client_secret" @keyup.enter="onSubmitBot($event)" />
+                          <b-input-group-text>Secret ID</b-input-group-text>
+                          <b-form-input maxlength="32" size="sm" :state="check.bot_secret" v-model.trim="addbot.client_secret" @keyup.enter="onSubmitBot($event)" />
                         </b-input-group>
                       </li>
                     </ol>
@@ -165,8 +163,8 @@
               </div>
               <div v-for="e in bot" :key="e._id">
                 <b>{{ e.text }} <small>({{ getUsage(e) }})</small></b>
-                <b-progress :max="e.stats.limited" variant="info" height=".9rem" class="mb-3" :animated="e.wait">
-                  <b-progress-bar v-if="!e.wait" :value="getLimitPercent(e.stats.usage, e.stats.limited)" :label-html="String(e.stats.usage)"></b-progress-bar>
+                <b-progress :max="e.stats.limited" variant="info" height=".8rem" class="mb-3" :animated="e.wait">
+                  <b-progress-bar :value="e.wait ? 0 : getLimitPercent(e.stats.usage, e.stats.limited)" :label-html="String(e.stats.usage)"></b-progress-bar>
                   <b-progress-bar :value="e.wait ? e.stats.limited : getDayPercent(e.stats.usage, e.stats.limited)" :show-value="false" variant="default"></b-progress-bar>
                 </b-progress>
               </div>
@@ -182,30 +180,7 @@
               <b-form>
                 <b-row class="mb-2">
                   <b-col>
-                    <h4>How to create new Line bot?</h4>
-                    <ol>
-                      <li class="pt-1 pb-1">
-                        <b-input-group>
-                          <b-input-group-text>Name</b-input-group-text>
-                          <b-form-input maxlength="40" size="sm" :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmitBot($event)" />
-                        </b-input-group>
-                      </li>
-                      <li class="pt-1 pb-1">
-                        <b-input-group>
-                          <b-input-group-text>Client ID</b-input-group-text>
-                          <b-form-input maxlength="32" size="sm" :state="check.client_id" v-model.trim="row.client_id" @keyup.enter="onSubmitBot($event)" />
-                        </b-input-group>
-                      </li>
-                      <li class="pt-1 pb-1">
-                        <b-input-group>
-                          <b-input-group-text>Client Secret</b-input-group-text>
-                          <b-form-input maxlength="64" size="sm" :state="check.client_secret" v-model.trim="row.client_secret" @keyup.enter="onSubmitBot($event)" />
-                        </b-input-group>
-                      </li>
-                    </ol>
-                    <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" :disabled="btn.submit" @click="onSubmitBot($event)">
-                      <fa v-if="btn.submit" icon="circle-notch" spin /> Create LINE BOT
-                    </b-btn>
+                    <h4>How to create new CMD event?</h4>
                   </b-col>
                 </b-row>
               </b-form>
@@ -291,17 +266,27 @@ export default {
       room: null,
       service: null,
       client_id: null,
-      client_secret: null
+      client_secret: null,
+      botname: null,
+      bot_id: null,
+      bot_secret: null
     },
     btn: {
       submit: false,
       trash: null,
       remove: null
     },
-    row: {
+    addnoti: {
       name: '',
       client_id: '',
-      client_secret: '',
+      client_secret: ''
+    },
+    addbot: {
+      name: '',
+      client_id: '',
+      client_secret: ''
+    },
+    row: {
       url: '',
       type: '',
       webhook: ''
@@ -346,8 +331,8 @@ export default {
     title: 'Dashboard'
   }),
   methods: {
-    getUsage ({ stats }) {
-      return numeral(stats.limited - stats.usage).format('0,0')
+    getUsage ({ wait, stats }) {
+      return wait ? '...' : numeral(stats.limited - stats.usage).format('0,0')
     },
     getLimitPercent (value, max) {
       return Math.round(value * max / max)
@@ -386,10 +371,48 @@ export default {
       e
     },
     async onSubmitBot (e) {
-      e
+      if (!this.addbot.name || !this.checkName(this.addbot.name)) {
+        this.check.botname = false
+        this.check.bot_id = null
+        this.check.bot_secret = null
+        this.showToast('Name is empty or not a-z,0-9, and - .')
+        return e.preventDefault()
+      }
+
+      if (!this.addbot.client_id) {
+        this.check.bot_id = false
+        this.check.botname = null
+        this.check.bot_secret = null
+        this.showToast('client_id is empty.')
+        return e.preventDefault()
+      }
+
+      if (!this.addbot.client_secret) {
+        this.check.bot_secret = false
+        this.check.bot_id = null
+        this.check.botname = null
+        this.showToast('client_secret is empty.')
+        return e.preventDefault()
+      }
+
+      this.btn.submit = true
+      try {
+        let res = await this.$axios.post('/api/bot', this.addbot)
+        if (res.error) throw new Error(res.error)
+        this.addbot.name = ''
+        this.addbot.client_id = ''
+        this.addbot.client_secret = ''
+        this.check.botname = null
+        this.check.bot_id = null
+        this.check.bot_secret = null
+        await this.updateService()
+      } catch (ex) {
+        console.error(ex)
+      }
+      this.btn.submit = false
     },
     async onSubmitNotify (e) {
-      if (!this.row.name || !this.checkName(this.row.name)) {
+      if (!this.addnoti.name || !this.checkName(this.addnoti.name)) {
         this.check.service = false
         this.check.client_id = null
         this.check.client_secret = null
@@ -397,7 +420,7 @@ export default {
         return e.preventDefault()
       }
 
-      if (!this.row.client_id) {
+      if (!this.addnoti.client_id) {
         this.check.client_id = false
         this.check.service = null
         this.check.client_secret = null
@@ -405,7 +428,7 @@ export default {
         return e.preventDefault()
       }
 
-      if (!this.row.client_secret) {
+      if (!this.addnoti.client_secret) {
         this.check.client_secret = false
         this.check.client_id = null
         this.check.service = null
@@ -415,12 +438,12 @@ export default {
 
       this.btn.submit = true
       try {
-        let res = await this.$axios.post('/api/service', this.row)
+        let res = await this.$axios.post('/api/service', this.addnoti)
         if (res.error) throw new Error(res.error)
         
-        this.row.name = ''
-        this.row.client_id = ''
-        this.row.client_secret = ''
+        this.addnoti.name = ''
+        this.addnoti.client_id = ''
+        this.addnoti.client_secret = ''
         this.check.service = null
         this.check.client_id = null
         this.check.client_secret = null
