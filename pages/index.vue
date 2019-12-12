@@ -20,7 +20,7 @@
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Name</b-input-group-text>
-                          <b-form-input size="sm" maxlength="40" :state="check.service" v-model.trim="addnoti.name" @keyup.enter="onSubmitNotify($event)" />
+                          <b-form-input size="sm" maxlength="40" :state="check.service" v-model.trim="addnoti.name" />
                         </b-input-group>
                       </li>
                       <li class="pt-1 pb-1">Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.</li>
@@ -32,13 +32,13 @@
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Client ID</b-input-group-text>
-                          <b-form-input size="sm" maxlength="32" :state="check.client_id" v-model.trim="addnoti.client_id" @keyup.enter="onSubmitNotify($event)" />
+                          <b-form-input size="sm" maxlength="32" :state="check.client_id" v-model.trim="addnoti.client_id" />
                         </b-input-group>
                       </li>
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Client Secret</b-input-group-text>
-                          <b-form-input size="sm" maxlength="64" :state="check.client_secret" v-model.trim="addnoti.client_secret" @keyup.enter="onSubmitNotify($event)" />
+                          <b-form-input size="sm" maxlength="64" :state="check.client_secret" v-model.trim="addnoti.client_secret" />
                         </b-input-group>
                       </li>
                     </ol>
@@ -129,20 +129,26 @@
                     <ol>
                       <li class="pt-1 pb-1">
                         <b-input-group>
-                          <b-input-group-text>Name</b-input-group-text>
-                          <b-form-input maxlength="40" size="sm" :state="check.botname" v-model.trim="addbot.name" @keyup.enter="onSubmitBot($event)" />
+                          <b-input-group-text>ID</b-input-group-text>
+                          <b-form-input maxlength="40" size="sm" v-model.trim="addbot.id" />
                         </b-input-group>
                       </li>
                       <li class="pt-1 pb-1">
                         <b-input-group>
-                          <b-input-group-text>Access Token</b-input-group-text>
-                          <b-form-input maxlength="256" size="sm" :state="check.bot_id" v-model.trim="addbot.client_id" @keyup.enter="onSubmitBot($event)" />
+                          <b-input-group-text>Name</b-input-group-text>
+                          <b-form-input maxlength="40" size="sm" :state="check.botname" v-model.trim="addbot.name" />
                         </b-input-group>
                       </li>
                       <li class="pt-1 pb-1">
                         <b-input-group>
                           <b-input-group-text>Secret ID</b-input-group-text>
-                          <b-form-input maxlength="32" size="sm" :state="check.bot_secret" v-model.trim="addbot.client_secret" @keyup.enter="onSubmitBot($event)" />
+                          <b-form-input maxlength="32" size="sm" :state="check.bot_secret" v-model.trim="addbot.client_secret" />
+                        </b-input-group>
+                      </li>
+                      <li class="pt-1 pb-1">
+                        <b-input-group>
+                          <b-input-group-text>Access Token</b-input-group-text>
+                          <b-form-input maxlength="256" size="sm" :state="check.bot_id" v-model.trim="addbot.client_id" />
                         </b-input-group>
                       </li>
                     </ol>
@@ -282,6 +288,7 @@ export default {
       client_secret: ''
     },
     addbot: {
+      id: '',
       name: '',
       client_id: '',
       client_secret: ''
@@ -400,6 +407,7 @@ export default {
         let res = await this.$axios.post('/api/bot', this.addbot)
         if (res.error) throw new Error(res.error)
         this.addbot.name = ''
+        this.addbot.id = ''
         this.addbot.client_id = ''
         this.addbot.client_secret = ''
         this.check.botname = null
