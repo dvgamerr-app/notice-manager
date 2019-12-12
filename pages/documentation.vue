@@ -13,24 +13,18 @@
         <h6>Example code</h6>
         <p class="sample-code p-2 mt-1 border">
           <code>
-          curl -X PUT {{api.server}}/notify/{{api.notify.service ? api.notify.service : '[service_name]'}}/{{api.notify.room ? api.notify.room : '[room_name]'}} -H "Content-Type: application/json" -d "{ \"message\": \"Testing\nMessage\" }"
+          curl -X PUT {{api.server}}/notify/{{api.notify.service || '[service_name]'}}/{{api.notify.room || '[room_name]'}} -H "Content-Type: application/json" -d "{ \"message\": \"Testing\nMessage\" }"
           </code>
         </p>
         <b-card v-if="service && service.length > 0" title="Sample API">
           <b-form inline>
             <label class="mr-2" for="select-service">Service: </label>
-            <b-dropdown id="select-service" class="mr-2" :text="`${ api.notify.service ? api.notify.service : '[service_name]'}`" variant="outline-info">
-              <b-dropdown-item href="#" v-for="e in getServiceSample" :key="e._id" @click.prevent="onSampleChangeService(e)">
-                <span v-text="e.text" />
-              </b-dropdown-item>
-            </b-dropdown>
+            <model-select  class="mr-2 col-md-4 col-lg-3" placeholder="Select service"
+              :options="getServiceSample" v-model="api.notify.service" />
             <label class="mr-2" for="select-room">Room: </label>
-            <b-dropdown id="select-room" class="mr-4" :text="`${ api.notify.room ? api.notify.room : '[room_name]'}`" variant="outline-info">
-              <b-dropdown-item href="#" v-for="e in getRoomSample" :key="e._id" @click.prevent="onSampleChangeRoom(e)">
-                <span v-text="e.text" />
-              </b-dropdown-item>
-            </b-dropdown>
-            <b-button variant="outline-warning" @click.prevent="onTestNotify()">Testing</b-button>
+            <model-select  class="mr-2 col-md-4 col-lg-3" placeholder="Select room"
+              :options="getRoomSample" v-model="api.notify.room" :is-disabled="!getRoomSample.length" />
+            <b-button :variant="!getRoomSample.length?'outline-secondary':'outline-warning'" :disabled="!getRoomSample.length" @click.prevent="onTestNotify()">Testing</b-button>
           </b-form>
           <h6>Response</h6>
           <p class="sample-code"><code v-html="api.notify.test || '[show after click testing api.]'" /></p>
@@ -60,14 +54,12 @@
         <b-card v-if="bot && bot.length > 0" title="Sample API">
           <b-form inline>
             <label class="mr-2" for="select-botname">Bot Name: </label>
-            <b-dropdown id="select-botname" class="mr-2" :text="`${ api.bot.name ? api.bot.name : '[name]'}`" variant="outline-info">
-              <b-dropdown-item href="#" v-for="e in getBotnameSample" :key="e._id" @click.prevent="onSampleChangeBotname(e)">
-                <span v-text="e.name" />
-              </b-dropdown-item>
-            </b-dropdown>
-            <label class="mr-2" for="select-botname">userId : </label>
-            <b-input class="mr-4 col-4" v-model="api.bot.to" />
-            <b-button variant="outline-warning" @click.prevent="onTestBot()">Testing</b-button>
+            <model-select  class="mr-2 col-md-4 col-lg-3" placeholder="Select BOT"
+              :options="getBotSample" v-model="api.bot.name" />
+            <label class="mr-2" for="select-botname">Room : </label>
+            <model-select  class="mr-2 col-md-4 col-lg-3" placeholder="Select room"
+              :options="getBotRoomSample" v-model="api.bot.to" :is-disabled="!getBotRoomSample.length" />
+            <b-button :variant="!getBotRoomSample.length?'outline-secondary':'outline-warning'" :disabled="!getBotRoomSample.length" @click.prevent="onTestBot()">Testing</b-button>
           </b-form>
           <h6>Response</h6>
           <p class="sample-code"><code v-html="api.bot.test || '[show after click testing api.]'" /></p>
@@ -95,7 +87,8 @@
               </b-dropdown-item>
             </b-dropdown>
             <label class="mr-2" for="select-botname">userId : </label>
-            <b-input class="mr-4 col-4" v-model="api.flex.to" />
+            <model-select  class="mr-2 col-md-4 col-lg-3" placeholder="Select room"
+              :options="getFlexRoomSample" v-model="api.flex.to" :is-disabled="!getFlexRoomSample.length" />
             <b-button variant="outline-warning" @click.prevent="onTestFlex()">Testing</b-button>
           </b-form>
           <h6>Response</h6>
@@ -113,12 +106,14 @@
 </b-row>
 </template>
 
-
-
 <script>
+import { ModelSelect } from 'vue-search-select'
 const dashboard = '/api/service/dashboard'
 
 export default {
+  components: {
+    ModelSelect
+  },
   data: () => ({
     check: {
       room: null,
@@ -252,15 +247,28 @@ export default {
     title: 'Documentation'
   }),
   computed: {
-    getBotnameSample () {
+    getBotSample () {
       return this.bot
+    },
+    getBotRoomSample () {
+      let bot = this.bot.filter(e => e.value === this.api.bot.name)
+      return bot && bot[0] ? bot[0].room : []
+    },
+    getFlexRoomSample () {
+      let bot = this.bot.filter(e => e.value === 'health-check')
+      return bot && bot[0] ? bot[0].room : []
     },
     getServiceSample () {
       return this.service
     },
     getRoomSample () {
-      let service = this.service.filter(e => e.service === this.api.notify.service)
+      let service = this.service.filter(e => e.value === this.api.notify.service)
       return service && service[0] ? service[0].room : []
+    }
+  },
+  watch: {
+    'api.notify.service' () {
+      this.api.notify.room = ''
     }
   },
   methods: {
@@ -305,14 +313,6 @@ export default {
     },
     onSampleChangeBotname (e) {
       this.api.bot.name = e.botname
-    },
-    onSampleChangeService (e) {
-      this.api.notify.service = e.service
-      this.api.notify.room = '[room_name]'
-    },
-    onSampleChangeRoom (e) {
-      console.log(e)
-      this.api.notify.room = e.value
     }
   }
 }
