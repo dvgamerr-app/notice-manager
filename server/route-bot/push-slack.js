@@ -8,7 +8,7 @@
 //   let outbound = null
 //   try {
 //     let data = sender || { text: message }
-//     if (icon) data.icon_url = `https://intense-citadel-55702.herokuapp.com/${icon}.png`
+//     if (icon) data.icon_url = `http://notice.touno.io/${icon}.png`
 //     outbound = await new LineOutbound({
 //       botname: username,
 //       userTo: channel,

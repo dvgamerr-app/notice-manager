@@ -59,12 +59,7 @@ export default {
     bot: [],
     webhook: []
   }),
-  async asyncData ({ req, redirect, env, $axios }) {
-    if (process.server && req.headers['x-host'] && !/localhost\.com/ig.test(req.headers.host)) {
-      redirect('https://intense-citadel-55702.herokuapp.com')
-      return
-    }
-
+  async asyncData ({ env, $axios }) {
     let { data, status, statusText } = await $axios(dashboard)
     if (status !== 200) throw new Error(`Server Down '${dashboard}' is ${statusText}.`)
     return {

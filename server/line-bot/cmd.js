@@ -20,6 +20,6 @@ export const onCommands = {
     if (event.source.type === 'user') return helpFlex
   },
   'api': async () => {
-    return `https://intense-citadel-55702.herokuapp.com/documentation` 
+    return `http://notice.touno.io/documentation` 
   }
 }

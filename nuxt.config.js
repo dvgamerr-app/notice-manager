@@ -1,5 +1,9 @@
+const production = !(process.env.NODE_ENV === 'development')
+
 module.exports = {
   mode: 'universal',
+  target: 'server',
+  telemetry: false,
   head: {
     titleTemplate: title => `${title ? `${title} · ` : ''}LINE Notify Manager`,
     link: [
@@ -64,5 +68,26 @@ module.exports = {
   env: {
     PROXY_API: process.env.PROXY_API || 'http://localhost:4000',
     HOST_API: process.env.HOST_API || 'http://localhost:4000'
+  },
+  build: {
+    parallel: !production,
+    cache: true,
+    extractCSS: production,
+    optimization: {
+      splitChunks: {
+        cacheGroups: {
+          styles: { name: 'styles', test: /\.(css|vue)$/, chunks: 'all', enforce: true }
+        }
+      }
+    }
+  },
+  server: { port: 3000, host: '0.0.0.0', timing: false },
+  render: {
+    http2: {
+      push: true,
+      pushAssets: (req, res, publicPath, preloadFiles) => preloadFiles
+        .filter(f => f.asType === 'script' && f.file === 'runtime.js')
+        .map(f => `<${publicPath}${f.file}>; rel=preload; as=${f.asType}`)
+    }
   }
 }

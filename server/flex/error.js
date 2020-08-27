@@ -1,7 +1,7 @@
 const request = require('request-promise')
 const moment = require('moment')
 const url = require('./url-bot')
-const img = 'https://intense-citadel-55702.herokuapp.com/static/transparent.png'
+const img = 'http://notice.touno.io/static/transparent.png'
 module.exports = async (app, ex, flex = false) => {
   let body = {
     type: 'flex',
