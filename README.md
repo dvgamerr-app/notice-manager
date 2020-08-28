@@ -19,12 +19,6 @@ npm run dev
 # open browser http://localhost:4000
 ```
 
-### Deploy to Heroku
-```bash
-heroku login
-git push heroku
-```
-
 #### Environment
 
 - `HOST_API` require domain name and api. example 'https://notify.domain.com'
