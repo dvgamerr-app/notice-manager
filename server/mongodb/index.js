@@ -1,3 +1,5 @@
+import getEnv from '../get-env'
+
 const mongoose = require('mongoose')
 // const fs = require('fs')
 
@@ -5,11 +7,11 @@ global._mongo = { connected: () => false }
 let tmp = []
 const { mConn, mMapping } = {
   mConn: async (server, dbname, username, password) => {
-    const IsAdmin = !!process.env.MONGODB_ADMIN
-    const MONGODB_ACCOUNT = process.env.MONGODB_ADMIN || username ? `${username}:${password}@` : ''
-    const MONGODB_SERVER = server || process.env.MONGODB_SERVER || 'localhost:27017'
+    const IsAdmin = !!getEnv('MONGODB_ADMIN')
+    const MONGODB_ACCOUNT = getEnv('MONGODB_ADMIN') || username ? `${username}:${password}@` : ''
+    const MONGODB_SERVER = server || getEnv('MONGODB_SERVER') || 'localhost:27017'
 
-    let MONGODB_URI = process.env.MONGODB_URI || `mongodb://${MONGODB_ACCOUNT}${MONGODB_SERVER}/${dbname}?authMode=scram-sha1${IsAdmin ? '&authSource=admin' : ''}`
+    let MONGODB_URI = getEnv('MONGODB_URI') || `mongodb://${MONGODB_ACCOUNT}${MONGODB_SERVER}/${dbname}?authMode=scram-sha1${IsAdmin ? '&authSource=admin' : ''}`
     global._mongo = await mongoose.createConnection(MONGODB_URI, {
       useCreateIndex: true,
       useNewUrlParser: true,

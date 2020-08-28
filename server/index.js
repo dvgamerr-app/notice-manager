@@ -1,13 +1,15 @@
 import express from 'express'
+import spdy from 'spdy'
 import cron from 'node-cron'
 import debuger from '@touno-io/debuger'
 import bodyParser from 'body-parser'
 import { Nuxt, Builder } from 'nuxt'
-
+import { readFileSync } from 'fs'
 // Import and Set Nuxt.js options
 import pkg from '../package.json'
 import config from '../nuxt.config.js'
 import mongo from './line-bot'
+import getEnv from "./get-env";
 import { notifyLogs } from './helper'
 import { lineInitilize, cmdExpire, loggingPushMessage } from './helper/schedule'
 
@@ -35,12 +37,12 @@ import getBotOutboundHandler from './route-db/outbound'
 
 const getHealthStatusHandler = (req, res) => res.sendStatus(200)
 const app = express()
-const port = process.env.PORT || 4000
-const host = process.env.HOST || '127.0.0.1'
-const dev = !(process.env.NODE_ENV === 'production')
+const port = getEnv('PORT') || 4000
+const host = getEnv('HOST') || '0.0.0.0'
+const dev = !(getEnv('NODE_ENV') === 'production')
 const logger = debuger(pkg.title)
 
-if (!process.env.MONGODB_URI) throw new Error('Mongo connection uri is undefined.')
+if (!getEnv('MONGODB_URI')) throw new Error('Mongo connection uri is undefined.')
 
 const bodyOptions = { limit: '50mb', extended: true }
 // parse application/x-www-form-urlencoded and application/jsons
@@ -79,16 +81,22 @@ logger.log(`MongoDB 'LINE-BOT' Connecting...`)
 
 mongo.open().then(async () => {
   // Init Nuxt.js
+  const options = {}
   const nuxt = new Nuxt(config)
   if (dev) {
     const builder = new Builder(nuxt)
     await builder.build()
   } else {
+    options.key = readFileSync('/certs/notice.touno.io.key')
+    options.cert = readFileSync('/certs/notice.touno.io.crt')
     await nuxt.ready()
   }
 
   app.use(nuxt.render)
-  await app.listen(port, host)
+  // await app.listen(port, host)
+  spdy.createServer(options, app, (err) => {
+    if (err) throw new Error(err)
+  }).listen(port, host)
   logger.log(`listening port is ${port}.`)
   
   if (!dev) {
@@ -98,10 +106,6 @@ mongo.open().then(async () => {
     cron.schedule('0 */3 * * *', () => lineInitilize().catch(notifyLogs), { })
     cron.schedule('* * * * *', () => cmdExpire().catch(notifyLogs))
     cron.schedule('5 0 * * *', () => loggingPushMessage().catch(notifyLogs))
-    cron.schedule('5 3 * * *', async () => {
-      await notifyLogs('Server has *terminated* yourself for `reboot` herokuapp every day.')
-      process.exit()
-    })
   }
 }).catch(ex => notifyLogs(ex).then(() => {
   process.exit()

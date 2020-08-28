@@ -36,7 +36,8 @@
     "nuxt-fontawesome": "^0.4.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
-    "simple-oauth2": "^2.4.0"
+    "simple-oauth2": "^2.4.0",
+    "spdy": "^4.0.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.0",
