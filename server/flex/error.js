@@ -1,7 +1,7 @@
 const request = require('request-promise')
 const url = require('./url-bot')
 module.exports = async (app, ex, flex = false) => {
-  let body = {
+  const body = {
     type: 'flex',
     altText: `พบข้อผิดพลาด [${app}] ${ex.message}`,
     contents: {
@@ -10,7 +10,7 @@ module.exports = async (app, ex, flex = false) => {
       header: {
         type: 'box',
         layout: 'vertical',
-        contents: [ { type: 'filler' } ],
+        contents: [{ type: 'filler' }],
         spacing: 'md',
         backgroundColor: '#f44336',
         cornerRadius: 'none',
@@ -33,7 +33,7 @@ module.exports = async (app, ex, flex = false) => {
       footer: {
         type: 'box',
         layout: 'vertical',
-        contents: [ { type: 'filler' } ],
+        contents: [{ type: 'filler' }],
         cornerRadius: 'none',
         height: '2px',
         paddingAll: '0px',

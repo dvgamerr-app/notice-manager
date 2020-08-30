@@ -3,10 +3,10 @@ const moment = require('moment')
 const url = require('./url-bot')
 
 module.exports = async (title, msg, detail, color = '#009688', flex = false) => {
-  let contents = [ ]
+  const contents = []
 
   if (/\n/.test(msg)) {
-    let [ header1, header2 ] = msg.split(/\n/)
+    const [header1, header2] = msg.split(/\n/)
     contents.push({ type: 'text', weight: 'bold', text: header1, size: 'xs', color: '#666666', decoration: 'none', gravity: 'top', offsetTop: '2px' })
     contents.push({ type: 'text', weight: 'regular', text: header2, size: 'xxs', color: '#666666', decoration: 'none', style: 'normal', gravity: 'top', wrap: true })
     msg = header1
@@ -20,7 +20,7 @@ module.exports = async (title, msg, detail, color = '#009688', flex = false) => 
   }
 
  moment().format('D MMM YYYY HH:mm:ss')
-  let body = {
+  const body = {
     type: 'flex',
     altText: `แจ้งเตือน ${msg}`,
     contents: {
@@ -45,7 +45,7 @@ module.exports = async (title, msg, detail, color = '#009688', flex = false) => 
             offsetEnd: '10px',
             offsetTop: '15px',
             contents: [
-              { type: 'text', weight: 'bold', text:  moment().format('D MMM YYYY HH:mm:ss'), size: 'xxs', align: 'end', color: '#ffffff99' }
+              { type: 'text', weight: 'bold', text: moment().format('D MMM YYYY HH:mm:ss'), size: 'xxs', align: 'end', color: '#ffffff99' }
             ]
           }
         ],
@@ -57,7 +57,7 @@ module.exports = async (title, msg, detail, color = '#009688', flex = false) => 
         cornerRadius: 'none',
         backgroundColor: color
       },
-      body: { type: 'box', layout: 'vertical', paddingAll: '5px', paddingStart: '10px', cornerRadius: 'none', contents: contents }
+      body: { type: 'box', layout: 'vertical', paddingAll: '5px', paddingStart: '10px', cornerRadius: 'none', contents }
     }
   }
   return !flex ? request({ method: 'PUT', url, body, json: true }) : body

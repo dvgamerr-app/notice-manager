@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "env-cmd nodemon --watch server server/index.js",
     "build": "nuxt build",
-    "eslint": "eslint --ext .js --ignore-path .eslintignore .",
+    "eslint": "eslint --fix --ext .js --ignore-path .eslintignore .",
     "start": "node ./server/index.js"
   },
   "keywords": [],

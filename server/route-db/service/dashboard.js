@@ -1,14 +1,14 @@
 import mongo from '../../mongodb'
 
 export default async (req, res) => {
-  let { LineBot, LineBotRoom, ServiceBot, ServiceOauth, ChatWebhook } = mongo.get() // LineInbound, LineOutbound, LineCMD, 
+  const { LineBot, LineBotRoom, ServiceBot, ServiceOauth, ChatWebhook } = mongo.get() // LineInbound, LineOutbound, LineCMD,
   try {
-    let webhook = await ChatWebhook.find({ active: true }, null, { sort: { botname: 1 } })
-    let bot = await LineBot.find({ active: true }, null, { sort: { botname: 1 } })
-    let room = await LineBotRoom.find({ active: true }, null, { sort: { botname: 1, name: 1 } })
-    let service = await ServiceBot.find({ active: true }, null, { sort: { name: 1 } })
-    let oauth = await ServiceOauth.find({ accessToken: { $ne: null } }, null, { sort: { service: 1, name: 1 } })
-    res.json({ 
+    const webhook = await ChatWebhook.find({ active: true }, null, { sort: { botname: 1 } })
+    const bot = await LineBot.find({ active: true }, null, { sort: { botname: 1 } })
+    const room = await LineBotRoom.find({ active: true }, null, { sort: { botname: 1, name: 1 } })
+    const service = await ServiceBot.find({ active: true }, null, { sort: { name: 1 } })
+    const oauth = await ServiceOauth.find({ accessToken: { $ne: null } }, null, { sort: { service: 1, name: 1 } })
+    res.json({
       service: service.map(e => ({
         _id: e._id,
         text: e.name,

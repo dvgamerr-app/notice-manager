@@ -10,19 +10,19 @@ export default async (req, res) => {
   const { id } = req.params
   try {
     const { LineBot } = mongo.get()
-    let date = moment().add(-1, 'day')
-  
-    let { accesstoken } = await LineBot.findOne({ _id: id })
-    const opts = { headers: { 'Authorization': `Bearer ${accesstoken}` }, json: true }
+    const date = moment().add(-1, 'day')
 
-    let quota = await request('https://api.line.me/v2/bot/message/quota', opts)
-    let consumption = await request('https://api.line.me/v2/bot/message/quota/consumption', opts)
-    let reply = await request(`https://api.line.me/v2/bot/message/delivery/reply?date=${date.format('YYYYMMDD')}`, opts)
-    let push = await request(`https://api.line.me/v2/bot/message/delivery/push?date=${date.format('YYYYMMDD')}`, opts)
+    const { accesstoken } = await LineBot.findOne({ _id: id })
+    const opts = { headers: { Authorization: `Bearer ${accesstoken}` }, json: true }
 
-    let stats = {
-      usage : consumption.totalUsage,
-      limited : quota.type === 'limited' ? quota.value : 0,
+    const quota = await request('https://api.line.me/v2/bot/message/quota', opts)
+    const consumption = await request('https://api.line.me/v2/bot/message/quota/consumption', opts)
+    const reply = await request(`https://api.line.me/v2/bot/message/delivery/reply?date=${date.format('YYYYMMDD')}`, opts)
+    const push = await request(`https://api.line.me/v2/bot/message/delivery/push?date=${date.format('YYYYMMDD')}`, opts)
+
+    const stats = {
+      usage: consumption.totalUsage,
+      limited: quota.type === 'limited' ? quota.value : 0,
       reply: reply.status === 'ready' ? reply.success : reply.status,
       push: push.status === 'ready' ? push.success : push.status,
       updated: date.toDate()

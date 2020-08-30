@@ -3,11 +3,11 @@ import mongo from '../mongodb'
 import { getStatus, setRevoke } from '../api-notify'
 import { notifyLogs } from '../helper'
 
-const uuid = length => {
+const uuid = (length) => {
   let result = ''
-  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  for (let i = 0; i < length; i++ ) {
-     result += characters.charAt(Math.floor(Math.random() * characters.length));
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  for (let i = 0; i < length; i++) {
+     result += characters.charAt(Math.floor(Math.random() * characters.length))
   }
   return result
 }
@@ -21,16 +21,16 @@ export default async (req, res) => {
   const redirect_uri = `${hosts}/register-bot`
   const response_type = 'code'
   const scope = 'notify'
-  
+
   try {
     await mongo.open()
     const { ServiceOauth, ServiceBot } = mongo.get()
 
     if (code) {
-      let oauth = await ServiceOauth.findOne({ state })
+      const oauth = await ServiceOauth.findOne({ state })
 
-      let bot = await ServiceBot.findOne({ service: oauth.service })
-      let credentials = {
+      const bot = await ServiceBot.findOne({ service: oauth.service })
+      const credentials = {
         client: { id: bot.client, secret: bot.secret },
         auth: { tokenHost: 'https://notify-bot.line.me/' },
         options: { bodyFormat: 'form' }
@@ -43,7 +43,7 @@ export default async (req, res) => {
         client_id: credentials.client.id,
         client_secret: credentials.client.secret
       }
-      
+
       if (oauth.accessToken) {
         try {
           await setRevoke(oauth.accessToken)
@@ -55,9 +55,9 @@ export default async (req, res) => {
       try {
         const result = await oauth2.authorizationCode.getToken(tokenConfig)
         const access = oauth2.accessToken.create(result)
-        let { body } = await getStatus(access.token.access_token)
+        const { body } = await getStatus(access.token.access_token)
 
-        let data = await ServiceOauth.findOne({ state })        
+        const data = await ServiceOauth.findOne({ state })
         await ServiceOauth.updateOne({ state }, { $set: { name: body.target, accessToken: access.token.access_token } })
         await notifyLogs(`Join room *${body.target}* with service *${data.service}*`)
       } catch (ex) {
@@ -68,12 +68,12 @@ export default async (req, res) => {
     } else if (error) {
       return res.redirect(hosts)
     } else {
-      if (!service || !room) return res.sendStatus(404)
+      if (!service || !room) { return res.sendStatus(404) }
 
-      let bot = await ServiceBot.findOne({ service })
-      if (!bot) return res.sendStatus(404)
-    
-      let credentials = {
+      const bot = await ServiceBot.findOne({ service })
+      if (!bot) { return res.sendStatus(404) }
+
+      const credentials = {
         client: { id: bot.client, secret: bot.secret },
         auth: { tokenHost: 'https://notify-bot.line.me/' },
         options: { bodyFormat: 'form' }

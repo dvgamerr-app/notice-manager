@@ -68,7 +68,7 @@ module.exports = {
     height: '2px'
   },
   css: [
-    '~/assets/index.scss',
+    '~/assets/index.scss'
   ],
   plugins: [
     '~/plugins/vue-focus.js',

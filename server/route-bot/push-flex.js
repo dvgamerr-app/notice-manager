@@ -1,14 +1,14 @@
-import pushMessagehandler from './push-message'
 import flexAlert from '../flex/alert'
 import flexError from '../flex/error'
+import pushMessagehandler from './push-message'
 
 export default async (req, res) => {
-  let { name } = req.params
-  let { app, message, detail, botname } = req.body
+  const { name } = req.params
+  const { app, message, detail, botname } = req.body
   req.params.bot = botname || 'health-check'
 
-  if (!app || !message) return res.json({ error: 'app, message, detail is undefined.' })
-  let data = { params: req.params }
+  if (!app || !message) { return res.json({ error: 'app, message, detail is undefined.' }) }
+  const data = { params: req.params }
   if (name === 'error') {
     data.body = await flexError(app, { message, stack: detail }, true)
     await pushMessagehandler(data, res)

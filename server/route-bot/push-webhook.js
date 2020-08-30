@@ -13,7 +13,7 @@ export default async (req, res) => {
       sender: req.body,
       sended: false,
       error: null,
-      created: new Date(),
+      created: new Date()
     }).save()
     await webhookMessage(type, webhook, req.body)
     await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: true } })

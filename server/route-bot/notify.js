@@ -9,12 +9,12 @@ export default async (req, res) => {
   const { room, service } = req.params
   const { message, imageThumbnail, imageFullsize, stickerPackageId, stickerId, notificationDisabled } = req.body
   let outbound = null
-  
+
   await mongo.open()
   const { ServiceOauth, LineOutbound } = mongo.get()
 
   try {
-    if (typeof message !== 'string') throw new Error('Message is undefined.')
+    if (typeof message !== 'string') { throw new TypeError('Message is undefined.') }
 
     outbound = await new LineOutbound({
       botname: service,
@@ -23,23 +23,23 @@ export default async (req, res) => {
       sender: req.body || {},
       sended: false,
       error: null,
-      created: new Date(),
+      created: new Date()
     }).save()
 
     const token = await ServiceOauth.findOne({ service, room })
-    if (!token || !token.accessToken) throw new Error('Service and room not register.')
+    if (!token || !token.accessToken) { throw new Error('Service and room not register.') }
 
-    let sender = {
+    const sender = {
       message: message.replace(/\\n|newline/ig, '\n')
     }
-    if (imageThumbnail != undefined) sender.imageThumbnail = imageThumbnail
-    if (imageFullsize != undefined) sender.imageFullsize = imageFullsize
-    if (stickerPackageId != undefined) sender.stickerPackageId = stickerPackageId
-    if (stickerId != undefined) sender.stickerId = stickerId
-    if (notificationDisabled != undefined) sender.notificationDisabled = notificationDisabled
+    if (imageThumbnail != undefined) { sender.imageThumbnail = imageThumbnail }
+    if (imageFullsize != undefined) { sender.imageFullsize = imageFullsize }
+    if (stickerPackageId != undefined) { sender.stickerPackageId = stickerPackageId }
+    if (stickerId != undefined) { sender.stickerId = stickerId }
+    if (notificationDisabled != undefined) { sender.notificationDisabled = notificationDisabled }
 
-    let { headers } = await pushMessage(token.accessToken, sender)
-    let result = {
+    const { headers } = await pushMessage(token.accessToken, sender)
+    const result = {
       remaining: parseInt(headers['x-ratelimit-remaining']),
       image: parseInt(headers['x-ratelimit-imageremaining']),
       reset: parseInt(headers['x-ratelimit-reset']) * 1000
@@ -49,7 +49,7 @@ export default async (req, res) => {
     res.json(result)
   } catch (ex) {
     logger.error(ex)
-    if (outbound) await LineOutbound.updateOne({ _id: outbound._id }, { $set: { error: ex.message || ex.toString() } })
+    if (outbound) { await LineOutbound.updateOne({ _id: outbound._id }, { $set: { error: ex.message || ex.toString() } }) }
     res.status(ex.error ? ex.error.status : 500)
     res.json({ error: (ex.error ? ex.error.message : ex.message || ex) })
   } finally {
