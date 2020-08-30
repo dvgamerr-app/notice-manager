@@ -8,7 +8,7 @@
           <li class="pt-1 pb-1">
             <b-input-group>
               <b-input-group-text>Create name</b-input-group-text>
-              <b-form-input size="sm" maxlength="40" :state="check.service" v-model.trim="data.name" @keyup.enter="onSubmitNotify($event)" />
+              <b-form-input v-model.trim="data.name" size="sm" maxlength="40" :state="check.service" @keyup.enter="onSubmitNotify($event)" />
             </b-input-group>
           </li>
           <li>Input <b>Service URL</b> <code>{{ api().hostname }}/</code></li>
@@ -19,13 +19,13 @@
           <li class="pt-1 pb-1">
             <b-input-group>
               <b-input-group-text>Copy Client ID</b-input-group-text>
-              <b-form-input size="sm" maxlength="32" :state="check.client_id" v-model.trim="data.client_id" @keyup.enter="onSubmitNotify($event)" />
+              <b-form-input v-model.trim="data.client_id" size="sm" maxlength="32" :state="check.client_id" @keyup.enter="onSubmitNotify($event)" />
             </b-input-group>
           </li>
           <li class="pt-1 pb-1">
             <b-input-group>
               <b-input-group-text>Copy Client Secret</b-input-group-text>
-              <b-form-input size="sm" maxlength="64" :state="check.client_secret" v-model.trim="data.client_secret" @keyup.enter="onSubmitNotify($event)" />
+              <b-form-input v-model.trim="data.client_secret" size="sm" maxlength="64" :state="check.client_secret" @keyup.enter="onSubmitNotify($event)" />
             </b-input-group>
           </li>
         </ol>
@@ -38,7 +38,7 @@
 </template>
 <script>
 import Api from '../../model/api'
-import Notify from '../../model/notify';
+import Notify from '../../model/notify'
 
 export default {
   data: () => ({
@@ -82,7 +82,7 @@ export default {
       return Api.query().first()
     },
     onChangeService (e) {
-      let vm = this
+      const vm = this
       vm.add.service = e.service
     },
     showToast (msg) {
@@ -124,12 +124,12 @@ export default {
 
       this.btn.submit = true
       try {
-        let res = await this.$axios.post('/api/service', this.data)
-        if (res.error) throw new Error(res.error)
+        const res = await this.$axios.post('/api/service', this.data)
+        if (res.error) { throw new Error(res.error) }
         // await this.updateService()
         await Notify.insert({
           _id: null,
-          name: this.data.name ,
+          name: this.data.name,
           service: this.data.name,
           room: []
         })
@@ -145,7 +145,7 @@ export default {
         this.showToast(ex.stack || ex.message)
       }
       this.btn.submit = false
-    },
+    }
   }
 }
 </script>

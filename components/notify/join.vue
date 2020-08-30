@@ -8,7 +8,7 @@
           <b-img class="qr-code" src="~assets/notify-qr.png" />
           <li class="pt-1 pb-1">
             <b-dropdown dropright :text="`Select Service${ add.service ? ` : ${add.service}` : ''}`" variant="outline-info">
-              <b-dropdown-item href="#" v-for="e in list()" :key="e._id" @click.prevent="onChangeService(e)">
+              <b-dropdown-item v-for="e in list()" :key="e._id" href="#" @click.prevent="onChangeService(e)">
                 <span v-text="e.name" />
               </b-dropdown-item>
             </b-dropdown>
@@ -16,7 +16,7 @@
           <li class="pt-1 pb-1">
             <b-input-group>
               <b-input-group-text>Room name</b-input-group-text>
-              <b-form-input size="sm" ref="room" maxlength="20" :state="check.room" v-model.trim="add.room" @keyup.enter="onJoinRoom($event)" />
+              <b-form-input ref="room" v-model.trim="add.room" size="sm" maxlength="20" :state="check.room" @keyup.enter="onJoinRoom($event)" />
             </b-input-group>
           </li>
           <li>Your line account choose room and click <b>agree and connect</b>.</li>
@@ -70,7 +70,7 @@ export default {
       return Api.query().first()
     },
     onChangeService (e) {
-      let vm = this
+      const vm = this
       vm.add.service = e.service
       vm.$nextTick(() => {
         vm.$refs.room.focus()
@@ -103,7 +103,7 @@ export default {
         this.showToast('Name verify a-z,0-9, and - .')
         return e.preventDefault()
       }
-      let { data } = await this.$axios.post('/api/service/check', { room: this.add.room, service: this.add.service })
+      const { data } = await this.$axios.post('/api/service/check', { room: this.add.room, service: this.add.service })
       if (data.error) {
         this.check.room = false
         this.showToast(data.error)

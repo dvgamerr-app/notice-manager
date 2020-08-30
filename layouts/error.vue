@@ -3,7 +3,8 @@
 </template>
 <script>
 export default {
-  props: [ 'error' ]
+  // eslint-disable-next-line vue/require-prop-types
+  props: ['error']
 }
 </script>
 <style>
@@ -18,4 +19,3 @@ export default {
   margin-left: 40%;
 }
 </style>
-

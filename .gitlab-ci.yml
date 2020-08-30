@@ -1,9 +1,0 @@
-deploy:
-  environment: production
-  stage: deploy
-  tags:
-    - windows
-  only:
-    - tags
-  script:
-    - dpl --provider=heroku --app=intense-citadel-55702 --api-key=$HEROKU_API_KEY

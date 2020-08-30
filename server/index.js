@@ -1,7 +1,6 @@
 const { readFileSync } = require('fs')
-
+const { join } = require('path')
 const express = require('express')
-const spdy = require('spdy')
 const cron = require('node-cron')
 const debuger = require('@touno-io/debuger')
 const bodyParser = require('body-parser')
@@ -15,10 +14,7 @@ const getEnv = require('./get-env')
 const { notifyLogs } = require('./helper')
 const { lineInitilize, cmdExpire, checkMongoConn, loggingPushMessage } = require('./helper/schedule')
 
-Sentry.init({ dsn: process.env.SENTRY_DSN })
-
 const app = express()
-const port = getEnv('PORT') || 4000
 const dev = !(getEnv('NODE_ENV') === 'production')
 const logger = debuger(pkg.title)
 
@@ -29,9 +25,7 @@ const bodyOptions = { limit: '50mb', extended: true }
 app.use(bodyParser.urlencoded(bodyOptions))
 app.use(bodyParser.json(bodyOptions))
 
-app.use(Sentry.Handlers.requestHandler())
-
-// app.use('/_health', (req, res) => res.sendStatus(200))
+app.use('/_health', (req, res) => res.sendStatus(200))
 // app.post('/:bot', require('./route-bot/webhook'))
 // app.put('/:bot/:to?', require('./route-bot/push-message'))
 // app.put('/flex/:name/:to', require('./route-bot/push-flex'))
@@ -62,38 +56,77 @@ app.use(Sentry.Handlers.requestHandler())
 // app.get('/api/stats/bot/:id', require('./route-check/stats-bot'))
 // app.get('/api/stats/slack', require('./route-check/stats-slack'))
 
-app.use(Sentry.Handlers.errorHandler())
-
 logger.log('MongoDB LINE-BOT Connecting...')
-mongo.open().then(async () => {
-  // Init Nuxt.js
-  const options = {}
-  const nuxt = new Nuxt(config)
+
+// Init Nuxt.js
+const nuxt = new Nuxt(config)
+
+const nuxtClient = async () => {
+  // Build only in dev mode
   if (dev) {
     const builder = new Builder(nuxt)
     await builder.build()
-  } else {
-    options.key = readFileSync('/certs/notice.touno.io.key')
-    options.cert = readFileSync('/certs/notice.touno.io.crt')
-    await nuxt.ready()
   }
+  await nuxt.ready()
+  Sentry.init({ dsn: process.env.SENTRY_DSN })
+  return mongo.open()
+}
 
-  app.use(nuxt.render)
-  // await app.listen(port, host)
-  spdy.createServer(options, app, (err) => {
-    if (err) { throw new Error(err) }
-  }).listen(port, async () => {
-    logger.log(`listening port is ${port}.`)
-
-    if (!dev) {
-      await notifyLogs(`Server has listening port is ${port}.`)
-      lineInitilize().catch(notifyLogs)
-      cron.schedule('0 */3 * * *', () => lineInitilize().catch(notifyLogs), { })
-      cron.schedule('* * * * *', () => cmdExpire().catch(notifyLogs))
-      cron.schedule('* * * * *', () => checkMongoConn().catch(notifyLogs))
-      cron.schedule('5 0 * * *', () => loggingPushMessage().catch(notifyLogs))
-    }
+nuxtClient().then(() => {
+  app.use((req, res, next) => {
+    res.setHeader('X-Developer', '@dvgamerr')
+    next()
   })
+  app.use(nuxt.render)
+
+  const { host, port } = nuxt.options.server
+  app.listen(port, host, () => {
+    logger.log(`listening ${host} port is ${port}.`)
+  })
+
+  if (!dev) {
+    lineInitilize().catch(notifyLogs)
+    cron.schedule('0 */3 * * *', () => lineInitilize().catch(notifyLogs), { })
+    cron.schedule('* * * * *', () => cmdExpire().catch(notifyLogs))
+    cron.schedule('* * * * *', () => checkMongoConn().catch(notifyLogs))
+    cron.schedule('5 0 * * *', () => loggingPushMessage().catch(notifyLogs))
+  }
 }).catch((ex) => {
+  logger.error(ex)
   Sentry.captureException(ex)
+}).finally(() => {
+  logger.success('Nuxt.js compiled')
 })
+
+// mongo.open().then(async () => {
+//   // Init Nuxt.js
+//   const options = {}
+//   const nuxt = new Nuxt(config)
+//   if (dev) {
+//     const builder = new Builder(nuxt)
+//     await builder.build()
+//   } else {
+//     // options.key = readFileSync('/certs/notice.touno.io.key')
+//     // options.cert = readFileSync('/certs/notice.touno.io.crt')
+//     await nuxt.ready()
+//   }
+
+//   app.use(nuxt.render)
+//   // await app.listen(port, host)
+//   spdy.createServer(options, app, (err) => {
+//     if (err) { throw new Error(err) }
+//   }).listen(port, async () => {
+//     logger.log(`listening port is ${port}.`)
+
+//     if (!dev) {
+//       await notifyLogs(`Server has listening port is ${port}.`)
+//       lineInitilize().catch(notifyLogs)
+//       cron.schedule('0 */3 * * *', () => lineInitilize().catch(notifyLogs), { })
+//       cron.schedule('* * * * *', () => cmdExpire().catch(notifyLogs))
+//       cron.schedule('* * * * *', () => checkMongoConn().catch(notifyLogs))
+//       cron.schedule('5 0 * * *', () => loggingPushMessage().catch(notifyLogs))
+//     }
+//   })
+// }).catch((ex) => {
+//   Sentry.captureException(ex)
+// })

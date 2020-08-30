@@ -7,16 +7,25 @@
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom mb-1">
         <h6 v-text="e.name" />
         <div v-if="edit.show === e._id" class="menu-notify">
-          <b-btn class="edit" variant="icon" size="sm" @click="onUpdateName(e)"><fa icon="edit" /></b-btn>
-          <b-btn class="trash" v-b-modal="'trash-' + e._id" variant="icon" size="sm"><fa icon="trash-alt" /></b-btn>
+          <b-btn class="edit" variant="icon" size="sm" @click="onUpdateName(e)">
+            <fa icon="edit" />
+          </b-btn>
+          <b-btn v-b-modal="'trash-' + e._id" class="trash" variant="icon" size="sm">
+            <fa icon="trash-alt" />
+          </b-btn>
         </div>
-        <b-modal :id="'trash-' + e._id" title="Delete service?" no-fade ok-title="Sure, Delete it." cancel-title="No, Thank."
-          ok-variant="danger" cancel-variant="default">
+        <b-modal
+          :id="'trash-' + e._id" title="Delete service?" no-fade
+          ok-title="Sure, Delete it." cancel-title="No, Thank."
+          ok-variant="danger" cancel-variant="default"
+        >
           Your want to delete service '{{ e.name }}' ?
         </b-modal>
       </div>
       <ul class="line-notify">
-        <li v-if="!e.room || e.room.length == 0" style="color: #989898;">No room join.</li>
+        <li v-if="!e.room || e.room.length == 0" style="color: #989898;">
+          No room join.
+        </li>
         <li v-for="r in e.room" :key="r._id">
           <b-btn v-if="btn.trash !== r._id" variant="icon" size="sm" @click.prevent="onTrash(r)">
             <fa :icon="btn.remove !== r._id ? 'trash-alt' : 'circle-notch'" :spin="btn.remove === r._id" />
@@ -59,7 +68,7 @@ export default {
       return Notify.all()
     },
     onChangeService (e) {
-      let vm = this
+      const vm = this
       vm.add.service = e.service
       vm.$nextTick(() => {
         vm.$refs.room.focus()
@@ -80,15 +89,18 @@ export default {
       this.btn.trash = r._id
       this.$forceUpdate()
     },
-    async onCancelTrash () {
+    onCancelTrash () {
       this.btn.trash = null
       this.$forceUpdate()
     },
     async onApplyTrash (r) {
       this.btn.trash = null
       this.btn.remove = r._id
-      let { data } = await this.$axios.put(`/revoke/${r.service}/${r.room}`, { revoke: 'agree' })
-      if (data.error) return console.log(data.error)
+      const { data } = await this.$axios.put(`/revoke/${r.service}/${r.room}`, { revoke: 'agree' })
+      if (data.error) {
+        // eslint-disable-next-line no-console
+        return console.log(data.error)
+      }
 
       await this.$props.dataUpdate()
       this.btn.remove = null

@@ -75,24 +75,20 @@ module.exports = {
     '~/plugins/vue-tabindex.js'
   ],
   buildModules: [
+    '@nuxtjs/fontawesome',
     '@nuxtjs/eslint-module',
     '@nuxtjs/stylelint-module'
   ],
   modules: [
+    'bootstrap-vue/nuxt',
     '@nuxtjs/axios',
     '@nuxtjs/auth',
-    '@nuxtjs/pwa',
-    'nuxt-fontawesome',
-    [
-      'bootstrap-vue/nuxt', { icons: false, css: true }
-    ]
+    '@nuxtjs/pwa'
   ],
+  bootstrapVue: { bootstrapCSS: false, icons: false },
   fontawesome: {
     component: 'fa',
-    imports: [
-      { icons: ['fas'], set: '@fortawesome/free-solid-svg-icons' },
-      { icons: ['fab'], set: '@fortawesome/free-brands-svg-icons' }
-    ]
+    icons: { solid: true, regular: true, brands: true }
   },
   axios: { baseURL: process.env.HOST_API || process.env.AXIOS_BASE_URL || 'http://localhost:4000' },
   env: {
@@ -111,13 +107,5 @@ module.exports = {
       }
     }
   },
-  server: { port: 3000, host: '0.0.0.0', timing: false },
-  render: {
-    http2: {
-      push: true,
-      pushAssets: (req, res, publicPath, preloadFiles) => preloadFiles
-        .filter(f => f.asType === 'script' && f.file === 'runtime.js')
-        .map(f => `<${publicPath}${f.file}>; rel=preload; as=${f.asType}`)
-    }
-  }
+  server: { port: 4000, host: '0.0.0.0', timing: false }
 }

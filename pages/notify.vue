@@ -23,14 +23,18 @@
               </b-dropdown>
               <label class="mr-2" for="select-room">Room: </label>
               <b-dropdown id="select-room" class="mr-4" :text="`${ sample.room ? sample.room : '[room_id]'}`" variant="outline-info">
-                <b-dropdown-item href="#" v-for="e in getRoomSample" :key="e._id" @click.prevent="onSampleChangeRoom(e)">
+                <b-dropdown-item v-for="e in getRoomSample" :key="e._id" href="#" @click.prevent="onSampleChangeRoom(e)">
                   <span v-text="e.name" />
                 </b-dropdown-item>
               </b-dropdown>
-              <b-button variant="outline-warning" @click.prevent="onTestNotify()">Testing</b-button>
+              <b-button variant="outline-warning" @click.prevent="onTestNotify()">
+                Testing
+              </b-button>
             </b-form>
             <h6>Response</h6>
-            <p class="sample-code"><code v-html="sample.test || '[show after click testing api.]'" /></p>
+            <p class="sample-code">
+              <code>{{ sample.test || '[show after click testing api.]' }}</code>
+            </p>
           </b-card>
         </notify-api>
       </b-tab>
@@ -50,6 +54,33 @@ import Bot from '../model/bot'
 import Webhook from '../model/webhook'
 
 export default {
+  components: {
+    notifyNew,
+    // notifyJoin,
+    notifyList,
+    notifyApi
+  },
+  async asyncData ({ env, $axios }) {
+    if (!Api.query().first()) {
+      await Api.insert({
+        data: { id: 1, hostname: env.HOST_API, proxyname: env.PROXY_API || env.HOST_API }
+      })
+
+      const { data, status, statusText } = await $axios('/api/service/dashboard')
+      if (status !== 200) { throw new Error(`Server Down '/api/service/dashboard' is ${statusText}.`) }
+
+      for (const item of data.service) {
+        await Notify.insert({ data: item })
+      }
+      for (const item of data.bot) {
+        await Bot.insert({ data: item })
+      }
+      for (const item of data.webhook) {
+        await Webhook.insert({ data: item })
+      }
+    }
+    return { }
+  },
   data: () => ({
     sample: {
       test: '',
@@ -71,40 +102,13 @@ export default {
     },
     list: []
   }),
-  components: {
-    notifyNew,
-    // notifyJoin,
-    notifyList,
-    notifyApi
-  },
-  async asyncData ({ env, $axios }) {
-    if (!Api.query().first()) {
-      await Api.insert({
-        data: { id: 1, hostname: env.HOST_API, proxyname: env.PROXY_API || env.HOST_API }
-      })
-
-      let { data, status, statusText } = await $axios('/api/service/dashboard')
-      if (status !== 200) throw new Error(`Server Down '/api/service/dashboard' is ${statusText}.`)
-
-      for (const item of data.service) {
-        await Notify.insert({ data: item })
-      }
-      for (const item of data.bot) {
-        await Bot.insert({ data: item })
-      }
-      for (const item of data.webhook) {
-        await Webhook.insert({ data: item })
-      }
-    }
-    return { }
-  },
   methods: {
     getLimitPercent (value, max) {
       return Math.round(value * max / max)
     },
     getDayPercent (value, max) {
-      let limit = this.getLimitPercent(value, max)
-      let day = Math.round(moment().date() * max / moment().endOf('month').date())
+      const limit = this.getLimitPercent(value, max)
+      const day = Math.round(moment().date() * max / moment().endOf('month').date())
       // value: 0 max: 1000 limit 0 day 3
       return limit >= day ? 0 : day - limit
     },
@@ -133,10 +137,8 @@ export default {
       // this.$forceUpdate()
     },
     async onSubmitWebhook (e) {
-      e
     },
     async onSubmitBot (e) {
-      e
     },
     async onJoinRoom (e) {
       if (!this.add.service) {
@@ -153,7 +155,7 @@ export default {
         this.showToast('Name verify a-z,0-9, and - .')
         return e.preventDefault()
       }
-      let { data } = await this.$axios.post('/api/service/check', { room: this.add.room, service: this.add.service })
+      const { data } = await this.$axios.post('/api/service/check', { room: this.add.room, service: this.add.service })
       if (data.error) {
         this.check.room = false
         this.showToast(data.error)
@@ -165,8 +167,11 @@ export default {
     async onRevokeToken (r) {
       this.btn.trash = null
       this.btn.remove = r._id
-      let { data } = await this.$axios.put(`/revoke/${r.service}/${r.room}`, { revoke: 'agree' })
-      if (data.error) return console.log(data.error)
+      const { data } = await this.$axios.put(`/revoke/${r.service}/${r.room}`, { revoke: 'agree' })
+      if (data.error) {
+        // eslint-disable-next-line no-console
+        return console.log(data.error)
+      }
 
       await this.updateService()
       this.btn.remove = null
@@ -180,12 +185,12 @@ export default {
     async onSaveActive () {
       await this.$axios.post('/api/service/update', { active: false })
     },
-    async onUpdateName (e) {
+    onUpdateName (e) {
       this.edit.mode = e._id
       this.edit.service = e.name
     },
     async onSyncBot () {
-      if (this.sync.bot) return
+      if (this.sync.bot) { return }
       this.sync.bot = true
       await this.$axios('/api/stats/bot')
       await this.updateStats()
@@ -229,12 +234,10 @@ export default {
   .input-group-text {
     background-color: transparent;
     border: none;
-    padding-left: 0px; 
+    padding-left: 0px;
   }
   .bg-default {
     background-color: #ccd0d4;
   }
 }
-
 </style>
-

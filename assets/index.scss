@@ -1,7 +1,12 @@
-@import 'vue-search-select/dist/VueSearchSelect.css';
+@import "bootstrap/scss/_functions.scss";
+@import "bootstrap/scss/_variables.scss";
+
+// Import Bootstrap
+@import "bootstrap/scss/bootstrap.scss";
+@import 'bootstrap-vue/dist/bootstrap-vue.css';
 
 body {
-  font-family: "Open Sans", "Segoe UI", "Helvetica Neue", "Segoe UI Emoji", "Segoe UI Symbol", "Apple Color Emoji", "Noto Color Emoji", "Noto Emoji", sans-serif, Arial;
+  font-family: "Open Sans",'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 0.9375rem;
   font-weight: 400;
   line-height: 1.5;
@@ -25,26 +30,7 @@ footer {
 .nav-tabs {
   min-height: 40px;
 }
-.navbar {
-  border-bottom: 1px solid #edeff0;
-  .navbar-brand {
-    font-size: 1.2rem;
-    line-height: 1rem;
-    font-weight: bold;
-    .logo-top {
-      font-size: .7rem;
-      position: absolute;
-      margin-left: 5.55rem;
-      margin-top: .88rem;
-      left: 0px;
-      top: 0px;
-    }
-    .logo-bottom {
-      font-size: .7rem;
-      padding-top: .3rem;
-    }
-  }
-}
+
 
 .menu {
   font-size: .85rem;

@@ -7,19 +7,19 @@
           <li class="pt-1 pb-1">
             <b-input-group>
               <b-input-group-text>Name</b-input-group-text>
-              <b-form-input maxlength="40" size="sm" :state="check.service" v-model.trim="row.name" @keyup.enter="onSubmitBot($event)" />
+              <b-form-input v-model.trim="row.name" maxlength="40" size="sm" :state="check.service" @keyup.enter="onSubmitBot($event)" />
             </b-input-group>
           </li>
           <li class="pt-1 pb-1">
             <b-input-group>
               <b-input-group-text>Client ID</b-input-group-text>
-              <b-form-input maxlength="32" size="sm" :state="check.client_id" v-model.trim="row.client_id" @keyup.enter="onSubmitBot($event)" />
+              <b-form-input v-model.trim="row.client_id" maxlength="32" size="sm" :state="check.client_id" @keyup.enter="onSubmitBot($event)" />
             </b-input-group>
           </li>
           <li class="pt-1 pb-1">
             <b-input-group>
               <b-input-group-text>Client Secret</b-input-group-text>
-              <b-form-input maxlength="64" size="sm" :state="check.client_secret" v-model.trim="row.client_secret" @keyup.enter="onSubmitBot($event)" />
+              <b-form-input v-model.trim="row.client_secret" maxlength="64" size="sm" :state="check.client_secret" @keyup.enter="onSubmitBot($event)" />
             </b-input-group>
           </li>
         </ol>
@@ -32,6 +32,6 @@
 </template>
 <script>
 export default {
-  
+
 }
 </script>
