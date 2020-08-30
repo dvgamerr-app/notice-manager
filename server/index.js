@@ -1,50 +1,28 @@
-import express from 'express'
-import cron from 'node-cron'
-import debuger from '@touno-io/debuger'
-import bodyParser from 'body-parser'
-import { Nuxt, Builder } from 'nuxt'
-import * as Sentry from '@sentry/node'
+const { readFileSync } = require('fs')
 
-// Import and Set Nuxt.js options
-import pkg from '../package.json'
-import config from '../nuxt.config.js'
-import mongo from './line-bot'
-import { notifyLogs } from './helper'
-import { lineInitilize, cmdExpire, checkMongoConn, loggingPushMessage } from './helper/schedule'
+const express = require('express')
+const spdy = require('spdy')
+const cron = require('node-cron')
+const debuger = require('@touno-io/debuger')
+const bodyParser = require('body-parser')
+const { Nuxt, Builder } = require('nuxt')
+const Sentry = require('@sentry/node')
 
-import postBotHandler from './route-bot/webhook'
-import getRegisterBotServiceRoomHandler from './route-bot/oauth'
-import putServiceRoomHandler from './route-bot/notify'
-import putRevokeServiceRoomHandler from './route-bot/revoke'
-import getServiceDashboardHandler from './route-db/service/dashboard'
-import postServiceHandler from './route-db/service/new'
-import postCheckHandler from './route-db/service/check'
-import postUpdateHandler from './route-db/service/update'
-import postBotNewHandler from './route-db/bot/new'
-import getCheckStats from './route-check/stats'
-import getStatsBot from './route-check/stats-bot'
-import getStatsSlack from './route-check/stats-slack'
-
-import putBotMessageHandler from './route-bot/push-message'
-import putBotFlexHandler from './route-bot/push-flex'
-// import putSlackMessageHandler from './route-bot/push-slack'
-import putWebhookMessageHandler from './route-bot/push-webhook'
-import postWebhookNotifyHandler from './route-bot/webhook/post-notify'
-
-import getBotCMDHandler from './route-db/bot-cmd'
-import getBotEndpointHandler from './route-db/bot-endpoint'
-import getBotInboundHandler from './route-db/inbound'
-import getBotOutboundHandler from './route-db/outbound'
-
+const pkg = require('../package.json')
+const config = require('../nuxt.config.js')
+const mongo = require('./line-bot')
+const getEnv = require('./get-env')
+const { notifyLogs } = require('./helper')
+const { lineInitilize, cmdExpire, checkMongoConn, loggingPushMessage } = require('./helper/schedule')
 
 Sentry.init({ dsn: process.env.SENTRY_DSN })
 
-const getHealthStatusHandler = (req, res) => res.sendStatus(200)
 const app = express()
-const port = process.env.PORT || 4000
-const host = process.env.HOST || '127.0.0.1'
-const dev = !(process.env.NODE_ENV === 'production')
+const port = getEnv('PORT') || 4000
+const dev = !(getEnv('NODE_ENV') === 'production')
 const logger = debuger(pkg.title)
+
+if (!getEnv('MONGODB_URI')) { throw new Error('Mongo connection uri is undefined.') }
 
 // parse application/x-www-form-urlencoded and application/jsons
 const bodyOptions = { limit: '50mb', extended: true }
@@ -53,68 +31,69 @@ app.use(bodyParser.json(bodyOptions))
 
 app.use(Sentry.Handlers.requestHandler())
 
-app.use('/_health', getHealthStatusHandler)
-app.post('/:bot', postBotHandler)
-app.put('/:bot/:to?', putBotMessageHandler)
-app.put('/flex/:name/:to', putBotFlexHandler)
-// app.put('/slack/mii/:channel', putSlackMessageHandler)
-app.put('/hook/:type/:webhook', putWebhookMessageHandler)
-app.post('/webhook/:botname/:userTo', postWebhookNotifyHandler)
+app.use('/_health', (req, res) => res.sendStatus(200))
+app.post('/:bot', require('./route-bot/webhook'))
+app.put('/:bot/:to?', require('./route-bot/push-message'))
+app.put('/flex/:name/:to', require('./route-bot/push-flex'))
+// app.put('/slack/mii/:channel', require('./route-bot/push-slack'))
+app.put('/hook/:type/:webhook', require('./route-bot/push-webhook'))
+app.post('/webhook/:botname/:userTo', require('./route-bot/webhook/post-notify'))
 
 // API Get Database
-app.get('/db/cmd', getBotCMDHandler)
-app.get('/db/cmd/endpoint', getBotEndpointHandler)
-app.get('/db/:bot/cmd', getBotCMDHandler)
-app.post('/db/:bot/cmd/:id', getBotCMDHandler)
-app.get('/db/:bot/inbound', getBotInboundHandler)
-app.get('/db/:bot/outbound', getBotOutboundHandler)
+app.get('/db/cmd', require('./route-db/bot-cmd'))
+app.get('/db/cmd/endpoint', require('./route-db/bot-endpoint'))
+app.get('/db/:bot/cmd', require('./route-db/bot-cmd'))
+app.post('/db/:bot/cmd/:id', require('./route-db/bot-cmd'))
+app.get('/db/:bot/inbound', require('./route-db/inbound'))
+app.get('/db/:bot/outbound', require('./route-db/outbound'))
 
 // API Notify
-app.get('/register-bot/:service?/:room?', getRegisterBotServiceRoomHandler)
-app.put('/notify/:service/:room', putServiceRoomHandler)
-app.put('/revoke/:service/:room', putRevokeServiceRoomHandler)
+app.get('/register-bot/:service?/:room?', require('./route-bot/oauth'))
+app.put('/notify/:service/:room', require('./route-bot/notify'))
+app.put('/revoke/:service/:room', require('./route-bot/revoke'))
 
 // API router
-app.get('/api/service/dashboard', getServiceDashboardHandler)
-app.post('/api/service/check', postCheckHandler)
-app.post('/api/service/update', postUpdateHandler)
-app.post('/api/service', postServiceHandler)
-app.post('/api/bot', postBotNewHandler)
-app.get('/api/check/stats', getCheckStats)
-app.get('/api/stats/bot/:id', getStatsBot)
-app.get('/api/stats/slack', getStatsSlack)
+app.get('/api/service/dashboard', require('./route-db/service/dashboard'))
+app.post('/api/service/check', require('./route-db/service/check'))
+app.post('/api/service/update', require('./route-db/service/update'))
+app.post('/api/service', require('./route-db/service/new'))
+app.post('/api/bot', require('./route-db/bot/new'))
+app.get('/api/check/stats', require('./route-check/stats'))
+app.get('/api/stats/bot/:id', require('./route-check/stats-bot'))
+app.get('/api/stats/slack', require('./route-check/stats-slack'))
 
 app.use(Sentry.Handlers.errorHandler())
 
-logger.log(`MongoDB 'LINE-BOT' Connecting...`)
-
+logger.log('MongoDB LINE-BOT Connecting...')
 mongo.open().then(async () => {
   // Init Nuxt.js
+  const options = {}
   const nuxt = new Nuxt(config)
   if (dev) {
     const builder = new Builder(nuxt)
     await builder.build()
   } else {
+    options.key = readFileSync('/certs/notice.touno.io.key')
+    options.cert = readFileSync('/certs/notice.touno.io.crt')
     await nuxt.ready()
   }
 
   app.use(nuxt.render)
-  await app.listen(port, host)
-  logger.log(`listening port is ${port}.`)
+  // await app.listen(port, host)
+  spdy.createServer(options, app, (err) => {
+    if (err) { throw new Error(err) }
+  }).listen(port, async () => {
+    logger.log(`listening port is ${port}.`)
 
-  if (!dev) {
-    await notifyLogs(`Server has listening port is ${port}.`)
-    lineInitilize().catch(notifyLogs)
-    cron.schedule('0 */3 * * *', () => lineInitilize().catch(notifyLogs), { })
-    cron.schedule('* * * * *', () => cmdExpire().catch(notifyLogs))
-    cron.schedule('* * * * *', () => checkMongoConn().catch(notifyLogs))
-    cron.schedule('5 0 * * *', () => loggingPushMessage().catch(notifyLogs))
-    cron.schedule('5 3 * * *', async () => {
-      await notifyLogs('Server has *terminated* yourself for `reboot` herokuapp every day.')
-      process.exit()
-    })
-  }
-}).catch(ex => {
+    if (!dev) {
+      await notifyLogs(`Server has listening port is ${port}.`)
+      lineInitilize().catch(notifyLogs)
+      cron.schedule('0 */3 * * *', () => lineInitilize().catch(notifyLogs), { })
+      cron.schedule('* * * * *', () => cmdExpire().catch(notifyLogs))
+      cron.schedule('* * * * *', () => checkMongoConn().catch(notifyLogs))
+      cron.schedule('5 0 * * *', () => loggingPushMessage().catch(notifyLogs))
+    }
+  })
+}).catch((ex) => {
   Sentry.captureException(ex)
-  process.exit()
 })

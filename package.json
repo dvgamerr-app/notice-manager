@@ -3,18 +3,14 @@
   "version": "4.12.0",
   "description": "Server notify message to 3party.",
   "main": "index.js",
-  "engines": {
-    "node": "12.13.0"
-  },
   "scripts": {
     "dev": "env-cmd nodemon --watch server server/index.js",
     "build": "nuxt build",
     "eslint": "eslint --ext .js --ignore-path .eslintignore .",
     "start": "node ./server/index.js"
   },
-  "heroku-run-build-script": true,
   "keywords": [],
-  "author": "Mr. Kananek Thongkam",
+  "author": "Kananek T.",
   "license": "ISC",
   "dependencies": {
     "@line/bot-sdk": "^6.8.3",
@@ -33,7 +29,8 @@
     "node-cron": "^2.0.3",
     "numeral": "^2.0.6",
     "nuxt": "^2.12.2",
-    "nuxt-fontawesome": "^0.4.0"
+    "nuxt-fontawesome": "^0.4.0",
+    "spdy": "^4.0.2"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.28",
