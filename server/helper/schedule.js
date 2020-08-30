@@ -1,9 +1,9 @@
-import numeral from 'numeral'
-import moment from 'moment'
-import request from 'request-promise'
-import * as Sentry from '@sentry/node'
-import mongo from '../line-bot'
-import { notifyLogs } from './index'
+const numeral = require('numeral')
+const moment = require('moment')
+const axios = require('axios')
+const Sentry = require('@sentry/node')
+const mongo = require('../line-bot')
+const { notifyLogs } = require('./index')
 
 const loggingExpire = async () => {
   const { LineOutbound, LineInbound, LineCMD } = mongo.get() // LineInbound, LineOutbound, LineCMD,
@@ -49,50 +49,49 @@ const loggingStats = async () => {
   return facts
 }
 
-export const cmdExpire = async () => {
-  const { LineCMD } = mongo.get()
-  await LineCMD.updateMany({ created: { $lte: moment().add(-3, 'minute').toDate() }, executing: false, executed: false }, {
-    $set: { executed: true }
-  })
-}
+module.exports = {
+  cmdExpire: async () => {
+    const { LineCMD } = mongo.get()
+    await LineCMD.updateMany({ created: { $lte: moment().add(-3, 'minute').toDate() }, executing: false, executed: false }, {
+      $set: { executed: true }
+    })
+  },
+  loggingPushMessage: async () => {
+    const fect1 = await loggingStats()
+    const fect2 = await loggingExpire()
 
-export const loggingPushMessage = async () => {
-  const fect1 = await loggingStats()
-  const fect2 = await loggingExpire()
+    const body = `[Heroku] *LINE-Notify* daily stats.\n${fect1.join('\n')}${fect2 ? fect2.join('\n') : ''}`
 
-  const body = `[Heroku] *LINE-Notify* daily stats.\n${fect1.join('\n')}${fect2 ? fect2.join('\n') : ''}`
-
-  await notifyLogs(body)
-}
-
-export const checkMongoConn = async () => {
-  await mongo.open()
-  if (!mongo.connected()) {
-    Sentry.captureMessage('MongoDB Connection fail.', Sentry.Severity.Critical)
-    process.exit(0)
-  }
-}
-
-export const lineInitilize = async () => {
-  const { LineBot } = mongo.get()
-  const date = moment().add(-1, 'day')
-
-  const data = await LineBot.find({ type: 'line' })
-  for (const line of data) {
-    const opts = { headers: { Authorization: `Bearer ${line.accesstoken}` }, json: true }
-
-    const quota = await request('https://api.line.me/v2/bot/message/quota', opts)
-    const consumption = await request('https://api.line.me/v2/bot/message/quota/consumption', opts)
-    const reply = await request(`https://api.line.me/v2/bot/message/delivery/reply?date=${date.format('YYYYMMDD')}`, opts)
-    const push = await request(`https://api.line.me/v2/bot/message/delivery/push?date=${date.format('YYYYMMDD')}`, opts)
-
-    const stats = {
-      usage: consumption.totalUsage,
-      limited: quota.type === 'limited' ? quota.value : 0,
-      reply: reply.status === 'ready' ? reply.success : reply.status,
-      push: push.status === 'ready' ? push.success : push.status,
-      updated: date.toDate()
+    await notifyLogs(body)
+  },
+  checkMongoConn: async () => {
+    await mongo.open()
+    if (!mongo.connected()) {
+      Sentry.captureMessage('MongoDB Connection fail.', Sentry.Severity.Critical)
+      process.exit(0)
     }
-    await LineBot.updateOne({ _id: line._id }, { $set: { options: { stats } } })
+  },
+  lineInitilize: async () => {
+    const { LineBot } = mongo.get()
+    const date = moment().add(-1, 'day')
+
+    const data = await LineBot.find({ type: 'line' })
+    for (const line of data) {
+      const opts = { headers: { Authorization: `Bearer ${line.accesstoken}` } }
+
+      const { data: quota } = await axios('https://api.line.me/v2/bot/message/quota', opts)
+      const { data: consumption } = await axios('https://api.line.me/v2/bot/message/quota/consumption', opts)
+      const { data: reply } = await axios(`https://api.line.me/v2/bot/message/delivery/reply?date=${date.format('YYYYMMDD')}`, opts)
+      const { data: push } = await axios(`https://api.line.me/v2/bot/message/delivery/push?date=${date.format('YYYYMMDD')}`, opts)
+
+      const stats = {
+        usage: consumption.totalUsage,
+        limited: quota.type === 'limited' ? quota.value : 0,
+        reply: reply.status === 'ready' ? reply.success : reply.status,
+        push: push.status === 'ready' ? push.success : push.status,
+        updated: date.toDate()
+      }
+      await LineBot.updateOne({ _id: line._id }, { $set: { options: { stats } } })
+    }
   }
 }

@@ -1,10 +1,10 @@
-import debuger from '@touno-io/debuger'
-import { pushMessage } from '../api-notify'
-import mongo from '../mongodb'
+const debuger = require('@touno-io/debuger')
+const { pushMessage } = require('../api-notify')
+const mongo = require('../mongodb')
 
 const logger = debuger('Notify')
 
-export default async (req, res) => {
+module.exports = async (req, res) => {
   // Authorization oauth2 URI
   const { room, service } = req.params
   const { message, imageThumbnail, imageFullsize, stickerPackageId, stickerId, notificationDisabled } = req.body
@@ -32,11 +32,11 @@ export default async (req, res) => {
     const sender = {
       message: message.replace(/\\n|newline/ig, '\n')
     }
-    if (imageThumbnail != undefined) { sender.imageThumbnail = imageThumbnail }
-    if (imageFullsize != undefined) { sender.imageFullsize = imageFullsize }
-    if (stickerPackageId != undefined) { sender.stickerPackageId = stickerPackageId }
-    if (stickerId != undefined) { sender.stickerId = stickerId }
-    if (notificationDisabled != undefined) { sender.notificationDisabled = notificationDisabled }
+    if (imageThumbnail !== undefined) { sender.imageThumbnail = imageThumbnail }
+    if (imageFullsize !== undefined) { sender.imageFullsize = imageFullsize }
+    if (stickerPackageId !== undefined) { sender.stickerPackageId = stickerPackageId }
+    if (stickerId !== undefined) { sender.stickerId = stickerId }
+    if (notificationDisabled !== undefined) { sender.notificationDisabled = notificationDisabled }
 
     const { headers } = await pushMessage(token.accessToken, sender)
     const result = {

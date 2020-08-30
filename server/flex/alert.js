@@ -2,7 +2,7 @@ const request = require('request-promise')
 const moment = require('moment')
 const url = require('./url-bot')
 
-module.exports = async (title, msg, detail, color = '#009688', flex = false) => {
+module.exports = (title, msg, detail, color = '#009688', flex = false) => {
   const contents = []
 
   if (/\n/.test(msg)) {

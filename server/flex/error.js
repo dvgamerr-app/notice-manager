@@ -1,6 +1,7 @@
 const request = require('request-promise')
 const url = require('./url-bot')
-module.exports = async (app, ex, flex = false) => {
+
+module.exports = (app, ex, flex = false) => {
   const body = {
     type: 'flex',
     altText: `พบข้อผิดพลาด [${app}] ${ex.message}`,

@@ -1,4 +1,4 @@
-const mongo = require('../mongodb')
+const mongo = require('@touno-io/db')('ris-line-bot')
 
 mongo.set('LineCMD', 'db-line-cmd', {
   botname: { type: String, index: true },

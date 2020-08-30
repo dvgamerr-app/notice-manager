@@ -1,6 +1,7 @@
-import { notifyLogs } from '../helper'
-import mongo from '../mongodb'
-import helpFlex from './flex-help'
+const { notifyLogs } = require('../helper')
+const mongo = require('../line-bot')
+const helpFlex = require('./flex-help')
+
 const api = process.env.PROXY_API || 'http://localhost:4000'
 
 const getID = (e) => {
@@ -38,57 +39,58 @@ const renameBotRoom = async (botname, id, type, name) => {
   return mongo.get('LineBotRoom').updateOne({ botname, id, type }, { $set: { name } })
 }
 
-export const onEvents = {
-  join: async (botname, event) => {
-    await joinBotRoom(botname, getID(event), event.source.type)
-    await notifyLogs(`Bot your join in ${event.source.type} (${getID(event)}).`)
-    return 'มาแล้วๆ'
-  },
-  leave: async (botname, event) => {
-    await leaveBotRoom(botname, getID(event), event.source.type)
-    await notifyLogs(`Bot your leave from ${event.source.type} (${getID(event)}).`)
-  }
-}
-
-export const onCommands = {
-  id: async (botname, args, event) => {
-    const room = await getRoom(botname, getID(event), event.source.type)
-    if (!room) { return }
-
-    const _active = (room.active) ? 'ON' : '`OFF`'
-    const _api = (room.name && room.active) ? `\n*API:* ${api}/${botname}/${room.name}` : ''
-    return `*ID:* \`${getID(event)}\`\n*Name:* ${room.name ? room.name : '`None`'}\n*Active:* ${_active}${_api}`
-  },
-  join: async (botname, args, event) => {
-    await joinBotRoom(botname, getID(event), event.source.type)
-    return 'มาแล้วๆ'
-  },
-  room: async (botname, args, event) => {
-    const room = await getRoom(botname, getID(event), event.source.type)
-    if (!room || !args || !args[0]) { return }
-
-    if (await verifyRoom(botname, args[0])) { return `\`${args[0]}\` ใช้แล้ว` }
-    await renameBotRoom(botname, getID(event), event.source.type, args[0])
-    return `เย้! \`${args[0]}\``
-  },
-  leave: async (botname, args, event, line) => {
-    await leaveBotRoom(botname, getID(event), event.source.type)
-    if (event.source.type === 'user') { return 'ไม่! จะอยู่' }
-
-    await line.replyMessage(event.replyToken, { type: 'text', text: 'ไปก็ได้' })
-    if (event.source.type === 'group') {
-      await line.leaveGroup(getID(event))
-    } else if (event.source.type === 'room') {
-      await line.leaveRoom(getID(event))
+module.exports = {
+  onEvents: {
+    join: async (botname, event) => {
+      await joinBotRoom(botname, getID(event), event.source.type)
+      await notifyLogs(`Bot your join in ${event.source.type} (${getID(event)}).`)
+      return 'มาแล้วๆ'
+    },
+    leave: async (botname, event) => {
+      await leaveBotRoom(botname, getID(event), event.source.type)
+      await notifyLogs(`Bot your leave from ${event.source.type} (${getID(event)}).`)
     }
   },
-  help: async (botname, args, event) => {
-    if (event.source.type === 'user') { return helpFlex }
-  },
-  api: async (botname, args, event) => {
-    const room = await getRoom(botname, getID(event), event.source.type)
-    const url = `${api}/${botname}/${room.name && room.active ? room.name : getID(event)}`
-    const curl = '```\n' + `curl -X PUT ${url} -H "Content-Type: application/json" -d "{"type":"text","text":"*BOT* Testing Message"}"` + '\n```'
-    return curl
+  onCommands: {
+    id: async (botname, args, event) => {
+      const room = await getRoom(botname, getID(event), event.source.type)
+      if (!room) { return }
+
+      const _active = (room.active) ? 'ON' : '`OFF`'
+      const _api = (room.name && room.active) ? `\n*API:* ${api}/${botname}/${room.name}` : ''
+      return `*ID:* \`${getID(event)}\`\n*Name:* ${room.name ? room.name : '`None`'}\n*Active:* ${_active}${_api}`
+    },
+    join: async (botname, args, event) => {
+      await joinBotRoom(botname, getID(event), event.source.type)
+      return 'มาแล้วๆ'
+    },
+    room: async (botname, args, event) => {
+      const room = await getRoom(botname, getID(event), event.source.type)
+      if (!room || !args || !args[0]) { return }
+
+      if (await verifyRoom(botname, args[0])) { return `\`${args[0]}\` ใช้แล้ว` }
+      await renameBotRoom(botname, getID(event), event.source.type, args[0])
+      return `เย้! \`${args[0]}\``
+    },
+    leave: async (botname, args, event, line) => {
+      await leaveBotRoom(botname, getID(event), event.source.type)
+      if (event.source.type === 'user') { return 'ไม่! จะอยู่' }
+
+      await line.replyMessage(event.replyToken, { type: 'text', text: 'ไปก็ได้' })
+      if (event.source.type === 'group') {
+        await line.leaveGroup(getID(event))
+      } else if (event.source.type === 'room') {
+        await line.leaveRoom(getID(event))
+      }
+    },
+    help: (botname, args, event) => {
+      if (event.source.type === 'user') { return helpFlex }
+    },
+    api: async (botname, args, event) => {
+      const room = await getRoom(botname, getID(event), event.source.type)
+      const url = `${api}/${botname}/${room.name && room.active ? room.name : getID(event)}`
+      const curl = '```\n' + `curl -X PUT ${url} -H "Content-Type: application/json" -d "{"type":"text","text":"*BOT* Testing Message"}"` + '\n```'
+      return curl
+    }
   }
 }

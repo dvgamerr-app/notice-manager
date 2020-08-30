@@ -1,10 +1,11 @@
-import * as sdk from '@line/bot-sdk'
-import mongo from '../../mongodb'
-import { onEvents, onCommands } from '../../line-bot/cmd'
+const sdk = require('@line/bot-sdk')
+const Sentry = require('@sentry/node')
+const mongo = require('../../line-bot')
+const { onEvents, onCommands } = require('../../line-bot/cmd')
 
 const _VERIFY_TOKEN = '00000000000000000000000000000000'
 
-export default async (req, res) => {
+module.exports = async (req, res) => {
   const { bot } = req.params
   const { events } = req.body
   if (!events) { return res.end() }
@@ -81,7 +82,7 @@ export default async (req, res) => {
       await new LineInbound(Object.assign(events, { botname: bot })).save()
     }
   } catch (ex) {
-    console.error(ex)
+    Sentry.captureException(ex)
     res.sendStatus(404)
   } finally {
     res.end()

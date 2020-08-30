@@ -1,6 +1,6 @@
-import { sendNotify, webhookLogger } from '../../helper'
+const { sendNotify, webhookLogger } = require('../../helper')
 
-export default async (req, res) => {
+module.exports = async (req, res) => {
   // Authorization oauth2 URI
   const { botname, userTo } = req.params
   let sender = req.body

@@ -31,36 +31,36 @@ app.use(bodyParser.json(bodyOptions))
 
 app.use(Sentry.Handlers.requestHandler())
 
-app.use('/_health', (req, res) => res.sendStatus(200))
-app.post('/:bot', require('./route-bot/webhook'))
-app.put('/:bot/:to?', require('./route-bot/push-message'))
-app.put('/flex/:name/:to', require('./route-bot/push-flex'))
-// app.put('/slack/mii/:channel', require('./route-bot/push-slack'))
-app.put('/hook/:type/:webhook', require('./route-bot/push-webhook'))
-app.post('/webhook/:botname/:userTo', require('./route-bot/webhook/post-notify'))
+// app.use('/_health', (req, res) => res.sendStatus(200))
+// app.post('/:bot', require('./route-bot/webhook'))
+// app.put('/:bot/:to?', require('./route-bot/push-message'))
+// app.put('/flex/:name/:to', require('./route-bot/push-flex'))
+// // app.put('/slack/mii/:channel', require('./route-bot/push-slack'))
+// app.put('/hook/:type/:webhook', require('./route-bot/push-webhook'))
+// app.post('/webhook/:botname/:userTo', require('./route-bot/webhook/post-notify'))
 
-// API Get Database
-app.get('/db/cmd', require('./route-db/bot-cmd'))
-app.get('/db/cmd/endpoint', require('./route-db/bot-endpoint'))
-app.get('/db/:bot/cmd', require('./route-db/bot-cmd'))
-app.post('/db/:bot/cmd/:id', require('./route-db/bot-cmd'))
-app.get('/db/:bot/inbound', require('./route-db/inbound'))
-app.get('/db/:bot/outbound', require('./route-db/outbound'))
+// // API Get Database
+// app.get('/db/cmd', require('./route-db/bot-cmd'))
+// app.get('/db/cmd/endpoint', require('./route-db/bot-endpoint'))
+// app.get('/db/:bot/cmd', require('./route-db/bot-cmd'))
+// app.post('/db/:bot/cmd/:id', require('./route-db/bot-cmd'))
+// app.get('/db/:bot/inbound', require('./route-db/inbound'))
+// app.get('/db/:bot/outbound', require('./route-db/outbound'))
 
-// API Notify
-app.get('/register-bot/:service?/:room?', require('./route-bot/oauth'))
-app.put('/notify/:service/:room', require('./route-bot/notify'))
-app.put('/revoke/:service/:room', require('./route-bot/revoke'))
+// // API Notify
+// app.get('/register-bot/:service?/:room?', require('./route-bot/oauth'))
+// app.put('/notify/:service/:room', require('./route-bot/notify'))
+// app.put('/revoke/:service/:room', require('./route-bot/revoke'))
 
 // API router
-app.get('/api/service/dashboard', require('./route-db/service/dashboard'))
-app.post('/api/service/check', require('./route-db/service/check'))
-app.post('/api/service/update', require('./route-db/service/update'))
-app.post('/api/service', require('./route-db/service/new'))
-app.post('/api/bot', require('./route-db/bot/new'))
-app.get('/api/check/stats', require('./route-check/stats'))
-app.get('/api/stats/bot/:id', require('./route-check/stats-bot'))
-app.get('/api/stats/slack', require('./route-check/stats-slack'))
+// app.get('/api/service/dashboard', require('./route-db/service/dashboard'))
+// app.post('/api/service/check', require('./route-db/service/check'))
+// app.post('/api/service/update', require('./route-db/service/update'))
+// app.post('/api/service', require('./route-db/service/new'))
+// app.post('/api/bot', require('./route-db/bot/new'))
+// app.get('/api/check/stats', require('./route-check/stats'))
+// app.get('/api/stats/bot/:id', require('./route-check/stats-bot'))
+// app.get('/api/stats/slack', require('./route-check/stats-slack'))
 
 app.use(Sentry.Handlers.errorHandler())
 

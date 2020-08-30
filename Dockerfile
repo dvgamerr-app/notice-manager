@@ -17,6 +17,8 @@ FROM node:lts-alpine
 
 ENV TZ Asia/Bangkok
 ENV NODE_ENV production
+ENV PROXY_API https://notice.touno.io
+ENV HOST_API https://notice.touno.io
 
 WORKDIR /app
 COPY --from=builder /app .
