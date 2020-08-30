@@ -6,56 +6,86 @@ module.exports = {
   telemetry: false,
   head: {
     titleTemplate: title => `${title ? `${title} · ` : ''}LINE-Notify`,
+    meta: [
+      { charset: 'utf-8' },
+      { name: 'application-name', content: 'LINE Notify Manager' },
+      { name: 'name', content: 'LINE Notify Manager' },
+      { name: 'description', content: process.env.npm_package_description || '', id: 'desc' },
+      { 'http-equiv': 'X-UA-Compatible', content: 'IE=edge' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' },
+      { name: 'apple-mobile-web-app-capable', content: 'yes' },
+      { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+      { name: 'MobileOptimized', content: 'width' },
+      { name: 'HandheldFriendly', content: 'true' },
+      { name: 'author', content: 'Mr. Kananek Thongkam' }
+    ],
     link: [
       { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,700' }
     ]
   },
-  meta: [
-    { charset: 'utf-8' },
-    { name: 'application-name', content: 'LINE Notify Manager' },
-    { name: 'name', content: 'LINE Notify Manager' },
-    { name: 'description', content: process.env.npm_package_description || '', id: 'desc' },
-    { 'http-equiv': 'X-UA-Compatible', content: 'IE=edge' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' },
-    { name: 'apple-mobile-web-app-capable', content: 'yes' },
-    { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
-    { name: 'MobileOptimized', content: 'width' },
-    { name: 'HandheldFriendly', content: 'true' },
-    { name: 'author', content: 'Mr. Kananek Thongkam' }
-  ],
-  manifest: {
-    name: 'Notify',
-    lang: 'en',
-    description: '',
-    short_name: 'Notify',
-    icons: [
-      { src: '/favicon.ico', sizes: '16x16' }
-    ],
-    start_url: '/',
-    display: 'standalone',
-    orientation: 'portrait',
-    theme_color: '#ffffff',
-    background_color: '#ffffff',
-    browser_action: {
-      default_icon: '/favicon.ico',
-      default_popup: '/'
+  pwa: {
+    manifest: {
+      name: 'Notify',
+      lang: 'en',
+      description: '',
+      short_name: 'Notify',
+      start_url: '/',
+      display: 'standalone',
+      orientation: 'portrait',
+      theme_color: '#ffffff',
+      background_color: '#ffffff',
+      browser_action: {
+        default_icon: '/favicon.ico',
+        default_popup: '/'
+      },
+      icons: [
+        {
+          src: '/favicon-16.png',
+          sizes: '16x16',
+          type: 'image/png',
+          purpose: 'any maskable'
+        },
+        {
+          src: '/favicon-64.png',
+          sizes: '64x64',
+          type: 'image/png',
+          purpose: 'any maskable'
+        },
+        {
+          src: '/favicon.png',
+          sizes: '196x196',
+          type: 'image/png',
+          purpose: 'any maskable'
+        }
+      ]
+    },
+    workbox: {
+      offlinePage: ['/', '/login']
     }
   },
-  icons: {
-    sizes: [ 32, 57, 72, 144, 512 ]
-  },
-  workbox: { },
   loading: {
     color: '#00B900',
     height: '2px'
   },
   css: [
-    './assets/basic.scss'
+    '~/assets/index.scss',
+  ],
+  plugins: [
+    '~/plugins/vue-focus.js',
+    '~/plugins/vue-tabindex.js'
+  ],
+  buildModules: [
+    '@nuxtjs/eslint-module',
+    '@nuxtjs/stylelint-module'
   ],
   modules: [
+    '@nuxtjs/axios',
+    '@nuxtjs/auth',
+    '@nuxtjs/pwa',
     'nuxt-fontawesome',
-    'bootstrap-vue/nuxt',
-    '@nuxtjs/axios'
+    [
+      'bootstrap-vue/nuxt', { icons: false, css: true }
+    ]
   ],
   fontawesome: {
     component: 'fa',
