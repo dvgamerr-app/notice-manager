@@ -4,6 +4,11 @@ WORKDIR /app
 COPY . /app
 
 RUN npm i
+
+ENV TZ Asia/Bangkok
+ENV PROXY_API https://notice.touno.io
+ENV HOST_API https://notice.touno.io
+
 RUN npm run build
 RUN rm -Rf ./.github \
   ./assets \

@@ -90,10 +90,10 @@ module.exports = {
     component: 'fa',
     icons: { solid: true, regular: true, brands: true }
   },
-  axios: { baseURL: process.env.HOST_API || process.env.AXIOS_BASE_URL || 'http://localhost:4000' },
+  axios: { baseURL: process.env.HOST_API || process.env.AXIOS_BASE_URL || 'https://notice.touno.io' },
   env: {
-    PROXY_API: process.env.PROXY_API || 'http://localhost:4000',
-    HOST_API: process.env.HOST_API || 'http://localhost:4000'
+    PROXY_API: process.env.PROXY_API || 'https://notice.touno.io',
+    HOST_API: process.env.HOST_API || 'https://notice.touno.io'
   },
   build: {
     parallel: !production,
