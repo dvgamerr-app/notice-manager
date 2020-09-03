@@ -4,6 +4,12 @@ WORKDIR /app
 COPY . /app
 
 RUN npm i
+
+ENV TZ Asia/Bangkok
+ENV PROXY_API https://notice.touno.io
+ENV HOST_API https://notice.touno.io
+ENV AXIOS_BASE_URL https://notice.touno.io
+
 RUN npm run build
 RUN rm -Rf ./.github \
   ./assets \
@@ -17,6 +23,9 @@ FROM node:lts-alpine
 
 ENV TZ Asia/Bangkok
 ENV NODE_ENV production
+ENV PROXY_API https://notice.touno.io
+ENV HOST_API https://notice.touno.io
+ENV AXIOS_BASE_URL https://notice.touno.io
 
 WORKDIR /app
 COPY --from=builder /app .
