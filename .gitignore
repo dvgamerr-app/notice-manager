@@ -78,3 +78,4 @@ typings/
 
 package-lock.json
 codealike.json
+static/sw.js

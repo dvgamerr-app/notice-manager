@@ -7,13 +7,13 @@
 - Slack
 
 #### Dashboard
-![Dashboard](https://raw.githubusercontent.com/touno-io/line-notify/master/docs/dashboard.png)
-![Documentation](https://raw.githubusercontent.com/touno-io/line-notify/master/docs/documentation.png)
+![Dashboard](https://raw.githubusercontent.com/touno-io/line-notice/master/docs/dashboard.png)
+![Documentation](https://raw.githubusercontent.com/touno-io/line-notice/master/docs/documentation.png)
 
 ### Installation
 ```bash
-git clone https://github.com/touno-io/line-notify.git line-notify
-cd line-notify
+git clone https://github.com/touno-io/line-notice.git line-notice
+cd line-notice
 npm i
 npm run dev
 # open browser http://localhost:4000
@@ -21,7 +21,7 @@ npm run dev
 
 #### Environment
 
-- `HOST_API` require domain name and api. example 'https://notify.domain.com'
+- `HOST_API` require domain name and api. example 'https://notice.domain.com'
 
 ```env
 TZ=Asia/Bangkok

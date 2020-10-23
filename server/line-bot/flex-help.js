@@ -166,6 +166,6 @@ const flexMessage = {
 
 module.exports = {
   type: 'flex',
-  altText: 'LINE-Notify Help command lists.',
+  altText: 'LINE-Notice Help command lists.',
   contents: flexMessage
 }

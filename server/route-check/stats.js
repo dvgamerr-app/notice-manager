@@ -10,7 +10,7 @@ export default async (req, res) => {
   const { ServiceOauth } = mongo.get()
   try {
     const tokenItems = await ServiceOauth.find({})
-    if (tokenItems.length === 0) { throw new Error('Service LINE-Notify not register.') }
+    if (tokenItems.length === 0) { throw new Error('Service LINE-Notice not register.') }
     const result = []
     for (const e of tokenItems) {
       const { body } = await getStatus(e.accessToken)

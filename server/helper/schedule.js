@@ -60,7 +60,7 @@ module.exports = {
     const fect1 = await loggingStats()
     const fect2 = await loggingExpire()
 
-    const body = `[Heroku] *LINE-Notify* daily stats.\n${fect1.join('\n')}${fect2 ? fect2.join('\n') : ''}`
+    const body = `[Heroku] *LINE-Notice* daily stats.\n${fect1.join('\n')}${fect2 ? fect2.join('\n') : ''}`
 
     await notifyLogs(body)
   },

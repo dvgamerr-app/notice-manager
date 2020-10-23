@@ -2,7 +2,7 @@
   <b-form>
     <b-row class="mb-2">
       <b-col>
-        <h4>How to add LINE-Notify to room?</h4>
+        <h4>How to add LINE-Notice to room?</h4>
         <ol>
           <li>Add <b>LINE Notify</b> friend.</li>
           <b-img class="qr-code" src="~assets/notify-qr.png" />
@@ -79,7 +79,7 @@ export default {
     showToast (msg) {
       this.$bvToast.toast(msg, {
         toaster: 'b-toaster-bottom-right',
-        title: 'LINE-Notify',
+        title: 'LINE-Notice',
         autoHideDelay: 3000,
         solid: true,
         variant: 'warning'

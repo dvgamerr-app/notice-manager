@@ -88,7 +88,7 @@ export default {
     showToast (msg) {
       this.$bvToast.toast(msg, {
         toaster: 'b-toaster-bottom-right',
-        title: 'LINE-Notify',
+        title: 'LINE-Notice',
         autoHideDelay: 3000,
         solid: true,
         variant: 'warning'
