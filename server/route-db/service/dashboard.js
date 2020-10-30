@@ -1,4 +1,5 @@
 const { notice } = require('@touno-io/db/schema')
+const logger = require('@touno-io/debuger')('API')
 
 module.exports = async (req, res) => {
   try {
@@ -32,6 +33,7 @@ module.exports = async (req, res) => {
       }))
     })
   } catch (ex) {
+    logger.error(ex)
     res.status(500).json({ error: ex.stack || ex.message || ex })
   } finally {
     res.end()

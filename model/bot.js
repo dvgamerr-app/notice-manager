@@ -8,8 +8,8 @@ export default class Bot extends Model {
   static fields () {
     return {
       _id: this.attr(null),
-      name: this.attr(''),
-      botname: this.attr(''),
+      text: this.attr(''),
+      value: this.attr(''),
       stats: this.attr({})
     }
   }

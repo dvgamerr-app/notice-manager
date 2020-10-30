@@ -3,7 +3,7 @@ const debuger = require('@touno-io/debuger')
 const { notice } = require('@touno-io/db/schema')
 const { pushMessage } = require('../api-notify')
 
-const logger = debuger('Notify')
+const logger = debuger('API')
 
 module.exports = async (req, res) => {
   // Authorization oauth2 URI

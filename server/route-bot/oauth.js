@@ -55,11 +55,11 @@ module.exports = async (req, res) => {
       try {
         const result = await oauth2.authorizationCode.getToken(tokenConfig)
         const access = oauth2.accessToken.create(result)
-        const { body } = await getStatus(access.token.access_token)
+        const { data: res } = await getStatus(access.token.access_token)
 
         const data = await ServiceOauth.findOne({ state })
-        await ServiceOauth.updateOne({ state }, { $set: { name: body.target, accessToken: access.token.access_token } })
-        await notifyLogs(`Join room *${body.target}* with service *${data.service}*`)
+        await ServiceOauth.updateOne({ state }, { $set: { name: res.target, accessToken: access.token.access_token } })
+        await notifyLogs(`Join room *${res.target}* with service *${data.service}*`)
       } catch (ex) {
         await ServiceOauth.updateOne({ state }, { $set: { active: false } })
       }

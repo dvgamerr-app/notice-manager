@@ -5,7 +5,7 @@
     </div>
     <div v-for="e in list()" :key="e._id" @mouseover="() => edit.show = e._id" @mouseleave="() => edit.show = null">
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom mb-1">
-        <h6 v-text="e.name" />
+        <h6 v-text="e.text" />
         <div v-if="edit.show === e._id" class="menu-notify">
           <b-btn class="edit" variant="icon" size="sm" @click="onUpdateName(e)">
             <fa icon="edit" />
@@ -19,7 +19,7 @@
           ok-title="Sure, Delete it." cancel-title="No, Thank."
           ok-variant="danger" cancel-variant="default"
         >
-          Your want to delete service '{{ e.name }}' ?
+          Your want to delete service '{{ e.text }}' ?
         </b-modal>
       </div>
       <ul class="line-notify">
@@ -38,7 +38,7 @@
               <fa icon="trash-alt" />
             </b-btn>
           </div>
-          {{ r.room }} ({{ r.name }})
+          {{ r.value }} ({{ r.text }})
         </li>
       </ul>
     </div>
@@ -53,10 +53,13 @@ export default {
     btn: {
       trash: null
     },
+    add: {
+      value: ''
+    },
     edit: {
       show: null,
-      service: '',
-      name: '',
+      value: '',
+      text: '',
       mode: null
     }
   }),
@@ -69,21 +72,21 @@ export default {
     },
     onChangeService (e) {
       const vm = this
-      vm.add.service = e.service
+      vm.add.value = e.value
       vm.$nextTick(() => {
         vm.$refs.room.focus()
       })
     },
     async onSaveName (e) {
-      await this.$axios.post('/api/service/update', { name: this.edit.service, _id: e._id })
+      await this.$axios.post('/api/service/update', { name: this.edit.value, _id: e._id })
       this.edit.mode = null
-      this.edit.name = ''
+      this.edit.text = ''
       this.edit.service = ''
     },
-    async onUpdateName () {
-      // this.edit.mode = e._id
-      // this.edit.name = e.name
-      // this.edit.service = e.service
+    onUpdateName (e) {
+      this.edit.mode = e._id
+      this.edit.text = e.text
+      this.edit.value = e.value
     },
     onTrash (r) {
       this.btn.trash = r._id
@@ -96,13 +99,13 @@ export default {
     async onApplyTrash (r) {
       this.btn.trash = null
       this.btn.remove = r._id
-      const { data } = await this.$axios.put(`/revoke/${r.service}/${r.room}`, { revoke: 'agree' })
+      const { data } = await this.$axios.put(`/revoke/${r.service}/${r.value}`, { revoke: 'agree' })
       if (data.error) {
         // eslint-disable-next-line no-console
         return console.log(data.error)
       }
 
-      await this.$props.dataUpdate()
+      this.$emit('dataUpdate')
       this.btn.remove = null
     }
   }

@@ -5,9 +5,10 @@
         <b-row>
           <b-col lg="8">
             <notify-new />
+            <notify-join />
           </b-col>
           <b-col lg="4">
-            <notify-list />
+            <notify-list @data-update="updateService" />
           </b-col>
         </b-row>
       </b-tab>
@@ -45,6 +46,7 @@
 <script>
 import moment from 'moment'
 import notifyNew from '../components/notify/new'
+import notifyJoin from '../components/notify/join'
 import notifyList from '../components/notify/list'
 import notifyApi from '../components/notify/api'
 
@@ -56,7 +58,7 @@ import Webhook from '../model/webhook'
 export default {
   components: {
     notifyNew,
-    // notifyJoin,
+    notifyJoin,
     notifyList,
     notifyApi
   },
@@ -125,10 +127,9 @@ export default {
       return !/[^0-9a-z.-]+/g.test(name)
     },
     async updateService () {
-      // let { data } = await this.$axios(dashboard)
-      // this.hosts = data.hosts
-      // this.service = data.service
-      // this.$forceUpdate()
+      const { data } = await this.$axios('/api/service/dashboard')
+      this.service = data.service
+      this.$forceUpdate()
     },
     async updateStats () {
       // let { data } = await this.$axios(dashboard)

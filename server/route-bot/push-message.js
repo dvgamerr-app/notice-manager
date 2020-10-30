@@ -1,5 +1,6 @@
 const sdk = require('@line/bot-sdk')
 const { notice } = require('@touno-io/db/schema')
+const logger = require('@touno-io/debuger')('API')
 
 module.exports = async (req, res) => {
   const { bot, to } = req.params
@@ -40,6 +41,7 @@ module.exports = async (req, res) => {
     }
     res.json({ error: null })
   } catch (ex) {
+    logger.error(ex)
     res.json({ error: ex.message || ex.toString(), type: req.body.type })
     if (outbound && outbound._id) {
       await notice.get('LineOutbound').updateOne({ _id: outbound._id }, { $set: { error: ex.message || ex.toString() } })

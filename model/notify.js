@@ -10,8 +10,8 @@ export default class Notify extends Model {
   static fields () {
     return {
       _id: this.attr(null),
-      name: this.attr(''),
-      service: this.attr(''),
+      text: this.attr(''),
+      value: this.attr(''),
       room: this.attr([])
     }
   }

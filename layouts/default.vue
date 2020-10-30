@@ -21,13 +21,13 @@
       <b-container fluid>
         <b-row>
           <b-col class="menu nav nav-pills border-bottom" md="12">
-            <nuxt-link to="/notify" class="nav-link">
+            <nuxt-link to="/" class="nav-link">
               <fa icon="bell" /> <span class="d-none d-md-inline">LINE</span> Notify
             </nuxt-link>
-            <nuxt-link to="/bot" class="nav-link">
+            <nuxt-link to="/bot" class="nav-link d-none">
               <fa :icon="['fab','line']" /> <span class="d-none d-md-inline">LINE</span> BOT
             </nuxt-link>
-            <nuxt-link to="/webhook" class="nav-link">
+            <nuxt-link to="/webhook" class="nav-link d-none">
               <fa icon="link" /> Webhook
             </nuxt-link>
           </b-col>

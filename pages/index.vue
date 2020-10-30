@@ -1,8 +1,4 @@
-<template>
-  <div />
-</template>
-
 <script>
-export default {
-}
+import notify from './notify'
+export default notify
 </script>
