@@ -2,39 +2,43 @@
   <b-form>
     <b-row class="mb-2">
       <b-col>
-        <h4>How to add LINE-Notice to room?</h4>
+        <h3>วิธีใช้ service ที่สร้าง join เข้ากลุ่มที่ต้องการใช้งาน</h3>
         <ol>
           <li>Add <b>LINE Notify</b> friend.</li>
           <b-img class="qr-code" src="~assets/notify-qr.png" />
           <li class="pt-1 pb-1">
-            <b-dropdown dropright :text="`Select Service${ add.service ? ` : ${add.service}` : ''}`" variant="outline-info">
-              <b-dropdown-item v-for="e in list()" :key="e._id" href="#" @click.prevent="onChangeService(e)">
-                <span v-text="e.name" />
-              </b-dropdown-item>
-            </b-dropdown>
-          </li>
-          <li class="pt-1 pb-1">
-            <b-input-group>
-              <b-input-group-text>Room name</b-input-group-text>
-              <b-form-input ref="room" v-model.trim="add.room" size="sm" maxlength="20" :state="check.room" @keyup.enter="onJoinRoom($event)" />
-            </b-input-group>
+            <b-row>
+              <b-col cols="5">
+                <model-select v-model="add.service" :options="service" placeholder="Select service" />
+              </b-col>
+              <b-col cols="7">
+                <b-input-group>
+                  <b-input-group-text>Room name is</b-input-group-text>
+                  <b-form-input ref="room" v-model.trim="add.room" maxlength="20" :state="check.room" @keyup.enter="onJoinRoom($event)" />
+                </b-input-group>
+              </b-col>
+            </b-row>
           </li>
           <li>Your line account choose room and click <b>agree and connect</b>.</li>
           <li>Invite <b>LINE Notify</b> to room your select.</li>
         </ol>
-        <b-card-text>After your remember step and click <b>join room</b>.</b-card-text>
+        <p>After your remember step and click <b>join room</b>.</p>
         <b-link @click="onJoinRoom($event)">
-          <fa icon="external-link-alt" /> Join room
+          <!-- <fa icon="external-link-alt" /> Join room -->
         </b-link>
       </b-col>
     </b-row>
   </b-form>
 </template>
 <script>
+import { ModelSelect } from 'vue-search-select'
 import Api from '../../model/api'
 import Notify from '../../model/notify'
 
 export default {
+  components: {
+    ModelSelect
+  },
   data: () => ({
     check: {
       room: null,

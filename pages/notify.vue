@@ -8,7 +8,7 @@
             <notify-join />
           </b-col>
           <b-col lg="4">
-            <notify-list @data-update="updateService" />
+            <notify-list @update-service="updateService" />
           </b-col>
         </b-row>
       </b-tab>
@@ -54,6 +54,8 @@ import Api from '../model/api'
 import Notify from '../model/notify'
 import Bot from '../model/bot'
 import Webhook from '../model/webhook'
+
+const dashboard = '/api/service/dashboard'
 
 export default {
   components: {
@@ -127,15 +129,16 @@ export default {
       return !/[^0-9a-z.-]+/g.test(name)
     },
     async updateService () {
-      const { data } = await this.$axios('/api/service/dashboard')
+      const { data } = await this.$axios(dashboard)
+      this.hosts = data.hosts
       this.service = data.service
       this.$forceUpdate()
     },
     async updateStats () {
-      // let { data } = await this.$axios(dashboard)
-      // this.bot = data.bot
-      // this.webhook = data.webhook
-      // this.$forceUpdate()
+      const { data } = await this.$axios(dashboard)
+      this.bot = data.bot
+      this.webhook = data.webhook
+      this.$forceUpdate()
     },
     async onSubmitWebhook (e) {
     },

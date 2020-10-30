@@ -2,35 +2,51 @@
   <b-form>
     <b-row class="mb-2">
       <b-col>
-        <h4>How to create new service?</h4>
+        <h4>README</h4>
+        <p>
+          ให้สร้าง service ก่อนเพื่อเชื่อมต่อ token กับ line notify แล้วค่อยเอา service ที่สร้างไป join เข้าห้องที่ต้องให้ใช้งาน notify.
+        </p>
+        <h3>วิธีเพิ่ม service ใหม่</h3>
         <ol>
-          <li>Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.</li>
           <li class="pt-1 pb-1">
             <b-input-group>
-              <b-input-group-text>Create name</b-input-group-text>
-              <b-form-input v-model.trim="data.name" size="sm" maxlength="40" :state="check.service" @keyup.enter="onSubmitNotify($event)" />
-            </b-input-group>
-          </li>
-          <li>Input <b>Service URL</b> <code>{{ api().hostname }}/</code></li>
-          <li>Input <b>Callback URL</b> <code>{{ api().hostname }}/register-bot</code></li>
-          <li>Click <b>Argee and Contuiue</b> and click <b>Add</b>.</li>
-          <li>Goto <a href="https://notify-bot.line.me/my/services/" target="_blank">My Services</a> and click your service.</li>
-          <li>Check your email becouse client secret will be valid only after verifying your email address.</li>
-          <li class="pt-1 pb-1">
-            <b-input-group>
-              <b-input-group-text>Copy Client ID</b-input-group-text>
-              <b-form-input v-model.trim="data.client_id" size="sm" maxlength="32" :state="check.client_id" @keyup.enter="onSubmitNotify($event)" />
+              <b-input-group-text>Name</b-input-group-text>
+              <b-form-input v-model.trim="data.name" size="sm" maxlength="40" :state="state.service" @keyup.enter="onSubmitNotify($event)" />
             </b-input-group>
           </li>
           <li class="pt-1 pb-1">
+            Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.
+          </li>
+          <li class="pt-1 pb-1">
+            Input <b>Service URL</b> <code>{{ api.hosts }}/</code>
+          </li>
+          <li class="pt-1 pb-1">
+            Input <b>Callback URL</b> <code>{{ api.hosts }}/register-bot</code>
+          </li>
+          <li class="pt-1 pb-1">
+            Click <b>Argee and Contuiue</b> and click <b>Add</b>.
+          </li>
+          <li class="pt-1 pb-1">
+            Goto <a href="https://notify-bot.line.me/my/services/" target="_blank">My Services</a> and click your service.
+          </li>
+          <li class="pt-1 pb-1">
+            <span class="badge badge-warning">IMPORTANT</span> <b>Check your mailbox becouse client secret will be valid after verify in email.</b>
+          </li>
+          <li class="pt-1 pb-1">
             <b-input-group>
-              <b-input-group-text>Copy Client Secret</b-input-group-text>
-              <b-form-input v-model.trim="data.client_secret" size="sm" maxlength="64" :state="check.client_secret" @keyup.enter="onSubmitNotify($event)" />
+              <b-input-group-text>Client ID</b-input-group-text>
+              <b-form-input v-model.trim="data.client_id" size="sm" maxlength="32" :state="state.client_id" @keyup.enter="onSubmitNotify($event)" />
+            </b-input-group>
+          </li>
+          <li class="pt-1 pb-1">
+            <b-input-group>
+              <b-input-group-text>Client Secret</b-input-group-text>
+              <b-form-input v-model.trim="data.client_secret" size="sm" maxlength="64" :state="state.client_secret" @keyup.enter="onSubmitNotify($event)" />
             </b-input-group>
           </li>
         </ol>
         <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" :disabled="btn.submit" @click="onSubmitNotify($event)">
-          <fa v-if="btn.submit" icon="circle-notch" spin /> Create notify
+          <!-- <fa v-if="btn.submit" icon="circle-notch" spin /> Create notify -->
         </b-btn>
       </b-col>
     </b-row>

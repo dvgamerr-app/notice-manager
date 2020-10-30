@@ -17,7 +17,7 @@
         <b-modal
           :id="'trash-' + e._id" title="Delete service?" no-fade
           ok-title="Sure, Delete it." cancel-title="No, Thank."
-          ok-variant="danger" cancel-variant="default"
+          ok-variant="danger" cancel-variant="default" @ok="onDeleteService(e)"
         >
           Your want to delete service '{{ e.text }}' ?
         </b-modal>
@@ -88,6 +88,11 @@ export default {
       this.edit.text = e.text
       this.edit.value = e.value
     },
+    async onDeleteService (e) {
+      if (e.room.length > 0) { return this.showToast('Please remove room join all before remove service.') }
+      await this.$axios.post('/api/service/update', { _id: e._id, active: false })
+      await this.updateService()
+    },
     onTrash (r) {
       this.btn.trash = r._id
       this.$forceUpdate()
@@ -104,8 +109,7 @@ export default {
         // eslint-disable-next-line no-console
         return console.log(data.error)
       }
-
-      this.$emit('dataUpdate')
+      this.$emit('updateService')
       this.btn.remove = null
     }
   }
