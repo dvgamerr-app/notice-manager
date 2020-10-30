@@ -1,6 +1,6 @@
 const sdk = require('@line/bot-sdk')
 const Sentry = require('@sentry/node')
-const mongo = require('../../line-bot')
+const { notice } = require('@touno-io/db/schema')
 const { onEvents, onCommands } = require('../../line-bot/cmd')
 
 const _VERIFY_TOKEN = '00000000000000000000000000000000'
@@ -9,9 +9,10 @@ module.exports = async (req, res) => {
   const { bot } = req.params
   const { events } = req.body
   if (!events) { return res.end() }
-
-  const { LineInbound, LineCMD, LineBot } = mongo.get()
   try {
+    await notice.open()
+    const { LineInbound, LineCMD, LineBot } = notice.get()
+
     const client = await LineBot.findOne({ botname: bot })
     if (!client) { throw new Error('LINE API bot is undefined.') }
     const { accesstoken, secret } = client

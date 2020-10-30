@@ -6,7 +6,7 @@
           <b-navbar-brand to="/">
             <div class="logo-grid d-grid">
               <span class="logo-main">LINE</span>
-              <span class="logo-top">Notify</span>
+              <span class="logo-top">Notice</span>
               <span class="logo-bottom">MANAGER</span>
             </div>
           </b-navbar-brand>

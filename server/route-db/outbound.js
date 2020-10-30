@@ -1,7 +1,13 @@
-import mongo from '../mongodb'
+const { notice } = require('@touno-io/db/schema')
 
-export default async (req, res) => {
+module.exports = async (req, res) => {
   const { bot } = req.params
-  res.json((await mongo.get('LineOutbound').find({ botname: bot }, null, { sort: { created: -1 }, skip: 0, limit: 1000 })) || [])
-  res.end()
+  try {
+    await notice.open()
+    res.json((await notice.get('LineOutbound').find({ botname: bot }, null, { sort: { created: -1 }, skip: 0, limit: 1000 })) || [])
+  } catch (ex) {
+    res.status(500).json({ error: ex.stack || ex.message || ex })
+  } finally {
+    res.end()
+  }
 }

@@ -1,8 +1,10 @@
-import mongo from '../../mongodb'
+const { notice } = require('@touno-io/db/schema')
 
-export default async (req, res) => {
-  const { LineBot, LineBotRoom, ServiceBot, ServiceOauth, ChatWebhook } = mongo.get() // LineInbound, LineOutbound, LineCMD,
+module.exports = async (req, res) => {
   try {
+    await notice.open()
+    const { LineBot, LineBotRoom, ServiceBot, ServiceOauth, ChatWebhook } = notice.get() // LineInbound, LineOutbound, LineCMD,
+
     const webhook = await ChatWebhook.find({ active: true }, null, { sort: { botname: 1 } })
     const bot = await LineBot.find({ active: true }, null, { sort: { botname: 1 } })
     const room = await LineBotRoom.find({ active: true }, null, { sort: { botname: 1, name: 1 } })
@@ -30,7 +32,8 @@ export default async (req, res) => {
       }))
     })
   } catch (ex) {
-    res.json({ error: ex.message })
+    res.status(500).json({ error: ex.stack || ex.message || ex })
+  } finally {
+    res.end()
   }
-  res.end()
 }

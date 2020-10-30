@@ -1,7 +1,7 @@
-import debuger from '@touno-io/debuger'
-import mongo from '../mongodb'
-import { getStatus, setRevoke } from '../api-notify'
-import { notifyLogs } from '../helper'
+const debuger = require('@touno-io/debuger')
+const { notice } = require('@touno-io/db/schema')
+const { getStatus, setRevoke } = require('../api-notify')
+const { notifyLogs } = require('../helper')
 
 const uuid = (length) => {
   let result = ''
@@ -14,17 +14,17 @@ const uuid = (length) => {
 const hosts = process.env.HOST_API || 'http://localhost:4000/'
 const logger = debuger('OAUTH')
 
-export default async (req, res) => {
+module.exports = async (req, res) => {
   // Authorization oauth2 URI
   const { code, state, error } = req.query
   const { room, service } = req.params
-  const redirect_uri = `${hosts}/register-bot`
-  const response_type = 'code'
+  const redirectUri = `${hosts}/register-bot`
+  const responseType = 'code'
   const scope = 'notify'
 
   try {
-    await mongo.open()
-    const { ServiceOauth, ServiceBot } = mongo.get()
+    await notice.open()
+    const { ServiceOauth, ServiceBot } = notice.get()
 
     if (code) {
       const oauth = await ServiceOauth.findOne({ state })
@@ -39,7 +39,7 @@ export default async (req, res) => {
 
       const tokenConfig = {
         code,
-        redirect_uri,
+        redirect_uri: redirectUri,
         client_id: credentials.client.id,
         client_secret: credentials.client.secret
       }
@@ -86,9 +86,9 @@ export default async (req, res) => {
       if (token) {
         await ServiceOauth.updateOne({ service, room }, { $set: { state: newState } })
       } else {
-        await new ServiceOauth({ name: room, service, room, response_type, redirect_uri, state: newState }).save()
+        await new ServiceOauth({ name: room, service, room, response_type: responseType, redirect_uri: redirectUri, state: newState }).save()
       }
-      const authorizationUri = oauth2.authorizationCode.authorizeURL({ response_type, redirect_uri, scope, state: newState })
+      const authorizationUri = oauth2.authorizationCode.authorizeURL({ response_type: responseType, redirect_uri: redirectUri, scope, state: newState })
       return res.redirect(authorizationUri)
     }
   } catch (ex) {

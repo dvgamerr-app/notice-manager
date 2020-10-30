@@ -1,6 +1,7 @@
+const { nullFormat } = require('numeral')
 const debuger = require('@touno-io/debuger')
+const { notice } = require('@touno-io/db/schema')
 const { pushMessage } = require('../api-notify')
-const mongo = require('../mongodb')
 
 const logger = debuger('Notify')
 
@@ -8,12 +9,12 @@ module.exports = async (req, res) => {
   // Authorization oauth2 URI
   const { room, service } = req.params
   const { message, imageThumbnail, imageFullsize, stickerPackageId, stickerId, notificationDisabled } = req.body
-  let outbound = null
-
-  await mongo.open()
-  const { ServiceOauth, LineOutbound } = mongo.get()
+  let outbound = nullFormat
 
   try {
+    await notice.open()
+    const { ServiceOauth, LineOutbound } = notice.get()
+
     if (typeof message !== 'string') { throw new TypeError('Message is undefined.') }
 
     outbound = await new LineOutbound({
@@ -49,7 +50,7 @@ module.exports = async (req, res) => {
     res.json(result)
   } catch (ex) {
     logger.error(ex)
-    if (outbound) { await LineOutbound.updateOne({ _id: outbound._id }, { $set: { error: ex.message || ex.toString() } }) }
+    if (outbound) { await notice.get('LineOutbound').updateOne({ _id: outbound._id }, { $set: { error: ex.message || ex.toString() } }) }
     res.status(ex.error ? ex.error.status : 500)
     res.json({ error: (ex.error ? ex.error.message : ex.message || ex) })
   } finally {

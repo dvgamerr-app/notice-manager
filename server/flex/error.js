@@ -1,8 +1,8 @@
-const request = require('request-promise')
+const axios = require('axios')
 const url = require('./url-bot')
 
 module.exports = (app, ex, flex = false) => {
-  const body = {
+  const data = {
     type: 'flex',
     altText: `พบข้อผิดพลาด [${app}] ${ex.message}`,
     contents: {
@@ -42,5 +42,5 @@ module.exports = (app, ex, flex = false) => {
       }
     }
   }
-  return !flex ? request({ method: 'PUT', url, body, json: true }) : body
+  return !flex ? axios({ method: 'PUT', url, data, json: true }) : data
 }

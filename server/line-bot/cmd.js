@@ -1,5 +1,5 @@
+const { notice } = require('@touno-io/db/schema')
 const { notifyLogs } = require('../helper')
-const mongo = require('../line-bot')
 const helpFlex = require('./flex-help')
 
 const api = process.env.PROXY_API || 'http://localhost:4000'
@@ -9,19 +9,19 @@ const getID = (e) => {
   return e.source[`${e.source.type}Id`]
 }
 const getRoom = async (botname, id, type) => {
-  await mongo.open()
-  const LineBotRoom = mongo.get('LineBotRoom')
+  await notice.open()
+  const LineBotRoom = notice.get('LineBotRoom')
   return (await LineBotRoom.findOne({ botname, id, type })) || {}
 }
 const verifyRoom = async (botname, name) => {
-  await mongo.open()
-  const LineBotRoom = mongo.get('LineBotRoom')
+  await notice.open()
+  const LineBotRoom = notice.get('LineBotRoom')
   return LineBotRoom.findOne({ botname, name })
 }
 
 const joinBotRoom = async (botname, id, type) => {
   const room = await getRoom(botname, id, type)
-  const LineBotRoom = mongo.get('LineBotRoom')
+  const LineBotRoom = notice.get('LineBotRoom')
   if (room._id) {
     await LineBotRoom.updateOne({ _id: room._id }, { $set: { active: true } })
   } else {
@@ -31,12 +31,12 @@ const joinBotRoom = async (botname, id, type) => {
 }
 
 const leaveBotRoom = async (botname, id, type) => {
-  await mongo.open()
-  return mongo.get('LineBotRoom').updateOne({ botname, id, type }, { $set: { active: false } })
+  await notice.open()
+  return notice.get('LineBotRoom').updateOne({ botname, id, type }, { $set: { active: false } })
 }
 const renameBotRoom = async (botname, id, type, name) => {
-  await mongo.open()
-  return mongo.get('LineBotRoom').updateOne({ botname, id, type }, { $set: { name } })
+  await notice.open()
+  return notice.get('LineBotRoom').updateOne({ botname, id, type }, { $set: { name } })
 }
 
 module.exports = {

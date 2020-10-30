@@ -1,14 +1,12 @@
-import debuger from '@touno-io/debuger'
-import { getStatus } from '../api-notify'
-import mongo from '../mongodb'
+const { notice } = require('@touno-io/db/schema')
+const { getStatus } = require('../api-notify')
 
-const logger = debuger('Notify')
-
-export default async (req, res) => {
+module.exports = async (req, res) => {
   // Authorization oauth2 URI
-  await mongo.open()
-  const { ServiceOauth } = mongo.get()
   try {
+    await notice.open()
+    const { ServiceOauth } = notice.get()
+
     const tokenItems = await ServiceOauth.find({})
     if (tokenItems.length === 0) { throw new Error('Service LINE-Notice not register.') }
     const result = []
@@ -28,8 +26,7 @@ export default async (req, res) => {
 
     res.json(result)
   } catch (ex) {
-    logger.error(ex)
-    res.json({ error: ex.message || ex })
+    res.status(500).json({ error: ex.stack || ex.message || ex })
   } finally {
     res.end()
   }

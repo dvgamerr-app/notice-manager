@@ -1,10 +1,11 @@
-import mongo from '../../mongodb'
-import { notifyLogs } from '../../helper'
+const { notice } = require('@touno-io/db/schema')
+const { notifyLogs } = require('../../helper')
 
-export default async (req, res) => {
+module.exports = async (req, res) => {
   const data = req.body
-  const { ServiceBot } = mongo.get() // LineInbound, LineOutbound, LineCMD, ServiceOauth
   try {
+    await notice.open()
+    const { ServiceBot } = notice.get() // LineInbound, LineOutbound, LineCMD, ServiceOauth
     if (await ServiceBot.findOne({ service: data.name, active: true })) { throw new Error('name is duplicate.') }
     const found = await ServiceBot.findOne({ service: data.name })
     if (!found) {
@@ -16,16 +17,17 @@ export default async (req, res) => {
       }).save()
     } else {
       await ServiceBot.updateOne({ name: data.name, active: false }, {
- $set: {
-        client: data.client_id,
-        secret: data.client_secret,
-        active: true
-      }
-})
+        $set: {
+          client: data.client_id,
+          secret: data.client_secret,
+          active: true
+        }
+      })
     }
     await notifyLogs(`Notify service add *${data.name}*`)
   } catch (ex) {
-    res.json({ error: ex.message })
+    res.status(500).json({ error: ex.stack || ex.message || ex })
+  } finally {
+    res.end()
   }
-  res.end()
 }

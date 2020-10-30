@@ -1,11 +1,13 @@
-import mongo from '../line-bot'
-import { webhookMessage } from '../helper'
+const { notice } = require('@touno-io/db/schema')
+const { webhookMessage } = require('../helper')
 
-export default async (req, res) => {
-  const { LineOutbound } = mongo.get()
+module.exports = async (req, res) => {
   const { type, webhook } = req.params
   let outbound = null
   try {
+    await notice.open()
+    const { LineOutbound } = notice.get()
+
     outbound = await new LineOutbound({
       botname: webhook,
       userTo: type,
@@ -21,6 +23,7 @@ export default async (req, res) => {
   } catch (ex) {
     res.json({ error: ex.message || ex.toString(), type: req.body.type })
     if (outbound && outbound._id) {
+      const { LineOutbound } = notice.get()
       await LineOutbound.updateOne({ _id: outbound._id }, { $set: { error: ex.message || ex.toString() } })
     }
   } finally {

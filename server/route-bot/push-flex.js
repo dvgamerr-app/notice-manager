@@ -1,8 +1,8 @@
-import flexAlert from '../flex/alert'
-import flexError from '../flex/error'
-import pushMessagehandler from './push-message'
+const flexAlert = require('../flex/alert')
+const flexError = require('../flex/error')
+const pushMessagehandler = require('./push-message')
 
-export default async (req, res) => {
+module.exports = async (req, res) => {
   const { name } = req.params
   const { app, message, detail, botname } = req.body
   req.params.bot = botname || 'health-check'

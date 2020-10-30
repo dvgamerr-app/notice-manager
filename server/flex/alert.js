@@ -1,4 +1,4 @@
-const request = require('request-promise')
+const axios = require('axios')
 const moment = require('moment')
 const url = require('./url-bot')
 
@@ -19,8 +19,7 @@ module.exports = (title, msg, detail, color = '#009688', flex = false) => {
     contents.push({ type: 'text', weight: 'regular', text: detail, size: 'xxs', color: '#939393', decoration: 'none', style: 'normal', gravity: 'top', wrap: true, margin: 'sm' })
   }
 
- moment().format('D MMM YYYY HH:mm:ss')
-  const body = {
+  const data = {
     type: 'flex',
     altText: `แจ้งเตือน ${msg}`,
     contents: {
@@ -60,5 +59,5 @@ module.exports = (title, msg, detail, color = '#009688', flex = false) => {
       body: { type: 'box', layout: 'vertical', paddingAll: '5px', paddingStart: '10px', cornerRadius: 'none', contents }
     }
   }
-  return !flex ? request({ method: 'PUT', url, body, json: true }) : body
+  return !flex ? axios({ method: 'PUT', url, data }) : data
 }

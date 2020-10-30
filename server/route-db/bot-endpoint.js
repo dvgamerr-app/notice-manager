@@ -1,11 +1,12 @@
-import mongo from '../mongodb'
+const { notice } = require('@touno-io/db/schema')
 
-export default async (req, res) => {
+module.exports = async (req, res) => {
   try {
-    const data = await mongo.get('LineCMDWebhook').find({ active: true }, null, { sort: { botname: 1, command: -1 } })
+    await notice.open()
+    const data = await notice.get('LineCMDWebhook').find({ active: true }, null, { sort: { botname: 1, command: -1 } })
     res.json(data || [])
   } catch (ex) {
-    res.json({ error: ex.stack || ex.message || ex })
+    res.status(500).json({ error: ex.stack || ex.message || ex })
   }
   res.end()
 }

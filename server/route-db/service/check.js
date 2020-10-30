@@ -1,9 +1,11 @@
-import mongo from '../../mongodb'
+const { notice } = require('@touno-io/db/schema')
 
-export default async (req, res) => {
+module.exports = async (req, res) => {
   const { service, room } = req.body
-  const { ServiceOauth, ServiceBot } = mongo.get() // LineInbound, LineOutbound, LineCMD, ServiceOauth
   try {
+    await notice.open()
+    const { ServiceOauth, ServiceBot } = notice.get() // LineInbound, LineOutbound, LineCMD, ServiceOauth
+
     if (service && room) {
       if (await ServiceOauth.findOne({ service, room, accessToken: { $ne: null } })) { throw new Error('Room is duplicate.') }
     } else if (service) {
@@ -11,7 +13,8 @@ export default async (req, res) => {
     }
     res.json({})
   } catch (ex) {
-    res.json({ error: ex.message })
+    res.status(500).json({ error: ex.stack || ex.message || ex })
+  } finally {
+    res.end()
   }
-  res.end()
 }

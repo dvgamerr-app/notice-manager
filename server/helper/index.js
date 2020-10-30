@@ -1,5 +1,5 @@
 const debuger = require('@touno-io/debuger')
-const mongo = require('../line-bot')
+const { notice } = require('@touno-io/db/schema')
 const pkg = require('../../package.json')
 const { pushMessage } = require('../api-notify')
 
@@ -9,7 +9,7 @@ module.exports = {
   pkgChannel: 'heroku-notify',
   pkgName,
   notifyLogs: async (ex) => {
-    const { ServiceOauth } = mongo.get()
+    const { ServiceOauth } = notice.get()
     const logs = await ServiceOauth.findOne({ service: 'log', room: 'slog' })
     if (ex instanceof Error) {
       ex = ex.message ? `*${(ex.message || '').substring(0, 200)}*\n${(ex.stack || '').substring(0, 200)}` : ex
@@ -20,14 +20,14 @@ module.exports = {
   sendNotify: async (service, room, message) => {
     if (!service || !room) { return logger.log('No service, No room.') }
 
-    const { ServiceOauth } = mongo.get()
+    const { ServiceOauth } = notice.get()
     const oauth = await ServiceOauth.findOne({ service, room })
     if (!oauth || !oauth.accessToken) { return logger.log(`Oauth: ${service} in ${room}, No access token.`) }
     await pushMessage(oauth.accessToken, message)
   },
   webhookLogger: async (req, res, callback, botname = 'webhook', userTo = 'user') => {
     let outbound = null
-    const { LineOutbound } = mongo.get()
+    const { LineOutbound } = notice.get()
 
     try {
       outbound = await new LineOutbound({
@@ -52,8 +52,8 @@ module.exports = {
     }
   }
   // webhookMessage: async (type, botname, body) => {
-  //   await mongo.open()
-  //   const { ChatWebhook } = mongo.get()
+  //   await notice.open()
+  //   const { ChatWebhook } = notice.get()
   //   const chat = await ChatWebhook.findOne({ type, botname })
   //   await request.post(chat.uri, { body, json: true })
   // }

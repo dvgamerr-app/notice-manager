@@ -1,7 +1,7 @@
 // import mongo from '../line-bot'
 // import { slackMessage } from '../helper'
 
-// export default async (req, res) => {
+// module.exports = (req, res) => {
 //   const { LineOutbound } = mongo.get()
 //   const { icon, username, sender, message } = req.body
 //   const { channel } = req.params

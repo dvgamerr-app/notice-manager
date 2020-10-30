@@ -1,24 +1,27 @@
-import * as sdk from '@line/bot-sdk'
-import mongo from '../line-bot'
+const sdk = require('@line/bot-sdk')
+const { notice } = require('@touno-io/db/schema')
 
-export default async (req, res) => {
-  let { bot, to } = req.params
+module.exports = async (req, res) => {
+  const { bot, to } = req.params
 
-  const { LineOutbound, LineBot, LineBotRoom } = mongo.get()
   let outbound = null
+  let roomId = to
   try {
-    if (!/^[RUC]{1}/g.test(to) && (!/[0-9a-f]*/.test(to) || to.length !== 32)) {
-      const room = await LineBotRoom.findOne({ botname: bot, name: to })
+    await notice.open()
+    const { LineOutbound, LineBot, LineBotRoom } = notice.get()
+
+    if (!/^[RUC]{1}/g.test(roomId) && (!/[0-9a-f]*/.test(roomId) || roomId.length !== 32)) {
+      const room = await LineBotRoom.findOne({ botname: bot, name: roomId })
       if (!room || !room.active) { throw new Error('Room name is unknow.') }
-      to = room.id
+      roomId = room.id
     }
 
     const client = await LineBot.findOne({ botname: bot })
     if (!client) { throw new Error('LINE API bot is undefined.') }
     outbound = await new LineOutbound({
       botname: bot,
-      userTo: to,
-      type: to.startsWith('R') ? 'room' : to.startsWith('C') ? 'group' : to.startsWith('U') ? 'user' : 'replyToken',
+      userTo: roomId,
+      type: roomId.startsWith('R') ? 'room' : roomId.startsWith('C') ? 'group' : roomId.startsWith('U') ? 'user' : 'replyToken',
       sender: req.body || {},
       sended: false,
       error: null,
@@ -30,16 +33,16 @@ export default async (req, res) => {
 
     const line = new sdk.Client({ channelAccessToken: accesstoken, channelSecret: secret })
     await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: true } })
-    if (!/^[RUC]{1}/g.test(to)) {
-      await line.replyMessage(to, req.body)
+    if (!/^[RUC]{1}/g.test(roomId)) {
+      await line.replyMessage(roomId, req.body)
     } else {
-      await line.pushMessage(to, req.body)
+      await line.pushMessage(roomId, req.body)
     }
     res.json({ error: null })
   } catch (ex) {
     res.json({ error: ex.message || ex.toString(), type: req.body.type })
     if (outbound && outbound._id) {
-      await LineOutbound.updateOne({ _id: outbound._id }, { $set: { error: ex.message || ex.toString() } })
+      await notice.get('LineOutbound').updateOne({ _id: outbound._id }, { $set: { error: ex.message || ex.toString() } })
     }
   } finally {
     res.end()

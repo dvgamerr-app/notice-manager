@@ -2,11 +2,11 @@ const numeral = require('numeral')
 const moment = require('moment')
 const axios = require('axios')
 const Sentry = require('@sentry/node')
-const mongo = require('../line-bot')
+const { notice } = require('@touno-io/db/schema')
 const { notifyLogs } = require('./index')
 
 const loggingExpire = async () => {
-  const { LineOutbound, LineInbound, LineCMD } = mongo.get() // LineInbound, LineOutbound, LineCMD,
+  const { LineOutbound, LineInbound, LineCMD } = notice.get() // LineInbound, LineOutbound, LineCMD,
 
   const dataIn = await LineInbound.deleteMany({ created: { $lte: moment().add(24 * -1, 'month').toDate() } })
   const dataOut = await LineOutbound.deleteMany({ created: { $lte: moment().add(24 * -1, 'month').toDate() } })
@@ -21,7 +21,7 @@ const loggingExpire = async () => {
 }
 
 const loggingStats = async () => {
-  const { LineBot, ServiceBot, LineOutbound } = mongo.get()
+  const { LineBot, ServiceBot, LineOutbound } = notice.get()
   const dayFrom = moment().startOf('day').add(-1, 'day').toDate()
   const dayTo = moment().startOf('day').toDate()
   const facts = []
@@ -51,7 +51,7 @@ const loggingStats = async () => {
 
 module.exports = {
   cmdExpire: async () => {
-    const { LineCMD } = mongo.get()
+    const { LineCMD } = notice.get()
     await LineCMD.updateMany({ created: { $lte: moment().add(-3, 'minute').toDate() }, executing: false, executed: false }, {
       $set: { executed: true }
     })
@@ -65,14 +65,14 @@ module.exports = {
     await notifyLogs(body)
   },
   checkMongoConn: async () => {
-    await mongo.open()
-    if (!mongo.connected()) {
+    await notice.open()
+    if (!notice.connected()) {
       Sentry.captureMessage('MongoDB Connection fail.', Sentry.Severity.Critical)
       process.exit(0)
     }
   },
   lineInitilize: async () => {
-    const { LineBot } = mongo.get()
+    const { LineBot } = notice.get()
     const date = moment().add(-1, 'day')
 
     const data = await LineBot.find({ type: 'line' })

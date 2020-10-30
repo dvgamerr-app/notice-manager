@@ -1,9 +1,9 @@
 const production = !(process.env.NODE_ENV === 'development')
 
 module.exports = {
-  mode: 'universal',
   target: 'server',
   telemetry: false,
+  components: true,
   head: {
     titleTemplate: title => `${title ? `${title} · ` : ''}LINE-Notice`,
     meta: [
