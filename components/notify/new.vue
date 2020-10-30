@@ -11,7 +11,7 @@
           <li class="pt-1 pb-1">
             <b-input-group>
               <b-input-group-text>Name</b-input-group-text>
-              <b-form-input v-model.trim="data.name" size="sm" maxlength="40" :state="state.service" @keyup.enter="onSubmitNotify($event)" />
+              <b-form-input v-model.trim="data.name" size="sm" maxlength="40" :state="check.service" @keyup.enter="onSubmitNotify($event)" />
             </b-input-group>
           </li>
           <li class="pt-1 pb-1">
@@ -35,13 +35,13 @@
           <li class="pt-1 pb-1">
             <b-input-group>
               <b-input-group-text>Client ID</b-input-group-text>
-              <b-form-input v-model.trim="data.client_id" size="sm" maxlength="32" :state="state.client_id" @keyup.enter="onSubmitNotify($event)" />
+              <b-form-input v-model.trim="data.client_id" size="sm" maxlength="32" :state="check.client_id" @keyup.enter="onSubmitNotify($event)" />
             </b-input-group>
           </li>
           <li class="pt-1 pb-1">
             <b-input-group>
               <b-input-group-text>Client Secret</b-input-group-text>
-              <b-form-input v-model.trim="data.client_secret" size="sm" maxlength="64" :state="state.client_secret" @keyup.enter="onSubmitNotify($event)" />
+              <b-form-input v-model.trim="data.client_secret" size="sm" maxlength="64" :state="check.client_secret" @keyup.enter="onSubmitNotify($event)" />
             </b-input-group>
           </li>
         </ol>

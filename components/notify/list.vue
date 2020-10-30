@@ -5,12 +5,13 @@
     </div>
     <div v-for="e in list()" :key="e._id" @mouseover="() => edit.show = e._id" @mouseleave="() => edit.show = null">
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom mb-1">
-        <h6 v-text="e.text" />
+        <b-form-input v-if="edit.mode === e._id" v-model.trim="edit.text" class="edit-name col-10" maxlength="20" @keyup.enter="onSaveName(e, i)" />
+        <h6 v-if="edit.mode !== e._id" v-text="e.text" />
         <div v-if="edit.show === e._id" class="menu-notify">
-          <b-btn class="edit" variant="icon" size="sm" @click="onUpdateName(e)">
+          <b-btn v-if="edit.mode !== e._id" class="edit" variant="icon" size="sm" @click="onUpdateName(e)">
             <fa icon="edit" />
           </b-btn>
-          <b-btn v-b-modal="'trash-' + e._id" class="trash" variant="icon" size="sm">
+          <b-btn v-if="edit.mode !== e._id" v-b-modal="'trash-' + e._id" class="trash" variant="icon" size="sm">
             <fa icon="trash-alt" />
           </b-btn>
         </div>
@@ -78,7 +79,7 @@ export default {
       })
     },
     async onSaveName (e) {
-      await this.$axios.post('/api/service/update', { name: this.edit.value, _id: e._id })
+      await this.$axios.post('/api/service/update', { name: this.edit.text, _id: e._id })
       this.edit.mode = null
       this.edit.text = ''
       this.edit.service = ''
@@ -86,12 +87,20 @@ export default {
     onUpdateName (e) {
       this.edit.mode = e._id
       this.edit.text = e.text
-      this.edit.value = e.value
+    },
+    showToast (msg) {
+      this.$bvToast.toast(msg, {
+        toaster: 'b-toaster-bottom-right',
+        title: 'LINE-Notify',
+        autoHideDelay: 3000,
+        solid: true,
+        variant: 'warning'
+      })
     },
     async onDeleteService (e) {
       if (e.room.length > 0) { return this.showToast('Please remove room join all before remove service.') }
       await this.$axios.post('/api/service/update', { _id: e._id, active: false })
-      await this.updateService()
+      this.$emit('updateService')
     },
     onTrash (r) {
       this.btn.trash = r._id

@@ -5,7 +5,7 @@
         <b-row>
           <b-col lg="8">
             <notify-new />
-            <notify-join />
+            <!-- <notify-join /> -->
           </b-col>
           <b-col lg="4">
             <notify-list @update-service="updateService" />
