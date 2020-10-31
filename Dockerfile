@@ -19,7 +19,7 @@ RUN rm -Rf ./.github \
   ./pages \
   ./node_modules
 
-FROM node:lts-alpine  
+FROM node:lts-alpine
 
 ENV TZ Asia/Bangkok
 ENV NODE_ENV production
@@ -27,10 +27,9 @@ ENV PROXY_API https://notice.touno.io
 ENV HOST_API https://notice.touno.io
 ENV AXIOS_BASE_URL https://notice.touno.io
 
-
 WORKDIR /app
 COPY --from=builder /app .
-RUN npm i
+RUN npm i --production
 
 CMD ["npm", "start"]
 

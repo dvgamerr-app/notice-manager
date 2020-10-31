@@ -20,12 +20,10 @@
     "@line/bot-sdk": "^7.1.0",
     "@nuxtjs/auth": "^4.9.1",
     "@nuxtjs/axios": "^5.12.1",
+    "@nuxtjs/fontawesome": "^1.1.2",
     "@nuxtjs/pwa": "^3.2.2",
     "@riophae/vue-treeselect": "^0.4.0",
-    "@nuxtjs/fontawesome": "^1.1.2",
     "@sentry/node": "^5.27.2",
-    "@slack/events-api": "^2.3.0",
-    "@slack/web-api": "^5.13.0",
     "@touno-io/db": "^2.8.0",
     "@touno-io/debuger": "^2.3.3",
     "@vuex-orm/core": "^0.36.3",
@@ -36,12 +34,10 @@
     "bootstrap-vue": "^2.18.1",
     "express": "^4.17.1",
     "moment": "^2.24.0",
-    "mongoose": "^5.10.11",
     "node-cron": "^2.0.3",
     "numeral": "^2.0.6",
-    "nuxt": "^2.14.4",
-    "simple-oauth2": "^4.1.0",
-    "spdy": "^4.0.2"
+    "nuxt": "^2.14.7",
+    "simple-oauth2": "^4.1.0"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config": "^4.0.0",

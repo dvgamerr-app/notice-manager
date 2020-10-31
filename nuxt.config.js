@@ -17,7 +17,7 @@ module.exports = {
       { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
       { name: 'MobileOptimized', content: 'width' },
       { name: 'HandheldFriendly', content: 'true' },
-      { name: 'author', content: 'Mr. Kananek Thongkam' }
+      { name: 'author', content: 'Mr.Kananek Thongkam' }
     ],
     link: [
       { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,700' }
@@ -40,19 +40,19 @@ module.exports = {
       },
       icons: [
         {
-          src: '/favicon-16.png',
+          src: '/favicon.ico',
           sizes: '16x16',
           type: 'image/png',
           purpose: 'any maskable'
         },
         {
-          src: '/favicon-64.png',
+          src: '/favicon.ico',
           sizes: '64x64',
           type: 'image/png',
           purpose: 'any maskable'
         },
         {
-          src: '/favicon.png',
+          src: '/favicon.ico',
           sizes: '196x196',
           type: 'image/png',
           purpose: 'any maskable'
@@ -60,7 +60,7 @@ module.exports = {
       ]
     },
     workbox: {
-      offlinePage: ['/', '/login']
+      offlinePage: []
     }
   },
   loading: {
