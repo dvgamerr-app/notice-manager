@@ -42,7 +42,7 @@ app.get('/db/:bot/inbound', require('./route-db/inbound'))
 app.get('/db/:bot/outbound', require('./route-db/outbound'))
 
 // API Notify
-app.get('/register-bot/:service?/:room?', require('./route-bot/oauth'))
+app.get('/register/:service?/:room?', require('./route-bot/oauth'))
 app.put('/notify/:service/:room', require('./route-bot/notify'))
 app.put('/revoke/:service/:room', require('./route-bot/revoke'))
 

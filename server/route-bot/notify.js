@@ -40,6 +40,7 @@ module.exports = async (req, res) => {
     if (notificationDisabled !== undefined) { sender.notificationDisabled = notificationDisabled }
 
     const { headers } = await pushMessage(token.accessToken, sender)
+
     const result = {
       remaining: parseInt(headers['x-ratelimit-remaining']),
       image: parseInt(headers['x-ratelimit-imageremaining']),

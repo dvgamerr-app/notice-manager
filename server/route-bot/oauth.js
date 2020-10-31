@@ -1,3 +1,4 @@
+const { AuthorizationCode } = require('simple-oauth2')
 const debuger = require('@touno-io/debuger')
 const { notice } = require('@touno-io/db/schema')
 const { getStatus, setRevoke } = require('../api-notify')
@@ -18,7 +19,7 @@ module.exports = async (req, res) => {
   // Authorization oauth2 URI
   const { code, state, error } = req.query
   const { room, service } = req.params
-  const redirectUri = `${hosts}/register-bot`
+  const redirectUri = `${hosts}/register`
   const responseType = 'code'
   const scope = 'notify'
 
@@ -35,7 +36,7 @@ module.exports = async (req, res) => {
         auth: { tokenHost: 'https://notify-bot.line.me/' },
         options: { bodyFormat: 'form' }
       }
-      const oauth2 = require('simple-oauth2').create(credentials)
+      const client = new AuthorizationCode(credentials)
 
       const tokenConfig = {
         code,
@@ -53,15 +54,16 @@ module.exports = async (req, res) => {
       }
 
       try {
-        const result = await oauth2.authorizationCode.getToken(tokenConfig)
-        const access = oauth2.accessToken.create(result)
-        const { data: res } = await getStatus(access.token.access_token)
+        const accessToken = await client.getToken(tokenConfig)
+        if (accessToken.token.status !== 200) { throw new Error('Access Token is not verify.') }
+        const res = await getStatus(accessToken.token.access_token)
 
         const data = await ServiceOauth.findOne({ state })
-        await ServiceOauth.updateOne({ state }, { $set: { name: res.target, accessToken: access.token.access_token } })
-        await notifyLogs(`Join room *${res.target}* with service *${data.service}*`)
+        await ServiceOauth.updateOne({ state }, { $set: { name: res.target, accessToken: accessToken.token.access_token } })
+        await notifyLogs(`Join room *${res.message}* with service *${data.service}*`)
       } catch (ex) {
         await ServiceOauth.updateOne({ state }, { $set: { active: false } })
+        throw ex
       }
 
       return res.redirect(hosts)
@@ -78,7 +80,7 @@ module.exports = async (req, res) => {
         auth: { tokenHost: 'https://notify-bot.line.me/' },
         options: { bodyFormat: 'form' }
       }
-      const oauth2 = require('simple-oauth2').create(credentials)
+      const client = new AuthorizationCode(credentials)
 
       const newState = uuid(16)
       logger.log(`${service} in ${room} new state is '${newState}'`)
@@ -88,7 +90,7 @@ module.exports = async (req, res) => {
       } else {
         await new ServiceOauth({ name: room, service, room, response_type: responseType, redirect_uri: redirectUri, state: newState }).save()
       }
-      const authorizationUri = oauth2.authorizationCode.authorizeURL({ response_type: responseType, redirect_uri: redirectUri, scope, state: newState })
+      const authorizationUri = client.authorizeURL({ response_type: responseType, redirect_uri: redirectUri, scope, state: newState })
       return res.redirect(authorizationUri)
     }
   } catch (ex) {

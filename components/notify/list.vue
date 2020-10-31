@@ -1,13 +1,21 @@
 <template>
   <div>
-    <div v-if="!list() || list().length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
+    <div v-if="!list || list.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
       No service notify.
     </div>
-    <div v-for="e in list()" :key="e._id" @mouseover="() => edit.show = e._id" @mouseleave="() => edit.show = null">
+    <div v-for="e in list" :key="e.$id" @mouseover="() => edit.show = e._id" @mouseleave="() => edit.show = null">
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom mb-1">
-        <b-form-input v-if="edit.mode === e._id" v-model.trim="edit.text" class="edit-name col-10" maxlength="20" @keyup.enter="onSaveName(e, i)" />
-        <h6 v-if="edit.mode !== e._id" v-text="e.text" />
-        <div v-if="edit.show === e._id" class="menu-notify">
+        <b-form-input v-if="edit.mode === e._id" v-model.trim="edit.text" class="edit-name col-10" maxlength="20" @keyup.enter="onSaveName(e)" />
+        <span v-if="edit.mode === e._id" class="edit-enter">
+          ENTER
+        </span>
+        <h6 v-if="edit.mode !== e._id">
+          {{ e.text }}
+          <small v-if="e.text !== e.value">
+            ({{ e.value }})
+          </small>
+        </h6>
+        <div v-if="edit.show === e._id && edit.mode !== e._id" class="menu-notify">
           <b-btn v-if="edit.mode !== e._id" class="edit" variant="icon" size="sm" @click="onUpdateName(e)">
             <fa icon="edit" />
           </b-btn>
@@ -35,7 +43,7 @@
             <b-btn variant="icon" size="sm" @click.prevent="onCancelTrash()">
               <fa icon="times" />
             </b-btn>
-            <b-btn variant="icon" class="text-danger" size="sm" @click.prevent="onApplyTrash(r)">
+            <b-btn variant="icon" class="text-danger" size="sm" @click.prevent="onApplyTrash(e, r)">
               <fa icon="trash-alt" />
             </b-btn>
           </div>
@@ -46,7 +54,6 @@
   </div>
 </template>
 <script>
-import Api from '../../model/api'
 import Notify from '../../model/notify'
 
 export default {
@@ -64,13 +71,12 @@ export default {
       mode: null
     }
   }),
-  methods: {
-    api () {
-      return Api.query().first()
-    },
+  computed: {
     list () {
-      return Notify.all()
-    },
+      return Notify.query().orderBy('text').get()
+    }
+  },
+  methods: {
     onChangeService (e) {
       const vm = this
       vm.add.value = e.value
@@ -80,6 +86,10 @@ export default {
     },
     async onSaveName (e) {
       await this.$axios.post('/api/service/update', { name: this.edit.text, _id: e._id })
+      Notify.update({
+        where: e.$id,
+        data: { text: this.edit.text }
+      })
       this.edit.mode = null
       this.edit.text = ''
       this.edit.service = ''
@@ -100,26 +110,25 @@ export default {
     async onDeleteService (e) {
       if (e.room.length > 0) { return this.showToast('Please remove room join all before remove service.') }
       await this.$axios.post('/api/service/update', { _id: e._id, active: false })
-      this.$emit('updateService')
+      Notify.delete(e._id)
     },
     onTrash (r) {
       this.btn.trash = r._id
-      this.$forceUpdate()
     },
     onCancelTrash () {
       this.btn.trash = null
-      this.$forceUpdate()
     },
-    async onApplyTrash (r) {
+    async onApplyTrash (e, r) {
       this.btn.trash = null
       this.btn.remove = r._id
       const { data } = await this.$axios.put(`/revoke/${r.service}/${r.value}`, { revoke: 'agree' })
-      if (data.error) {
-        // eslint-disable-next-line no-console
-        return console.log(data.error)
-      }
-      this.$emit('updateService')
+      if (data.error) { return this.showToast(data.error) }
+
       this.btn.remove = null
+      Notify.update({
+        where: e.$id,
+        data: { room: e.room.filter(l => l._id !== r._id) }
+      })
     }
   }
 }
@@ -163,5 +172,13 @@ ul.line-notify {
   font-size: .9rem;
   padding: 2px 6px;
   height: auto;
+}
+.edit-enter {
+  font-size: 0.7rem;
+  padding: 1px 4px;
+  border: #dfdfdf solid 1px;
+  border-radius: 3px;
+  color: #787878;
+  margin-right: 6px;
 }
 </style>

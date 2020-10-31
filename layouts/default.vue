@@ -12,7 +12,6 @@
           </b-navbar-brand>
           <b-navbar-nav class="ml-auto">
             <b-nav-item to="/">
-              <font-awesome-icon :icon="['fas', 'user-circle']" />
               <fa icon="user-circle" class="text-muted" style="font-size:1.2rem" />
             </b-nav-item>
           </b-navbar-nav>
@@ -21,13 +20,13 @@
       <b-container fluid>
         <b-row>
           <b-col class="menu nav nav-pills border-bottom" md="12">
-            <nuxt-link to="/" class="nav-link">
+            <nuxt-link to="/" class="nav-link" exact>
               <fa icon="bell" /> <span class="d-none d-md-inline">LINE</span> Notify
             </nuxt-link>
-            <nuxt-link to="/bot" class="nav-link d-none">
+            <nuxt-link to="/bot" class="nav-link">
               <fa :icon="['fab','line']" /> <span class="d-none d-md-inline">LINE</span> BOT
             </nuxt-link>
-            <nuxt-link to="/webhook" class="nav-link d-none">
+            <nuxt-link to="/webhook" class="nav-link disabled">
               <fa icon="link" /> Webhook
             </nuxt-link>
           </b-col>

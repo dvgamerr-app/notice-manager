@@ -4,7 +4,7 @@
 // Import Bootstrap
 @import "bootstrap/scss/bootstrap.scss";
 @import 'bootstrap-vue/dist/bootstrap-vue.css';
-@import 'vue-search-select/dist/VueSearchSelect.css';
+@import '@riophae/vue-treeselect/dist/vue-treeselect.css';
 
 body {
   font-family: "Open Sans",'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -41,8 +41,13 @@ footer {
     color: #212529;
     border-bottom: transparent solid 3px;
     border-radius: 0px;
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1rem 0.4rem 1rem;
     font-weight: bold;
+    
+    &.disabled {
+      color: #b2b2b2 !important;
+    }
+
     &.nuxt-link-active {
       border-bottom-color: #00B900 !important;
     }

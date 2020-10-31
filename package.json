@@ -35,8 +35,8 @@
     "node-cron": "^2.0.3",
     "numeral": "^2.0.6",
     "nuxt": "^2.14.4",
-    "spdy": "^4.0.2",
-    "vue-search-select": "^2.9.3"
+    "simple-oauth2": "^4.1.0",
+    "spdy": "^4.0.2"
   },
   "devDependencies": {
     "@nuxtjs/auth": "^4.9.1",

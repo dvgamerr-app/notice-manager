@@ -20,13 +20,13 @@ module.exports = {
       message = { message }
     }
 
-    const { data } = await instance({
+    const res = await instance({
       method: 'POST',
       headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/x-www-form-urlencoded' },
       url: `${apiLINE}/notify`,
       data: qs.stringify(message)
     })
-    return data
+    return res
   },
   setRevoke: async (accessToken) => {
     const { data } = await instance({

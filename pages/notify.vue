@@ -5,7 +5,7 @@
         <b-row>
           <b-col lg="8">
             <notify-new />
-            <!-- <notify-join /> -->
+            <notify-join />
           </b-col>
           <b-col lg="4">
             <notify-list @update-service="updateService" />
@@ -15,20 +15,12 @@
       <b-tab title="API Reference">
         <notify-api :sample="sample">
           <b-card v-if="list && list.length > 0" slot="sample" title="Sample API">
-            <b-form inline>
+            <b-form>
               <label class="mr-2" for="select-service">Service: </label>
-              <b-dropdown id="select-service" class="mr-2" :text="`${ sample.service ? sample.service : '[service_name]'}`" variant="outline-info">
-                <b-dropdown-item v-for="e in getServiceSample" :key="e._id" href="#" @click.prevent="onSampleChangeService(e)">
-                  <span v-text="e.name" />
-                </b-dropdown-item>
-              </b-dropdown>
+              <treeselect v-model="sample.service" :options="getServiceSample" placeholder="Select service" />
               <label class="mr-2" for="select-room">Room: </label>
-              <b-dropdown id="select-room" class="mr-4" :text="`${ sample.room ? sample.room : '[room_id]'}`" variant="outline-info">
-                <b-dropdown-item v-for="e in getRoomSample" :key="e._id" href="#" @click.prevent="onSampleChangeRoom(e)">
-                  <span v-text="e.name" />
-                </b-dropdown-item>
-              </b-dropdown>
-              <b-button variant="outline-warning" @click.prevent="onTestNotify()">
+              <treeselect v-model="sample.room" :options="getRoomSample" placeholder="Select room" />
+              <b-button variant="outline-warning" @click.prevent="onTestNotify">
                 Testing
               </b-button>
             </b-form>
@@ -45,6 +37,7 @@
 
 <script>
 import moment from 'moment'
+import Treeselect from '@riophae/vue-treeselect'
 import notifyNew from '../components/notify/new'
 import notifyJoin from '../components/notify/join'
 import notifyList from '../components/notify/list'
@@ -59,6 +52,7 @@ const dashboard = '/api/service/dashboard'
 
 export default {
   components: {
+    Treeselect,
     notifyNew,
     notifyJoin,
     notifyList,
@@ -70,8 +64,8 @@ export default {
         data: { id: 1, hostname: env.HOST_API, proxyname: env.PROXY_API || env.HOST_API }
       })
 
-      const { data, status, statusText } = await $axios('/api/service/dashboard')
-      if (status !== 200) { throw new Error(`Server Down '/api/service/dashboard' is ${statusText}.`) }
+      const { data, status, statusText } = await $axios(dashboard)
+      if (status !== 200) { throw new Error(`Server Down '${dashboard}' is ${statusText}.`) }
 
       for (const item of data.service) {
         await Notify.insert({ data: item })
@@ -103,9 +97,20 @@ export default {
       show: null,
       service: '',
       mode: null
-    },
-    list: []
+    }
   }),
+  computed: {
+    list () {
+      return Notify.query().orderBy('text').get()
+    },
+    getServiceSample () {
+      return Notify.query().get().map(e => ({ id: e.value, label: e.text }))
+    },
+    getRoomSample () {
+      const service = Notify.query().where('value', this.sample.service).get()[0] || {}
+      return (service.room || []).map(e => ({ id: e.value, label: e.text }))
+    }
+  },
   methods: {
     getLimitPercent (value, max) {
       return Math.round(value * max / max)
@@ -124,6 +129,14 @@ export default {
         solid: true,
         variant: 'warning'
       })
+    },
+    async onTestNotify () {
+      if (!this.sample.service || !this.sample.room) { return }
+      const { data } = await this.$axios.put(`/notify/${this.sample.service}/${this.sample.room}`, {
+        message: '*LINE-BOT*\nNotify testing message.'
+      })
+      this.sample.test = JSON.stringify(data)
+      if (data.error) { this.showToast(data.error) }
     },
     checkName (name) {
       return !/[^0-9a-z.-]+/g.test(name)
@@ -166,16 +179,13 @@ export default {
         return e.preventDefault()
       }
       this.check.room = true
-      this.$router.push(`/register-bot/${this.add.service}/${this.add.room || ''}`, () => this.$router.go(0))
+      this.$router.push(`/register/${this.add.service}/${this.add.room || ''}`, () => this.$router.go(0))
     },
     async onRevokeToken (r) {
       this.btn.trash = null
       this.btn.remove = r._id
       const { data } = await this.$axios.put(`/revoke/${r.service}/${r.room}`, { revoke: 'agree' })
-      if (data.error) {
-        // eslint-disable-next-line no-console
-        return console.log(data.error)
-      }
+      if (data.error) { this.showToast(data.error) }
 
       await this.updateService()
       this.btn.remove = null

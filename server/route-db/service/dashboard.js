@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
     const service = await ServiceBot.find({ active: true }, null, { sort: { name: 1 } })
     const oauth = await ServiceOauth.find({ accessToken: { $ne: null } }, null, { sort: { service: 1, name: 1 } })
     res.json({
-      service: service.map(e => ({
+      service: service.filter(e => e.service !== 'log').map(e => ({
         _id: e._id,
         text: e.name,
         value: e.service,
@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
     })
   } catch (ex) {
     logger.error(ex)
-    res.status(500).json({ error: ex.stack || ex.message || ex })
+    res.json({ error: ex.stack || ex.message || ex })
   } finally {
     res.end()
   }

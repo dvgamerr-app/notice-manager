@@ -1,19 +1,18 @@
 <template>
   <b-form>
-    <b-row class="mb-2">
-      <b-col>
+    <b-row class="mb-2 mt-5">
+      <b-col cols="9">
         <h3>วิธีใช้ service ที่สร้าง join เข้ากลุ่มที่ต้องการใช้งาน</h3>
         <ol>
-          <li>Add <b>LINE Notify</b> friend.</li>
-          <b-img class="qr-code" src="~assets/notify-qr.png" />
+          <li>Add <b>LINE Notify</b> friend from <b>QR Code</b>.</li>
           <li class="pt-1 pb-1">
             <b-row>
               <b-col cols="5">
-                <model-select v-model="add.service" :options="service" placeholder="Select service" />
+                <treeselect v-model="add.service" :options="getServiceSample" placeholder="Select service" />
               </b-col>
               <b-col cols="7">
                 <b-input-group>
-                  <b-input-group-text>Room name is</b-input-group-text>
+                  <b-input-group-text>Room</b-input-group-text>
                   <b-form-input ref="room" v-model.trim="add.room" maxlength="20" :state="check.room" @keyup.enter="onJoinRoom($event)" />
                 </b-input-group>
               </b-col>
@@ -24,21 +23,21 @@
         </ol>
         <p>After your remember step and click <b>join room</b>.</p>
         <b-link @click="onJoinRoom($event)">
-          <!-- <fa icon="external-link-alt" /> Join room -->
+          <fa icon="external-link-alt" /> Join room
         </b-link>
+      </b-col>
+      <b-col cols="3">
+        <b-img class="qr-code" src="~assets/notify-qr.png" />
       </b-col>
     </b-row>
   </b-form>
 </template>
 <script>
-import { ModelSelect } from 'vue-search-select'
-import Api from '../../model/api'
+import Treeselect from '@riophae/vue-treeselect'
 import Notify from '../../model/notify'
 
 export default {
-  components: {
-    ModelSelect
-  },
+  components: { Treeselect },
   data: () => ({
     check: {
       room: null,
@@ -50,29 +49,23 @@ export default {
       submit: false
     },
     add: {
-      service: '',
-      room: ''
+      service: null,
+      room: null
     }
   }),
-  // computed: {
+  computed: {
   //   getBotnameSample () {
   //     return this.bot
   //   },
-  //   getServiceSample () {
-  //     return this.list
-  //   },
-  //   getRoomSample () {
-  //     let service = this.list.filter(e => e.service === this.api.notify.service)
-  //     return service && service[0] ? service[0].room : []
-  //   }
-  // },
+    getServiceSample () {
+      return Notify.query().get().map(e => ({ id: e.value, label: e.text }))
+    },
+    getRoomSample () {
+      const service = Notify.query().get().filter(e => e.value === this.api.notify.service)
+      return service && service[0] ? service[0].room : []
+    }
+  },
   methods: {
-    list () {
-      return Notify.all()
-    },
-    api () {
-      return Api.query().first()
-    },
     onChangeService (e) {
       const vm = this
       vm.add.service = e.service
@@ -110,13 +103,13 @@ export default {
       const { data } = await this.$axios.post('/api/service/check', { room: this.add.room, service: this.add.service })
       if (data.error) {
         this.check.room = false
-        this.showToast(data.error)
+        this.showToast(/.*?\n/ig.exec(data.error)[0])
         return e.preventDefault()
       }
       this.check.room = true
-      window.location.href = `/register-bot/${this.add.service}/${this.add.room || ''}`
+      window.location.href = `/register/${this.add.service}/${this.add.room || ''}`
       return e.preventDefault()
-      // this.$router.push(`/register-bot/${this.add.service}/${this.add.room || ''}`, () => this.$router.go(0))
+      // this.$router.push(`/register/${this.add.service}/${this.add.room || ''}`, () => this.$router.go(0))
     }
   }
 }

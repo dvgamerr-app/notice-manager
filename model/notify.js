@@ -7,6 +7,10 @@ export default class Notify extends Model {
     return 'notify'
   }
 
+  static get primaryKey () {
+    return '_id'
+  }
+
   static fields () {
     return {
       _id: this.attr(null),

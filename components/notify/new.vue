@@ -18,10 +18,10 @@
             Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.
           </li>
           <li class="pt-1 pb-1">
-            Input <b>Service URL</b> <code>{{ api.hosts }}/</code>
+            Input <b>Service URL</b> <code>{{ api.hostname }}/</code>
           </li>
           <li class="pt-1 pb-1">
-            Input <b>Callback URL</b> <code>{{ api.hosts }}/register-bot</code>
+            Input <b>Callback URL</b> <code>{{ api.hostname }}/register</code>
           </li>
           <li class="pt-1 pb-1">
             Click <b>Argee and Contuiue</b> and click <b>Add</b>.
@@ -46,8 +46,16 @@
           </li>
         </ol>
         <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" :disabled="btn.submit" @click="onSubmitNotify($event)">
-          <!-- <fa v-if="btn.submit" icon="circle-notch" spin /> Create notify -->
+          <fa v-if="btn.submit" icon="circle-notch" spin /> Create notify
         </b-btn>
+        <b-modal
+          id="'trash-'" v-model="btn.approve"
+          title="New service?" no-fade
+          ok-title="Sure, Add now." cancel-title="No."
+          ok-variant="success" cancel-variant="default" @ok="onSubmitNotify($event)"
+        >
+          Your want to add new service '{{ data.name }}' ?
+        </b-modal>
       </b-col>
     </b-row>
   </b-form>
@@ -66,7 +74,8 @@ export default {
       client_secret: null
     },
     btn: {
-      submit: false
+      submit: false,
+      approve: false
     },
     data: {
       name: '',
@@ -81,7 +90,10 @@ export default {
       room: ''
     }
   }),
-  // computed: {
+  computed: {
+    api () {
+      return Api.query().first()
+    }
   //   getBotnameSample () {
   //     return this.bot
   //   },
@@ -92,11 +104,8 @@ export default {
   //     let service = this.list.filter(e => e.service === this.api.notify.service)
   //     return service && service[0] ? service[0].room : []
   //   }
-  // },
+  },
   methods: {
-    api () {
-      return Api.query().first()
-    },
     onChangeService (e) {
       const vm = this
       vm.add.service = e.service
@@ -138,16 +147,23 @@ export default {
         return e.preventDefault()
       }
 
+      if (!this.btn.approve) {
+        this.btn.approve = true
+        return e.preventDefault()
+      }
+
       this.btn.submit = true
       try {
-        const res = await this.$axios.post('/api/service', this.data)
+        const { data: res } = await this.$axios.post('/api/service', this.data)
         if (res.error) { throw new Error(res.error) }
         // await this.updateService()
         await Notify.insert({
-          _id: null,
-          name: this.data.name,
-          service: this.data.name,
-          room: []
+          data: {
+            _id: res._id,
+            text: this.data.name,
+            value: this.data.name,
+            room: []
+          }
         })
 
         this.data.name = ''
@@ -159,8 +175,10 @@ export default {
         this.showToast('Successful.')
       } catch (ex) {
         this.showToast(ex.stack || ex.message)
+      } finally {
+        this.btn.approve = false
+        this.btn.submit = false
       }
-      this.btn.submit = false
     }
   }
 }

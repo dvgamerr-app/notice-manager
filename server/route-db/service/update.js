@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
     res.json({})
   } catch (ex) {
     logger.error(ex)
-    res.status(500).json({ error: ex.stack || ex.message || ex })
+    res.json({ error: ex.stack || ex.message || ex })
   }
   res.end()
 }
