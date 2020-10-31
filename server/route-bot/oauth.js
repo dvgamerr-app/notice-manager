@@ -12,7 +12,7 @@ const uuid = (length) => {
   }
   return result
 }
-const hosts = process.env.HOST_API || 'http://localhost:4000/'
+const hosts = process.env.HOST_API || 'https://notice.touno.io'
 const logger = debuger('OAUTH')
 
 module.exports = async (req, res) => {
