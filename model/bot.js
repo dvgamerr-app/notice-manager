@@ -10,7 +10,8 @@ export default class Bot extends Model {
       _id: this.attr(null),
       text: this.attr(''),
       value: this.attr(''),
-      stats: this.attr({})
+      stats: this.attr({}),
+      room: this.attr([])
     }
   }
 }

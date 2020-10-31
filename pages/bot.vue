@@ -30,7 +30,7 @@
                     <label class="mr-2" for="select-botname">Bot Name: </label>
                     <treeselect v-model="bot.name" :options="getBotnameSample" placeholder="Select Bot" />
                     <label class="mr-2" for="select-botname">userId : </label>
-                    <b-input v-model="bot.to" class="mr-4 col-4" />
+                    <treeselect v-model="bot.to" :options="getRoomSample" placeholder="Select User" />
                     <b-button variant="outline-warning" @click.prevent="onTestBot()">
                       Testing
                     </b-button>
@@ -210,6 +210,10 @@ export default {
     },
     getBotnameSample () {
       return Bot.query().get().map(e => ({ label: e.text, id: e.value, stats: e.stats }))
+    },
+    getRoomSample () {
+      const service = Bot.query().where('value', this.bot.name).get()[0] || {}
+      return (service.room || []).map(e => ({ id: e.value, label: e.text }))
     }
   },
   methods: {
