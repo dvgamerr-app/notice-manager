@@ -6,7 +6,7 @@ const { pushMessage } = require('../api-notify')
 const logger = debuger('API')
 
 module.exports = async (req, res) => {
-  // Authorization oauth2 URI
+  const IsWebhook = req.method === 'POST'
   const { room, service } = req.params
   const { message, imageThumbnail, imageFullsize, stickerPackageId, stickerId, notificationDisabled } = req.body
   let outbound = nullFormat
@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
     await notice.open()
     const { ServiceOauth, LineOutbound } = notice.get()
 
-    if (typeof message !== 'string') { throw new TypeError('Message is undefined.') }
+    if (typeof message !== 'string' && !IsWebhook) { throw new TypeError('Message is undefined.') }
 
     outbound = await new LineOutbound({
       botname: service,
@@ -30,14 +30,18 @@ module.exports = async (req, res) => {
     const token = await ServiceOauth.findOne({ service, room })
     if (!token || !token.accessToken) { throw new Error('Service and room not register.') }
 
-    const sender = {
-      message: message.replace(/\\n|newline/ig, '\n')
+    const sender = {}
+    if (!IsWebhook) {
+      sender.message = message.replace(/\\n|newline/ig, '\n')
+
+      if (imageThumbnail !== undefined) { sender.imageThumbnail = imageThumbnail }
+      if (imageFullsize !== undefined) { sender.imageFullsize = imageFullsize }
+      if (stickerPackageId !== undefined) { sender.stickerPackageId = stickerPackageId }
+      if (stickerId !== undefined) { sender.stickerId = stickerId }
+      if (notificationDisabled !== undefined) { sender.notificationDisabled = notificationDisabled }
+    } else {
+      sender.message = `*Webhook Payload*\n${process.env.HOST_API}/${outbound._id}`
     }
-    if (imageThumbnail !== undefined) { sender.imageThumbnail = imageThumbnail }
-    if (imageFullsize !== undefined) { sender.imageFullsize = imageFullsize }
-    if (stickerPackageId !== undefined) { sender.stickerPackageId = stickerPackageId }
-    if (stickerId !== undefined) { sender.stickerId = stickerId }
-    if (notificationDisabled !== undefined) { sender.notificationDisabled = notificationDisabled }
 
     const { headers } = await pushMessage(token.accessToken, sender)
 

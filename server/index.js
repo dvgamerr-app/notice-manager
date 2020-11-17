@@ -32,6 +32,7 @@ app.put('/flex/:name/:to', require('./route-bot/push-flex'))
 // app.put('/slack/mii/:channel', require('./route-bot/push-slack'))
 app.put('/hook/:type/:webhook', require('./route-bot/push-webhook'))
 app.post('/webhook/:botname/:userTo', require('./route-bot/webhook/post-notify'))
+app.get('/webhook/:id', require('./route-bot/webhook/get-body'))
 
 // API Get Database
 app.get('/db/cmd', require('./route-db/bot-cmd'))
@@ -44,6 +45,7 @@ app.get('/db/:bot/outbound', require('./route-db/outbound'))
 // API Notify
 app.get('/register/:service?/:room?', require('./route-bot/oauth'))
 app.put('/notify/:service/:room', require('./route-bot/notify'))
+app.post('/notify/:service/:room', require('./route-bot/notify'))
 app.put('/revoke/:service/:room', require('./route-bot/revoke'))
 
 // API router

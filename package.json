@@ -23,7 +23,7 @@
     "@nuxtjs/fontawesome": "^1.1.2",
     "@nuxtjs/pwa": "^3.2.2",
     "@riophae/vue-treeselect": "^0.4.0",
-    "@sentry/node": "^5.27.2",
+    "@sentry/node": "^5.27.4",
     "@touno-io/db": "^2.8.0",
     "@touno-io/debuger": "^2.3.3",
     "@vuex-orm/core": "^0.36.3",
@@ -31,7 +31,7 @@
     "axios-retry": "^3.1.8",
     "body-parser": "^1.19.0",
     "bootstrap": "^4.4.1",
-    "bootstrap-vue": "^2.18.1",
+    "bootstrap-vue": "^2.19.0",
     "express": "^4.17.1",
     "moment": "^2.24.0",
     "node-cron": "^2.0.3",
@@ -41,15 +41,15 @@
   },
   "devDependencies": {
     "@nuxtjs/eslint-config": "^4.0.0",
-    "@nuxtjs/eslint-module": "^3.0.0",
+    "@nuxtjs/eslint-module": "^3.0.1",
     "@nuxtjs/stylelint-module": "^4.0.0",
     "env-cmd": "^10.1.0",
-    "eslint": "^7.12.1",
+    "eslint": "^7.13.0",
     "eslint-plugin-nuxt": "^1.0.0",
     "node-sass": "^4.14.1",
     "nodemon": "^2.0.6",
-    "sass-loader": "^10.0.4",
-    "stylelint": "^13.7.2"
+    "sass-loader": "^10.1.0",
+    "stylelint": "^13.8.0"
   },
   "repository": {
     "type": "git",
