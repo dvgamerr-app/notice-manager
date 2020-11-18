@@ -40,7 +40,7 @@ module.exports = async (req, res) => {
       if (stickerId !== undefined) { sender.stickerId = stickerId }
       if (notificationDisabled !== undefined) { sender.notificationDisabled = notificationDisabled }
     } else {
-      sender.message = `*Webhook Payload*\n${process.env.HOST_API}/${outbound._id}`
+      sender.message = `*Webhook Payload*\n${process.env.HOST_API}/webhook/${outbound._id}`
     }
 
     const { headers } = await pushMessage(token.accessToken, sender)
