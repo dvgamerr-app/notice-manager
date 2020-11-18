@@ -24,7 +24,7 @@
     "@nuxtjs/pwa": "^3.2.2",
     "@riophae/vue-treeselect": "^0.4.0",
     "@sentry/node": "^5.27.4",
-    "@touno-io/db": "^2.8.0",
+    "@touno-io/db": "^2.8.1",
     "@touno-io/debuger": "^2.3.3",
     "@vuex-orm/core": "^0.36.3",
     "axios": "^0.21.0",
