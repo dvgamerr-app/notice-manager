@@ -40,7 +40,7 @@ module.exports = async (req, res) => {
       if (stickerId !== undefined) { sender.stickerId = stickerId }
       if (notificationDisabled !== undefined) { sender.notificationDisabled = notificationDisabled }
     } else {
-      const payload = await ServiceWebhook.findOne({ botname: service, userTo: room })
+      const payload = await ServiceWebhook.findOne({ service, room })
       if (payload) {
         try {
           // eslint-disable-next-line no-unused-vars
