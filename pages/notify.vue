@@ -153,10 +153,10 @@ export default {
       this.webhook = data.webhook
       this.$forceUpdate()
     },
-    async onSubmitWebhook (e) {
-    },
-    async onSubmitBot (e) {
-    },
+    // async onSubmitWebhook (e) {
+    // },
+    // async onSubmitBot (e) {
+    // },
     async onJoinRoom (e) {
       if (!this.add.service) {
         this.showToast('Select service name in dropdown.')

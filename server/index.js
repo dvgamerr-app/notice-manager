@@ -1,5 +1,3 @@
-// const { readFileSync } = require('fs')
-// const { join } = require('path')
 const express = require('express')
 const cron = require('node-cron')
 const { notice } = require('@touno-io/db/schema')
@@ -17,8 +15,6 @@ const { lineInitilize, cmdExpire, checkMongoConn, loggingPushMessage } = require
 const app = express()
 const dev = !(getEnv('NODE_ENV') === 'production')
 const logger = debuger(pkg.title)
-
-if (!getEnv('MONGODB_URI')) { throw new Error('Mongo connection uri is undefined.') }
 
 // parse application/x-www-form-urlencoded and application/jsons
 const bodyOptions = { limit: '50mb', extended: true }

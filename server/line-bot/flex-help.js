@@ -9,7 +9,7 @@ const flexMessage = {
         contents: [
           {
             type: 'text',
-            text: 'BOT [RIS-SD3]',
+            text: 'BOT [RIS-Robo]',
             weight: 'bold',
             color: '#000000',
             size: 'xl'
@@ -151,6 +151,36 @@ const flexMessage = {
               {
                 type: 'text',
                 text: 'get documentation request message.',
+                size: 'xs',
+                color: '#aaaaaa',
+                margin: 'sm',
+                flex: 4
+              },
+              {
+                type: 'text',
+                text: '/id',
+                weight: 'bold',
+                size: 'xs',
+                flex: 2
+              },
+              {
+                type: 'text',
+                text: 'get room name and check status.',
+                size: 'xs',
+                color: '#aaaaaa',
+                margin: 'sm',
+                flex: 4
+              },
+              {
+                type: 'text',
+                text: '/room [name]',
+                weight: 'bold',
+                size: 'xs',
+                flex: 2
+              },
+              {
+                type: 'text',
+                text: 'rename room from id to nickname api',
                 size: 'xs',
                 color: '#aaaaaa',
                 margin: 'sm',

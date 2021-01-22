@@ -70,10 +70,10 @@ module.exports = async (req, res) => {
     } else if (error) {
       return res.redirect(hosts)
     } else {
-      if (!service || !room) { return res.sendStatus(404) }
+      if (!service || !room) { return res.sendStatus(500) }
 
       const bot = await ServiceBot.findOne({ service })
-      if (!bot) { return res.sendStatus(404) }
+      if (!bot) { return res.sendStatus(500) }
 
       const credentials = {
         client: { id: bot.client, secret: bot.secret },

@@ -25,7 +25,7 @@ const joinBotRoom = async (botname, id, type) => {
   if (room._id) {
     await LineBotRoom.updateOne({ _id: room._id }, { $set: { active: true } })
   } else {
-    await new LineBotRoom({ botname, id, type, name: '' }).save()
+    await new LineBotRoom({ botname, id, type, name: '', variable: { bypass: false } }).save()
   }
   return room
 }
@@ -35,6 +35,7 @@ const leaveBotRoom = async (botname, id, type) => {
   return notice.get('LineBotRoom').updateOne({ botname, id, type }, { $set: { active: false } })
 }
 const renameBotRoom = async (botname, id, type, name) => {
+  await joinBotRoom(botname, id, type)
   await notice.open()
   return notice.get('LineBotRoom').updateOne({ botname, id, type }, { $set: { name } })
 }

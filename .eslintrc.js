@@ -1,26 +1,21 @@
 module.exports = {
-  root: true,
   env: {
     browser: true,
+    commonjs: true,
+    es2021: true,
     node: true
   },
-  parserOptions: {
-    parser: 'babel-eslint'
-  },
   extends: [
-    '@nuxtjs',
-    'plugin:nuxt/recommended'
+    "eslint:recommended",
+    "plugin:nuxt/recommended"
   ],
-  // add your custom rules here
+  parserOptions: {
+    ecmaVersion: 12
+  },
   rules: {
-    indent: 'off',
     'nuxt/no-cjs-in-config': 'off',
-    'template-curly-spacing': 'off',
-    'vue/max-attributes-per-line': [
-      'error', {
-        singleline: 10,
-        multiline: { max: 3, allowFirstLine: false }
-      }
-    ]
+    'no-console': 'off',
+    'no-debugger': 'off',
+    'vue/no-v-html': 'off'
   }
 }
