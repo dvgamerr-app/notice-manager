@@ -39,6 +39,12 @@ const renameBotRoom = async (botname, id, type, name) => {
   await notice.open()
   return notice.get('LineBotRoom').updateOne({ botname, id, type }, { $set: { name } })
 }
+const renameUserInRoom = async (botname, roomname, name, user_id) => {
+  await notice.open()
+  const LineBotUser = notice.get('LineBotUser')
+  await LineBotUser.deleteMany({ botname, roomname, user_id })
+  return new LineBotUser({ botname, roomname, user_id, name }).save()
+}
 
 module.exports = {
   onEvents: {
@@ -72,6 +78,13 @@ module.exports = {
       if (await verifyRoom(botname, args[0])) { return `\`${args[0]}\` ใช้แล้ว` }
       await renameBotRoom(botname, getID(event), event.source.type, args[0])
       return `เย้! \`${args[0]}\``
+    },
+    name: async (botname, args, event) => {
+      const room = await getRoom(botname, getID(event), event.source.type)
+      if (!room) { return }
+
+      await renameUserInRoom(botname, room.name, args.join(' '), event.source.userId)
+      return `สวัสดี! \`${args.join(' ')}\``
     },
     leave: async (botname, args, event, line) => {
       await leaveBotRoom(botname, getID(event), event.source.type)

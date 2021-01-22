@@ -23,7 +23,7 @@
     "@nuxtjs/fontawesome": "^1.1.2",
     "@nuxtjs/pwa": "^3.3.4",
     "@riophae/vue-treeselect": "^0.4.0",
-    "@touno-io/db": "^2.8.1",
+    "@touno-io/db": "^2.8.4",
     "@touno-io/debuger": "^2.4.0",
     "@vuex-orm/core": "^0.36.3",
     "axios": "^0.21.1",

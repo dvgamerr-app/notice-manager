@@ -28,6 +28,17 @@ const getVariable = async (e, name) => {
   return data.variable && data.variable[name] 
 }
 
+const getNicknane = async (e, botname, unqiueID) => {
+  const member = await getVariable(e, 'member')
+  const nickname = []
+  const room = await notice.get('LineBotRoom').findOne({ botname, id: unqiueID, type: e.source.type })
+  for await (const user_id of member) {
+    const user = await notice.get('LineBotUser').findOne({ botname, roomname: room.name, user_id })
+    nickname.push(user ? user.name : user_id)
+  }
+  return nickname
+}
+
 const task = {}
 const msg = [
   'ยังขาดอีก :n คนนะ 😄',
@@ -87,11 +98,10 @@ module.exports = {
         const memberTotal = await getVariable(e, 'memberTotal')
         if (forceStop) {
           if (task[unqiueID].cron) task[unqiueID].cron.stop()
-
-          const member = await getVariable(e, 'member')
-          
           await setVariable(e, { bypass: false })
-          await line.pushMessage(unqiueID, { type: 'text', text: member.length ? `จบงานแล้ว นับได้ \`${member.length}\` คน\n- ${member.join('\n- ')}`: 'อ้าว ไม่มีคนเลย' })
+
+          const nickname = await getNicknane(e, 'ris-robo', unqiueID)
+          await line.pushMessage(unqiueID, { type: 'text', text: nickname.length ? `จบงานแล้ว นับได้ \`${nickname.length}\` คน\n- ${nickname.join('\n- ')}`: 'อ้าว ไม่มีคนเลย' })
         } else {
           const userId = await getVariable(e, 'userId')
           if (userId === e.source.userId) return
