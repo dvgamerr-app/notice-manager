@@ -76,7 +76,6 @@ typings/
 # FuseBox cache
 .fusebox/
 
-package-lock.json
 codealike.json
 static/sw.js
 static/sw.js

@@ -1,7 +1,7 @@
 const { notice } = require('@touno-io/db/schema')
-const { webhookMessage } = require('../helper')
+const { webhookMessage } = require('~/api/helper')
 
-module.exports = async (req, res) => {
+module.exports = async (req) => {
   const { type, webhook } = req.params
   let outbound = null
   try {

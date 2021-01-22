@@ -76,8 +76,8 @@ module.exports = {
   ],
   buildModules: [
     '@nuxtjs/fontawesome',
-    '@nuxtjs/eslint-module',
-    '@nuxtjs/stylelint-module'
+    // '@nuxtjs/eslint-module',
+    // '@nuxtjs/stylelint-module'
   ],
   modules: [
     'bootstrap-vue/nuxt',
