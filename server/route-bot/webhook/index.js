@@ -49,7 +49,7 @@ module.exports = async (req, res) => {
       for (const e of events) {
         if (e.replyToken === _VERIFY_TOKEN) { continue }
         await new LineInbound(Object.assign(e, { botname: bot })).save()
-        if (await getVariable(e, 'bypass')) {
+        if (await getVariable(e, 'bypass') && (e.source.type === 'room' || e.source.type === 'group')) {
           const cmdIndex = await getVariable(e, 'index')
           if (e.type === 'message' && e.message.type === 'text') {
             const { text } = e.message

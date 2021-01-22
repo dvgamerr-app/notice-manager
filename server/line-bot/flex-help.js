@@ -139,52 +139,81 @@ const flexMessage = {
           },
           {
             type: 'box',
-            layout: 'horizontal',
+            layout: 'vertical',
             contents: [
               {
                 type: 'text',
                 text: '/api',
                 weight: 'bold',
                 size: 'xs',
-                flex: 2
+                margin: 'sm'
               },
               {
                 type: 'text',
                 text: 'get documentation request message.',
                 size: 'xs',
                 color: '#aaaaaa',
-                margin: 'sm',
-                flex: 4
-              },
+                margin: 'xs'
+              }
+            ]
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            contents: [
               {
                 type: 'text',
                 text: '/id',
                 weight: 'bold',
                 size: 'xs',
-                flex: 2
+                margin: 'sm'
               },
               {
                 type: 'text',
                 text: 'get room name and check status.',
                 size: 'xs',
                 color: '#aaaaaa',
-                margin: 'sm',
-                flex: 4
-              },
+                margin: 'xs'
+              }
+            ]
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            contents: [
               {
                 type: 'text',
                 text: '/room [name]',
                 weight: 'bold',
                 size: 'xs',
-                flex: 2
+                margin: 'sm'
               },
               {
                 type: 'text',
                 text: 'rename room from id to nickname api',
                 size: 'xs',
                 color: '#aaaaaa',
-                margin: 'sm',
-                flex: 4
+                margin: 'xs'
+              }
+            ]
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            contents: [
+              {
+                type: 'text',
+                text: '/name [nickname]',
+                weight: 'bold',
+                size: 'xs',
+                margin: 'sm'
+              },
+              {
+                type: 'text',
+                text: 'rename user in room.',
+                size: 'xs',
+                color: '#aaaaaa',
+                margin: 'xs'
               }
             ]
           }

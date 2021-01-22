@@ -98,7 +98,7 @@ module.exports = {
       }
     },
     help: (botname, args, event) => {
-      if (event.source.type === 'user') { return helpFlex }
+      return helpFlex
     },
     api: async (botname, args, event) => {
       const room = await getRoom(botname, getID(event), event.source.type)
