@@ -62,7 +62,8 @@ module.exports = {
             const member = await getVariable(e, 'member')
             
             task[unqiueID].count++
-            let text = msg[Math.ceil(task[unqiueID].count / (minutePeriod / msg.length)) - 1]
+            // sequence Math.ceil(task[unqiueID].count / (minutePeriod / msg.length)) - 1
+            let text = msg[Math.floor(Math.random() * msg.length)]
             const total = memberTotal - member.length
             if (memberTotal <= member.length) {
               task[unqiueID].cron.stop()
@@ -70,7 +71,8 @@ module.exports = {
 
             if (task[unqiueID].count >= minutePeriod) {
               task[unqiueID].cron.stop()
-              text = 'บอทเสียใจ 😭 ม..ไม่มีใครคุยด้วยเลย😢 ป...ไปก็ได้😢'
+              await setVariable(e, { bypass: false })
+              text = `บอทเสียใจ 😭 ม..ไม่มีใครคุยด้วยเลย😢 ป...ไปก็ได้😢 ยังขาดอีก *${total}* คนนะ`
             }
             
             await line.pushMessage(unqiueID, { type: 'text', text: text ? text.replace(/:n/, `*${total}*`) : `เร็วๆ ยังขาดอีก *${total}* คนนะ` })
@@ -87,8 +89,9 @@ module.exports = {
           if (task[unqiueID].cron) task[unqiueID].cron.stop()
 
           const member = await getVariable(e, 'member')
+          
           await setVariable(e, { bypass: false })
-          await line.pushMessage(unqiueID, { type: 'text', text: member.length ? `จบงานนับได้ \`${member.length}\` คน\n- ${member.join('\n- ')}`: 'อ้าว ไม่มีคนเลย' })
+          await line.pushMessage(unqiueID, { type: 'text', text: member.length ? `จบงานแล้ว นับได้ \`${member.length}\` คน\n- ${member.join('\n- ')}`: 'อ้าว ไม่มีคนเลย' })
         } else {
           const userId = await getVariable(e, 'userId')
           if (userId === e.source.userId) return
@@ -100,7 +103,7 @@ module.exports = {
             if (task[unqiueID].cron) task[unqiueID].cron.stop()
 
             await setVariable(e, { bypass: false })
-            await line.pushMessage(unqiueID, { type: 'text', text: `ครบแล้วสินะ!! 💯 \`แยกย้าย\`` })
+            await line.pushMessage(unqiueID, { type: 'text', text: `🥰 ครบแล้วสินะ!! 💯 \`แยกย้าย\` 💥` })
           }
         }
       }
