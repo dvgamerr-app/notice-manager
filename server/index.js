@@ -24,29 +24,29 @@ const logger = debuger(pkg.title)
 // app.put('/flex/:name/:to', require('./route-bot/push-flex'))
 // app.put('/slack/mii/:channel', require('./route-bot/push-slack'))
 
-// API Get Database
-app.get('/db/cmd', require('../api/route-db/bot-cmd'))
-app.get('/db/cmd/endpoint', require('../api/route-db/bot-endpoint'))
-app.get('/db/:bot/cmd', require('../api/route-db/bot-cmd'))
-app.post('/db/:bot/cmd/:id', require('../api/route-db/bot-cmd'))
-app.get('/db/:bot/inbound', require('../api/route-db/inbound'))
-app.get('/db/:bot/outbound', require('../api/route-db/outbound'))
+// // API Get Database
+// app.get('/db/cmd', require('../api/route-db/bot-cmd'))
+// app.get('/db/cmd/endpoint', require('../api/route-db/bot-endpoint'))
+// app.get('/db/:bot/cmd', require('../api/route-db/bot-cmd'))
+// app.post('/db/:bot/cmd/:id', require('../api/route-db/bot-cmd'))
+// app.get('/db/:bot/inbound', require('../api/route-db/inbound'))
+// app.get('/db/:bot/outbound', require('../api/route-db/outbound'))
 
-// API Notify
-app.get('/register/:service?/:room?', require('../api/route-bot/oauth'))
-app.put('/notify/:service/:room', require('../api/route-bot/notify'))
-app.post('/notify/:service/:room', require('../api/route-bot/notify'))
-app.put('/revoke/:service/:room', require('../api/route-bot/revoke'))
+// // API Notify
+// app.get('/register/:service?/:room?', require('../api/route-bot/oauth'))
+// app.put('/notify/:service/:room', require('../api/route-bot/notify'))
+// app.post('/notify/:service/:room', require('../api/route-bot/notify'))
+// app.put('/revoke/:service/:room', require('../api/route-bot/revoke'))
 
-// API router
-app.get('/api/service/dashboard', require('../api/route-db/service/dashboard'))
-app.post('/api/service/check', require('../api/route-db/service/check'))
-app.post('/api/service/update', require('../api/route-db/service/update'))
-app.post('/api/service', require('../api/route-db/service/new'))
-app.post('/api/bot', require('../api/route-db/bot/new'))
-app.get('/api/check/stats', require('../api/route-check/stats'))
-app.get('/api/stats/bot/:id', require('../api/route-check/stats-bot'))
-app.get('/api/stats/slack', require('../api/route-check/stats-slack'))
+// // API router
+// app.get('/api/service/dashboard', require('../api/route-db/service/dashboard'))
+// app.post('/api/service/check', require('../api/route-db/service/check'))
+// app.post('/api/service/update', require('../api/route-db/service/update'))
+// app.post('/api/service', require('../api/route-db/service/new'))
+// app.post('/api/bot', require('../api/route-db/bot/new'))
+// app.get('/api/check/stats', require('../api/route-check/stats'))
+// app.get('/api/stats/bot/:id', require('../api/route-check/stats-bot'))
+// app.get('/api/stats/slack', require('../api/route-check/stats-slack'))
 
 // Init Nuxt.js
 

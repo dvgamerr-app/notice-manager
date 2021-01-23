@@ -21,13 +21,26 @@ module.exports = [
   { method: 'POST', path: '/webhook/{type}/{name}/{to}/{msg?}', handler: require('./webhook/push-notify') },
   { method: 'GET', path: '/webhook/{id}', handler: require('./webhook') },
 
-  { method: 'GET', path: '/api/service/dashboard', handler: require('./route-db/service/dashboard') }
-]
+  // API UI
+  { method: 'GET', path: '/api/service/dashboard', handler: require('./route-db/service/dashboard') },
+  { method: 'POST', path: '/api/service/check', handler: require('./route-db/service/check') },
+  { method: 'POST', path: '/api/service/update', handler: require('./route-db/service/update') },
+  { method: 'POST', path: '/api/service', handler: require('./route-db/service/new') },
+  { method: 'POST', path: '/api/bot', handler: require('./route-db/bot/new') },
+  { method: 'GET', path: '/api/check/stats', handler: require('./route-check/stats') },
+  { method: 'GET', path: '/api/stats/bot/{id}', handler: require('./route-check/stats-bot') },
+  { method: 'GET', path: '/api/stats/slack', handler: require('./route-check/stats-slack') },
 
-// app.post('/api/service/check', require('../api/route-db/service/check'))
-// app.post('/api/service/update', require('../api/route-db/service/update'))
-// app.post('/api/service', require('../api/route-db/service/new'))
-// app.post('/api/bot', require('../api/route-db/bot/new'))
-// app.get('/api/check/stats', require('../api/route-check/stats'))
-// app.get('/api/stats/bot/:id', require('../api/route-check/stats-bot'))
-// app.get('/api/stats/slack', require('../api/route-check/stats-slack'))
+  // API Get Database
+  { method: 'GET', path: '/db/cmd', handler: require('./route-db/bot-cmd') },
+  { method: 'GET', path: '/db/cmd/endpoint', handler: require('./route-db/bot-endpoint') },
+  { method: 'GET', path: '/db/{bot}/cmd', handler: require('./route-db/bot-cmd') },
+  { method: 'POST', path: '/db/{bot}/cmd/{id}', handler: require('./route-db/bot-cmd') },
+  { method: 'GET', path: '/db/{bot}/inbound', handler: require('./route-db/inbound') },
+  { method: 'GET', path: '/db/{bot}/outbound', handler: require('./route-db/outbound') },
+
+  // API Notify
+  { method: 'GET', path: '/register/{service}/{room?}', handler: require('./route-bot/oauth') },
+  { method: ['PUT', 'POST'], path: '/notify/{service}/{room}', handler: require('./route-bot/notify') },
+  { method: 'PUT', path: '/revoke/{service}/{room}', handler: require('./route-bot/revoke') }
+]
