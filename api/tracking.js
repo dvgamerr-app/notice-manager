@@ -1,9 +1,8 @@
 const numeral = require('numeral')
 const moment = require('moment')
 const axios = require('axios')
-const Sentry = require('@sentry/node')
 const { notice } = require('@touno-io/db/schema')
-const { notifyLogs } = require('./index')
+const { loggingLINE } = require('./logging')
 
 const loggingExpire = async () => {
   const { LineOutbound, LineInbound, LineCMD } = notice.get() // LineInbound, LineOutbound, LineCMD,
@@ -12,12 +11,14 @@ const loggingExpire = async () => {
   const dataOut = await LineOutbound.deleteMany({ created: { $lte: moment().add(24 * -1, 'month').toDate() } })
   const dataCmd = await LineCMD.deleteMany({ created: { $lte: moment().add(12 * -1, 'month').toDate() } })
   const rows = dataIn.n + dataOut.n + dataCmd.n
-  return rows > 0 ? [
-    '',
-    '---------------------------------------------------------',
-    'Logging documents delete if over year.',
+  return rows > 0
+    ? [
+        '',
+        '---------------------------------------------------------',
+        'Logging documents delete if over year.',
     ` - Delete it ${numeral(rows).format('0,0')} rows.`
-  ] : null
+      ]
+    : null
 }
 
 const loggingStats = async () => {
@@ -62,14 +63,7 @@ module.exports = {
 
     const body = `[Heroku] *LINE-Notice* daily stats.\n${fect1.join('\n')}${fect2 ? fect2.join('\n') : ''}`
 
-    await notifyLogs(body)
-  },
-  checkMongoConn: async () => {
-    await notice.open()
-    if (!notice.connected()) {
-      Sentry.captureMessage('MongoDB Connection fail.', Sentry.Severity.Critical)
-      process.exit(0)
-    }
+    await loggingLINE(body)
   },
   lineInitilize: async () => {
     try {

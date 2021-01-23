@@ -1,6 +1,6 @@
 const { notice } = require('@touno-io/db/schema')
 const logger = require('@touno-io/debuger')('API')
-const { notifyLogs } = require('../../helper')
+const { loggingLINE } = require('../../logging')
 
 module.exports = async (req, res) => {
   const data = req.body
@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
         }
       })
     }
-    await notifyLogs(`Notify service add *${data.name}*`)
+    await loggingLINE(`Notify service add *${data.name}*`)
     res.json({ _id: serviceId })
   } catch (ex) {
     logger.error(ex)

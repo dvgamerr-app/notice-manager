@@ -24,9 +24,14 @@
           </b-btn>
         </div>
         <b-modal
-          :id="'trash-' + e._id" title="Delete service?" no-fade
-          ok-title="Sure, Delete it." cancel-title="No, Thank."
-          ok-variant="danger" cancel-variant="default" @ok="onDeleteService(e)"
+          :id="'trash-' + e._id"
+          title="Delete service?"
+          no-fade
+          ok-title="Sure, Delete it."
+          cancel-title="No, Thank."
+          ok-variant="danger"
+          cancel-variant="default"
+          @ok="onDeleteService(e)"
         >
           Your want to delete service '{{ e.text }}' ?
         </b-modal>

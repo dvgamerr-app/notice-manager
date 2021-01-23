@@ -7,14 +7,14 @@ const getID = (e) => {
 }
 
 const setVariable = async (e, name, value, clear) => {
-  if (!name) return
+  if (!name) { return }
 
   const LineBotRoom = notice.get('LineBotRoom')
   const data = await LineBotRoom.findOne({ id: getID(e) })
-  if (!data.variable) return
+  if (!data.variable) { return }
 
   if (typeof name === 'object') {
-    if (name.member && name.member.length) name.member = Array.from(new Set(data.variable.member.concat(name.member)))
+    if (name.member && name.member.length) { name.member = Array.from(new Set(data.variable.member.concat(name.member))) }
     await LineBotRoom.updateOne({ id: getID(e) }, { $set: { variable: clear ? name : Object.assign(data.variable, name) } })
   } else {
     const variable = {}
@@ -25,16 +25,16 @@ const setVariable = async (e, name, value, clear) => {
 
 const getVariable = async (e, name) => {
   const data = ((await notice.get('LineBotRoom').findOne({ id: getID(e) })) || {})
-  return data.variable && data.variable[name] 
+  return data.variable && data.variable[name]
 }
 
 const getNicknane = async (e, botname, unqiueID) => {
   const member = await getVariable(e, 'member')
   const nickname = []
   const room = await notice.get('LineBotRoom').findOne({ botname, id: unqiueID, type: e.source.type })
-  for await (const user_id of member) {
-    const user = await notice.get('LineBotUser').findOne({ botname, roomname: room.name, user_id })
-    nickname.push(user ? user.name : user_id)
+  for await (const userId of member) {
+    const user = await notice.get('LineBotUser').findOne({ botname, roomname: room.name, userId })
+    nickname.push(user ? user.name : userId)
   }
   return nickname
 }
@@ -54,24 +54,23 @@ const minutePeriod = 30
 module.exports = {
   'ris-robo': [
     {
-      cmd: [ 'เช็คชื่อ', 'เช๊คชื่อ', 'เชคชื่อ', 'เชคชือ', 'checkname' ],
+      cmd: ['เช็คชื่อ', 'เช๊คชื่อ', 'เชคชื่อ', 'เชคชือ', 'checkname'],
       job: async (e, lineMessage, line) => {
-        if (e.source.type !== 'room' && e.source.type !== 'group') return
+        if (e.source.type !== 'room' && e.source.type !== 'group') { return }
         const unqiueID = getID(e)
 
-        console.log(e.source.type, ':', unqiueID)
         task[unqiueID] = { count: 0, cron: null }
-        if (e.source.type == 'group') {
+        if (e.source.type === 'group') {
           await setVariable(e, { bypass: true, index: 0, userId: e.source.userId, member: [] }, true)
 
           const member = await line.getGroupMembersCount(unqiueID)
           await setVariable(e, { memberTotal: member.count - 1 })
-  
-          await line.pushMessage(unqiueID, { type: 'text', text: `💬 ไหนมีใครมาบ้าง *เช็คชื่อสิ* !!` })
+
+          await line.pushMessage(unqiueID, { type: 'text', text: '💬 ไหนมีใครมาบ้าง *เช็คชื่อสิ* !!' })
           task[unqiueID].cron = cron.schedule('* * * * *', async () => {
             const memberTotal = await getVariable(e, 'memberTotal')
             const member = await getVariable(e, 'member')
-            
+
             task[unqiueID].count++
             // sequence Math.ceil(task[unqiueID].count / (minutePeriod / msg.length)) - 1
             let text = msg[Math.floor(Math.random() * msg.length)]
@@ -85,35 +84,34 @@ module.exports = {
               await setVariable(e, { bypass: false })
               text = `บอทเสียใจ 😭 ม..ไม่มีใครคุยด้วยเลย😢 ป...ไปก็ได้😢 ยังขาดอีก *${total}* คนนะ`
             }
-            
+
             await line.pushMessage(unqiueID, { type: 'text', text: text ? text.replace(/:n/, `*${total}*`) : `เร็วๆ ยังขาดอีก *${total}* คนนะ` })
           })
         }
-
       },
       bypass: async (e, lineMessage, line, forceStop) => {
-        if (e.source.type !== 'room' && e.source.type !== 'group') return
+        if (e.source.type !== 'room' && e.source.type !== 'group') { return }
         const unqiueID = getID(e)
-        
+
         const memberTotal = await getVariable(e, 'memberTotal')
         if (forceStop) {
-          if (task[unqiueID].cron) task[unqiueID].cron.stop()
+          if (task[unqiueID].cron) { task[unqiueID].cron.stop() }
           await setVariable(e, { bypass: false })
 
           const nickname = await getNicknane(e, 'ris-robo', unqiueID)
-          await line.pushMessage(unqiueID, { type: 'text', text: nickname.length ? `จบงานแล้ว นับได้ \`${nickname.length}\` คน\n- ${nickname.join('\n- ')}`: 'อ้าว ไม่มีคนเลย' })
+          await line.pushMessage(unqiueID, { type: 'text', text: nickname.length ? `จบงานแล้ว นับได้ \`${nickname.length}\` คน\n- ${nickname.join('\n- ')}` : 'อ้าว ไม่มีคนเลย' })
         } else {
           const userId = await getVariable(e, 'userId')
-          if (userId === e.source.userId) return
+          if (userId === e.source.userId) { return }
 
-          await setVariable(e, { member: [ e.source.userId ] })
-  
+          await setVariable(e, { member: [e.source.userId] })
+
           const member = await getVariable(e, 'member')
           if (memberTotal <= member.length) {
-            if (task[unqiueID].cron) task[unqiueID].cron.stop()
+            if (task[unqiueID].cron) { task[unqiueID].cron.stop() }
 
             await setVariable(e, { bypass: false })
-            await line.pushMessage(unqiueID, { type: 'text', text: `🥰 ครบแล้วสินะ!! 💯 \`แยกย้าย\` 💥` })
+            await line.pushMessage(unqiueID, { type: 'text', text: '🥰 ครบแล้วสินะ!! 💯 `แยกย้าย` 💥' })
           }
         }
       }

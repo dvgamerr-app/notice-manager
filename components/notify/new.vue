@@ -49,10 +49,15 @@
           <fa v-if="btn.submit" icon="circle-notch" spin /> Create notify
         </b-btn>
         <b-modal
-          id="'trash-'" v-model="btn.approve"
-          title="New service?" no-fade
-          ok-title="Sure, Add now." cancel-title="No."
-          ok-variant="success" cancel-variant="default" @ok="onSubmitNotify($event)"
+          id="'trash-'"
+          v-model="btn.approve"
+          title="New service?"
+          no-fade
+          ok-title="Sure, Add now."
+          cancel-title="No."
+          ok-variant="success"
+          cancel-variant="default"
+          @ok="onSubmitNotify($event)"
         >
           Your want to add new service '{{ data.name }}' ?
         </b-modal>

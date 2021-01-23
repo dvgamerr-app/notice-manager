@@ -4,13 +4,13 @@ const { notice } = require('@touno-io/db/schema')
 module.exports = async (req) => {
   const { name, to: userTo } = req.params
   const sender = req.payload
-  if (!sender) throw new Error('Not Support payload.')
-  
+  if (!sender) { throw new Error('Not Support payload.') }
+
   const { LineOutbound, ChatWebhook } = notice.get()
   const chat = await ChatWebhook.findOne({ botname: name })
-  if (!chat) throw new Error('Not Support webhook request.')
+  if (!chat) { throw new Error('Not Support webhook request.') }
 
-  const outbound = await new LineOutbound({ type: `webhook`, userTo, sender, sended: false }).save()
+  const outbound = await new LineOutbound({ type: 'webhook', userTo, sender, sended: false }).save()
   try {
     await axios(chat.uri, { body: sender, json: true })
     await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: true } })

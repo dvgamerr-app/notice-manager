@@ -41,7 +41,7 @@ const pushNotify = async (accessToken, message) => {
 }
 const getToken = async (service, room) => {
   if (!service || !room) { return logger.log('No service, No room.') }
-  
+
   const { ServiceOauth } = notice.get()
   const oauth = await ServiceOauth.findOne({ service, room })
   if (!oauth || !oauth.accessToken) { return logger.log(`Oauth: ${service} in ${room}, No access token.`) }
@@ -51,7 +51,7 @@ const getToken = async (service, room) => {
 module.exports = async (service, room) => {
   const accesstoken = await getToken(service, room)
   return {
-    pushNotify: (message) => pushNotify(accesstoken, message),
+    pushNotify: message => pushNotify(accesstoken, message),
     getStatus: () => getStatus(accesstoken),
     setRevoke: () => setRevoke(accesstoken)
   }

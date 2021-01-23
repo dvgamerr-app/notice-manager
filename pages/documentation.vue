@@ -270,6 +270,9 @@ export default {
     bot: [],
     slack: []
   }),
+  head: () => ({
+    title: 'Documentation'
+  }),
   computed: {
     getBotnameSample () {
       return this.bot
@@ -341,10 +344,7 @@ export default {
     onSampleChangeRoom (e) {
       this.api.notify.room = e.room
     }
-  },
-  head: () => ({
-    title: 'Documentation'
-  })
+  }
 }
 </script>
 

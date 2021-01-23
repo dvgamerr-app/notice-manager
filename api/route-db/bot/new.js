@@ -1,6 +1,6 @@
 const { notice } = require('@touno-io/db/schema')
 const logger = require('@touno-io/debuger')('API')
-const { notifyLogs } = require('../../helper')
+const { loggingLINE } = require('../../logging')
 
 module.exports = async (req, res) => {
   const data = req.body
@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
         }
       })
     }
-    await notifyLogs(`Notify Bot add *${data.name}*`)
+    await loggingLINE(`Notify Bot add *${data.name}*`)
   } catch (ex) {
     logger.error(ex)
     res.status(500).json({ error: ex.stack || ex.message || ex })

@@ -1,6 +1,13 @@
 <template>
   <b-container fluid>
-    <b-tabs class="aside-bar" pills card vertical no-fade nav-wrapper-class="aside overflow-auto w-fix-280 flex-shrink-0 flex-grow-0 position-relative border-right">
+    <b-tabs
+      class="aside-bar"
+      pills
+      card
+      vertical
+      no-fade
+      nav-wrapper-class="aside overflow-auto w-fix-280 flex-shrink-0 flex-grow-0 position-relative border-right"
+    >
       <b-tab title="Service Manager" active>
         <b-row>
           <b-col lg="8">

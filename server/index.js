@@ -2,18 +2,15 @@ const express = require('express')
 const cron = require('node-cron')
 const { notice } = require('@touno-io/db/schema')
 const debuger = require('@touno-io/debuger')
-const bodyParser = require('body-parser')
-const { Nuxt, Builder } = require('nuxt')
 const Sentry = require('@sentry/node')
 
 const pkg = require('../package.json')
-const config = require('../nuxt.config.js')
-const getEnv = require('./get-env')
-const { notifyLogs } = require('../api/helper')
-const { lineInitilize, cmdExpire, checkMongoConn, loggingPushMessage } = require('../api/helper/schedule')
+// const config = require('../nuxt.config.js')
+const { loggingLINE } = require('../api/logging')
+const { lineInitilize, cmdExpire, checkMongoConn, loggingPushMessage } = require('../api/tracking')
 
 const app = express()
-const dev = !(getEnv('NODE_ENV') === 'production')
+const dev = !(process.env.NODE_ENV === 'production')
 const logger = debuger(pkg.title)
 
 // parse application/x-www-form-urlencoded and application/jsons
@@ -52,17 +49,8 @@ app.get('/api/stats/bot/:id', require('../api/route-check/stats-bot'))
 app.get('/api/stats/slack', require('../api/route-check/stats-slack'))
 
 // Init Nuxt.js
-const nuxt = new Nuxt(config)
 
-const nuxtClient = async () => {
-  // Build only in dev mode
-  if (dev) {
-    const builder = new Builder(nuxt)
-    await builder.build()
-  }
-  logger.log('Nuxtjs ready...')
-  await nuxt.ready()
-  Sentry.init({ dsn: process.env.SENTRY_DSN })
+const nuxtClient = () => {
   logger.log('MongoDB db-notice connecting...')
   return notice.open()
 }
@@ -72,19 +60,15 @@ nuxtClient().then(() => {
     res.setHeader('X-Developer', '@dvgamerr')
     next()
   })
-  app.use(nuxt.render)
 
-  const { host, port } = nuxt.options.server
-  app.listen(port, host, () => {
-    logger.log(`listening ${host} port is ${port}.`)
-  })
+  app.listen()
 
   if (!dev) {
-    lineInitilize().catch(notifyLogs)
-    cron.schedule('0 */3 * * *', () => lineInitilize().catch(notifyLogs), { })
-    cron.schedule('* * * * *', () => cmdExpire().catch(notifyLogs))
-    cron.schedule('* * * * *', () => checkMongoConn().catch(notifyLogs))
-    cron.schedule('5 0 * * *', () => loggingPushMessage().catch(notifyLogs))
+    lineInitilize().catch(loggingLINE)
+    cron.schedule('0 */3 * * *', () => lineInitilize().catch(loggingLINE), { })
+    cron.schedule('* * * * *', () => cmdExpire().catch(loggingLINE))
+    cron.schedule('* * * * *', () => checkMongoConn().catch(loggingLINE))
+    cron.schedule('5 0 * * *', () => loggingPushMessage().catch(loggingLINE))
   }
 }).catch((ex) => {
   logger.error(ex)
@@ -114,12 +98,12 @@ nuxtClient().then(() => {
 //     logger.log(`listening port is ${port}.`)
 
 //     if (!dev) {
-//       await notifyLogs(`Server has listening port is ${port}.`)
-//       lineInitilize().catch(notifyLogs)
-//       cron.schedule('0 */3 * * *', () => lineInitilize().catch(notifyLogs), { })
-//       cron.schedule('* * * * *', () => cmdExpire().catch(notifyLogs))
-//       cron.schedule('* * * * *', () => checkMongoConn().catch(notifyLogs))
-//       cron.schedule('5 0 * * *', () => loggingPushMessage().catch(notifyLogs))
+//       await loggingLINE(`Server has listening port is ${port}.`)
+//       lineInitilize().catch(loggingLINE)
+//       cron.schedule('0 */3 * * *', () => lineInitilize().catch(loggingLINE), { })
+//       cron.schedule('* * * * *', () => cmdExpire().catch(loggingLINE))
+//       cron.schedule('* * * * *', () => checkMongoConn().catch(loggingLINE))
+//       cron.schedule('5 0 * * *', () => loggingPushMessage().catch(loggingLINE))
 //     }
 //   })
 // }).catch((ex) => {

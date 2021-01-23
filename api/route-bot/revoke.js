@@ -1,7 +1,7 @@
 const debuger = require('@touno-io/debuger')
 const { notice } = require('@touno-io/db/schema')
 const { setRevoke } = require('../sdk-notify')
-const { notifyLogs } = require('../helper')
+const { loggingLINE } = require('../logging')
 
 const logger = debuger('Notify')
 
@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
     const data = await setRevoke(token.accessToken)
     if (data.status !== 200) { throw new Error('Revoke Service fail.') }
     await ServiceOauth.updateOne({ service, room }, { $set: { accessToken: null } })
-    await notifyLogs(`Rovoke room *${room}* from *${service}*`)
+    await loggingLINE(`Rovoke room *${room}* from *${service}*`)
     res.json({})
   } catch (ex) {
     logger.error(ex)

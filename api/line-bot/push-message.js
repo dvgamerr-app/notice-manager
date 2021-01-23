@@ -2,7 +2,7 @@ const { notice } = require('@touno-io/db/schema')
 const logger = require('@touno-io/debuger')('API')
 const sdkClient = require('../sdk-client')
 
-module.exports = async req => {
+module.exports = async (req) => {
   const startTime = new Date().getTime()
   let { bot: botname, to: roomId } = req.params
 

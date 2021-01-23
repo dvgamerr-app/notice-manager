@@ -25,7 +25,6 @@ npm run dev
 
 ```env
 TZ=Asia/Bangkok
-HOST_API=
 MONGODB_URI=
 SLACK_CLIENT_ID=
 SLACK_CLIENT_SECRET=

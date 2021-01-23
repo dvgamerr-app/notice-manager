@@ -75,7 +75,7 @@ module.exports = {
     '~/plugins/vue-tabindex.js'
   ],
   buildModules: [
-    '@nuxtjs/fontawesome',
+    '@nuxtjs/fontawesome'
     // '@nuxtjs/eslint-module',
     // '@nuxtjs/stylelint-module'
   ],
@@ -90,10 +90,19 @@ module.exports = {
     component: 'fa',
     icons: { solid: true, regular: true, brands: true }
   },
-  axios: { baseURL: process.env.AXIOS_BASE_URL || 'https://notice.touno.io' },
-  env: {
-    HOST_API: process.env.HOST_API || 'https://notice.touno.io'
+  auth: {
+    strategies: {
+      local: {
+        token: { property: 'token' },
+        user: { property: 'user' },
+        endpoints: {
+          login: { url: '/auth/login', method: 'post' },
+          user: { url: '/auth/user', method: 'post' }
+        }
+      }
+    }
   },
+  axios: { baseURL: process.env.AXIOS_BASE_URL || 'https://notice.touno.io' },
   build: {
     parallel: !production,
     cache: true,

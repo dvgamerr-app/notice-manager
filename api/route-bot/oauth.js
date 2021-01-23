@@ -2,13 +2,13 @@ const { AuthorizationCode } = require('simple-oauth2')
 const debuger = require('@touno-io/debuger')
 const { notice } = require('@touno-io/db/schema')
 const { getStatus, setRevoke } = require('../sdk-notify')
-const { notifyLogs } = require('../helper')
+const { loggingLINE } = require('../logging')
 
 const uuid = (length) => {
   let result = ''
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   for (let i = 0; i < length; i++) {
-     result += characters.charAt(Math.floor(Math.random() * characters.length))
+    result += characters.charAt(Math.floor(Math.random() * characters.length))
   }
   return result
 }
@@ -60,7 +60,7 @@ module.exports = async (req, res) => {
 
         const data = await ServiceOauth.findOne({ state })
         await ServiceOauth.updateOne({ state }, { $set: { name: res.target, accessToken: accessToken.token.access_token } })
-        await notifyLogs(`Join room *${res.message}* with service *${data.service}*`)
+        await loggingLINE(`Join room *${res.message}* with service *${data.service}*`)
       } catch (ex) {
         await ServiceOauth.updateOne({ state }, { $set: { active: false } })
         throw ex
