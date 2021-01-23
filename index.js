@@ -5,20 +5,18 @@ const Sentry = require('@sentry/node')
 
 const { notice } = require('@touno-io/db/schema')
 const logger = require('@touno-io/debuger')('nuxt')
-const { lineInitilize, cmdExpire } = require('./api/tracking')
-
-const host = process.env.HOST || '127.0.0.1'
-const port = process.env.PORT || 4000
+// const { lineInitilize, cmdExpire } = require('./api/tracking')
+const config = require('./nuxt.config.js')
 
 const routes = require('./api')
 
-const server = new Server({ port, host })
+const server = new Server({ port: config.server.port, host: config.server.host })
 const nuxtCreateBuilder = async () => {
   logger.info('MongoDB db-notice connecting...')
   await notice.open()
   logger.start('Server initialize...')
   await server.initialize()
-  await (Promise.all([lineInitilize(), cmdExpire()]))
+  // await (Promise.all([lineInitilize(), cmdExpire()]))
 
   await server.register({
     plugin: require('hapi-sentry'),

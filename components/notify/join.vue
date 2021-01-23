@@ -8,7 +8,7 @@
           <li class="pt-1 pb-1">
             <b-row>
               <b-col cols="5">
-                <treeselect v-model="add.service" :options="getServiceSample" placeholder="Select service" />
+                <treeselect v-model="add.service" :options="getServiceSample" :disabled="!loggedIn" placeholder="Select service" />
               </b-col>
               <b-col cols="7">
                 <b-input-group>
@@ -22,7 +22,7 @@
           <li>Invite <b>LINE Notify</b> to room your select.</li>
         </ol>
         <p>After your remember step and click <b>join room</b>.</p>
-        <b-link @click="onJoinRoom($event)">
+        <b-link v-if="loggedIn" @click="onJoinRoom($event)">
           <fa icon="external-link-alt" /> Join room
         </b-link>
       </b-col>
@@ -54,9 +54,9 @@ export default {
     }
   }),
   computed: {
-  //   getBotnameSample () {
-  //     return this.bot
-  //   },
+    loggedIn () {
+      return this.$auth.$state.loggedIn
+    },
     getServiceSample () {
       return Notify.query().get().map(e => ({ id: e.value, label: e.text }))
     },

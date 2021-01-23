@@ -45,7 +45,7 @@
             </b-input-group>
           </li>
         </ol>
-        <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" :disabled="btn.submit" @click="onSubmitNotify($event)">
+        <b-btn :variant="btn.submit || !loggedIn ? 'outline-secondary' : 'primary'" :disabled="btn.submit || !loggedIn" @click="onSubmitNotify($event)">
           <fa v-if="btn.submit" icon="circle-notch" spin /> Create notify
         </b-btn>
         <b-modal
@@ -96,6 +96,9 @@ export default {
     }
   }),
   computed: {
+    loggedIn () {
+      return this.$auth.$state.loggedIn
+    },
     api () {
       return Api.query().first()
     }
@@ -128,6 +131,7 @@ export default {
       return !/[^0-9a-z.-]+/g.test(name)
     },
     async onSubmitNotify (e) {
+      if (!this.loggedIn) { return }
       if (!this.data.name || !this.checkName(this.data.name)) {
         this.check.service = false
         this.check.client_id = null

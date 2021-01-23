@@ -11,7 +11,7 @@ module.exports = [
   },
   { method: 'GET', path: '/auth/sso', handler: require('./auth/sso') },
   { method: 'POST', path: '/auth/login', handler: require('./auth/login') },
-  // { method: 'POST', path: '/auth/user', handler: require('./auth/user') },
+  { method: 'POST', path: '/auth/user', handler: require('./auth/user') },
 
   { method: 'POST', path: '/{bot}', handler: require('./line-bot/webhook') },
   { method: 'PUT', path: '/{bot}/{to?}', handler: require('./line-bot/push-message') },

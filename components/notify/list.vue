@@ -15,7 +15,7 @@
             ({{ e.value }})
           </small>
         </h6>
-        <div v-if="edit.show === e._id && edit.mode !== e._id" class="menu-notify">
+        <div v-if="edit.show === e._id && edit.mode !== e._id && loggedIn" class="menu-notify">
           <b-btn v-if="edit.mode !== e._id" class="edit" variant="icon" size="sm" @click="onUpdateName(e)">
             <fa icon="edit" />
           </b-btn>
@@ -42,7 +42,7 @@
         </li>
         <li v-for="r in e.room" :key="r._id">
           <b-btn v-if="btn.trash !== r._id" variant="icon" size="sm" @click.prevent="onTrash(r)">
-            <fa :icon="btn.remove !== r._id ? 'trash-alt' : 'circle-notch'" :spin="btn.remove === r._id" />
+            <fa v-show="loggedIn" :icon="btn.remove !== r._id ? 'trash-alt' : 'circle-notch'" :spin="btn.remove === r._id" />
           </b-btn>
           <div v-else style="display: inline;">
             <b-btn variant="icon" size="sm" @click.prevent="onCancelTrash()">
@@ -77,6 +77,9 @@ export default {
     }
   }),
   computed: {
+    loggedIn () {
+      return this.$auth.$state.loggedIn
+    },
     list () {
       return Notify.query().orderBy('text').get()
     }

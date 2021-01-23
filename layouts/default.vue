@@ -11,9 +11,15 @@
             </div>
           </b-navbar-brand>
           <b-navbar-nav class="ml-auto">
-            <b-nav-item to="/">
+            <div v-if="loggedIn" class="flex-user">
+              <span class="text-muted text-username" v-text="username" />
               <fa icon="user-circle" class="text-muted" style="font-size:1.2rem" />
-            </b-nav-item>
+            </div>
+            <div v-else>
+              <b-link href="/auth/sso" class="flex-sign">
+                <fa icon="external-link-alt" /> Sign-In
+              </b-link>
+            </div>
           </b-navbar-nav>
         </b-container>
       </b-navbar>
@@ -34,7 +40,7 @@
       </b-container>
     </header>
     <client-only>
-      <div slot="placeholder" class="main d-flex justify-content-center m-5">
+      <div slot="placeholder" class="main d-flex justify-content-center pt-5">
         <b-spinner />
       </div>
       <nuxt class="main" />
@@ -49,9 +55,40 @@
     </footer>
   </div>
 </template>
+<script>
+export default {
+  computed: {
+    loggedIn () {
+      return this.$auth.$state.loggedIn
+    },
+    username () {
+      return this.$auth.$state.user.user_name
+    }
+  },
+  created () {
+  }
+}
+</script>
 
 <style lang="scss" scoped>
+.main {
+  min-height: calc(100vh - 9.8em) !important;
+}
 .navbar {
+  .flex-user {
+    vertical-align: middle;
+    display: flex;
+  }
+  .flex-sign {
+    font-weight: bold;
+  }
+
+  .text-username {
+    font-size: .8rem;
+    font-weight: bold;
+    margin-right: 6px;
+  }
+
   border-bottom: 1px solid #edeff0;
   .navbar-brand {
     font-size: 1.2rem;
@@ -79,6 +116,7 @@
       grid-area: bottom;
       font-size: .7rem;
     }
+
   }
 }
 </style>
