@@ -1,10 +1,11 @@
 const debuger = require('@touno-io/debuger')
 const { notice } = require('@touno-io/db/schema')
 const pkg = require('../../package.json')
-const { pushMessage } = require('../api-notify')
+const { pushMessage } = require('../sdk-notify')
 
 const logger = debuger(pkg.title)
 const pkgName = `LINE-BOT v${pkg.version}`
+
 module.exports = {
   pkgChannel: 'heroku-notify',
   pkgName,

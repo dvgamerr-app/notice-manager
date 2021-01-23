@@ -3,6 +3,9 @@ const { expect } = require('@hapi/code')
 const { afterEach, beforeEach, describe, it } = exports.lab = Lab.script()
 const { create, prepare, remove } = require('./index.js')
 
+const botname = process.env.BOT_NAME
+const to = process.env.BOT_TO
+
 describe('API LINE BOT', () => {
   let server
 
@@ -16,12 +19,16 @@ describe('API LINE BOT', () => {
     await remove()
   })
 
-  it('POST /e-ngo responds with 400', async () => {
-    const res = await server.inject({ method: 'POST', url: '/e-ngo' })
+  it('POST /bot responds with 400', async () => {
+    const res = await server.inject({ method: 'POST', url: `/${botname}` })
     expect(res.statusCode).to.equal(400)
   })
-  it('POST /e-ngo responds with 200', async () => {
-    const res = await server.inject({ method: 'POST', url: '/e-ngo', payload: { events: [] } })
+  it('POST /bot responds with 200', async () => {
+    const res = await server.inject({ method: 'POST', url: `/${botname}`, payload: { events: [] } })
+    expect(res.statusCode).to.equal(200)
+  })
+  it('PUT /bot/to responds with 200', async () => {
+    const res = await server.inject({ method: 'PUT', url: `/${botname}/${to}`, payload: { type: 'text', text: 'Testing' } })
     expect(res.statusCode).to.equal(200)
   })
 })

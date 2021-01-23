@@ -1,7 +1,7 @@
 const { AuthorizationCode } = require('simple-oauth2')
 const debuger = require('@touno-io/debuger')
 const { notice } = require('@touno-io/db/schema')
-const { getStatus, setRevoke } = require('../api-notify')
+const { getStatus, setRevoke } = require('../sdk-notify')
 const { notifyLogs } = require('../helper')
 
 const uuid = (length) => {

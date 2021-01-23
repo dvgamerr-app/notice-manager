@@ -1,7 +1,7 @@
 const { nullFormat } = require('numeral')
 const debuger = require('@touno-io/debuger')
 const { notice } = require('@touno-io/db/schema')
-const { pushMessage } = require('../api-notify')
+const { pushMessage } = require('../sdk-notify')
 
 const logger = debuger('API')
 

@@ -1,6 +1,6 @@
 const flexAlert = require('../flex/alert')
 const flexError = require('../flex/error')
-const pushMessagehandler = require('./push-message')
+const pushMessagehandler = require('../line-bot/push-message')
 
 module.exports = async (req, res) => {
   const { name } = req.params

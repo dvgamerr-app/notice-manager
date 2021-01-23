@@ -11,11 +11,13 @@ const port = process.env.PORT || 4000
 
 const routes = require('./api')
 
-const NuxtBuilder = async () => {
+const server = new Server({ port, host })
+const nuxtCreateBuilder = async () => {
+  logger.start(`Server initialize...`)
+  await server.initialize()
   logger.info('MongoDB db-notice connecting...')
   await notice.open()
 
-  const server = new Server({ port, host })
   await server.register({
     plugin: require('hapi-sentry'),
     options: { client: { dsn: process.env.SENTRY_DSN || false } }
@@ -31,13 +33,13 @@ const NuxtBuilder = async () => {
   logger.start(`Server running on ${server.info.uri}`)
 }
 
-process.on('unhandledRejection', (err) => {
+process.on('unhandledRejection', (ex) => {
   Sentry.captureException(ex)
-  logger.error(err)
+  logger.error(ex)
   process.exit(1)
 })
 
-NuxtBuilder().catch(ex => {
+nuxtCreateBuilder().catch(ex => {
   Sentry.captureException(ex)
   logger.error(ex)
   process.exit(1)

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "env-cmd nodemon -w ./api index.js",
     "build": "nuxt build",
+    "test": "env-cmd \"lab -lv\"",
     "eslint": "eslint --ext .js,.vue --ignore-path .eslintignore .",
     "start": "node ./server/index.js"
   },
@@ -43,6 +44,8 @@
     "simple-oauth2": "^4.2.0"
   },
   "devDependencies": {
+    "@hapi/code": "^8.0.2",
+    "@hapi/lab": "^24.1.0",
     "@nuxtjs/eslint-config": "^5.0.0",
     "@nuxtjs/eslint-module": "^3.0.2",
     "@nuxtjs/stylelint-module": "^4.0.0",

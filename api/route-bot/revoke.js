@@ -1,6 +1,6 @@
 const debuger = require('@touno-io/debuger')
 const { notice } = require('@touno-io/db/schema')
-const { setRevoke } = require('../api-notify')
+const { setRevoke } = require('../sdk-notify')
 const { notifyLogs } = require('../helper')
 
 const logger = debuger('Notify')

@@ -1,6 +1,6 @@
 const { notice } = require('@touno-io/db/schema')
 const logger = require('@touno-io/debuger')('API')
-const { getStatus } = require('../api-notify')
+const { getStatus } = require('../sdk-notify')
 
 module.exports = async (req, res) => {
   // Authorization oauth2 URI

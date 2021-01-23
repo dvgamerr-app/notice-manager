@@ -17,18 +17,15 @@ const dev = !(getEnv('NODE_ENV') === 'production')
 const logger = debuger(pkg.title)
 
 // parse application/x-www-form-urlencoded and application/jsons
-const bodyOptions = { limit: '50mb', extended: true }
-app.use(bodyParser.urlencoded(bodyOptions))
-app.use(bodyParser.json(bodyOptions))
+// const bodyOptions = { limit: '50mb', extended: true }
+// app.use(bodyParser.urlencoded(bodyOptions))
+// app.use(bodyParser.json(bodyOptions))
 
 // app.use('/health', (req, res) => res.sendStatus(200))
 // app.post('/:bot', require('./route-bot/webhook'))
 // app.put('/:bot/:to?', require('./route-bot/push-message'))
 // app.put('/flex/:name/:to', require('./route-bot/push-flex'))
 // app.put('/slack/mii/:channel', require('./route-bot/push-slack'))
-app.put('/hook/:type/:webhook', require('../api/route-bot/push-webhook'))
-app.post('/webhook/:botname/:userTo', require('../api/line-bot/webhook/post-notify'))
-app.get('/webhook/:id', require('../api/line-bot/webhook/get-body'))
 
 // API Get Database
 app.get('/db/cmd', require('../api/route-db/bot-cmd'))
