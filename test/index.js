@@ -5,7 +5,7 @@ const host = process.env.HOST || '127.0.0.1'
 const port = process.env.PORT || 4000
 const routes = require('../api')
 
-exports.create = async () => {
+exports.create = () => {
   const app = new Server({ port, host })
 
   app.route(routes)

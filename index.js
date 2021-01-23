@@ -14,6 +14,7 @@ const server = new Server({ port: config.server.port, host: config.server.host }
 const nuxtCreateBuilder = async () => {
   logger.info('MongoDB db-notice connecting...')
   await notice.open()
+
   logger.start('Server initialize...')
   await server.initialize()
   // await (Promise.all([lineInitilize(), cmdExpire()]))
@@ -27,7 +28,10 @@ const nuxtCreateBuilder = async () => {
 
   const { nuxt, builder } = server.plugins.nuxt
 
-  await builder.build()
+  if (process.env.NODE_ENV !== 'production') {
+    await builder.build()
+  }
+
   await nuxt.ready()
   await server.start()
   logger.start(`Server running on ${server.info.uri}`)

@@ -8,7 +8,7 @@
     "build": "nuxt build",
     "test": "env-cmd \"lab -lv\"",
     "eslint": "eslint --ext .js,.vue --ignore-path .eslintignore .",
-    "start": "node ./server/index.js"
+    "start": "node ./index.js"
   },
   "keywords": [],
   "author": "Kananek T.",
