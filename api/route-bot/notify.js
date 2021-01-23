@@ -5,7 +5,7 @@ const { pushMessage } = require('../sdk-notify')
 module.exports = async (req, res) => {
   const IsWebhook = req.method === 'POST'
   const { room, service } = req.params
-  const { message, imageThumbnail, imageFullsize, stickerPackageId, stickerId, notificationDisabled } = req.body
+  const { message, imageThumbnail, imageFullsize, stickerPackageId, stickerId, notificationDisabled } = req.payload
   let outbound = nullFormat
 
   await notice.open()
@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
     botname: service,
     userTo: room,
     type: 'notify',
-    sender: req.body || {},
+    sender: req.payload || {},
     sended: false,
     error: null,
     created: new Date()

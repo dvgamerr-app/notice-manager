@@ -4,7 +4,7 @@ const pushMessagehandler = require('../line-bot/push-message')
 
 module.exports = async (req, res) => {
   const { name } = req.params
-  const { app, message, detail, botname } = req.body
+  const { app, message, detail, botname } = req.payload
   req.params.bot = botname || 'health-check'
 
   if (!app || !message) { return res.json({ error: 'app, message, detail is undefined.' }) }

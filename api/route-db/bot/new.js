@@ -2,7 +2,7 @@ const { notice } = require('@touno-io/db/schema')
 const { loggingLINE } = require('../../logging')
 
 module.exports = async (req) => {
-  const data = req.body
+  const data = req.payload
   const { LineBot } = notice.get() // LineInbound, LineOutbound, LineCMD, ServiceOauth
 
   if (await LineBot.findOne({ botname: data.name, active: true })) { throw new Error('name is duplicate.') }

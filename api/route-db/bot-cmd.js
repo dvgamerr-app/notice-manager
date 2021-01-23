@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
     const updated = { updated: new Date() }
     const where = id !== 'clear' ? { _id: id } : { botname: bot }
     await LineCMD.updateMany(where, {
-      $set: Object.assign(updated, (Object.keys(req.body).length > 0 ? req.body : { executed: true, executing: true }))
+      $set: Object.assign(updated, (Object.keys(req.payload).length > 0 ? req.payload : { executed: true, executing: true }))
     })
     return { error: null }
   }
