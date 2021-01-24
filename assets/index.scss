@@ -28,6 +28,25 @@ footer {
     font-size: .8rem;
   }
 }
+
+#__nuxt, #__layout {
+  height: 100vh;
+  background-color: #F7F8FB;
+}
+#__layout {
+  display: flex !important;
+  > div {
+    display: grid;
+    width: 100%;
+    height: 100vh;
+    grid-template:
+      "navtop" auto
+      "navbottom" auto
+      "main-content" 1fr
+      "footer" 50px;
+  }
+}
+
 .nav-tabs {
   min-height: 40px;
 }

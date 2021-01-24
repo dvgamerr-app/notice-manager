@@ -115,5 +115,8 @@ module.exports = {
       }
     }
   },
+  env: {
+    HOST_API: process.env.HOST_API || 'https://notice.touno.io'
+  },
   server: { port: 4000, host: '0.0.0.0', timing: false }
 }

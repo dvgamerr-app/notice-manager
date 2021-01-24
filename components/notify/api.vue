@@ -1,7 +1,8 @@
 <template>
   <div>
+    <h4><fa icon="bell" /> <b>LINE Notify</b></h4>
     <h5 class="mt-1">
-      Push Message API
+      Push Notify API
     </h5>
     <pre class="language-html" data-type="put"><code class="text-white">/notify/:service/:room</code></pre>
     <h6>Parameter</h6>

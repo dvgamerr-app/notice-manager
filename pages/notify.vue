@@ -1,7 +1,30 @@
 <template>
   <b-container fluid>
+    <b-row class="d-block d-md-none">
+      <b-col sm="12" class="mt-4">
+        <notify-api :sample="sample">
+          <b-card v-if="list && list.length > 0" slot="sample" title="Sample API">
+            <b-form>
+              <label class="mr-2" for="select-service">Service: </label>
+              <treeselect v-model="sample.service" :options="getServiceSample" placeholder="Select service" />
+              <label class="mr-2" for="select-room">Room: </label>
+              <treeselect v-model="sample.room" :options="getRoomSample" placeholder="Select room" />
+              <b-button class="mt-3" block variant="outline-warning" @click.prevent="onTestNotify">
+                Testing
+              </b-button>
+            </b-form>
+            <h6 class="mt-3">
+              Response
+            </h6>
+            <p class="sample-code">
+              <code>{{ sample.test || '[show after click testing api.]' }}</code>
+            </p>
+          </b-card>
+        </notify-api>
+      </b-col>
+    </b-row>
     <b-tabs
-      class="aside-bar"
+      class="aside-bar d-none d-md-flex"
       pills
       card
       vertical

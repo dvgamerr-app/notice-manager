@@ -1,7 +1,116 @@
 <template>
   <b-container fluid>
+    <b-row class="d-block d-md-none">
+      <b-col>
+        <b-row class="mt-4">
+          <b-col>
+            <h4><fa :icon="['fab','line']" /> <b>LINE BOT</b></h4>
+            <h5 class="mt-1">
+              Push Message API
+            </h5>
+            <pre class="language-html" data-type="put"><code class="text-white">/:botname/:id</code></pre>
+            <h6>Parameter</h6>
+            <b-table bordered small :items="url2.param.items" :fields="url2.param.fields" />
+            <h6>Body</h6>
+            <b-table bordered small :items="url2.body.items" :fields="url2.body.fields" />
+            <p>
+              Messages sent with the Messaging API can be divided into two categories: <b>reply messages</b> and <b>push messages</b>.<br>
+              for more detailed information about messages, see Message objects in the <a href="https://developers.line.biz/en/docs/messaging-api/message-types/">Messaging API</a> reference.
+            </p>
+            <h6>Example code</h6>
+            <p class="sample-code p-2 mt-1 border">
+              <code>
+                curl -X PUT {{ api.hostname }}/{{ bot.name ? bot.name : '[name]' }}/{{ bot.to ? bot.to : '[id]' }} -H "Content-Type: application/json" -d "{ \"type\":\"text\",\"text\":\"Testing\nMessage\" }"
+              </code>
+            </p>
+            <b-card v-if="getBotnameSample && getBotnameSample.length > 0" title="Sample API">
+              <b-form>
+                <label class="mr-2" for="select-botname">Bot Name: </label>
+                <treeselect v-model="bot.name" :options="getBotnameSample" placeholder="Select Bot" />
+                <label class="mr-2" for="select-botname">userId : </label>
+                <treeselect v-model="bot.to" :options="getRoomSample" placeholder="Select User" />
+                <b-button class="mt-3" block variant="outline-warning" @click.prevent="onTestBot()">
+                  Testing
+                </b-button>
+              </b-form>
+              <h6 class="mt-3">
+                Response
+              </h6>
+              <p class="sample-code">
+                <code>{{ bot.test || '[show after click testing api.]' }}</code>
+              </p>
+            </b-card>
+            <h5 class="mt-3">
+              Push Flex Message API
+            </h5>
+            <pre class="language-html" data-type="put"><code class="text-white">/flex/:name/:id</code></pre>
+            <h6>Parameter</h6>
+            <b-table bordered small :items="url3.param.items" :fields="url3.param.fields" />
+            <h6>Body</h6>
+            <b-table bordered small :items="url3.body.items" :fields="url3.body.fields" />
+            <h6>Example code</h6>
+            <p class="sample-code p-2 mt-1 border">
+              <code>
+                curl -X PUT {{ api.hostname }}/flex/{{ flex.name ? flex.name : '[name]' }}/{{ flex.to ? flex.to : '[id]' }} -H "Content-Type: application/json" -d "{ \"type\":\"text\",\"text\":\"Testing\nMessage\" }"
+              </code>
+            </p>
+            <b-card v-if="getBotnameSample && getBotnameSample.length > 0" title="Sample API">
+              <b-form>
+                <b-row>
+                  <b-col sm="12" md="6">
+                    <label class="mr-2">Botname:</label>
+                    <b class="mr-3">health-check</b>
+                    <label class="mr-2" for="select-botname">Flex: </label>
+                    <b-dropdown class="mr-2 col-4" :text="`${ flex.name ? flex.name : '[name]'}`" variant="outline-info" :state="false">
+                      <b-dropdown-item v-for="(e, i) in ['alert','error']" :key="i" href="#" @click.prevent="onSampleChangeFlex(e)">
+                        <span v-text="e" />
+                      </b-dropdown-item>
+                    </b-dropdown>
+                  </b-col>
+                  <b-col sm="12" md="6">
+                    <label class="mr-2" for="select-botname">userId : </label>
+                  </b-col>
+                  <b-col sm="12">
+                    <b-input v-model="flex.to" block class="mr-4" />
+                  </b-col>
+                  <b-col sm="12">
+                    <b-button class="mt-3" block variant="outline-warning" @click.prevent="onTestFlex()">
+                      Testing
+                    </b-button>
+                  </b-col>
+                </b-row>
+              </b-form>
+              <h6 class="mt-3">
+                Response
+              </h6>
+              <p class="sample-code">
+                <code>{{ flex.test || '[show after click testing api.]' }}</code>
+              </p>
+            </b-card>
+          </b-col>
+        </b-row>
+      </b-col>
+      <b-col class="d-none">
+        <h5>
+          <fa :icon="['fab','line']" /> <b>LINE BOT</b>
+          <b-btn variant="icon" size="sync" @click="onSyncBot">
+            <fa icon="sync-alt" :spin="sync.bot" />
+          </b-btn>
+        </h5>
+        <div v-if="!getBotnameSample || getBotnameSample.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
+          No bot line.
+        </div>
+        <div v-for="e in getBotnameSample" :key="e._id">
+          <b>{{ e.label }} <small>({{ getUsage(e) }})</small></b>
+          <b-progress :max="e.stats.limited" variant="info" height=".8rem" class="mb-3" :animated="e.wait">
+            <b-progress-bar :value="e.wait ? 0 : getLimitPercent(e.stats.usage, e.stats.limited)" :label-html="String(e.stats.usage)" />
+            <b-progress-bar :value="e.wait ? e.stats.limited : getDayPercent(e.stats.usage, e.stats.limited)" :show-value="false" variant="default" />
+          </b-progress>
+        </div>
+      </b-col>
+    </b-row>
     <b-tabs
-      class="aside-bar"
+      class="aside-bar d-none d-md-flex"
       pills
       card
       vertical

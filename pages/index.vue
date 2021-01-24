@@ -1,4 +1,12 @@
+<template>
+  <b-container fluid class="d-flex justify-content-center">
+    home
+  </b-container>
+</template>
+
 <script>
-import notify from './notify'
-export default notify
+export default {
+  async created () {
+  }
+}
 </script>

@@ -1,16 +1,21 @@
 <template>
   <b-form>
     <b-row class="mb-2 mt-5">
-      <b-col cols="9">
+      <b-col cols="12">
         <h3>วิธีใช้ service ที่สร้าง join เข้ากลุ่มที่ต้องการใช้งาน</h3>
+      </b-col>
+      <b-col style="max-width:135px">
+        <b-img class="qr-code" src="~assets/notify-qr.png" />
+      </b-col>
+      <b-col style="width:auto">
         <ol>
           <li>Add <b>LINE Notify</b> friend from <b>QR Code</b>.</li>
           <li class="pt-1 pb-1">
             <b-row>
-              <b-col cols="5">
+              <b-col md="12" lg="5" class="mb-1">
                 <treeselect v-model="add.service" :options="getServiceSample" :disabled="!loggedIn" placeholder="Select service" />
               </b-col>
-              <b-col cols="7">
+              <b-col md="12" lg="7">
                 <b-input-group>
                   <b-input-group-text>Room</b-input-group-text>
                   <b-form-input ref="room" v-model.trim="add.room" maxlength="20" :state="check.room" @keyup.enter="onJoinRoom($event)" />
@@ -21,13 +26,12 @@
           <li>Your line account choose room and click <b>agree and connect</b>.</li>
           <li>Invite <b>LINE Notify</b> to room your select.</li>
         </ol>
+      </b-col>
+      <b-col cols="12">
         <p>After your remember step and click <b>join room</b>.</p>
         <b-link v-if="loggedIn" @click="onJoinRoom($event)">
           <fa icon="external-link-alt" /> Join room
         </b-link>
-      </b-col>
-      <b-col cols="3">
-        <b-img class="qr-code" src="~assets/notify-qr.png" />
       </b-col>
     </b-row>
   </b-form>
