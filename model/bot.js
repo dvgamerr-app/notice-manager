@@ -11,7 +11,8 @@ export default class Bot extends Model {
       text: this.attr(''),
       value: this.attr(''),
       stats: this.attr({}),
-      room: this.attr([])
+      room: this.attr([]),
+      wait: this.boolean(false)
     }
   }
 }
