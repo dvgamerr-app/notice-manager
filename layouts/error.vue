@@ -8,14 +8,12 @@ export default {
 }
 </script>
 <style>
-.error {
-  height: calc(100vh - 9.84em);
-
-}
 .error::before {
   content: "404";
   color: #cecece;
   font-size: 10rem;
-  margin-left: 40%;
+  position: absolute;
+  left: calc(50vw - 8rem);
+  top: calc(50vh - 8rem);
 }
 </style>
