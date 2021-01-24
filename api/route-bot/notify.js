@@ -1,6 +1,6 @@
 const { nullFormat } = require('numeral')
 const { notice } = require('@touno-io/db/schema')
-const { pushMessage } = require('../sdk-notify')
+const sdkNotify = require('../sdk-notify')
 
 module.exports = async (req, res) => {
   const IsWebhook = req.method === 'POST'
@@ -8,25 +8,13 @@ module.exports = async (req, res) => {
   const { message, imageThumbnail, imageFullsize, stickerPackageId, stickerId, notificationDisabled } = req.payload
   let outbound = nullFormat
 
-  await notice.open()
   const { ServiceOauth, LineOutbound, ServiceWebhook } = notice.get()
-
   if (typeof message !== 'string' && !IsWebhook) { throw new TypeError('Message is undefined.') }
 
-  outbound = await new LineOutbound({
-    botname: service,
-    userTo: room,
-    type: 'notify',
-    sender: req.payload || {},
-    sended: false,
-    error: null,
-    created: new Date()
-  }).save()
-
-  const token = await ServiceOauth.findOne({ service, room })
-  if (!token || !token.accessToken) { throw new Error('Service and room not register.') }
+  outbound = await new LineOutbound({ botname: service, userTo: room, type: 'notify', sender: req.payload || {} }).save()
 
   const sender = {}
+  const { pushNotify } = await sdkNotify(service, room)
   if (!IsWebhook) {
     sender.message = message.replace(/\\n|newline/ig, '\n')
 
@@ -51,7 +39,7 @@ module.exports = async (req, res) => {
     }
   }
 
-  const { headers } = await pushMessage(token.accessToken, sender)
+  const { headers } = await pushNotify(sender)
 
   const result = {
     remaining: parseInt(headers['x-ratelimit-remaining']),
