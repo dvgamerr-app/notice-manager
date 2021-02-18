@@ -67,10 +67,12 @@ module.exports = {
     color: '#00B900',
     height: '2px'
   },
+  middleware: ['auth'],
   css: [
     '~/assets/index.scss'
   ],
   plugins: [
+    '~/plugins/vue-liff.client.js',
     '~/plugins/vue-focus.js',
     '~/plugins/vue-tabindex.js'
   ],

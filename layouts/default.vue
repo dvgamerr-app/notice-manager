@@ -92,6 +92,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+#__layout > div {
+  grid-template:
+    "navtop" auto
+    "navbottom" auto
+    "main-content" 1fr
+    "footer" 50px;
+}
+
 
 .nav-link {
   &.d-flex{
