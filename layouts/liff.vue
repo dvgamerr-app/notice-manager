@@ -16,7 +16,7 @@
           <b-navbar-nav class="ml-auto">
             <div v-if="profile.userId" class="flex-user">
               <span class="text-muted text-username" v-text="profile.displayName" />
-              <b-img :src="profile.pictureUrl" rounded="circle" :alt="profile.statusMessage" style="width:1.2rem;" />
+              <b-img :src="profile.pictureUrl" rounded="circle" alt="A" style="width:1.2rem;" />
             </div>
           </b-navbar-nav>
         </b-container>
@@ -39,33 +39,34 @@
 export default {
   data: () => ({
     profile: {
-      // userId: null,
-      // displayName: null,
-      // pictureUrl: '',
-      // statusMessage: null
-      userId: 'U9e0a870c01ca97da20a4ec462bf72991',
-      displayName: 'KEM',
-      pictureUrl: 'https://profile.line-scdn.net/0hUG0jVRsoCmgNEyOtVq…6PQwgdX1GW3sWAAp3I0s6YSBCCSgUXQ0gIERuMXMWXSkaVV8l', 
-      statusMessage: 'You wanna make out.'
+      userId: null,
+      displayName: null,
+      pictureUrl: '',
+      statusMessage: null
+      // userId: 'U9e0a870c01ca97da20a4ec462bf72991',
+      // displayName: 'KEM',
+      // pictureUrl: 'https://profile.line-scdn.net/0hUG0jVRsoCmgNEyOtVqJ1PzFWBAV6PQwgdX1GW3sWAAp3I0s6YSBCCSgUXQ0gIERuMXMWXSkaVV8l',
+      // statusMessage: 'You wanna make out.'
     }
   }),
-  async beforeMount () {
-    await this.$liff.init({ liffId: '1607427050-pOvAm7RE' })
-    // if (!this.$liff.isLoggedIn()) {
-    //   return this.$liff.login({ redirectUri: 'http://localhost:4000/liff' })
-    // }
+  mounted () {
+    this.$nextTick(async () => {
+      this.$nuxt.$loading.start()
 
-    // this.profile = await this.$liff.getProfile()
-    // console.log('liff.getOS', liff.getOS())
-    // console.log('liff.getLanguage', liff.getLanguage())
-    // console.log('liff.getVersion', liff.getVersion())
-    // console.log('liff.getLineVersion', liff.getLineVersion())
-    // console.log('liff.isInClient', liff.isInClient())
-    // console.log('liff.isApiAvailable', liff.isApiAvailable('shareTargetPicker'))
+      await this.$liff.init({ liffId: '1607427050-pOvAm7RE' })
+      if (!this.$liff.isLoggedIn()) {
+        return this.$liff.login({ redirectUri: 'http://localhost:4000/liff' })
+      }
+
+      await this.$liff.ready.then(() => Promise.resolve())
+      this.profile = await this.$liff.getProfile()
+      this.$nuxt.$loading.finish()
+    })
+  },
+  created () {
   },
   methods: {
-    async loggedIn () {
-      await this.$liff.init({ liffId: '1607427050-pOvAm7RE' })
+    loggedIn () {
       return this.$liff.isLoggedIn()
     }
   }
