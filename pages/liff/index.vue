@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 <template>
-  <b-container fluid class="d-flex justify-content-center pt-5">
+  <div>
     start
-  </b-container>
+  </div>
 </template>
 
 <script>

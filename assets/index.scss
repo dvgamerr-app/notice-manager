@@ -27,6 +27,35 @@ body {
     width: 100%;
     height: 100vh;
   }
+
+  .navbar-brand {
+    font-size: 1.2rem;
+    line-height: 1rem;
+    font-weight: bold;
+
+    .logo-grid {
+      display: grid;
+      grid-template:
+        'main top' 0.6em
+        'main bottom' 0.8em / 3.1em 1fr;
+    }
+    .logo-main {
+      grid-area: main;
+      margin-top: .2em;
+      font-size: 1.6rem;
+    }
+
+    .logo-top {
+      grid-area: top;
+      font-size: .7rem;
+    }
+
+    .logo-bottom {
+      grid-area: bottom;
+      font-size: .7rem;
+    }
+
+  }
 }
 
 .nav-tabs {

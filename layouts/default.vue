@@ -100,7 +100,6 @@ export default {
     "footer" 50px;
 }
 
-
 .nav-link {
   &.d-flex{
     flex: 1;
@@ -123,33 +122,5 @@ export default {
   }
 
   border-bottom: 1px solid #edeff0;
-  .navbar-brand {
-    font-size: 1.2rem;
-    line-height: 1rem;
-    font-weight: bold;
-
-    .logo-grid {
-      display: grid;
-      grid-template:
-        'main top' 0.6em
-        'main bottom' 0.8em / 3em 1fr;
-    }
-    .logo-main {
-      grid-area: main;
-      margin-top: 5px;
-      font-size: 1.5rem;
-    }
-
-    .logo-top {
-      grid-area: top;
-      font-size: .7rem;
-    }
-
-    .logo-bottom {
-      grid-area: bottom;
-      font-size: .7rem;
-    }
-
-  }
 }
 </style>
