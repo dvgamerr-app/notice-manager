@@ -1,69 +1,51 @@
 <template>
-  <div>
-    <client-only>
-      <div slot="placeholder" class="main-content d-flex justify-content-center pt-5">
-        <b-spinner />
-      </div>
-      <b-navbar class="navtop">
-        <b-container fluid>
-          <b-navbar-brand to="/">
-            <div class="logo-grid d-grid">
-              <span class="logo-main">LINE</span>
-              <span class="logo-top">Notice</span>
-              <span class="logo-bottom">MANAGER</span>
-            </div>
-          </b-navbar-brand>
-          <b-navbar-nav class="ml-auto">
-            <div v-if="profile.userId" class="flex-user">
-              <span class="text-muted text-username" v-text="profile.displayName" />
-              <b-img :src="profile.pictureUrl" rounded="circle" alt="A" style="width:1.2rem;" />
-            </div>
-          </b-navbar-nav>
+  <transition name="fade">
+    <div>
+      <client-only>
+        <div slot="placeholder">
+          <b-spinner variant="success" />
+        </div>
+        <b-navbar class="navtop">
+          <b-container fluid>
+            <b-navbar-brand to="/">
+              <div class="logo-grid d-grid">
+                <span class="logo-main">LINE</span>
+                <span class="logo-top">Notice</span>
+                <span class="logo-bottom">MANAGER</span>
+              </div>
+            </b-navbar-brand>
+            <b-navbar-nav class="ml-auto">
+              <div v-if="profile.userId" class="flex-user">
+                <span class="text-muted text-username" v-text="profile.displayName" />
+                <b-img :src="profile.pictureUrl" rounded="circle" alt="A" style="width:1.2rem;" />
+              </div>
+            </b-navbar-nav>
+          </b-container>
+        </b-navbar>
+        <b-container class="navbottom" />
+        <b-container class="main d-flex">
+          <nuxt />
         </b-container>
-      </b-navbar>
-      <b-container class="navbottom" />
-      <b-container class="main d-flex">
-        <nuxt />
-      </b-container>
-      <footer class="footer">
-        <b-container fluid>
-          <p>
-            LINE-BOT v{{ require('../package.json').version }}
-          </p>
-        </b-container>
-      </footer>
-    </client-only>
-  </div>
+        <footer class="footer">
+          <b-container fluid>
+            <p>
+              LINE-BOT v{{ require('../package.json').version }}
+            </p>
+          </b-container>
+        </footer>
+      </client-only>
+    </div>
+  </transition>
 </template>
 <script>
 export default {
+  transition: 'fade',
   data: () => ({
-    profile: {
-      userId: null,
-      displayName: null,
-      pictureUrl: '',
-      statusMessage: null
-      // userId: 'U9e0a870c01ca97da20a4ec462bf72991',
-      // displayName: 'KEM',
-      // pictureUrl: 'https://profile.line-scdn.net/0hUG0jVRsoCmgNEyOtVqJ1PzFWBAV6PQwgdX1GW3sWAAp3I0s6YSBCCSgUXQ0gIERuMXMWXSkaVV8l',
-      // statusMessage: 'You wanna make out.'
-    }
   }),
-  mounted () {
-    this.$nextTick(async () => {
-      this.$nuxt.$loading.start()
-
-      await this.$liff.init({ liffId: '1607427050-pOvAm7RE' })
-      if (!this.$liff.isLoggedIn()) {
-        return this.$liff.login({ redirectUri: 'http://localhost:4000/liff' })
-      }
-
-      await this.$liff.ready.then(() => Promise.resolve())
-      this.profile = await this.$liff.getProfile()
-      this.$nuxt.$loading.finish()
-    })
-  },
-  created () {
+  computed: {
+    profile () {
+      return this.$store.state.profile
+    }
   },
   methods: {
     loggedIn () {
@@ -73,13 +55,37 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.2s;
+}
+.page-enter,
+.page-leave-to {
+  opacity: 0;
+}
+
+.layout-enter-active,
+.layout-leave-active {
+  transition: opacity 0.2s;
+}
+.layout-enter,
+.layout-leave-to {
+  opacity: 0;
+}
+
 #__layout > div {
   grid-template:
     "navtop" auto
     "navbottom" auto
     "main-content" 1fr
     "footer" 32px;
+
+  .spinner-border {
+    position: absolute;
+    top: calc(50% - 20px);
+    left: calc(50% - 20px);
+  }
 }
 footer {
   background: #fafbfc;

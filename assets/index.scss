@@ -28,6 +28,15 @@ body {
     height: 100vh;
   }
 
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.2s;
+  }
+  .fade-enter,
+  .fade-leave-to {
+    opacity: 0;
+  }
+
   .navbar-brand {
     font-size: 1.2rem;
     line-height: 1rem;
@@ -41,7 +50,7 @@ body {
     }
     .logo-main {
       grid-area: main;
-      margin-top: .2em;
+      margin-top: .25em;
       font-size: 1.6rem;
     }
 

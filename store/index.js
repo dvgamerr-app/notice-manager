@@ -17,3 +17,18 @@ database.register(Webhook)
 export const plugins = [
   VuexORM.install(database)
 ]
+
+export const state = () => ({
+  profile: {
+    userId: null,
+    displayName: null,
+    pictureUrl: '',
+    statusMessage: null
+  }
+})
+
+export const mutations = {
+  profile (state, value) {
+    state.profile = value
+  }
+}
