@@ -10,7 +10,11 @@ const config = require('./nuxt.config.js')
 
 const routes = require('./api')
 
-const server = new Server({ port: config.server.port, host: config.server.host })
+const server = new Server({
+  port: config.server.port,
+  host: config.server.host,
+  routes: { state: { parse: true, failAction: 'ignore' } }
+})
 const nuxtCreateBuilder = async () => {
   logger.info('MongoDB db-notice connecting...')
   await notice.open()
@@ -23,6 +27,7 @@ const nuxtCreateBuilder = async () => {
     plugin: require('hapi-sentry'),
     options: { client: { dsn: process.env.SENTRY_DSN || false } }
   })
+
   await server.register({ plugin: hapiPlugin, options: {} })
   server.route(routes)
 
