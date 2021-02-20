@@ -16,7 +16,7 @@ export default {
   transition: 'fade',
   asyncData ({ env }) {
     return {
-      liffId: '1607427050-pOvAm7RE',
+      liffId: '1607427050-7W6qy2N9',
       hostname: env.HOST_API
     }
   },
@@ -57,7 +57,9 @@ export default {
       this.$store.commit('toggleWait')
 
       await this.$liff.init({ liffId: this.liffId })
-      if (!this.$liff.isInClient() && !isDev) { this.$nuxt.context.redirect(200, '/') }
+      if (!this.$liff.isInClient() && !isDev) {
+        return this.$nuxt.context.redirect(200, '/')
+      }
 
       if (!this.$liff.isLoggedIn() && !isDev) {
         return this.$liff.login({ redirectUri: `${this.hostname}/liff` })
