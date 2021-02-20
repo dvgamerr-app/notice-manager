@@ -5,7 +5,7 @@
         <div slot="placeholder">
           <b-spinner variant="success" />
         </div>
-        <b-navbar class="navtop">
+        <b-navbar v-if="$store.state.full" class="navtop">
           <b-container fluid>
             <b-navbar-brand>
               <div class="logo-grid d-grid">
@@ -22,6 +22,7 @@
             </b-navbar-nav>
           </b-container>
         </b-navbar>
+        <b-container v-else class="navtop" />
         <b-container class="navbottom" />
         <b-container class="main">
           <nuxt />

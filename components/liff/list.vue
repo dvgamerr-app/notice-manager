@@ -1,5 +1,5 @@
 <template>
-  <b-row v-if="profile.userId">
+  <b-row v-if="!$store.state.wait">
     <b-col v-if="listItems.length || search.length" sm="12" class="pt-3">
       <fa icon="search" class="fa-sm icon-search" />
       <b-form-input v-model="search" placeholder="Search" style="padding-left:2em" />

@@ -19,6 +19,10 @@ export const plugins = [
 ]
 
 export const state = () => ({
+  wait: false,
+  full: true,
+  tall: false,
+  compact: false,
   profile: {
     userId: null,
     displayName: null,
@@ -30,5 +34,18 @@ export const state = () => ({
 export const mutations = {
   profile (state, value) {
     state.profile = value
+  },
+  toggleWait (state, value) {
+    state.wait = value || !state.wait
+  },
+  setTall (state, value) {
+    state.full = false
+    state.tall = true
+    state.compact = false
+  },
+  setFull (state, value) {
+    state.full = true
+    state.tall = false
+    state.compact = false
   }
 }

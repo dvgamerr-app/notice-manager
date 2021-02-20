@@ -1,7 +1,7 @@
 <template>
-  <b-row v-if="profile.userId">
+  <b-row v-if="!$store.state.wait">
     <b-col>
-      <liff-list />
+      <lazy-liff-list />
     </b-col>
   </b-row>
 </template>
@@ -14,6 +14,12 @@ import Bot from '../../model/bot'
 export default {
   layout: 'liff',
   transition: 'fade',
+  asyncData ({ env }) {
+    return {
+      liffId: '1607427050-pOvAm7RE',
+      hostname: env.HOST_API
+    }
+  },
   data () {
     return {
       search: ''
@@ -44,26 +50,36 @@ export default {
   //   }
   // },
   mounted () {
+    const isDev = /localhost:/.test(this.hostname)
     this.$nextTick(async () => {
       this.$nuxt.$loading.start()
+      this.$nuxt.$loading.increase(50)
+      this.$store.commit('toggleWait')
 
-      await this.$liff.init({ liffId: '1607427050-pOvAm7RE' })
-      if (!this.$liff.isLoggedIn()) {
-        return this.$liff.login()
-        // return this.$liff.login({ redirectUri: `http://localhost:4000/liff` })
+      await this.$liff.init({ liffId: this.liffId })
+      if (!this.$liff.isInClient() && !isDev) { this.$nuxt.context.redirect(200, '/') }
+
+      if (!this.$liff.isLoggedIn() && !isDev) {
+        return this.$liff.login({ redirectUri: `${this.hostname}/liff` })
       }
 
-      await this.$liff.ready.then(() => Promise.resolve())
-      const profile = await this.$liff.getProfile()
+      let profile = {}
+      if (isDev) {
+        profile = {
+          userId: 'U9e0a870c01ca97da20a4ec462bf72991',
+          displayName: 'KEM',
+          pictureUrl: 'https://profile.line-scdn.net/0hUG0jVRsoCmgNEyOtVqJ1PzFWBAV6PQwgdX1GW3sWAAp3I0s6YSBCCSgUXQ0gIERuMXMWXSkaVV8l',
+          statusMessage: 'You wanna make out.'
+        }
+      } else {
+        await this.$liff.ready.then(() => Promise.resolve())
+        profile = await this.$liff.getProfile()
+      }
+
       this.$store.commit('profile', profile)
-      // this.$store.commit('profile', {
-      //   userId: 'U9e0a870c01ca97da20a4ec462bf72991',
-      //   displayName: 'KEM',
-      //   pictureUrl: 'https://profile.line-scdn.net/0hUG0jVRsoCmgNEyOtVqJ1PzFWBAV6PQwgdX1GW3sWAAp3I0s6YSBCCSgUXQ0gIERuMXMWXSkaVV8l',
-      //   statusMessage: 'You wanna make out.'
-      // })
       await this.$line(this.profile.userId)
       this.$nuxt.$loading.finish()
+      this.$store.commit('toggleWait')
     })
   }
 }

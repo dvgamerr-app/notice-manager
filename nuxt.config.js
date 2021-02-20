@@ -5,11 +5,11 @@ module.exports = {
   telemetry: false,
   components: true,
   head: {
-    titleTemplate: title => `${title ? `${title} · ` : ''}LINE-Notice`,
+    titleTemplate: title => `${title ? `${title} · ` : ''}LINE Manager`,
     meta: [
       { charset: 'utf-8' },
-      { name: 'application-name', content: 'LINE Notice Manager' },
-      { name: 'name', content: 'LINE Notice Manager' },
+      { name: 'application-name', content: 'Notice LINE Manager' },
+      { name: 'name', content: 'Notice LINE Manager' },
       { name: 'description', content: process.env.npm_package_description || '', id: 'desc' },
       { 'http-equiv': 'X-UA-Compatible', content: 'IE=edge' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' },

@@ -1,22 +1,22 @@
 <template>
   <b-row v-if="!$store.state.wait">
     <b-col>
-      <lazy-liff-list type="bot" />
+      documentation
     </b-col>
   </b-row>
 </template>
 
 <script>
-import Api from '../../../model/api'
-import Notify from '../../../model/notify'
-import Bot from '../../../model/bot'
+import Api from '../../model/api'
+import Notify from '../../model/notify'
+import Bot from '../../model/bot'
 
 export default {
   layout: 'liff',
   transition: 'fade',
   asyncData ({ env }) {
     return {
-      liffId: '1607427050-1rqxE7BN',
+      liffId: '1607427050-pOvAm7RE',
       hostname: env.HOST_API
     }
   },
@@ -50,7 +50,6 @@ export default {
   //   }
   // },
   mounted () {
-    this.$store.commit('setTall')
     const isDev = /localhost:/.test(this.hostname)
     this.$nextTick(async () => {
       this.$nuxt.$loading.start()

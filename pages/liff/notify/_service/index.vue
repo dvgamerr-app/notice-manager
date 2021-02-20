@@ -1,5 +1,5 @@
 <template>
-  <b-row v-if="profile.userId">
+  <b-row v-if="!$store.state.wait">
     <b-col sm="12" class="py-3">
       room
     </b-col>

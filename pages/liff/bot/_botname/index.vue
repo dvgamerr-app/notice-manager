@@ -1,31 +1,32 @@
-/* eslint-disable no-console */
 <template>
-  <b-row v-if="profile.userId">
+  <b-row v-if="!$store.state.wait">
     <b-col sm="12" class="py-3">
-      room
+      <h3 class="pb-1 mb-3 border-bottom" v-text="bot.text" />
+      <div v-for="e in bot.room" :key="e._id">
+        {{ e.name }}
+      </div>
     </b-col>
   </b-row>
 </template>
 
 <script>
 // import Api from '../model/api'
-import Notify from '../../../../model/notify'
 import Bot from '../../../../model/bot'
 
 export default {
   layout: 'liff',
   transition: 'fade',
+  asyncData ({ params }) {
+    return params
+  },
   computed: {
-    notifyList () {
-      return Notify.query().orderBy('service').get()
-    },
-    botList () {
-      return Bot.query().orderBy('botname').get()
+    bot () {
+      return Bot.query().where('value', this.botname).first()
     },
     profile () {
       return this.$store.state.profile
     }
-  },
+  }
   // computed: {
   //   getServiceSample () {
   //     return Notify.query().get().map(e => ({ id: e.value, label: e.text }))
@@ -35,8 +36,6 @@ export default {
   //     return (service.room || []).map(e => ({ id: e.value, label: e.text }))
   //   }
   // },
-  mounted () {
-  }
 }
 </script>
 <style lang="scss">
