@@ -7,7 +7,7 @@
 </template>
 
 <script>
-// import Api from '../model/api'
+import Api from '../model/api'
 import Notify from '../../model/notify'
 import Bot from '../../model/bot'
 
@@ -26,6 +26,9 @@ export default {
       return ([...n, ...b]).filter((e) => {
         return new RegExp(this.search, 'ig').test(e.text) || new RegExp(this.search, 'ig').test(e.value)
       }).sort((a, b) => a.value > b.value ? 1 : -1)
+    },
+    api () {
+      return Api.query().first()
     },
     profile () {
       return this.$store.state.profile
@@ -46,7 +49,8 @@ export default {
 
       await this.$liff.init({ liffId: '1607427050-pOvAm7RE' })
       if (!this.$liff.isLoggedIn()) {
-        return this.$liff.login({ redirectUri: 'http://localhost:4000/liff' })
+        return this.$liff.login()
+        // return this.$liff.login({ redirectUri: `http://localhost:4000/liff` })
       }
 
       await this.$liff.ready.then(() => Promise.resolve())

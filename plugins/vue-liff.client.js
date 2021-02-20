@@ -16,10 +16,10 @@ export default ({ app, env }, inject) => {
     const { data: { notify, bot }, status, statusText } = await app.$axios('/api/service/dashboard', { headers: { 'x-id': userId } })
     if (status !== 200) { throw new Error(`Server Down '/dashboard' is ${statusText}.`) }
 
-    // eslint-disable-next-line no-console
-    console.log('notify:', notify)
-    // eslint-disable-next-line no-console
-    console.log('bot:', bot)
+    // // eslint-disable-next-line no-console
+    // console.log('notify:', notify)
+    // // eslint-disable-next-line no-console
+    // console.log('bot:', bot)
     for (const data of notify) { await Notify.insert({ data }) }
     for (const data of bot) { await Bot.insert({ data }) }
   })
