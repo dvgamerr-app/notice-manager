@@ -17,6 +17,7 @@ export default {
   asyncData ({ env }) {
     return {
       liffId: '1607427050-M1XB28gl',
+      uri: '/liff/notify',
       hostname: env.HOST_API
     }
   },
@@ -58,12 +59,12 @@ export default {
       this.$store.commit('toggleWait')
 
       await this.$liff.init({ liffId: this.liffId })
-      if (!this.$liff.isInClient() && !isDev) {
-        return this.$nuxt.context.redirect(200, '/')
-      }
+      // if (!this.$liff.isInClient() && !isDev) {
+      //   return this.$nuxt.context.redirect(200, '/')
+      // }
 
       if (!this.$liff.isLoggedIn() && !isDev) {
-        return this.$liff.login(isDev ? { redirectUri: `${this.hostname}/liff/notify` } : undefined)
+        return this.$liff.login({ redirectUri: `${this.hostname}${this.uri}` })
       }
 
       let profile = {}

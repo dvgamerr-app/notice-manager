@@ -17,6 +17,7 @@ export default {
   asyncData ({ env }) {
     return {
       liffId: '1607427050-7W6qy2N9',
+      uri: '/liff/documentation',
       hostname: env.HOST_API
     }
   },
@@ -50,21 +51,19 @@ export default {
   //   }
   // },
   mounted () {
-    const isDev = /localhost:/.test(this.hostname)
+    const isDev = !/localhost:/.test(this.hostname)
     this.$nextTick(async () => {
       this.$nuxt.$loading.start()
       this.$nuxt.$loading.increase(50)
       this.$store.commit('toggleWait')
 
       await this.$liff.init({ liffId: this.liffId })
-      if (!this.$liff.isInClient() && !isDev) {
-        return this.$nuxt.context.redirect(200, '/')
-      }
-
+      // if (!this.$liff.isInClient() && !isDev) {
+      //   return this.$nuxt.context.redirect(200, '/')
+      // }
       if (!this.$liff.isLoggedIn() && !isDev) {
-        return this.$liff.login(isDev ? { redirectUri: `${this.hostname}/liff/documentation` } : undefined)
+        return this.$liff.login({ redirectUri: `${this.hostname}${this.uri}` })
       }
-
       let profile = {}
       if (isDev) {
         profile = {
