@@ -6,12 +6,12 @@ module.exports = async (req) => {
   if (userId) {
     const bot = await LineBot.aggregate([
       { $match: { active: true, userId } },
-      { $project: { _id: 1, name: 1, botname: 1 } },
+      { $project: { _id: 1, text: '$name', value: '$botname', type: 'bot' } },
       {
         $lookup: {
           as: 'room',
           from: 'db-line-bot-room',
-          let: { botname: '$botname' },
+          let: { botname: '$value' },
           pipeline: [
             { $match: { active: true } },
             { $match: { $expr: { $eq: ['$botname', '$$botname'] } } },
@@ -24,13 +24,13 @@ module.exports = async (req) => {
     ])
     const notify = await ServiceBot.aggregate([
       { $match: { active: true, userId } },
-      { $project: { _id: 1, name: 1, service: 1, client: 1, secret: 1 } },
+      { $project: { _id: 1, client: 1, secret: 1, text: '$name', value: '$service', type: 'notify' } },
       { $sort: { service: 1 } },
       {
         $lookup: {
           as: 'room',
           from: 'db-service-oauth',
-          let: { service: '$service ' },
+          let: { service: '$value' },
           pipeline: [
             { $match: { accessToken: { $ne: null } } },
             { $match: { $expr: { $eq: ['$service', '$$service'] } } },

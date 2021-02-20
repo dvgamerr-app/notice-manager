@@ -16,6 +16,8 @@ export default class Notify extends Model {
       _id: this.attr(null),
       text: this.attr(''),
       value: this.attr(''),
+      type: this.attr(''),
+      service: this.attr(''),
       room: this.attr([])
     }
   }

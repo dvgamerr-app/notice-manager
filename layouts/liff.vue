@@ -7,7 +7,7 @@
         </div>
         <b-navbar class="navtop">
           <b-container fluid>
-            <b-navbar-brand to="/">
+            <b-navbar-brand>
               <div class="logo-grid d-grid">
                 <span class="logo-main">LINE</span>
                 <span class="logo-top">Notice</span>
@@ -23,7 +23,7 @@
           </b-container>
         </b-navbar>
         <b-container class="navbottom" />
-        <b-container class="main d-flex">
+        <b-container class="main">
           <nuxt />
         </b-container>
         <footer class="footer">
@@ -56,22 +56,12 @@ export default {
 </script>
 
 <style lang="scss">
-.page-enter-active,
-.page-leave-active {
-  transition: opacity 0.2s;
-}
-.page-enter,
-.page-leave-to {
-  opacity: 0;
-}
+@import '../assets/fonts/stylesheet.css';
 
-.layout-enter-active,
-.layout-leave-active {
-  transition: opacity 0.2s;
-}
-.layout-enter,
-.layout-leave-to {
-  opacity: 0;
+body .main {
+  font-family: "thaisansneue-semibold", "Open Sans", Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: normal;
+  font-size: 1.2rem;
 }
 
 #__layout > div {
@@ -99,6 +89,24 @@ footer {
     margin: 0px;
     font-size: .65rem;
   }
+}
+
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.2s;
+}
+.page-enter,
+.page-leave-to {
+  opacity: 0;
+}
+
+.layout-enter-active,
+.layout-leave-active {
+  transition: opacity 0.2s;
+}
+.layout-enter,
+.layout-leave-to {
+  opacity: 0;
 }
 
 .nav-link {
