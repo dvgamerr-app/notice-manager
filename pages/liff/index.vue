@@ -62,7 +62,7 @@ export default {
       }
 
       if (!this.$liff.isLoggedIn() && !isDev) {
-        return this.$liff.login({ redirectUri: `${this.hostname}/liff` })
+        return this.$liff.login(isDev ? { redirectUri: `${this.hostname}/liff` } : undefined)
       }
 
       let profile = {}
