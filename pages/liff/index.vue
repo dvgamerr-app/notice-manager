@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import Api from '../model/api'
+import Api from '../../model/api'
 import Notify from '../../model/notify'
 import Bot from '../../model/bot'
 
