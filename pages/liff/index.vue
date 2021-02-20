@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 <template>
   <transition name="default">
-    <div v-if="profile.userId">
+    <div v-if="profile.userId" class="pt-2">
       start
     </div>
   </transition>
@@ -18,7 +18,7 @@ export default {
     }
   },
   mounted () {
-    this.$nextTick(() => {
+    this.$nextTick(async () => {
       this.$nuxt.$loading.start()
 
       //   await this.$liff.init({ liffId: '1607427050-pOvAm7RE' })
@@ -28,15 +28,16 @@ export default {
 
       //   await this.$liff.ready.then(() => Promise.resolve())
       //   this.profile = await this.$liff.getProfile()
-      setTimeout(() => {
-        this.$nuxt.$loading.finish()
-        this.$store.commit('profile', {
-          userId: 'U9e0a870c01ca97da20a4ec462bf72991',
-          displayName: 'KEM',
-          pictureUrl: 'https://profile.line-scdn.net/0hUG0jVRsoCmgNEyOtVqJ1PzFWBAV6PQwgdX1GW3sWAAp3I0s6YSBCCSgUXQ0gIERuMXMWXSkaVV8l',
-          statusMessage: 'You wanna make out.'
-        })
-      }, 2000)
+      this.$store.commit('profile', {
+        userId: 'U6e27176f34129a3cd1386b8849cb0906',
+        displayName: 'KEM',
+        pictureUrl: 'https://profile.line-scdn.net/0hUG0jVRsoCmgNEyOtVqJ1PzFWBAV6PQwgdX1GW3sWAAp3I0s6YSBCCSgUXQ0gIERuMXMWXSkaVV8l',
+        statusMessage: 'You wanna make out.'
+      })
+      const { data: res } = await this.$axios('/api/service/dashboard', { headers: { 'x-id': this.profile.userId } })
+      // eslint-disable-next-line no-console
+      console.dir(res)
+      this.$nuxt.$loading.finish()
     })
   }
 }

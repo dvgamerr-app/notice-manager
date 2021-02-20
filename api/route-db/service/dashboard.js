@@ -2,6 +2,46 @@ const { notice } = require('@touno-io/db/schema')
 
 module.exports = async (req) => {
   const { LineBot, LineBotRoom, ServiceBot, ServiceOauth, ChatWebhook } = notice.get()
+  const userId = req.headers['x-id']
+  if (userId) {
+    const bot = await LineBot.aggregate([
+      { $match: { active: true, userId } },
+      { $project: { _id: 1, name: 1, botname: 1 } },
+      {
+        $lookup: {
+          as: 'room',
+          from: 'db-line-bot-room',
+          let: { botname: '$botname' },
+          pipeline: [
+            { $match: { active: true } },
+            { $match: { $expr: { $eq: ['$botname', '$$botname'] } } },
+            { $project: { _id: 0, type: 1, botname: 1, name: 1 } },
+            { $sort: { botname: 1, name: 1 } }
+          ]
+        }
+      },
+      { $sort: { botname: 1, name: 1 } }
+    ])
+    const notify = await ServiceBot.aggregate([
+      { $match: { active: true, userId } },
+      { $project: { _id: 1, name: 1, service: 1, client: 1, secret: 1 } },
+      { $sort: { service: 1 } },
+      {
+        $lookup: {
+          as: 'room',
+          from: 'db-service-oauth',
+          let: { service: '$service ' },
+          pipeline: [
+            { $match: { accessToken: { $ne: null } } },
+            { $match: { $expr: { $eq: ['$service', '$$service'] } } },
+            { $project: { _id: 0, accessToken: 1, room: 1, name: 1 } },
+            { $sort: { room: 1, name: 1 } }
+          ]
+        }
+      }
+    ])
+    return { bot, notify }
+  }
 
   const webhook = await ChatWebhook.find({ active: true }, null, { sort: { botname: 1 } })
   const bot = await LineBot.find({ active: true }, null, { sort: { botname: 1 } })
