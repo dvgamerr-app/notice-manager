@@ -1,6 +1,6 @@
 // User Model
 import { Model } from '@vuex-orm/core'
-// import Room from './room'
+import Notiroom from './notiRoom'
 
 export default class Notify extends Model {
   static get entity () {
@@ -18,7 +18,8 @@ export default class Notify extends Model {
       value: this.attr(''),
       type: this.attr(''),
       service: this.attr(''),
-      room: this.attr([])
+      room: this.hasMany(Notiroom, 'service', 'value'),
+      removed: this.boolean(false)
     }
   }
 }

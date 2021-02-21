@@ -65,6 +65,14 @@ body {
     }
 
   }
+  .breadcrumb-item + .breadcrumb-item {
+    padding-left: 0.3rem;
+    &::before {
+      padding-right: 0.1rem;
+      font-family: 'thaisansneue-semibold';
+      margin-top: 0.1em;
+    }
+  }
 }
 
 .nav-tabs {

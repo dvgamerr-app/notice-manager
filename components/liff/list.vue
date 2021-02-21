@@ -44,7 +44,7 @@ export default {
   },
   data () {
     return {
-      search: ''
+      search: 'notify'
     }
   },
   computed: {

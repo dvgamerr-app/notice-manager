@@ -1,11 +1,22 @@
 <template>
   <b-row v-if="!$store.state.wait && bot">
     <b-col sm="12" class="py-3">
-      <h3 class="pb-1 mb-3 border-bottom" v-text="bot.text" />
+      <ol class="breadcrumb p-1 px-2">
+        <li class="breadcrumb-item active">
+          <span class="d-flex align-items-center">
+            <fa :icon="['fab','line']" /> <span class="ml-1" v-text="bot.text" />
+          </span>
+        </li>
+      </ol>
       <lazy-liff-item-drop v-for="e in room" :key="e.$id" @delete="remove(e)">
-        <span>
-          {{ e.name }}
-        </span>
+        <nuxt-link :to="`/liff/${bot.type}/${bot.value}/${e.name}`" class="d-flex align-items-center list-item py-3 border-bottom">
+          <div class="flex-grow-1 px-2">
+            <div class="display" v-text="e.name" />
+            <div class="name text-muted">
+              <small>{{ e.stats }}</small>
+            </div>
+          </div>
+        </nuxt-link>
       </lazy-liff-item-drop>
     </b-col>
   </b-row>
@@ -22,12 +33,17 @@ export default {
   asyncData ({ params }) {
     return params
   },
+  data () {
+    return {
+      type: 'view'
+    }
+  },
   computed: {
     bot () {
-      return Bot.query().where('value', this.botname).first()
+      return Bot.query().where('value', this.name).first()
     },
     room () {
-      return Botroom.query().where('removed', false).where('botname', this.botname).get()
+      return Botroom.query().where('removed', false).where('botname', this.name).get()
     },
     profile () {
       return this.$store.state.profile
