@@ -2,6 +2,7 @@ import VuexORM from '@vuex-orm/core'
 import Api from '../model/api'
 import Notify from '../model/notify'
 import Bot from '../model/bot'
+import Botroom from '../model/botRoom'
 import Webhook from '../model/webhook'
 
 // Create a new database instance.
@@ -11,6 +12,7 @@ const database = new VuexORM.Database()
 database.register(Api)
 database.register(Notify)
 database.register(Bot)
+database.register(Botroom)
 database.register(Webhook)
 
 // Create Vuex Store and register database through Vuex ORM.

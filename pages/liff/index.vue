@@ -7,10 +7,6 @@
 </template>
 
 <script>
-import Api from '../../model/api'
-import Notify from '../../model/notify'
-import Bot from '../../model/bot'
-
 export default {
   layout: 'liff',
   transition: 'fade',
@@ -27,16 +23,6 @@ export default {
     }
   },
   computed: {
-    listItems () {
-      const n = Notify.query().orderBy('service').get()
-      const b = Bot.query().orderBy('botname').get()
-      return ([...n, ...b]).filter((e) => {
-        return new RegExp(this.search, 'ig').test(e.text) || new RegExp(this.search, 'ig').test(e.value)
-      }).sort((a, b) => a.value > b.value ? 1 : -1)
-    },
-    api () {
-      return Api.query().first()
-    },
     profile () {
       return this.$store.state.profile
     }

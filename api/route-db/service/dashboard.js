@@ -15,8 +15,8 @@ module.exports = async (req) => {
           pipeline: [
             { $match: { active: true } },
             { $match: { $expr: { $eq: ['$botname', '$$botname'] } } },
-            { $project: { _id: 0, type: 1, botname: 1, name: 1 } },
-            { $sort: { botname: 1, name: 1 } }
+            { $project: { _id: 0, name: 1, botname: 1 } },
+            { $sort: { name: 1 } }
           ]
         }
       },

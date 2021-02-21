@@ -8,22 +8,24 @@
       <nuxt-link v-if="!listItems.length" to="/liff" class="d-block list-item empty py-3 border-bottom">
         Empty.
       </nuxt-link>
-      <nuxt-link v-for="e in listItems" :key="e.$id" :to="`/liff/${e.type}/${e.value}`" class="d-flex align-items-center list-item py-3 border-bottom">
-        <div class="icon px-1">
-          <fa v-if="e.type == 'notify'" icon="bell" />
-          <fa v-if="e.type == 'bot'" :icon="['fab','line']" />
-          <fa v-if="e.type == 'webhook'" icon="link" />
-        </div>
-        <div class="flex-grow-1 px-2">
-          <div class="display" v-text="e.text" />
-          <div class="name text-muted">
-            <small>{{ e.value }} used join {{ e.room.length }} rooms.</small>
+      <lazy-liff-item-drop v-for="e in listItems" :key="e.$id" @delete="onRemove(e)">
+        <nuxt-link :to="`/liff/${e.type}/${e.value}`" class="d-flex align-items-center list-item py-3 border-bottom">
+          <div class="icon px-1">
+            <fa v-if="e.type == 'notify'" icon="bell" />
+            <fa v-if="e.type == 'bot'" :icon="['fab','line']" />
+            <fa v-if="e.type == 'webhook'" icon="link" />
           </div>
-        </div>
-        <nuxt-link v-show="type != 'all'" :to="`/liff/${e.type}/${e.value}/edit`" class="py-3 px-4 config">
-          <fa icon="cog" class="fa-sm text-black-50" />
+          <div class="flex-grow-1 px-2">
+            <div class="display" v-text="e.text" />
+            <div class="name text-muted">
+              <small>{{ e.value }} used join {{ e.room.length }} rooms.</small>
+            </div>
+          </div>
+          <nuxt-link v-show="type != 'all'" :to="`/liff/${e.type}/${e.value}/edit`" class="py-3 px-4 config">
+            <fa icon="cog" class="fa-sm text-black-50" />
+          </nuxt-link>
         </nuxt-link>
-      </nuxt-link>
+      </lazy-liff-item-drop>
     </b-col>
   </b-row>
 </template>
@@ -47,14 +49,20 @@ export default {
   },
   computed: {
     listItems () {
-      const n = this.type === 'all' || this.type === 'notify' ? Notify.query().get() : []
-      const b = this.type === 'all' || this.type === 'bot' ? Bot.query().get() : []
+      const n = this.type === 'all' || this.type === 'notify' ? Notify.query().where('removed', false).withAll().get() : []
+      const b = this.type === 'all' || this.type === 'bot' ? Bot.query().where('removed', false).withAll().get() : []
       return ([...n, ...b]).filter((e) => {
         return new RegExp(this.search, 'ig').test(e.text) || new RegExp(this.search, 'ig').test(e.value)
       }).sort((a, b) => a.value > b.value ? 1 : -1)
     },
     profile () {
       return this.$store.state.profile
+    }
+  },
+  methods: {
+    onRemove (e) {
+      // eslint-disable-next-line no-console
+      console.log(e)
     }
   }
 }

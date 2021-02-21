@@ -1,10 +1,12 @@
 <template>
-  <b-row v-if="!$store.state.wait">
+  <b-row v-if="!$store.state.wait && bot">
     <b-col sm="12" class="py-3">
       <h3 class="pb-1 mb-3 border-bottom" v-text="bot.text" />
-      <div v-for="e in bot.room" :key="e._id">
-        {{ e.name }}
-      </div>
+      <lazy-liff-item-drop v-for="e in room" :key="e.$id" @delete="remove(e)">
+        <span>
+          {{ e.name }}
+        </span>
+      </lazy-liff-item-drop>
     </b-col>
   </b-row>
 </template>
@@ -12,6 +14,7 @@
 <script>
 // import Api from '../model/api'
 import Bot from '../../../../model/bot'
+import Botroom from '../../../../model/botRoom'
 
 export default {
   layout: 'liff',
@@ -23,8 +26,27 @@ export default {
     bot () {
       return Bot.query().where('value', this.botname).first()
     },
+    room () {
+      return Botroom.query().where('removed', false).where('botname', this.botname).get()
+    },
     profile () {
       return this.$store.state.profile
+    }
+  },
+  created () {
+    if (!this.bot) { this.$router.back() }
+  },
+  methods: {
+    remove (e) {
+      Botroom.update({
+        $$id: e.$$id,
+        data: { removed: true }
+      })
+      // this.bot.room.splice(index, 1)
+      // await Bot.update((file) => {
+      //   console.log(file)
+      //   return false
+      // })
     }
   }
   // computed: {

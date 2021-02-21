@@ -1,0 +1,15 @@
+@mixin flex($mainAxis:flex-start, $direction:row, $crossAxis:flex-start) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $mainAxis;
+  align-items: $crossAxis;
+}
+
+@mixin no-wrap-multi($n:2) {
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: $n;
+  -webkit-box-orient: vertical;
+  word-break: break-all;
+}
