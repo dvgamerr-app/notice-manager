@@ -13,6 +13,12 @@
           </span>
         </li>
       </ol>
+      <div class="text-muted mb-1" style="font-size:1.1rem">
+        การใช้งานระบบอย่างรายละเอียด
+      </div>
+      <div class="" style="font-size:1.1rem">
+        ...
+      </div>
     </b-col>
   </b-row>
 </template>

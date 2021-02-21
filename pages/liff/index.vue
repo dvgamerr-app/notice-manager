@@ -7,6 +7,7 @@
 </template>
 
 <script>
+
 export default {
   layout: 'liff',
   transition: 'fade',
@@ -15,11 +16,6 @@ export default {
       liffId: '1607427050-pOvAm7RE',
       uri: '/liff',
       hostname: env.HOST_API
-    }
-  },
-  data () {
-    return {
-      search: ''
     }
   },
   computed: {

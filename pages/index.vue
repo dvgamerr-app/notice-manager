@@ -97,13 +97,6 @@ export default {
   margin-top: -7px;
   color: #e2e2e2;
 }
-.progress {
-  .progress-bar {
-    color: #404040 !important;
-  }
-  font-weight: bold;
-  font-size: .65rem;
-}
 .edit-name {
   border-color: transparent;
   outline: 0;

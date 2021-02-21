@@ -28,7 +28,7 @@ module.exports = [
   { method: 'POST', path: '/api/service', handler: require('./route-db/service/new') },
   { method: 'POST', path: '/api/bot', handler: require('./route-db/bot/new') },
   { method: 'GET', path: '/api/check/stats', handler: require('./route-check/stats') },
-  { method: 'GET', path: '/api/stats/bot/{id}', handler: require('./route-check/stats-bot') },
+  { method: 'GET', path: '/api/stats/bot/{name?}', handler: require('./route-check/stats-bot') },
   { method: 'GET', path: '/api/stats/slack', handler: require('./route-check/stats-slack') },
 
   // API Get Database

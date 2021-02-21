@@ -6,7 +6,7 @@ module.exports = async (req) => {
   if (userId) {
     const bot = await LineBot.aggregate([
       { $match: { active: true, userId } },
-      { $project: { _id: 1, text: '$name', value: '$botname', type: 'bot' } },
+      { $project: { _id: 1, text: '$name', value: '$botname', type: 'bot', stats: '$options.stats' } },
       {
         $lookup: {
           as: 'room',

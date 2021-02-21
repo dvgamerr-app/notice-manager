@@ -1,6 +1,6 @@
 <template>
   <b-row v-if="!$store.state.wait">
-    <b-col v-if="listItems.length || search.length" sm="12" class="pt-3">
+    <b-col v-if="listItems.length || search.length" sm="12" class="pt-3 mb-1">
       <fa icon="search" class="fa-sm icon-search" />
       <b-form-input v-model="search" placeholder="Search" style="padding-left:2em" />
     </b-col>
@@ -44,7 +44,7 @@ export default {
   },
   data () {
     return {
-      search: 'notify'
+      search: ''
     }
   },
   computed: {

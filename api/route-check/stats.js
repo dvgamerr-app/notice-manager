@@ -1,5 +1,4 @@
 const { notice } = require('@touno-io/db/schema')
-const logger = require('@touno-io/debuger')('API')
 const { getStatus } = require('../sdk-notify')
 
 module.exports = async (req) => {
