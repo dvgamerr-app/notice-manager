@@ -56,8 +56,12 @@ module.exports = async (req, h) => {
       const { text } = e.message
       const { groups } = /^\/(?<name>[-_a-zA-Z]+)(?<arg>\W.*|)/ig.exec(text) || {}
 
+      // eslint-disable-next-line no-console
+      console.log('LINE WEBHOOK', groups)
       if (groups) {
         const args = groups.arg.trim().split(' ').filter(e => e !== '')
+        // eslint-disable-next-line no-console
+        console.log('onCommands', bot, args, e)
         // const cmd = await new LineCMD({
         //   botname: bot,
         //   userId: e.source.userId,

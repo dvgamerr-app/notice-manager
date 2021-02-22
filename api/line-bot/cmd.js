@@ -39,11 +39,11 @@ const renameBotRoom = async (botname, id, type, name) => {
   await notice.open()
   return notice.get('LineBotRoom').updateOne({ botname, id, type }, { $set: { name } })
 }
-const renameUserInRoom = async (botname, roomname, name, user_id) => {
+const renameUserInRoom = async (botname, roomname, name, userId) => {
   await notice.open()
   const LineBotUser = notice.get('LineBotUser')
-  await LineBotUser.deleteMany({ botname, roomname, user_id })
-  return new LineBotUser({ botname, roomname, user_id, name }).save()
+  await LineBotUser.deleteMany({ botname, roomname, userId })
+  return new LineBotUser({ botname, roomname, userId, name }).save()
 }
 
 module.exports = {

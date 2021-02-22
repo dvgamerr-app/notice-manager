@@ -4,7 +4,8 @@ const sdkClient = require('../sdk-client')
 
 module.exports = async (req) => {
   const startTime = new Date().getTime()
-  let { bot: botname, to: roomId } = req.params
+  const { bot: botname } = req.params
+  let { to: roomId } = req.params
 
   await notice.open()
   const { LineOutbound, LineBotRoom } = notice.get()
