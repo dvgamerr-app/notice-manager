@@ -1,8 +1,8 @@
 
 <template>
-  <div class="slider">
-    <div class="panal border-bottom" :class="{ removed: comfirm }" @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd">
-      <div ref="item" class="item" :style="itemStyle">
+  <div class="slider" :class="{ 'border-bottom': !comfirm }">
+    <div class="panal" :class="{ removed: comfirm }" @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd">
+      <div ref="item" class="item" :style="{transform: `translateX(${posX}px)`,'border-radius': posX !== 0 ? '4px' : '0px'}">
         <slot />
       </div>
       <div ref="remove" class="remove flex-shrink-1" :style="{ opacity: comfirm ? 0 : 1 }">
@@ -16,6 +16,7 @@
   </div>
 </template>
 <script>
+import { debounce } from 'debounce'
 /* eslint-disable no-console */
 export default {
   name: 'ItemDrop',
@@ -37,14 +38,6 @@ export default {
       posX: 0
     }
   },
-  computed: {
-    itemStyle () {
-      return {
-        transform: `translateX(${this.posX}px)`,
-        'border-radius': this.posX !== 0 ? '4px' : '0px'
-      }
-    }
-  },
   methods: {
     touchStart (ev) {
       if (ev.touches.length < 1 || this.comfirm || this.disabled) { return }
@@ -54,30 +47,40 @@ export default {
     touchMove (ev) {
       if (ev.touches.length < 1 || this.comfirm || this.disabled) { return }
       const [touch] = ev.touches
+      const { offsetWidth } = this.$refs.item
 
-      this.disX = this.startX - touch.clientX
-      if (this.disX < 0 || this.disX === 0) {
-        this.posX = 0
-      } else if (this.disX > 0) {
-        this.posX = Math.round(this.disX * -1)
-      }
+      const vm = this
+      return debounce(() => {
+        vm.disX = vm.startX - touch.clientX
+        if (Math.round(this.disX * 100 / offsetWidth) < 20) { return }
+
+        if (vm.disX < 0 || vm.disX === 0) {
+          vm.posX = 0
+        } else if (vm.disX > 0) {
+          vm.posX = Math.round(vm.disX * -1)
+          console.log('percent', Math.round(vm.disX * 100 / offsetWidth))
+        }
+      }, 100)()
     },
     touchEnd (ev) {
       if (ev.changedTouches.length < 1 || this.comfirm || this.disabled) { return }
       const [changed] = ev.changedTouches
       const { offsetWidth } = this.$refs.item
 
-      this.disX = this.startX - changed.clientX
-      const emitEvent = Math.round(this.disX * 100 / offsetWidth) < 65
-      if (emitEvent) {
-        this.posX = 0
-      } else {
-        this.posX = offsetWidth * -1
-        setTimeout(() => {
-          this.comfirm = true
-          this.$emit('delete')
-        }, 250)
-      }
+      const vm = this
+      return debounce(() => {
+        vm.disX = vm.startX - changed.clientX
+        const emitEvent = Math.round(vm.disX * 100 / offsetWidth) < 65
+        if (emitEvent) {
+          vm.posX = 0
+        } else {
+          vm.posX = offsetWidth * -1
+          setTimeout(() => {
+            vm.comfirm = true
+            vm.$emit('delete')
+          }, 250)
+        }
+      }, 100)()
     }
   }
 }
@@ -91,6 +94,10 @@ export default {
 
 .slider {
   @include flex(flex-start, row, center);
+  &:last-child {
+    border-color: #F7F7F7 !important;
+  }
+
   .panal {
     background-color: var(--danger);
     transition: all 0.3s ease-in-out;
@@ -117,6 +124,5 @@ export default {
       }
     }
   }
-
 }
 </style>

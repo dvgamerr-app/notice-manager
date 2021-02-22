@@ -19,7 +19,7 @@ module.exports = async (req, h) => {
   // Authorization oauth2 URI
   const { code, state, error } = req.query
   const { room, service } = req.params
-  const redirectUri = `${hosts}/register`
+  const redirectUri = `${hosts}/register/${service}`
   const responseType = 'code'
   const scope = 'notify'
 
@@ -38,6 +38,7 @@ module.exports = async (req, h) => {
 
     const tokenConfig = {
       code,
+      grant_type: 'authorization_code',
       redirect_uri: redirectUri,
       client_id: credentials.client.id,
       client_secret: credentials.client.secret
@@ -50,9 +51,11 @@ module.exports = async (req, h) => {
         logger.error(ex)
       }
     }
-
     try {
+      // eslint-disable-next-line no-console
+      console.log('tokenConfig', tokenConfig)
       const accessToken = await client.getToken(tokenConfig)
+
       if (accessToken.token.status !== 200) { throw new Error('Access Token is not verify.') }
       const res = await getStatus(accessToken.token.access_token)
 
@@ -61,6 +64,13 @@ module.exports = async (req, h) => {
       await loggingLINE(`Join room *${res.message}* with service *${data.service}*`)
     } catch (ex) {
       await ServiceOauth.updateOne({ state }, { $set: { active: false } })
+      if (ex.data && ex.data.payload) {
+        // eslint-disable-next-line no-console
+        console.error('ex', ex.data.payload)
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('ex', ex)
+      }
       throw ex
     }
 

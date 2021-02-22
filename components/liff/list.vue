@@ -9,7 +9,7 @@
         Empty.
       </nuxt-link>
       <lazy-liff-item-drop v-for="e in listItems" :key="e.$id" @delete="onRemove(e)">
-        <nuxt-link :to="`/liff/${e.type}/${e.value}`" class="d-flex align-items-center list-item py-3 border-bottom">
+        <nuxt-link :to="`/liff/${e.type}/${e.value}`" class="d-flex align-items-center list-item py-3">
           <div class="icon px-1">
             <fa v-if="e.type == 'notify'" icon="bell" />
             <fa v-if="e.type == 'bot'" :icon="['fab','line']" />
@@ -107,8 +107,5 @@ export default {
   .config {
     margin: -15px 0 -15px 0;
   }
-}
-.list-item:last-child {
-  border-color: transparent !important;
 }
 </style>
