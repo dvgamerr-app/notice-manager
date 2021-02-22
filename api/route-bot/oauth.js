@@ -36,7 +36,6 @@ module.exports = async (req, h) => {
       options: { bodyFormat: 'form' }
     }
     const client = new AuthorizationCode(credentials)
-    const { getStatus, setRevoke } = await sdkNotify(bot.service, bot.room)
 
     const tokenConfig = {
       code,
@@ -48,7 +47,8 @@ module.exports = async (req, h) => {
 
     if (oauth.accessToken) {
       try {
-        await setRevoke(oauth.accessToken)
+        const { setRevoke } = await sdkNotify(bot.service, bot.room)
+        await setRevoke()
       } catch (ex) {
         logger.error(ex)
       }
@@ -58,9 +58,11 @@ module.exports = async (req, h) => {
       const accessToken = await client.getToken(tokenConfig)
 
       if (accessToken.token.status !== 200) { throw new Error('Access Token is not verify.') }
+      await ServiceOauth.updateOne({ state }, { $set: { accessToken: accessToken.token.access_token } })
 
-      const res = await getStatus(accessToken.token.access_token)
-      await ServiceOauth.updateOne({ state }, { $set: { name: res.target, accessToken: accessToken.token.access_token } })
+      const { getStatus } = await sdkNotify(bot.service, bot.room)
+      const res = await getStatus()
+      await ServiceOauth.updateOne({ state }, { $set: { name: res.target } })
       await loggingLINE(`Join room *${res.message}* with service *${service}*`)
     } catch (ex) {
       await ServiceOauth.updateOne({ state }, { $set: { active: false } })
