@@ -1,7 +1,7 @@
 const { AuthorizationCode } = require('simple-oauth2')
 const debuger = require('@touno-io/debuger')
 const { notice } = require('@touno-io/db/schema')
-const { getStatus, setRevoke } = require('../sdk-notify')
+const sdkNotify = require('../sdk-notify')
 const { loggingLINE } = require('../logging')
 
 const uuid = (length) => {
@@ -18,7 +18,7 @@ const logger = debuger('OAUTH')
 module.exports = async (req, h) => {
   // Authorization oauth2 URI
   const { code, state, error } = req.query
-  const { room, service } = req.params
+  const { service, room } = req.params
   const redirectUri = `${hosts}/register/${service}`
   const responseType = 'code'
   const scope = 'notify'
@@ -26,15 +26,17 @@ module.exports = async (req, h) => {
   const { ServiceOauth, ServiceBot } = notice.get()
 
   if (code) {
-    const oauth = await ServiceOauth.findOne({ state })
+    const oauth = await ServiceOauth.findOne({ state, service })
+    if (!oauth) { throw new Error('Service and State is not verify.') }
 
-    const bot = await ServiceBot.findOne({ service: oauth.service })
+    const bot = await ServiceBot.findOne({ service })
     const credentials = {
       client: { id: bot.client, secret: bot.secret },
       auth: { tokenHost: 'https://notify-bot.line.me/' },
       options: { bodyFormat: 'form' }
     }
     const client = new AuthorizationCode(credentials)
+    const { getStatus, setRevoke } = await sdkNotify(bot.service, bot.room)
 
     const tokenConfig = {
       code,
@@ -53,15 +55,13 @@ module.exports = async (req, h) => {
     }
     try {
       // eslint-disable-next-line no-console
-      console.log('tokenConfig', tokenConfig)
       const accessToken = await client.getToken(tokenConfig)
 
       if (accessToken.token.status !== 200) { throw new Error('Access Token is not verify.') }
-      const res = await getStatus(accessToken.token.access_token)
 
-      const data = await ServiceOauth.findOne({ state })
+      const res = await getStatus(accessToken.token.access_token)
       await ServiceOauth.updateOne({ state }, { $set: { name: res.target, accessToken: accessToken.token.access_token } })
-      await loggingLINE(`Join room *${res.message}* with service *${data.service}*`)
+      await loggingLINE(`Join room *${res.message}* with service *${service}*`)
     } catch (ex) {
       await ServiceOauth.updateOne({ state }, { $set: { active: false } })
       if (ex.data && ex.data.payload) {

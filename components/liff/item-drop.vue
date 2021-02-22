@@ -47,18 +47,17 @@ export default {
     touchMove (ev) {
       if (ev.touches.length < 1 || this.comfirm || this.disabled) { return }
       const [touch] = ev.touches
-      const { offsetWidth } = this.$refs.item
+      const { offsetWidth: removeWidth } = this.$refs.remove
 
       const vm = this
       return debounce(() => {
         vm.disX = vm.startX - touch.clientX
-        if (Math.round(this.disX * 100 / offsetWidth) < 20) { return }
+        if (Math.round(this.disX) < removeWidth) { return }
 
         if (vm.disX < 0 || vm.disX === 0) {
           vm.posX = 0
         } else if (vm.disX > 0) {
           vm.posX = Math.round(vm.disX * -1)
-          console.log('percent', Math.round(vm.disX * 100 / offsetWidth))
         }
       }, 100)()
     },
@@ -109,7 +108,7 @@ export default {
     }
     .item {
       background-color: #F7F7F7;
-      transition: all 0.2s ease-in-out;
+      transition: all 0.1s ease-in-out;
       width: calc(100% + 65px);
       z-index: 1;
     }
