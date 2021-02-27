@@ -7,9 +7,6 @@
 </template>
 
 <script>
-import Api from '../../../model/api'
-import Notify from '../../../model/notify'
-import Bot from '../../../model/bot'
 
 export default {
   layout: 'liff',
@@ -21,35 +18,6 @@ export default {
       hostname: env.HOST_API
     }
   },
-  data () {
-    return {
-      search: ''
-    }
-  },
-  computed: {
-    listItems () {
-      const n = Notify.query().orderBy('service').get()
-      const b = Bot.query().orderBy('botname').get()
-      return ([...n, ...b]).filter((e) => {
-        return new RegExp(this.search, 'ig').test(e.text) || new RegExp(this.search, 'ig').test(e.value)
-      }).sort((a, b) => a.value > b.value ? 1 : -1)
-    },
-    api () {
-      return Api.query().first()
-    },
-    profile () {
-      return this.$store.state.profile
-    }
-  },
-  // computed: {
-  //   getServiceSample () {
-  //     return Notify.query().get().map(e => ({ id: e.value, label: e.text }))
-  //   },
-  //   getRoomSample () {
-  //     const service = Notify.query().where('value', this.sample.service).get()[0] || {}
-  //     return (service.room || []).map(e => ({ id: e.value, label: e.text }))
-  //   }
-  // },
   mounted () {
     this.$store.commit('setTall')
     const isDev = /localhost:/.test(this.hostname)

@@ -13,8 +13,8 @@
         <b-progress-bar :value="getDayPercent(stats.usage, stats.limited)" :show-value="false" variant="default" />
       </b-progress>
       <div class="text-muted mb-3" style="font-size:0.85rem">
-        used reply {{ stats.reply === 'unready' ? 0 : getUsage(stats.reply) }} messages
-        and push {{ stats.push === 'unready' ? 0 : getUsage(stats.push) }} messages.
+        This month, using reply {{ getUsage(stats.reply) }} posts
+        and push {{ getUsage(stats.push) }} posts.
       </div>
       <lazy-liff-item-drop v-for="e in room" :key="e.$id" @delete="remove(e)">
         <nuxt-link :to="`/liff/${bot.type}/${bot.value}/${e.name}`" class="d-flex align-items-center list-item py-3 border-bottom">
@@ -63,8 +63,8 @@ export default {
     if (!this.bot) { this.$router.back() }
   },
   methods: {
-    getUsage ({ wait, stats }) {
-      return wait ? '...' : numeral(stats.limited - stats.usage).format('0,0')
+    getUsage (stats) {
+      return numeral(stats).format('0,0')
     },
     getLimitPercent (value, max) {
       return Math.round(value * max / max)

@@ -1,7 +1,8 @@
 
 <template>
   <div class="slider" :class="{ 'border-bottom': !comfirm }">
-    <div class="panal" :class="{ removed: comfirm }" @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd">
+    <div class="panal" :class="{ removed: comfirm }">
+      <!-- @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" -->
       <div ref="item" class="item" :style="{transform: `translateX(${posX}px)`,'border-radius': posX !== 0 ? '4px' : '0px'}">
         <slot />
       </div>

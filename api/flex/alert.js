@@ -1,5 +1,5 @@
 const axios = require('axios')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const url = require('./url-bot')
 
 module.exports = (title, msg, detail, color = '#009688', flex = false) => {
@@ -44,7 +44,7 @@ module.exports = (title, msg, detail, color = '#009688', flex = false) => {
             offsetEnd: '10px',
             offsetTop: '15px',
             contents: [
-              { type: 'text', weight: 'bold', text: moment().format('D MMM YYYY HH:mm:ss'), size: 'xxs', align: 'end', color: '#ffffff99' }
+              { type: 'text', weight: 'bold', text: dayjs().format('D MMM YYYY HH:mm:ss'), size: 'xxs', align: 'end', color: '#ffffff99' }
             ]
           }
         ],

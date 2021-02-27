@@ -23,7 +23,7 @@
 
 <script>
 import numeral from 'numeral'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 import Api from '../model/api'
 import Notify from '../model/notify'
@@ -73,7 +73,7 @@ export default {
     },
     getDayPercent (value, max) {
       const limit = this.getLimitPercent(value, max)
-      const day = Math.round(moment().date() * max / moment().endOf('month').date())
+      const day = Math.round(dayjs().date() * max / dayjs().endOf('month').date())
       // value: 0 max: 1000 limit 0 day 3
       return limit >= day ? 0 : day - limit
     },

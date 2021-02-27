@@ -1,5 +1,5 @@
 const numeral = require('numeral')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const axios = require('axios')
 const { notice } = require('@touno-io/db/schema')
 const { loggingLINE } = require('./logging')
@@ -7,9 +7,9 @@ const { loggingLINE } = require('./logging')
 const loggingExpire = async () => {
   const { LineOutbound, LineInbound, LineCMD } = notice.get() // LineInbound, LineOutbound, LineCMD,
 
-  const dataIn = await LineInbound.deleteMany({ created: { $lte: moment().add(24 * -1, 'month').toDate() } })
-  const dataOut = await LineOutbound.deleteMany({ created: { $lte: moment().add(24 * -1, 'month').toDate() } })
-  const dataCmd = await LineCMD.deleteMany({ created: { $lte: moment().add(12 * -1, 'month').toDate() } })
+  const dataIn = await LineInbound.deleteMany({ created: { $lte: dayjs().add(24 * -1, 'month').toDate() } })
+  const dataOut = await LineOutbound.deleteMany({ created: { $lte: dayjs().add(24 * -1, 'month').toDate() } })
+  const dataCmd = await LineCMD.deleteMany({ created: { $lte: dayjs().add(12 * -1, 'month').toDate() } })
   const rows = dataIn.n + dataOut.n + dataCmd.n
   return rows > 0
     ? [
@@ -23,8 +23,8 @@ const loggingExpire = async () => {
 
 const loggingStats = async () => {
   const { LineBot, ServiceBot, LineOutbound } = notice.get()
-  const dayFrom = moment().startOf('day').add(-1, 'day').toDate()
-  const dayTo = moment().startOf('day').toDate()
+  const dayFrom = dayjs().startOf('day').add(-1, 'day').toDate()
+  const dayTo = dayjs().startOf('day').toDate()
   const facts = []
 
   facts.push('*Notify*')
@@ -53,7 +53,7 @@ const loggingStats = async () => {
 module.exports = {
   cmdExpire: async () => {
     const { LineCMD } = notice.get()
-    await LineCMD.updateMany({ created: { $lte: moment().add(-3, 'minute').toDate() }, executing: false, executed: false }, {
+    await LineCMD.updateMany({ created: { $lte: dayjs().add(-3, 'minute').toDate() }, executing: false, executed: false }, {
       $set: { executed: true }
     })
   },
@@ -69,7 +69,7 @@ module.exports = {
     try {
       await notice.open()
       const { LineBot } = notice.get()
-      const date = moment().add(-1, 'day')
+      const date = dayjs().add(-1, 'day')
 
       const data = await LineBot.find({ type: 'line' })
       for (const line of data) {

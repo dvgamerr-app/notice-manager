@@ -34,8 +34,8 @@ module.exports = async (req) => {
           pipeline: [
             { $match: { accessToken: { $ne: null } } },
             { $match: { $expr: { $eq: ['$service', '$$service'] } } },
-            { $project: { _id: 0, accessToken: 1, room: 1, name: 1 } },
-            { $sort: { room: 1, name: 1 } }
+            { $project: { _id: 0, accessToken: 1, value: '$room', name: 1 } },
+            { $sort: { value: 1, name: 1 } }
           ]
         }
       }

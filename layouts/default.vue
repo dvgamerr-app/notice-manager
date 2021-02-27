@@ -25,7 +25,7 @@
     <b-container class="navbottom" fluid>
       <b-row>
         <b-col class="menu nav nav-pills border-bottom d-none d-md-inline-block" md="12">
-          <nuxt-link to="/" class="nav-link d-md-inline-block" exact>
+          <nuxt-link to="/" class="nav-link d-md-inline-block">
             <fa icon="home" />
             <span>Dashboard</span>
           </nuxt-link>
@@ -43,7 +43,7 @@
           </nuxt-link>
         </b-col>
         <b-col class="menu nav nav-pills border-bottom d-flex d-md-none" md="12">
-          <nuxt-link to="/" class="nav-link d-flex justify-content-center d-md-block" exact>
+          <nuxt-link to="/" class="nav-link d-flex justify-content-center d-md-block">
             <fa icon="home" class="fa-lg m-2" />
           </nuxt-link>
           <nuxt-link to="/notify" class="nav-link d-flex justify-content-center d-md-block">

@@ -66,12 +66,8 @@
 </template>
 
 <script>
-import moment from 'moment'
+import dayjs from 'dayjs'
 import Treeselect from '@riophae/vue-treeselect'
-import notifyNew from '../components/notify/new'
-import notifyJoin from '../components/notify/join'
-import notifyList from '../components/notify/list'
-import notifyApi from '../components/notify/api'
 
 import Api from '../model/api'
 import Notify from '../model/notify'
@@ -82,11 +78,7 @@ const dashboard = '/api/service/dashboard'
 
 export default {
   components: {
-    Treeselect,
-    notifyNew,
-    notifyJoin,
-    notifyList,
-    notifyApi
+    Treeselect
   },
   async asyncData ({ env, $axios }) {
     if (!Api.query().first()) {
@@ -147,7 +139,7 @@ export default {
     },
     getDayPercent (value, max) {
       const limit = this.getLimitPercent(value, max)
-      const day = Math.round(moment().date() * max / moment().endOf('month').date())
+      const day = Math.round(dayjs().date() * max / dayjs().endOf('month').date())
       // value: 0 max: 1000 limit 0 day 3
       return limit >= day ? 0 : day - limit
     },

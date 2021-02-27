@@ -1,40 +1,45 @@
-const axios = require('axios')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const { notice } = require('@touno-io/db/schema')
 
-const getStats = async (accesstoken) => {
-  const date = moment()
-  const opts = { headers: { Authorization: `Bearer ${accesstoken}` } }
-  const { data: quota } = await axios('https://api.line.me/v2/bot/message/quota', opts)
-  const { data: consumption } = await axios('https://api.line.me/v2/bot/message/quota/consumption', opts)
-  const { data: reply } = await axios(`https://api.line.me/v2/bot/message/delivery/reply?date=${date.format('YYYYMMDD')}`, opts)
-  const { data: push } = await axios(`https://api.line.me/v2/bot/message/delivery/push?date=${date.format('YYYYMMDD')}`, opts)
+const getStats = async (botname) => {
+  const date = dayjs().startOf('month')
+  const { LineOutbound } = notice.get()
 
-  return {
-    usage: consumption.totalUsage,
-    limited: quota.type === 'limited' ? quota.value : 0,
-    reply: reply.status === 'ready' ? reply.success : reply.status,
-    push: push.status === 'ready' ? push.success : push.status,
-    updated: date.toDate()
-  }
+  const push = await LineOutbound.countDocuments({
+    botname,
+    type: { $ne: 'notify' },
+    created: { $gte: date.toISOString() }
+  })
+
+  const reply = await LineOutbound.countDocuments({
+    botname,
+    type: 'replyToken',
+    created: { $gte: date.toISOString() }
+  })
+
+  return { usage: push, limited: 1000, reply, push, updated: dayjs().toDate() }
 }
 
 module.exports = async (req) => {
   const { name } = req.params
   const { LineBot } = notice.get()
   if (!name) {
-    for await (const bot of await LineBot.find()) {
-      const stats = await getStats(bot.accesstoken)
-      await LineBot.updateOne({ _id: bot._id }, { $set: { options: { stats } } })
+    const data = []
+    for await (const { _id, botname } of await LineBot.find({ active: true })) {
+      const stats = await getStats(botname)
+      await LineBot.updateOne({ _id }, { $set: { options: { stats } } })
+      data.push(stats)
     }
-    return { }
+    return data
   }
 
-  const { _id, accesstoken, options } = await LineBot.findOne({ botname: name })
-  let stats = options.stats
-  if (moment().diff(moment(options.stats.updated), 'hour') > 23) {
-    stats = await getStats(accesstoken)
-    await LineBot.updateOne({ _id }, { $set: { options: { stats } } })
-  }
+  const bot = await LineBot.findOne({ botname: name })
+  if (!bot) { return {} }
+
+  let stats = bot.options.stats
+  // if (dayjs().diff(dayjs(bot.options.stats.updated), 'hour') > 23) {
+  stats = await getStats(bot.botname)
+  await LineBot.updateOne({ _id: bot._id }, { $set: { options: { stats } } })
+  // }
   return stats
 }

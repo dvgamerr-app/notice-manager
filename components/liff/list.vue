@@ -78,7 +78,7 @@ export default {
 
   &:hover {
     color: var(--dark);
-    background-color: #f2f2f2;
+    background-color: #f3f7f9;
     text-decoration: none;
   }
 

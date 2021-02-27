@@ -13,6 +13,7 @@ export default class Notiroom extends Model {
     return {
       service: this.attr(null),
       name: this.attr(null),
+      value: this.attr(null),
       removed: this.boolean(false)
     }
   }
