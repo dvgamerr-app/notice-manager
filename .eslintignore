@@ -79,3 +79,5 @@ typings/
 package-lock.json
 
 static
+docs/
+jsconfig.json

@@ -112,7 +112,7 @@ body {
       flex: 0 0 280px;
       background: #f8f9fa;
       > ul.card-header {
-        font-size: .85rem;
+        font-size: 1.2rem;
         background: transparent;
         .nav-link {
           background-color: transparent;
@@ -177,7 +177,7 @@ pre {
   }
   code {
     display: block;
-    font-size: 11px;
+    font-size: .9rem;
     font-style: normal;
     font-weight: 400;
     overflow-wrap: normal;
@@ -187,7 +187,8 @@ pre {
 .input-group {
   > .input-group-text {
     padding: 0.243rem 0.75rem;
-    font-size: .9rem;
+    font-size: 1.1rem;
+    line-height: 0.9;
     font-weight: bold;
     border-top-right-radius: 0px;
     border-bottom-right-radius: 0px;
@@ -195,4 +196,11 @@ pre {
   > .form-control {
     margin-left: -1px;
   }
+}
+.tab-content {
+  font-size: 1.2rem;
+  line-height: 1.2rem;
+}
+code {
+  font-size: .85rem;
 }

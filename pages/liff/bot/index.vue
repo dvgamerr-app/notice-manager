@@ -18,6 +18,11 @@ export default {
       hostname: env.HOST_API
     }
   },
+  computed: {
+    profile () {
+      return this.$store.state.profile
+    }
+  },
   mounted () {
     this.$store.commit('setTall')
     const isDev = /localhost:/.test(this.hostname)
