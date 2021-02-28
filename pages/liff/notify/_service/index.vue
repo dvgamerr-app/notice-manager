@@ -1,6 +1,6 @@
 <template>
   <b-row v-if="!$store.state.wait && bot">
-    <b-col sm="12" class="py-3">
+    <b-col cols="9" class="py-3">
       <ol class="breadcrumb p-1 px-2 mb-0">
         <li class="breadcrumb-item active">
           <span class="d-flex align-items-center">
@@ -18,6 +18,11 @@
           </div>
         </nuxt-link>
       </lazy-liff-item-drop>
+    </b-col>
+    <b-col cols="3" class="pl-0 pt-3 mb-1">
+      <b-button :to="`/liff/${bot.type}/${bot.value}/new`" variant="info" block class="btn-new">
+        <fa icon="plus" /> <span>Join</span>
+      </b-button>
     </b-col>
   </b-row>
 </template>

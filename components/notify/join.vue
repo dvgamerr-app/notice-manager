@@ -1,47 +1,45 @@
 <template>
   <b-form>
-    <b-row class="mb-2 mt-5">
+    <b-row>
       <b-col cols="12">
         <h3>วิธีใช้ service ที่สร้าง join เข้ากลุ่มที่ต้องการใช้งาน</h3>
       </b-col>
-      <b-col style="max-width:135px">
-        <b-img class="qr-code" src="~assets/notify-qr.png" />
-      </b-col>
-      <b-col style="width:auto">
+      <b-col>
         <ol>
-          <li>Add <b>LINE Notify</b> friend from <b>QR Code</b>.</li>
+          <li>Add <strong>LINE Notify</strong> friend from <strong>QR Code</strong>.</li>
+          <li>Input name from room to join in <strong>{{ serviceName }}</strong>.</li>
           <li class="pt-1 pb-1">
             <b-row>
-              <b-col md="12" lg="5" class="mb-1">
-                <treeselect v-model="add.service" :options="getServiceSample" :disabled="!loggedIn" placeholder="Select service" />
-              </b-col>
-              <b-col md="12" lg="7">
+              <b-col>
                 <b-input-group>
                   <b-input-group-text>Room</b-input-group-text>
-                  <b-form-input ref="room" v-model.trim="add.room" maxlength="20" :state="check.room" @keyup.enter="onJoinRoom($event)" />
+                  <b-form-input ref="room" v-model.trim="roomName" maxlength="20" :state="check.room" @keyup.enter="onJoinRoom($event)" />
                 </b-input-group>
               </b-col>
             </b-row>
           </li>
-          <li>Your line account choose room and click <b>agree and connect</b>.</li>
-          <li>Invite <b>LINE Notify</b> to room your select.</li>
+          <li>Your line account choose room and click <strong>agree and connect</strong>.</li>
+          <li>Invite <strong>LINE Notify</strong> to room your select.</li>
         </ol>
       </b-col>
       <b-col cols="12">
-        <p>After your remember step and click <b>join room</b>.</p>
-        <b-link v-if="loggedIn" @click="onJoinRoom($event)">
+        <p>After your remember step and click <strong>join room</strong>.</p>
+        <b-btn variant="info" block @click="onJoinRoom($event)">
           <fa icon="external-link-alt" /> Join room
-        </b-link>
+        </b-btn>
       </b-col>
     </b-row>
   </b-form>
 </template>
 <script>
-import Treeselect from '@riophae/vue-treeselect'
-import Notify from '../../model/notify'
 
 export default {
-  components: { Treeselect },
+  props: {
+    serviceName: {
+      type: String,
+      default: () => ''
+    }
+  },
   data: () => ({
     check: {
       room: null,
@@ -49,34 +47,12 @@ export default {
       client_id: null,
       client_secret: null
     },
+    roomName: '',
     btn: {
       submit: false
-    },
-    add: {
-      service: null,
-      room: null
     }
   }),
-  computed: {
-    loggedIn () {
-      return this.$auth.$state.loggedIn
-    },
-    getServiceSample () {
-      return Notify.query().get().map(e => ({ id: e.value, label: e.text }))
-    },
-    getRoomSample () {
-      const service = Notify.query().get().filter(e => e.value === this.api.notify.service)
-      return service && service[0] ? service[0].room : []
-    }
-  },
   methods: {
-    onChangeService (e) {
-      const vm = this
-      vm.add.service = e.service
-      vm.$nextTick(() => {
-        vm.$refs.room.focus()
-      })
-    },
     showToast (msg) {
       this.$bvToast.toast(msg, {
         toaster: 'b-toaster-bottom-right',
@@ -90,30 +66,33 @@ export default {
       return !/[^0-9a-z.-]+/g.test(name)
     },
     async onJoinRoom (e) {
-      if (!this.add.service) {
+      if (!this.serviceName) {
         this.showToast('Select service name in dropdown.')
         return e.preventDefault()
       }
-      if (!this.add.room) {
+      if (!this.roomName) {
         this.check.room = false
         this.showToast('Input room name.')
         return e.preventDefault()
       }
-      if (!this.checkName(this.add.room)) {
+      if (!this.checkName(this.roomName)) {
         this.check.room = false
         this.showToast('Name verify a-z,0-9, and - .')
         return e.preventDefault()
       }
-      const { data } = await this.$axios.post('/api/service/check', { room: this.add.room, service: this.add.service })
+      const { data } = await this.$axios.post('/api/service/check', { room: this.roomName, service: this.serviceName })
       if (data.error) {
         this.check.room = false
         this.showToast(/.*?\n/ig.exec(data.error)[0])
         return e.preventDefault()
       }
       this.check.room = true
-      window.location.href = `/register/${this.add.service}/${this.add.room || ''}`
+      this.$liff.openWindow({
+        url: `/register/${this.serviceName}/${this.roomName || ''}`,
+        external: true
+      })
+      this.$liff.closeWindow()
       return e.preventDefault()
-      // this.$router.push(`/register/${this.add.service}/${this.add.room || ''}`, () => this.$router.go(0))
     }
   }
 }

@@ -95,7 +95,7 @@ export default {
 .slider {
   @include flex(flex-start, row, center);
   &:last-child {
-    border-color: #F7F7F7 !important;
+    border-color: #F7F8FB !important;
   }
 
   .panal {
@@ -108,7 +108,7 @@ export default {
       border-width: 0px !important;
     }
     .item {
-      background-color: #F7F7F7;
+      background-color: #F7F8FB;
       transition: all 0.1s ease-in-out;
       width: calc(100% + 65px);
       z-index: 1;
@@ -120,7 +120,7 @@ export default {
       &-content {
         width: 45px;
         text-align: center;
-        color: #F7F7F7;
+        color: #F7F8FB;
       }
     }
   }

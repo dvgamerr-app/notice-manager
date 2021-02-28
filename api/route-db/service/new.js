@@ -2,6 +2,7 @@ const { notice } = require('@touno-io/db/schema')
 const { loggingLINE } = require('../../logging')
 
 module.exports = async (req) => {
+  const userId = req.headers['x-id']
   const data = req.payload
   const { ServiceBot } = notice.get()
   if (await ServiceBot.findOne({ service: data.name, active: true })) { throw new Error('name is duplicate.') }
@@ -13,7 +14,8 @@ module.exports = async (req) => {
       name: data.name,
       service: data.name,
       client: data.client_id,
-      secret: data.client_secret
+      secret: data.client_secret,
+      userId
     }).save()
     serviceId = saved._id
   } else {
@@ -21,7 +23,8 @@ module.exports = async (req) => {
       $set: {
         client: data.client_id,
         secret: data.client_secret,
-        active: true
+        active: true,
+        userId
       }
     })
   }

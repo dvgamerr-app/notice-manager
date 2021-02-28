@@ -2,7 +2,6 @@
   <b-form>
     <b-row class="mb-2">
       <b-col>
-        <h4>README</h4>
         <p>
           ให้สร้าง service ก่อนเพื่อเชื่อมต่อ token กับ line notify แล้วค่อยเอา service ที่สร้างไป join เข้าห้องที่ต้องให้ใช้งาน notify.
         </p>
@@ -10,18 +9,22 @@
         <ol>
           <li class="pt-1 pb-1">
             <b-input-group>
-              <b-input-group-text>Name</b-input-group-text>
+              <b-input-group-text>ตั้งชื่อ</b-input-group-text>
               <b-form-input v-model.trim="data.name" size="sm" maxlength="40" :state="check.service" @keyup.enter="onSubmitNotify($event)" />
             </b-input-group>
-          </li>
-          <li class="pt-1 pb-1">
-            Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.
           </li>
           <li class="pt-1 pb-1">
             Input <b>Service URL</b> <code>{{ api.hostname }}/</code>
           </li>
           <li class="pt-1 pb-1">
-            Input <b>Callback URL</b> <code>{{ api.hostname }}/register</code>
+            Input <b>Callback URL</b>
+            <span v-clipboard="`${api.hostname}/register/${data.name}`" class="copy-icon">
+              <code>{{ `${api.hostname}/register/${data.name}` }}</code>
+              <fa :icon="['far','copy']" />
+            </span>
+          </li>
+          <li class="pt-1 pb-1">
+            Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.
           </li>
           <li class="pt-1 pb-1">
             Click <b>Argee and Contuiue</b> and click <b>Add</b>.
@@ -45,7 +48,7 @@
             </b-input-group>
           </li>
         </ol>
-        <b-btn :variant="btn.submit || !loggedIn ? 'outline-secondary' : 'primary'" :disabled="btn.submit || !loggedIn" @click="onSubmitNotify($event)">
+        <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" block :disabled="btn.submit" @click="onSubmitNotify($event)">
           <fa v-if="btn.submit" icon="circle-notch" spin /> Create notify
         </b-btn>
         <b-modal
@@ -67,7 +70,7 @@
 </template>
 <script>
 import Api from '../../model/api'
-import Notify from '../../model/notify'
+// import Notify from '../../model/notify'
 
 export default {
   data: () => ({
@@ -96,12 +99,13 @@ export default {
     }
   }),
   computed: {
-    loggedIn () {
-      return this.$auth.$state.loggedIn
-    },
     api () {
       return Api.query().first()
+    },
+    profile () {
+      return this.$store.state.profile
     }
+
   //   getBotnameSample () {
   //     return this.bot
   //   },
@@ -114,10 +118,6 @@ export default {
   //   }
   },
   methods: {
-    onChangeService (e) {
-      const vm = this
-      vm.add.service = e.service
-    },
     showToast (msg) {
       this.$bvToast.toast(msg, {
         toaster: 'b-toaster-bottom-right',
@@ -131,7 +131,6 @@ export default {
       return !/[^0-9a-z.-]+/g.test(name)
     },
     async onSubmitNotify (e) {
-      if (!this.loggedIn) { return }
       if (!this.data.name || !this.checkName(this.data.name)) {
         this.check.service = false
         this.check.client_id = null
@@ -163,25 +162,16 @@ export default {
 
       this.btn.submit = true
       try {
-        const { data: res } = await this.$axios.post('/api/service', this.data)
-        if (res.error) { throw new Error(res.error) }
-        // await this.updateService()
-        await Notify.insert({
-          data: {
-            _id: res._id,
-            text: this.data.name,
-            value: this.data.name,
-            room: []
-          }
+        const { data: res } = await this.$axios({
+          method: 'POST',
+          url: '/api/service',
+          data: this.data,
+          headers: { 'x-id': this.profile.userId }
         })
 
-        this.data.name = ''
-        this.data.client_id = ''
-        this.data.client_secret = ''
-        this.check.service = null
-        this.check.client_id = null
-        this.check.client_secret = null
+        if (res.error) { throw new Error(res.error) }
         this.showToast('Successful.')
+        this.$router.back()
       } catch (ex) {
         this.showToast(ex.stack || ex.message)
       } finally {
@@ -192,3 +182,10 @@ export default {
   }
 }
 </script>
+<style>
+.copy-icon {
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--secondary);
+}
+</style>

@@ -1,8 +1,13 @@
 <template>
   <b-row v-if="!$store.state.wait">
-    <b-col v-if="listItems.length || search.length" sm="12" class="pt-3 mb-1">
+    <b-col v-if="listItems.length || search.length" cols="9" class="pt-3 mb-1">
       <fa icon="search" class="fa-sm icon-search" />
       <b-form-input v-model="search" placeholder="Search" style="padding-left:2em" />
+    </b-col>
+    <b-col cols="3" class="pl-0 pt-3 mb-1">
+      <b-button :to="`/liff/notify/new`" variant="primary" block class="btn-new">
+        <fa icon="plus" /> <span>Create</span>
+      </b-button>
     </b-col>
     <b-col sm="12" class="pb-3">
       <nuxt-link v-if="!listItems.length" to="/liff" class="d-block list-item empty py-3 border-bottom">
@@ -68,6 +73,16 @@ export default {
 }
 </script>
 <style lang="scss">
+.btn-new {
+  > svg {
+    margin-bottom: -2px;
+    font-size: 1.1rem;
+  }
+  > span {
+    font-size: 1.2rem;
+    line-height: 1rem;
+  }
+}
 .icon-search {
   color: #ced4da;
 }

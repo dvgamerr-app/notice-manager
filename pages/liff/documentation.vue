@@ -89,8 +89,8 @@ export default {
 .icon-search {
   color: #ced4da;
   position: absolute;
-  margin-top: .7em;
-  margin-left: .8em;
+  margin-top: 0.75em;
+  margin-left: .65em;
 }
 .list-item {
   color: var(--dark);

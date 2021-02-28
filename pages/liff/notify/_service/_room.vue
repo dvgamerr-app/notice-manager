@@ -4,7 +4,7 @@
       <ol class="breadcrumb p-1 px-2">
         <li class="breadcrumb-item active">
           <span class="d-flex align-items-center">
-            <fa :icon="['fab','line']" /> <span class="ml-1" v-text="bot.text" />
+            <fa icon="bell" /> <span class="ml-1" v-text="bot.text" />
           </span>
         </li>
         <li class="breadcrumb-item active">

@@ -1,6 +1,6 @@
 <template>
   <b-row v-if="!$store.state.wait">
-    <b-col>
+    <b-col sm="12">
       <lazy-liff-list type="notify" />
     </b-col>
   </b-row>
@@ -92,8 +92,8 @@ export default {
 .icon-search {
   color: #ced4da;
   position: absolute;
-  margin-top: .7em;
-  margin-left: .8em;
+  margin-top: 0.75em;
+  margin-left: .65em;
 }
 .list-item {
   color: var(--dark);

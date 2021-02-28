@@ -74,7 +74,8 @@ module.exports = {
   plugins: [
     '~/plugins/vue-liff.client.js',
     '~/plugins/vue-focus.js',
-    '~/plugins/vue-tabindex.js'
+    '~/plugins/vue-tabindex.js',
+    '~/plugins/vue-clipboards.js'
   ],
   buildModules: [
     '@nuxtjs/fontawesome'
