@@ -39,6 +39,10 @@ export default {
     serviceName: {
       type: String,
       default: () => ''
+    },
+    hostname: {
+      type: String,
+      default: () => ''
     }
   },
   data: () => ({
@@ -93,7 +97,7 @@ export default {
       }
       this.check.room = true
       this.$liff.openWindow({
-        url: `/register/${this.serviceName}/${this.roomName}`,
+        url: `${this.hostname}/register/${this.serviceName}/${this.roomName}`,
         external: false
       })
       notiRoom.insert({
