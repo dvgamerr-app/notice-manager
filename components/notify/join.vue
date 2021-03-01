@@ -94,7 +94,7 @@ export default {
       this.check.room = true
       this.$liff.openWindow({
         url: `/register/${this.serviceName}/${this.roomName}`,
-        external: true
+        external: false
       })
       notiRoom.insert({
         data: {
