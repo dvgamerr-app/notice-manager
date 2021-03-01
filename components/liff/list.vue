@@ -1,11 +1,11 @@
 <template>
   <b-row v-if="!$store.state.wait">
-    <b-col v-if="listItems.length || search.length" cols="9" class="pt-3 mb-1">
+    <b-col v-if="listItems.length || search.length" :cols="type != 'all' ? 9 : 12" class="pt-3 mb-1">
       <fa icon="search" class="fa-sm icon-search" />
       <b-form-input v-model="search" placeholder="Search" style="padding-left:2em" />
     </b-col>
-    <b-col cols="3" class="pl-0 pt-3 mb-1">
-      <b-button :to="`/liff/notify/new`" variant="primary" block class="btn-new">
+    <b-col v-if="type != 'all'" cols="3" class="pl-0 pt-3 mb-1">
+      <b-button :to="`/liff/${type}/new`" variant="primary" block class="btn-new">
         <fa icon="plus" /> <span>Create</span>
       </b-button>
     </b-col>
@@ -14,7 +14,7 @@
         Empty.
       </nuxt-link>
       <lazy-liff-item-drop v-for="e in listItems" :key="e.$id" @delete="onRemove(e)">
-        <nuxt-link :to="`/liff/${e.type}/${e.value}`" class="d-flex align-items-center list-item py-3">
+        <nuxt-link :to="`/liff/${e.type}/${e.value}${type == 'all' ? `?view=1` : ''}`" class="d-flex align-items-center list-item py-3">
           <div class="icon px-1">
             <fa v-if="e.type == 'notify'" icon="bell" />
             <fa v-if="e.type == 'bot'" :icon="['fab','line']" />
