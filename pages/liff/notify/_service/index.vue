@@ -1,6 +1,6 @@
 <template>
   <b-row v-if="!$store.state.wait && bot">
-    <b-col cols="9" class="py-3">
+    <b-col cols="9" class="pt-3">
       <ol class="breadcrumb p-1 px-2 mb-0">
         <li class="breadcrumb-item active">
           <span class="d-flex align-items-center">
@@ -8,9 +8,16 @@
           </span>
         </li>
       </ol>
-      <div class="text-muted mb-3" style="font-size:0.85rem">
+      <div class="text-muted" style="font-size:0.85rem">
         This month, using push {{ getUsage(stats.push) }} posts.
       </div>
+    </b-col>
+    <b-col cols="3" class="pl-0 pt-3 mb-1">
+      <b-button :to="`/liff/${bot.type}/${bot.value}/new`" variant="info" block class="btn-new">
+        <fa icon="plus" /> <span>Join</span>
+      </b-button>
+    </b-col>
+    <b-col cols="12" class="py-3">
       <lazy-liff-item-drop v-for="e in room" :key="e.$id" @delete="remove(e)">
         <nuxt-link :to="`/liff/${bot.type}/${bot.value}/${e.value}`" class="d-flex align-items-center list-item py-3 border-bottom">
           <div class="flex-grow-1 px-2">
@@ -18,11 +25,6 @@
           </div>
         </nuxt-link>
       </lazy-liff-item-drop>
-    </b-col>
-    <b-col cols="3" class="pl-0 pt-3 mb-1">
-      <b-button :to="`/liff/${bot.type}/${bot.value}/new`" variant="info" block class="btn-new">
-        <fa icon="plus" /> <span>Join</span>
-      </b-button>
     </b-col>
   </b-row>
 </template>

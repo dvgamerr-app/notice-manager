@@ -32,6 +32,7 @@
   </b-form>
 </template>
 <script>
+import notiRoom from '../../model/notiRoom'
 
 export default {
   props: {
@@ -80,18 +81,31 @@ export default {
         this.showToast('Name verify a-z,0-9, and - .')
         return e.preventDefault()
       }
-      const { data } = await this.$axios.post('/api/service/check', { room: this.roomName, service: this.serviceName })
+      const { data } = await this.$axios('/api/service/check', {
+        method: 'POST',
+        validateStatus: () => true,
+        data: { room: this.roomName, service: this.serviceName }
+      })
       if (data.error) {
+        this.showToast(data.error)
         this.check.room = false
-        this.showToast(/.*?\n/ig.exec(data.error)[0])
         return e.preventDefault()
       }
       this.check.room = true
       this.$liff.openWindow({
-        url: `/register/${this.serviceName}/${this.roomName || ''}`,
+        url: `/register/${this.serviceName}/${this.roomName}`,
         external: true
       })
-      this.$liff.closeWindow()
+      notiRoom.insert({
+        data: {
+          service: this.serviceName,
+          name: this.roomName,
+          value: this.roomName,
+          removed: false
+        }
+      })
+
+      this.$router.push(`/liff/notify/${this.serviceName}`)
       return e.preventDefault()
     }
   }

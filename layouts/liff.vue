@@ -59,10 +59,15 @@ export default {
 <style lang="scss">
 @import '../assets/fonts/stylesheet.css';
 
-body .main {
-  font-family: "thaisansneue-semibold", "Open Sans", Tahoma, Geneva, Verdana, sans-serif;
-  font-weight: normal;
-  font-size: 1.2rem;
+body {
+  .main {
+    font-family: "thaisansneue-semibold", "Open Sans", Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: normal;
+    font-size: 1.2rem;
+  }
+  strong {
+    font-family: 'thaisansneue-ultrabold';
+  }
 }
 
 #__layout > div {

@@ -5,7 +5,6 @@ import liff from '@line/liff'
 import Api from '../model/api'
 import Notify from '../model/notify'
 import Bot from '../model/bot'
-import Botroom from '../model/botRoom'
 // import Webhook from '../model/webhook'
 
 Vue.prototype.$liff = liff
@@ -24,9 +23,6 @@ export default ({ app, env }, inject) => {
     }
     for (const data of bot) {
       await Bot.insert({ data })
-      for (const room of data.room) {
-        await Botroom.insert({ data: room })
-      }
     }
     console.timeEnd('$line')
   })

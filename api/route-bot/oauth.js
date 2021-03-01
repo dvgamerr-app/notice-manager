@@ -47,7 +47,7 @@ module.exports = async (req, h) => {
 
     if (oauth.accessToken) {
       try {
-        const { setRevoke } = await sdkNotify(bot.service, bot.room)
+        const { setRevoke } = await sdkNotify(bot.service, oauth.room)
         await setRevoke()
       } catch (ex) {
         logger.error(ex)
@@ -60,10 +60,12 @@ module.exports = async (req, h) => {
       if (accessToken.token.status !== 200) { throw new Error('Access Token is not verify.') }
       await ServiceOauth.updateOne({ state }, { $set: { accessToken: accessToken.token.access_token } })
 
-      const { getStatus } = await sdkNotify(bot.service, bot.room)
+      const { getStatus } = await sdkNotify(bot.service, oauth.room)
       const res = await getStatus()
+      if (res.status !== 200) { throw new Error('Status is not verify.') }
+
       await ServiceOauth.updateOne({ state }, { $set: { name: res.target } })
-      await loggingLINE(`Join room *${res.message}* with service *${service}*`)
+      await loggingLINE(`Join room *${res.target}* \`${res.message}\` with service *${service}*`)
     } catch (ex) {
       await ServiceOauth.updateOne({ state }, { $set: { active: false } })
       if (ex.data && ex.data.payload) {
@@ -75,8 +77,7 @@ module.exports = async (req, h) => {
       }
       throw ex
     }
-
-    return h.redirect(hosts)
+    return h.redirect(`${hosts}/liff/close`)
   } else if (error) {
     return h.redirect(hosts)
   } else {
