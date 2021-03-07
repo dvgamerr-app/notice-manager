@@ -85,8 +85,8 @@ module.exports = {
   modules: [
     'bootstrap-vue/nuxt',
     '@nuxtjs/axios',
-    '@nuxtjs/auth',
-    '@nuxtjs/pwa'
+    '@nuxtjs/auth'
+    // '@nuxtjs/pwa'
   ],
   bootstrapVue: { bootstrapCSS: false, icons: false },
   fontawesome: {
