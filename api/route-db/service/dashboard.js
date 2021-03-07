@@ -1,7 +1,7 @@
 const { notice } = require('@touno-io/db/schema')
 
 module.exports = async (req) => {
-  const { LineBot, LineBotRoom, ServiceBot, ServiceOauth, ChatWebhook } = notice.get()
+  const { LineBot, LineBotRoom, ServiceBot, ServiceBotOauth, ChatWebhook } = notice.get()
   const userId = req.headers['x-id']
   if (userId) {
     const bot = await LineBot.aggregate([
@@ -47,7 +47,7 @@ module.exports = async (req) => {
   const bot = await LineBot.find({ active: true }, null, { sort: { botname: 1 } })
   const room = await LineBotRoom.find({ active: true }, null, { sort: { botname: 1, name: 1 } })
   const service = await ServiceBot.find({ active: true }, null, { sort: { name: 1 } })
-  const oauth = await ServiceOauth.find({ accessToken: { $ne: null } }, null, { sort: { service: 1, name: 1 } })
+  const oauth = await ServiceBotOauth.find({ accessToken: { $ne: null } }, null, { sort: { service: 1, name: 1 } })
 
   return {
     service: service.filter(e => e.service !== 'log').map(e => ({

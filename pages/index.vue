@@ -1,7 +1,5 @@
 <template>
-  <b-container fluid>
-    <b-col sm="12" />
-  </b-container>
+  <b-container fluid />
 </template>
 
 <script>

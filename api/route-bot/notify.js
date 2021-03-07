@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
   const { message, imageThumbnail, imageFullsize, stickerPackageId, stickerId, notificationDisabled } = req.payload
   let outbound = nullFormat
 
-  const { ServiceOauth, LineOutbound, ServiceWebhook } = notice.get()
+  const { ServiceBotOauth, LineOutbound, ServiceWebhook } = notice.get()
   if (typeof message !== 'string' && !IsWebhook) { throw new TypeError('Message is undefined.') }
 
   outbound = await new LineOutbound({ botname: service, userTo: room, type: 'notify', sender: req.payload || {} }).save()
@@ -46,7 +46,7 @@ module.exports = async (req, res) => {
     image: parseInt(headers['x-ratelimit-imageremaining']),
     reset: parseInt(headers['x-ratelimit-reset']) * 1000
   }
-  await ServiceOauth.updateOne({ room, service }, { $set: { limit: result } })
+  await ServiceBotOauth.updateOne({ room, service }, { $set: { limit: result } })
   await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: true } })
   return result
 }

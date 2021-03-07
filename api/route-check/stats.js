@@ -2,9 +2,9 @@ const { notice } = require('@touno-io/db/schema')
 const { getStatus } = require('../sdk-notify')
 
 module.exports = async (req) => {
-  const { ServiceOauth } = notice.get()
+  const { ServiceBotOauth } = notice.get()
 
-  const tokenItems = await ServiceOauth.find({ accessToken: { $ne: null } })
+  const tokenItems = await ServiceBotOauth.find({ accessToken: { $ne: null } })
   if (tokenItems.length === 0) { throw new Error('Service LINE-Notice not register.') }
   const result = []
   for (const e of tokenItems) {
@@ -17,7 +17,7 @@ module.exports = async (req) => {
       target: res.target
     })
     if (res.status !== 200) {
-      await ServiceOauth.updateOne({ _id: e._id }, { $set: { accessToken: null } })
+      await ServiceBotOauth.updateOne({ _id: e._id }, { $set: { accessToken: null } })
     }
   }
   return result

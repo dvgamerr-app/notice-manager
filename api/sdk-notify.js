@@ -42,8 +42,8 @@ const pushNotify = async (accessToken, message) => {
 const getToken = async (service, room) => {
   if (!service || !room) { return logger.log('No service, No room.') }
 
-  const { ServiceOauth } = notice.get()
-  const oauth = await ServiceOauth.findOne({ service, room })
+  const { ServiceBotOauth } = notice.get()
+  const oauth = await ServiceBotOauth.findOne({ service, room })
   if (!oauth || !oauth.accessToken) { return logger.log(`Oauth: ${service} in ${room}, No access token.`) }
   return oauth.accessToken
 }

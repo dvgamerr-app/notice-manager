@@ -3,7 +3,7 @@ const { loggingLINE } = require('../../logging')
 
 module.exports = async (req) => {
   const data = req.payload
-  const { LineBot } = notice.get() // LineInbound, LineOutbound, LineCMD, ServiceOauth
+  const { LineBot } = notice.get() // LineInbound, LineOutbound, LineCMD, ServiceBotOauth
 
   if (await LineBot.findOne({ botname: data.name, active: true })) { throw new Error('name is duplicate.') }
   const found = await LineBot.findOne({ botname: data.name })

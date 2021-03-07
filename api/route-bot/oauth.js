@@ -23,10 +23,10 @@ module.exports = async (req, h) => {
   const responseType = 'code'
   const scope = 'notify'
 
-  const { ServiceOauth, ServiceBot } = notice.get()
+  const { ServiceBotOauth, ServiceBot } = notice.get()
 
   if (code) {
-    const oauth = await ServiceOauth.findOne({ state, service })
+    const oauth = await ServiceBotOauth.findOne({ state, service })
     if (!oauth) { throw new Error('Service and State is not verify.') }
 
     const bot = await ServiceBot.findOne({ service })
@@ -58,16 +58,16 @@ module.exports = async (req, h) => {
       const accessToken = await client.getToken(tokenConfig)
 
       if (accessToken.token.status !== 200) { throw new Error('Access Token is not verify.') }
-      await ServiceOauth.updateOne({ state }, { $set: { accessToken: accessToken.token.access_token } })
+      await ServiceBotOauth.updateOne({ state }, { $set: { accessToken: accessToken.token.access_token } })
 
       const { getStatus } = await sdkNotify(bot.service, oauth.room)
       const res = await getStatus()
       if (res.status !== 200) { throw new Error('Status is not verify.') }
 
-      await ServiceOauth.updateOne({ state }, { $set: { name: res.target } })
+      await ServiceBotOauth.updateOne({ state }, { $set: { name: res.target } })
       await loggingLINE(`Join room *${res.target}* \`${res.message}\` with service *${service}*`)
     } catch (ex) {
-      await ServiceOauth.updateOne({ state }, { $set: { active: false } })
+      await ServiceBotOauth.updateOne({ state }, { $set: { active: false } })
       if (ex.data && ex.data.payload) {
         // eslint-disable-next-line no-console
         console.error('ex', ex.data.payload)
@@ -95,11 +95,11 @@ module.exports = async (req, h) => {
 
     const newState = uuid(16)
     logger.log(`${service} in ${room} new state is '${newState}'`)
-    const token = await ServiceOauth.findOne({ service, room })
+    const token = await ServiceBotOauth.findOne({ service, room })
     if (token) {
-      await ServiceOauth.updateOne({ service, room }, { $set: { state: newState } })
+      await ServiceBotOauth.updateOne({ service, room }, { $set: { state: newState } })
     } else {
-      await new ServiceOauth({ name: room, service, room, response_type: responseType, redirect_uri: redirectUri, state: newState }).save()
+      await new ServiceBotOauth({ name: room, service, room, response_type: responseType, redirect_uri: redirectUri, state: newState }).save()
     }
     const authorizationUri = client.authorizeURL({ response_type: responseType, redirect_uri: redirectUri, scope, state: newState })
     return h.redirect(authorizationUri)
