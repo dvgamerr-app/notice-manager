@@ -34,16 +34,12 @@ const pushNotify = async (accessToken, message) => {
     if (!message[key]) { delete message[key] }
   }
 
-  // eslint-disable-next-line no-console
-  console.log('req:', qs.stringify(message))
   const res = await instance({
     method: 'POST',
     headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/x-www-form-urlencoded' },
     url: `${apiLINE}/notify`,
     data: qs.stringify(message)
   })
-  // eslint-disable-next-line no-console
-  console.log('res:', res.data)
   return res
 }
 const getToken = async (service, room) => {
