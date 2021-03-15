@@ -1,6 +1,5 @@
 const numeral = require('numeral')
 const dayjs = require('dayjs')
-const axios = require('axios')
 const { notice } = require('@touno-io/db/schema')
 const { loggingLINE } = require('./logging')
 
@@ -61,37 +60,8 @@ module.exports = {
     const fect1 = await loggingStats()
     const fect2 = await loggingExpire()
 
-    const body = `[Heroku] *LINE-Notice* daily stats.\n${fect1.join('\n')}${fect2 ? fect2.join('\n') : ''}`
+    const body = `*Notice LINE* weekly stats.\n${fect1.join('\n')}${fect2 ? fect2.join('\n') : ''}`
 
     await loggingLINE(body)
-  },
-  lineInitilize: async () => {
-    try {
-      await notice.open()
-      const { LineBot } = notice.get()
-      const date = dayjs().add(-1, 'day')
-
-      const data = await LineBot.find({ type: 'line' })
-      for (const line of data) {
-        const opts = { headers: { Authorization: `Bearer ${line.accesstoken}` } }
-
-        const { data: quota } = await axios('https://api.line.me/v2/bot/message/quota', opts)
-        const { data: consumption } = await axios('https://api.line.me/v2/bot/message/quota/consumption', opts)
-        const { data: reply } = await axios(`https://api.line.me/v2/bot/message/delivery/reply?date=${date.format('YYYYMMDD')}`, opts)
-        const { data: push } = await axios(`https://api.line.me/v2/bot/message/delivery/push?date=${date.format('YYYYMMDD')}`, opts)
-
-        const stats = {
-          usage: consumption.totalUsage,
-          limited: quota.type === 'limited' ? quota.value : 0,
-          reply: reply.status === 'ready' ? reply.success : reply.status,
-          push: push.status === 'ready' ? push.success : push.status,
-          updated: date.toDate()
-        }
-        await LineBot.updateOne({ _id: line._id }, { $set: { options: { stats } } })
-      }
-    } catch (ex) {
-      // eslint-disable-next-line no-console
-      console.error(ex)
-    }
   }
 }

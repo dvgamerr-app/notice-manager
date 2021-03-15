@@ -6,5 +6,5 @@ module.exports = async (req) => {
   const data = await LineOutbound.findOne({ _id: id }) || {}
   if (!data) { return {} }
 
-  return data.sender
+  return typeof data.sender === 'string' ? JSON.parse(data.sender) : data.sender
 }

@@ -16,17 +16,14 @@ const packageSticker = {
 }
 
 module.exports = async (req, res) => {
-  const IsWebhook = req.method === 'POST'
+  const IsWebhook = req.method === 'post'
   const { room, service } = req.params
   const { sticker, imageThumbnail, imageFullsize, notificationDisabled, imageFile } = req.payload
   let { message, stickerPackageId, stickerId } = req.payload
   let outbound = nullFormat
-
   const { LineOutbound, ServiceWebhook } = notice.get()
-  if (!message && !imageThumbnail && !imageFullsize && !stickerPackageId && !stickerId) { throw new TypeError('message is undefined.') }
 
-  outbound = await new LineOutbound({ botname: service, userTo: room, type: 'notify', sender: req.payload || {} }).save()
-
+  outbound = await new LineOutbound({ botname: service, userTo: room, type: IsWebhook ? 'webhook' : 'notify', sender: JSON.stringify(req.payload) || {} }).save()
   const { pushNotify } = await sdkNotify(service, room)
   if (!IsWebhook) {
     if (message) { message = message.replace(/\\n|newline/ig, '\n') }
@@ -39,7 +36,7 @@ module.exports = async (req, res) => {
     if (payload) {
       try {
         // eslint-disable-next-line no-unused-vars
-        const { body } = req
+        const { payload: body } = req
         // eslint-disable-next-line no-eval
         message = eval('`' + payload.body + '`')
       } catch (ex) {
