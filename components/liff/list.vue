@@ -2,7 +2,7 @@
   <b-row v-if="!$store.state.wait">
     <b-col :cols="type != 'all' ? 9 : 12" class="pt-3 mb-1">
       <fa icon="search" class="fa-sm icon-search" />
-      <b-form-input v-model="search" :disabled="!listItems.length" placeholder="Search" style="padding-left:2em" />
+      <b-form-input v-model="search" :disabled="!listItems.length && !search" placeholder="Search" style="padding-left:2em" />
     </b-col>
     <b-col v-if="type != 'all'" cols="3" class="pl-0 pt-3 mb-1">
       <b-button :to="`/liff/${type}/new`" variant="primary" block class="btn-new">

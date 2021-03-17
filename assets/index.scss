@@ -6,6 +6,8 @@
 @import 'bootstrap-vue/dist/bootstrap-vue.css';
 @import '@riophae/vue-treeselect/dist/vue-treeselect.css';
 
+// @import './scss/github-markdown.css';
+
 body {
   font-family: "Open Sans",'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 0.9375rem;
@@ -175,14 +177,6 @@ pre {
       background-color: rgb(64, 112, 236);
     }
   }
-  code {
-    display: block;
-    font-size: .9rem;
-    font-style: normal;
-    font-weight: 400;
-    overflow-wrap: normal;
-    white-space: pre;
-  }
 }
 .input-group {
   > .input-group-text {
@@ -200,7 +194,4 @@ pre {
 .tab-content {
   font-size: 1.2rem;
   line-height: 1.2rem;
-}
-code {
-  font-size: .85rem;
 }

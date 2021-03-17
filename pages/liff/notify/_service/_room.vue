@@ -13,17 +13,19 @@
           </span>
         </li>
       </ol>
-      <div class="text-muted mb-1" style="font-size:1.1rem">
-        การใช้งานระบบอย่างรายละเอียด
+      <div class="text-muted mb-1 mt-3" style="font-size:1.1rem">
+        วิธีใช้งานและการทดสอบ
       </div>
-      <div class="" style="font-size:1.1rem">
-        ...
+      <liff-example :url="`${api.hostname}/${service}/${room}`" :service="service" :room="room" />
+      <div class="text-muted mb-1 mt-3" style="font-size:1.1rem">
+        การใช้งานระบบอย่างรายละเอียด
       </div>
     </b-col>
   </b-row>
 </template>
 
 <script>
+import Api from '../../../../model/api'
 import Notify from '../../../../model/notify'
 import Notiroom from '../../../../model/notiRoom'
 
@@ -40,6 +42,9 @@ export default {
     }
   },
   computed: {
+    api () {
+      return Api.query().first()
+    },
     bot () {
       return Notify.query().where('value', this.service).first()
     },

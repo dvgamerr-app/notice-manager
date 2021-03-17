@@ -22,6 +22,9 @@
         <nuxt-link :to="`/liff/${bot.type}/${bot.value}/${e.value}`" class="d-flex align-items-center list-item py-3 border-bottom">
           <div class="flex-grow-1 px-2">
             <div class="display" v-text="e.name" />
+            <div class="name text-muted">
+              <small>{{ api.hostname }}/{{ service }}/{{ e.value }}</small>
+            </div>
           </div>
         </nuxt-link>
       </lazy-liff-item-drop>
@@ -32,6 +35,7 @@
 <script>
 import dayjs from 'dayjs'
 import numeral from 'numeral'
+import Api from '../../../../model/api'
 import Notify from '../../../../model/notify'
 import Notiroom from '../../../../model/notiRoom'
 
@@ -48,6 +52,9 @@ export default {
     }
   },
   computed: {
+    api () {
+      return Api.query().first()
+    },
     bot () {
       return Notify.query().where('value', this.service).first()
     },
