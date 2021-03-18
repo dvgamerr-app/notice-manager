@@ -57,7 +57,7 @@ export default {
   },
   created () {
     if (!this.bot) { this.$router.back() }
-  },
+  }
   // computed: {
   //   getServiceSample () {
   //     return Notify.query().get().map(e => ({ id: e.value, label: e.text }))
@@ -67,8 +67,6 @@ export default {
   //     return (service.room || []).map(e => ({ id: e.value, label: e.text }))
   //   }
   // },
-  mounted () {
-  }
 }
 </script>
 <style lang="scss">
