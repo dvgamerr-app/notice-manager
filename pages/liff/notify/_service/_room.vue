@@ -16,7 +16,7 @@
       <div class="text-muted mb-1 mt-3" style="font-size:1.1rem">
         วิธีใช้งานและการทดสอบ
       </div>
-      <liff-example :url="`${api.hostname}/${service}/${room}`" :service="service" :room="room" />
+      <liff-example :url="`${api.hostname}/notify/${service}/${room}`" :service="service" :room="room" />
       <div class="text-muted mb-1 mt-3" style="font-size:1.1rem">
         การใช้งานระบบอย่างรายละเอียด
       </div>

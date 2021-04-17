@@ -13,8 +13,9 @@ module.exports = [
   { method: 'POST', path: '/auth/login', handler: require('./auth/login') },
   { method: 'POST', path: '/auth/user', handler: require('./auth/user') },
 
-  { method: 'POST', path: '/{bot}', handler: require('./line-bot/webhook') },
-  { method: 'PUT', path: '/{bot}/{to?}', handler: require('./line-bot/push-message') },
+  { method: 'PUT', path: '/{botname}/{to}', handler: require('./line-bot/push-message') },
+  { method: 'POST', path: '/{botname}', handler: require('./line-bot/webhook') },
+
   { method: 'PUT', path: '/flex/{name}/{to}', handler: require('./route-bot/push-flex') },
 
   { method: 'POST', path: '/webhook/{name}/{to}', handler: require('./webhook/push-webhook') },
