@@ -24,7 +24,7 @@
           </li>
         </ol>
         <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" :disabled="btn.submit" @click="onSubmitBot($event)">
-          <fa v-if="btn.submit" icon="circle-notch" spin /> Create LINE BOT
+          <font-awesome-icon v-if="btn.submit" icon="circle-notch" spin /> Create LINE BOT
         </b-btn>
       </b-col>
     </b-row>

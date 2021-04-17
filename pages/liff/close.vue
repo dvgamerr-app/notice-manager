@@ -12,8 +12,8 @@ export default {
   transition: 'fade',
   asyncData ({ env }) {
     return {
-      liffId: '1607427050-7W6qy2N9',
-      uri: '/liff/documentation',
+      liffId: '1607427050-GWg637kn',
+      uri: '/liff/close',
       hostname: env.HOST_API
     }
   },
