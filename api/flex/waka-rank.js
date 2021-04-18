@@ -10,7 +10,7 @@ module.exports = (e, data) => {
       type: 'box',
       layout: 'vertical',
       contents: [
-        { type: 'text', text: 'Ranking', size: 'md', weight: 'bold' },
+        { type: 'text', text: 'TEAM Ranking', size: 'md', weight: 'bold' },
         { type: 'text', text: 'Leaderboards', size: 'xxs', offsetTop: '-3px', color: '#C3C3C3' },
         { type: 'image', url: 'https://wakatime.com/static/img/wakatime.svg', gravity: 'top', aspectMode: 'fit', aspectRatio: '1:1', size: '25px', position: 'absolute', offsetEnd: '10px', offsetTop: '5px' }
       ]
@@ -66,18 +66,14 @@ module.exports = (e, data) => {
         },
         {
           type: 'text',
-          text: row.user.display_name,
+          text: row.user.display_name || '',
           weight: i <= 2 ? 'bold' : 'regular',
           gravity: 'bottom',
           size: 'sm',
           flex: 6,
           margin: 'xs',
           color: '#337AB7',
-          action: {
-            type: 'uri',
-            label: 'action',
-            uri: `https://wakatime.com/@${row.user.username}`
-          }
+          action: (row.user.username ? { type: 'uri', label: 'action', uri: `https://wakatime.com/@${row.user.username}` } : undefined)
         },
         {
           type: 'text',
@@ -97,7 +93,7 @@ module.exports = (e, data) => {
         },
         {
           type: 'text',
-          text: row.stats.languages.map(l => l.name).join(),
+          text: row.stats.languages.map(l => l.name).join() || 'N/A',
           gravity: 'bottom',
           size: 'xs',
           color: '#ababab',
@@ -120,7 +116,7 @@ module.exports = (e, data) => {
 
   return {
     type: 'flex',
-    altText: 'Leaderboard at RIS',
+    altText: 'Leaderboard TEAM',
     contents: {
       type: 'bubble',
       size: 'giga',

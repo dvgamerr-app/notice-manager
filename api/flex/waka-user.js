@@ -71,7 +71,7 @@ module.exports = (user, stats, rank = 0) => {
       action: {
         type: 'uri',
         label: 'Show Profile',
-        uri: 'https://wakatime.com/@dvgamerr'
+        uri: `https://wakatime.com/@${user.username}`
       }
     }
   }

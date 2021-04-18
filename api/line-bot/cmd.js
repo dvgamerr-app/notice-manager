@@ -25,7 +25,7 @@ const joinBotRoom = async (botname, id, type) => {
   if (room._id) {
     await LineBotRoom.updateOne({ _id: room._id }, { $set: { active: true } })
   } else {
-    await new LineBotRoom({ botname, id, type, name: '', variable: { bypass: false } }).save()
+    await new LineBotRoom({ botname, id, type, name: '', variable: [] }).save()
   }
   return room
 }
