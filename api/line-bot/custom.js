@@ -86,6 +86,14 @@ const wakaRanking = async (e) => {
 const wakaApi = 'https://wakatime.com/api/v1'
 const wakaUserProfile = async (e, wakaKey) => {
   try {
+    const { LineBotRoom } = notice.get()
+    const { variable } = await LineBotRoom.findOne({ botname: e.botname, id: getID(e), type: e.source.type })
+    for (const row of variable) {
+      if (row.userId !== e.source.userId && row.data.wakaKey === wakaKey) {
+        return null
+      }
+    }
+
     const { data: user } = await axios(`${wakaApi}/users/current?api_key=${wakaKey.trim()}`)
     await renameUserInRoom(e, e.botname, user.data.display_name)
     await setState(e, { wakaKey, wakaUser: user.data })
@@ -175,15 +183,8 @@ module.exports = {
     {
       cmd: ['แสดงอันดับ'],
       job: async (e, pushMessage, line) => {
-        // const room = await getRoomData(e)
-        // const flex = room.map(e => ({ user: e.data.wakaUser, stats: e.data.wakaStats }))
-        const flex = []
-        for (const room of await getRoomData(e)) {
-          const user = await wakaUserProfile(e, room.data.wakaKey)
-          const stats = await wakaUserStats(e, room.data.wakaKey)
-          flex.push({ user, stats })
-        }
-        await setState(e, { lasted: new Date() })
+        const room = await getRoomData(e)
+        const flex = room.map(e => ({ user: e.data.wakaUser, stats: e.data.wakaStats }))
         await pushMessage(e, wakaRank(e, flex))
       }
     },
