@@ -63,18 +63,6 @@ module.exports = async (req, h) => {
 
       if (groups) {
         const args = groups.arg.trim().split(' ').filter(e => e !== '')
-        // const cmd = await new LineCMD({
-        //   botname: bot,
-        //   userId: e.source.userId,
-        //   command: groups.name,
-        //   args: args.length ? args : null,
-        //   text,
-        //   event: e,
-        //   executing: false,
-        //   executed: false,
-        //   updated: null,
-        //   created: new Date()
-        // }).save()
 
         if (!e.replyToken || !groups || !onCommands[groups.name]) { continue }
         // await LineCMD.updateOne({ _id: cmd._id }, { $set: { executing: true } })

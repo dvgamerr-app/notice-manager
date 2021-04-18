@@ -49,10 +49,10 @@ module.exports = (user, stats, rank = 0) => {
                     type: 'box',
                     layout: 'baseline',
                     contents: [
-                      { type: 'text', text: 'power by wakatime.com', size: 'xxs', color: '#bcbcbc', align: 'end' }
+                      { type: 'text', text: 'Power by wakatime.com', size: 'xxs', color: '#bcbcbc', align: 'end' }
                     ],
                     spacing: 'sm',
-                    margin: 'sm'
+                    margin: 'md'
                   }
                 ]
               }

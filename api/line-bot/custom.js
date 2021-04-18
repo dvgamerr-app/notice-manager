@@ -37,6 +37,9 @@ const getRoomData = async (e) => {
   const room = await notice.get('LineBotRoom').findOne({ id: getID(e) })
   return room && room.variable
 }
+// const setRoomData = async (e, variable) => {
+//   await notice.get('LineBotRoom').updateOne({ id: getID(e) }, { $set: { variable } })
+// }
 
 const getState = async (e, name) => {
   const { userId } = e.source
@@ -68,8 +71,8 @@ const renameUserInRoom = async ({ source }, botname, name) => {
 }
 
 const wakaRanking = async (e) => {
-  const data = await getRoomData(e)
-  data.sort((a, b) => a.data.wakaStats.total_seconds <= b.data.wakaStats.total_seconds ? 1 : -1)
+  let data = await getRoomData(e)
+  data = data.sort((a, b) => a.data.wakaStats.total_seconds <= b.data.wakaStats.total_seconds ? 1 : -1)
   for (let i = 0; i < data.length; i++) {
     if (data[i].userId === e.source.userId) {
       return i + 1
@@ -92,7 +95,8 @@ const wakaUserProfile = async (e, wakaKey) => {
 const wakaUserStats = async (e, wakaKey) => {
   try {
     const { data: res } = await axios(`${wakaApi}/users/current/stats/last_7_days?api_key=${wakaKey.trim()}`)
-    await setState(e, { wakaKey, wakaStats: res.data })
+    const languages = res.data.languages.map(l => l.name).join()
+    await setState(e, { languages, wakaKey, wakaStats: res.data })
     return res.data
   } catch (ex) {
     return null
@@ -105,13 +109,13 @@ const wakaWelcomeUser = async (e, user, pushMessage) => {
   if (user.timeout !== 15) {
     return await pushMessage(e, 'คุณผิดกติกา ไปตั้งค่าที่\nsettings > preferences > Timeout เป็น 15 นาทีด้วยครับ')
   }
+  const rank = await wakaRanking(e)
+  await setState(e, { rank })
+  await pushMessage(e, require('../flex/waka-user')(user, stats, rank))
 
   if (!user || !stats || !wakaKey) {
     return await pushMessage(e, `เก็บข้อมูลไม่ได้จาก ${wakaKey} ไม่ได้`)
   }
-  const rank = await wakaRanking(e)
-  await setState(e, { rank })
-  await pushMessage(e, require('../flex/waka-user')(user, stats, rank))
 }
 
 const task = {}
@@ -131,11 +135,11 @@ module.exports = {
     {
       cmd: ['จัดอันดับ'],
       job: async (e, pushMessage, line) => {
-        if (!/\{.*?}/ig.test(e.message.text)) {
+        if (!/`.*?`/ig.test(e.message.text)) {
           await setState(e, { bypass: true, index: 0, event: 'secret-save' })
           return await pushMessage(e, 'ใส่ secret key ที่ได้จาก wakatime ด้วยคับ')
         }
-        const [, wakaKey] = /\{(.*?)}/ig.exec(e.message.text)
+        const [, wakaKey] = /`(.*?)`/ig.exec(e.message.text)
         const user = await wakaUserProfile(e, wakaKey)
         if (!user) {
           await setState(e, { bypass: true, index: 0, event: 'secret-save' })
@@ -154,6 +158,21 @@ module.exports = {
           await wakaWelcomeUser(e, user, pushMessage)
           await setState(e, { bypass: false })
         }
+      }
+    },
+    {
+      cmd: ['แสดงอันดับ'],
+      job: async (e, pushMessage, line) => {
+        const room = await getRoomData(e)
+        const flex = room.map(e => ({ user: e.data.wakaUser, stats: e.data.wakaStats }))
+
+        // for (const room of await getRoomData(e)) {
+        //   const user = await wakaUserProfile(e, room.data.wakaKey)
+        //   const stats = await wakaUserStats(e, room.data.wakaKey)
+        //   flex.push({ user, stats })
+        // }
+        await setState(e, { lasted: new Date() })
+        await pushMessage(e, require('../flex/waka-rank')(e, flex))
       }
     },
     {
