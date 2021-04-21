@@ -15,7 +15,7 @@ module.exports = [
 
   { method: 'POST', path: '/{botname}', handler: require('./line-bot/webhook') },
   { method: 'PUT', path: '/{botname}/{to}', handler: require('./line-bot/push-message') },
-  { method: 'PATCH', path: '/{botname}/{roomname}/{funcId}', handler: require('./line-bot/webhook-func') },
+  { method: ['GET', 'PATCH', 'PUT'], path: '/{botname}/{roomname}/{funcId}', handler: require('./line-bot/webhook-func') },
 
   { method: 'PUT', path: '/flex/{name}/{to}', handler: require('./route-bot/push-flex') },
 
