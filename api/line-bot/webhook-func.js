@@ -23,7 +23,6 @@ module.exports = async (req, h) => {
   } else if (req.method === 'patch' || req.method === 'put') {
     const flex = []
     const waka = []
-    room.variable = room.variable.sort((a, b) => a.data.wakaStats.total_seconds <= b.data.wakaStats.total_seconds ? 1 : -1)
     for (let i = 0; i < room.variable.length; i++) {
       const row = room.variable[i]
 
@@ -40,9 +39,15 @@ module.exports = async (req, h) => {
         console.log(`${row.data.wakaUser.display_name} - Rank: ${row.rank} >> ${i + 1} (${row.data.wakaStats.human_readable_total})`)
         waka.push({ user: user.data, stats: stats.data, old_rank: row.rank, new_rank: i + 1 })
       }
-      row.rank = i + 1
       flex.push({ user: user.data, stats: stats.data })
     }
+
+    room.variable = room.variable.sort((a, b) => a.data.wakaStats.total_seconds <= b.data.wakaStats.total_seconds ? 1 : -1)
+    for (let i = 0; i < room.variable.length; i++) {
+      const row = room.variable[i]
+      row.rank = i + 1
+    }
+
     await LineBotRoom.updateOne({ _id: room._id }, { $set: { variable: room.variable } })
 
     if (req.method === 'put') {
