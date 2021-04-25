@@ -34,17 +34,17 @@ module.exports = async (req, h) => {
       new LineBotUser({ botname, roomname, userId: row.userId, name: user.display_name }).save()
 
       row.data = Object.assign(row.data, { lasted: new Date(), languages, wakaStats: stats.data, wakaUser: user.data })
-      if (row.rank !== i + 1) {
-        // eslint-disable-next-line no-console
-        console.log(`${row.data.wakaUser.display_name} - Rank: ${row.rank} >> ${i + 1} (${row.data.wakaStats.human_readable_total})`)
-        waka.push({ user: user.data, stats: stats.data, old_rank: row.rank, new_rank: i + 1 })
-      }
       flex.push({ user: user.data, stats: stats.data })
     }
 
     room.variable = room.variable.sort((a, b) => a.data.wakaStats.total_seconds <= b.data.wakaStats.total_seconds ? 1 : -1)
     for (let i = 0; i < room.variable.length; i++) {
       const row = room.variable[i]
+      if (row.rank !== i + 1) {
+        // eslint-disable-next-line no-console
+        console.log(`${row.data.wakaUser.display_name} - Rank: ${row.rank} >> ${i + 1} (${row.data.wakaStats.human_readable_total})`)
+        waka.push({ user: row.data.wakaUser, stats: row.data.wakaStats, old_rank: row.rank, new_rank: i + 1 })
+      }
       row.rank = i + 1
     }
 
