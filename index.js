@@ -1,6 +1,5 @@
 // const md5 = require('md5')
 const { Server } = require('@hapi/hapi')
-const hapiPlugin = require('@nuxtjs/hapi')
 const Sentry = require('@sentry/node')
 
 const { notice } = require('@touno-io/db/schema')
@@ -11,7 +10,7 @@ const config = require('./nuxt.config.js')
 const routes = require('./api')
 
 const server = new Server({
-  port: config.server.port,
+  port: 3000,
   host: config.server.host,
   routes: { state: { parse: true, failAction: 'ignore' } }
 })
@@ -22,22 +21,20 @@ const nuxtCreateBuilder = async () => {
   logger.start('Server initialize...')
   await server.initialize()
   // await (Promise.all([lineInitilize(), cmdExpire()]))
+  await server.register({
+    plugin: require('hapi-cors'),
+    options: {
+      origins: [process.env.NODE_ENV !== 'production' ? '*' : 'http://localhost:4000']
+    }
+  })
 
   await server.register({
     plugin: require('hapi-sentry'),
     options: { client: { dsn: process.env.SENTRY_DSN || false } }
   })
 
-  await server.register({ plugin: hapiPlugin, options: {} })
   server.route(routes)
 
-  const { nuxt, builder } = server.plugins.nuxt
-
-  if (process.env.NODE_ENV !== 'production') {
-    await builder.build()
-  }
-
-  await nuxt.ready()
   await server.start()
   logger.start(`Server running on ${server.info.uri}`)
 }

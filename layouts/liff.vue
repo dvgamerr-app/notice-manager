@@ -49,9 +49,9 @@ export default {
     }
   },
   methods: {
-    loggedIn () {
-      return this.$liff.isLoggedIn()
-    }
+    // loggedIn () {
+    //   return this.$liff.isLoggedIn()
+    // }
   }
 }
 </script>
