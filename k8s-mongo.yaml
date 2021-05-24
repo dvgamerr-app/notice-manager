@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: notice-db
+  namespace: ris-utility
+spec:
+  storageClassName: azurefile
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/data"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: notice-db
+  namespace: ris-utility
+spec:
+  storageClassName: azurefile
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    touno-io: notice-db
+  name: notice-db
+  namespace: ris-utility
+spec:
+  selector:
+    matchLabels:
+      touno-io: notice-db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        touno-io: notice-db
+    spec:
+      containers:
+      - name: notice-db
+        image: mongo:4.4
+        imagePullPolicy: "Always"
+        args:
+        - --smallfiles
+        # env:
+        # - name: MONGO_INITDB_ROOT_USERNAME
+        #   value: "root"
+        # - name: MONGO_INITDB_ROOT_PASSWORD
+        #   value: "NQ^^65qW%BG$Jaan"
+        # command:
+        # - mongod
+        # - --auth
+        # - --bind_ip
+        # - 0.0.0.0
+        ports:
+        - containerPort: 27017
+        resources:
+          requests:
+            memory: "500M"
+            cpu: "500m"
+          limits:
+            memory: "2G"
+            cpu: "1G"
+        volumeMounts:
+        - mountPath: /data/db
+          name: notice-db
+      restartPolicy: Always
+      volumes:
+      - name: notice-db
+        persistentVolumeClaim:
+          claimName: notice-db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    touno-io: notice-db
+  name: notice-db
+  namespace: ris-utility
+spec:
+  ports:
+  - name: "mongodb"
+    port: 27017
+    targetPort: 27017
+  selector:
+    touno-io: notice-db
