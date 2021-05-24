@@ -18,13 +18,15 @@ const nuxtCreateBuilder = async () => {
   logger.info('MongoDB db-notice connecting...')
   await notice.open()
 
-  logger.start('Server initialize...')
+  logger.start(`Server initialize... (${process.env.NODE_ENV})`)
   await server.initialize()
   // await (Promise.all([lineInitilize(), cmdExpire()]))
   await server.register({
     plugin: require('hapi-cors'),
     options: {
-      origins: [process.env.NODE_ENV !== 'production' ? '*' : 'http://localhost:4000']
+      origins: [process.env.NODE_ENV !== 'production' ? '*' : 'http://localhost:4000'],
+      headers: [process.env.NODE_ENV !== 'production' ? '*' : 'x-id'],
+      methods: [process.env.NODE_ENV !== 'production' ? '*' : 'HEAD,GET,PUT,POST,DELETE']
     }
   })
 
