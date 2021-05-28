@@ -3,38 +3,32 @@ name: Docker
 on:
   push:
     branches: 
-      - master
+      - main
     tags:
       - v*
 
 env:
-  # TODO: Change variable to your image's name.
   UI_NAME: notice-ui
   API_NAME: notice-api
 
 jobs:
-  push:
+  notice-ui:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build image $UI_NAME
-        run: docker build -f notice-ui.Dockerfile -t $UI_NAME .
-        
-      - name: Build image $API_NAME
-        run: docker build -f notice-api.Dockerfile -t $API_NAME .
+      - name: Build image
+        run: docker build --tag $UI_NAME .
 
       - name: Log into docker.io
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin
 
       - name: Push image to docker.io
         run: |
-          UI_ID=${{ github.actor }}/$UI_NAME
-          API_ID=${{ github.actor }}/$API_NAME
+          IMAGE_ID=${{ github.actor }}/$UI_NAME
 
           # Change all uppercase to lowercase
-          UI_ID=$(echo $UI_ID | tr '[A-Z]' '[a-z]')
-          API_ID=$(echo $API_ID | tr '[A-Z]' '[a-z]')
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -45,12 +39,42 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$VERSION" == "master" ] && VERSION=latest
 
-          echo UI_ID=$UI_ID
-          echo API_ID=$API_ID
+          echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-          docker tag $UI_NAME $UI_ID:$VERSION
-          docker push $UI_ID:$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
 
-          docker tag $API_NAME $API_ID:$VERSION
-          docker push $API_ID:$VERSION
+          
+  notice-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: docker build --tag $API_NAME .
+
+      - name: Log into docker.io
+        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin
+
+      - name: Push image to docker.io
+        run: |
+          IMAGE_ID=${{ github.actor }}/$API_NAME
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
