@@ -1,4 +1,5 @@
 FROM node:lts AS builder
+LABEL MAINTAINER="Kananek T."
 
 WORKDIR /app
 COPY . /app
@@ -6,9 +7,9 @@ COPY . /app
 RUN npm i
 
 ENV TZ Asia/Bangkok
-ENV PROXY_API https://sandbox.notice.touno.io
-ENV HOST_API https://sandbox.notice.touno.io
-ENV AXIOS_BASE_URL https://sandbox.notice.touno.io
+ENV PROXY_API http://localhost:8080
+ENV HOST_API http://localhost:8080
+ENV AXIOS_BASE_URL http://localhost:8080
 
 RUN npm run build
 RUN rm -Rf ./.github \
@@ -20,18 +21,19 @@ RUN rm -Rf ./.github \
   ./node_modules
 
 FROM node:lts-alpine
+LABEL MAINTAINER="Kananek T."
 
 ENV TZ Asia/Bangkok
 ENV NODE_ENV production
-ENV PROXY_API https://sandbox.notice.touno.io
-ENV HOST_API https://sandbox.notice.touno.io
-ENV AXIOS_BASE_URL https://sandbox.notice.touno.io
+ENV PROXY_API http://localhost:8080
+ENV HOST_API http://localhost:8080
+ENV AXIOS_BASE_URL http://localhost:8080
 
 WORKDIR /app
 COPY --from=builder /app .
 RUN npm i --production
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "start:ui"]
 
 # FROM golang:1.7.3 AS builder
 # WORKDIR /go/src/github.com/alexellis/href-counter/

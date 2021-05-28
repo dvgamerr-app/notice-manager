@@ -26,7 +26,7 @@ const nuxtCreateBuilder = async () => {
     options: {
       origins: [process.env.NODE_ENV !== 'production' ? '*' : 'http://localhost:4000'],
       headers: [process.env.NODE_ENV !== 'production' ? '*' : 'x-id'],
-      methods: [process.env.NODE_ENV !== 'production' ? '*' : 'HEAD,GET,PUT,POST,DELETE']
+      methods: [process.env.NODE_ENV !== 'production' ? '*' : 'head,get,put,post,delete']
     }
   })
 
