@@ -18,7 +18,9 @@ export default {
     }
   },
   created () {
-    this.$liff.closeWindow()
+    this.$nextTick(() => {
+      this.$liff.closeWindow()
+    })
   },
   mounted () {
     const isDev = /localhost:/.test(this.hostname)
@@ -28,9 +30,9 @@ export default {
       this.$store.commit('toggleWait')
 
       await this.$liff.init({ liffId: this.liffId })
-      // if (!this.$liff.isInClient() && !isDev) {
-      //   return this.$nuxt.context.redirect(200, '/')
-      // }
+      if (!this.$liff.isInClient() && !isDev) {
+        return this.$nuxt.context.redirect(200, '/')
+      }
       if (!this.$liff.isLoggedIn() && !isDev) {
         return this.$liff.login({ redirectUri: `${this.hostname}${this.uri}` })
       }

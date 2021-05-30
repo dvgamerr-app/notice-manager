@@ -39,14 +39,14 @@ export default {
       this.$nuxt.$loading.increase(50)
       this.$store.commit('toggleWait')
 
-      // await this.$liff.init({ liffId: this.liffId })
-      // // if (!this.$liff.isInClient() && !isDev) {
-      // //   return this.$nuxt.context.redirect(200, '/')
-      // // }
+      await this.$liff.init({ liffId: this.liffId })
+      if (!this.$liff.isInClient() && !isDev) {
+        return this.$nuxt.context.redirect(200, '/')
+      }
 
-      // if (!this.$liff.isLoggedIn() && !isDev) {
-      //   return this.$liff.login({ redirectUri: `${this.hostname}${this.uri}` })
-      // }
+      if (!this.$liff.isLoggedIn() && !isDev) {
+        return this.$liff.login({ redirectUri: `${this.hostname}${this.uri}` })
+      }
 
       let profile = {}
       if (isDev) {

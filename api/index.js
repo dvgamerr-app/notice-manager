@@ -13,11 +13,11 @@ module.exports = [
   { method: 'POST', path: '/auth/login', handler: require('./auth/login') },
   { method: 'POST', path: '/auth/user', handler: require('./auth/user') },
 
-  { method: 'POST', path: '/{botname}', handler: require('./line-bot/webhook') },
-  { method: 'PUT', path: '/{botname}/{to}', handler: require('./line-bot/push-message') },
-  { method: ['GET', 'PATCH', 'PUT'], path: '/{botname}/{roomname}/{funcId}', handler: require('./line-bot/webhook-func') },
+  { method: 'POST', path: '/line/{botname}', handler: require('./line-bot/webhook') },
+  { method: 'PUT', path: '/line/{botname}/{to}', handler: require('./line-bot/push-message') },
+  { method: ['GET', 'PATCH', 'PUT'], path: '/line/{botname}/{roomname}/{funcId}', handler: require('./line-bot/webhook-func') },
 
-  { method: 'PUT', path: '/flex/{name}/{to}', handler: require('./route-bot/push-flex') },
+  // { method: 'PUT', path: '/flex/{name}/{to}', handler: require('./route-bot/push-flex') },
 
   { method: 'POST', path: '/webhook/{name}/{to}', handler: require('./webhook/push-webhook') },
   { method: 'POST', path: '/webhook/{type}/{name}/{to}/{msg?}', handler: require('./webhook/push-notify') },
@@ -44,6 +44,6 @@ module.exports = [
 
   // API Notify
   { method: 'GET', path: '/register/{service}/{room?}', handler: require('./route-bot/oauth') },
-  { method: ['PUT', 'POST'], path: '/notify/{service}/{room}', handler: require('./route-bot/notify') },
-  { method: 'PUT', path: '/revoke/{service}/{room}', handler: require('./route-bot/revoke') }
+  { method: 'PUT', path: '/revoke/{service}/{room}', handler: require('./route-bot/revoke') },
+  { method: ['PUT', 'POST'], path: '/notify/{service}/{room}', handler: require('./route-bot/notify') }
 ]
