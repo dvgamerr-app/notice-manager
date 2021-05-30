@@ -1,3 +1,8 @@
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: notice-line
+# ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -138,11 +143,15 @@ kind: Ingress
 metadata:
   name: notice-app
   namespace: notice-line
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+    cert-manager.io/cluster-issuer: "letsencrypt"
 spec:
-  # tls:
-  # - hosts:
-  #   - notice.touno.io
-  #   secretName: notice-cert
+  tls:
+  - hosts:
+    - notice.touno.io
+    secretName: notice-cert
   rules:
   - host: notice.touno.io
     http:

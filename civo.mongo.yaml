@@ -1,7 +1,12 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: db-touno-io
+---
+apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: mongodb
+  name: db-storage
 spec:
   storageClassName: civo-volume
   capacity:
@@ -22,7 +27,7 @@ spec:
     - ReadWriteMany
   resources:
     requests:
-      storage: 5Gi
+      storage: 2Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -46,18 +51,9 @@ spec:
       - name: mongodb
         image: mongo:4.4
         imagePullPolicy: "Always"
-        # args:
-        # - --smallfiles
-        # env:
-        # - name: MONGO_INITDB_ROOT_USERNAME
-        #   value: "root"
-        # - name: MONGO_INITDB_ROOT_PASSWORD
-        #   value: "NQ^^65qW%BG$Jaan"
         # command:
         # - mongod
         # - --auth
-        # - --bind_ip
-        # - 0.0.0.0
         ports:
         - containerPort: 27017
         resources:
@@ -69,10 +65,10 @@ spec:
             cpu: "500m"
         volumeMounts:
         - mountPath: /data/mongo-4.4
-          name: mongodb
+          name: db-storage
       restartPolicy: Always
       volumes:
-      - name: mongodb
+      - name: db-storage
         persistentVolumeClaim:
           claimName: mongodb
 ---
@@ -84,6 +80,7 @@ metadata:
   name: mongodb
   namespace: db-touno-io
 spec:
+  type: LoadBalancer
   ports:
   - name: "mongodb"
     port: 27017

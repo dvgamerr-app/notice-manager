@@ -1,0 +1,83 @@
+# helm install cert jetstack/cert-manager -n cert-manager --version v1.2.0 --create-namespace --set installCRDs=true
+# kubectl label namespace kube-system certmanager.k8s.io/disable-validation=true
+# kubectl label namespace kube-public certmanager.k8s.io/disable-validation=true
+# kubectl label namespace kube-node-lease certmanager.k8s.io/disable-validation=true
+# After create `cert` please edit `owner` network version `v1beta` to `v1`
+# Docs: https://doc.traefik.io/traefik/v1.7/configuration/backends/kubernetes/
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+  namespace: cert-manager
+spec:
+  acme:
+    email: info.dvgamer@gmail.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      # Secret resource that will be used to store the account's private key.
+      name: cf-issuer-letsencrypt
+    solvers:
+    - dns01:
+        cloudflare:
+          email: info.dvgamer@gmail.com
+          apiTokenSecretRef:
+            name: cloudflare-api-token
+            key: api-token
+      selector:
+        dnsZones:
+        - 'touno.io'
+        - '*.touno.io'
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-stg
+  namespace: cert-manager
+spec:
+  acme:
+    email: info.dvgamer@gmail.com
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      # Secret resource that will be used to store the account's private key.
+      name: cf-issuer-letsencrypt-stg
+    solvers:
+    - dns01:
+        cloudflare:
+          email: info.dvgamer@gmail.com
+          apiTokenSecretRef:
+            name: cloudflare-api-token
+            key: api-token
+      selector:
+        dnsZones:
+        - 'touno.io'
+        - '*.touno.io'
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: notice-cert
+  namespace: cert-manager
+spec:
+  secretName: notice-cert
+  issuerRef:
+    name: letsencrypt-stg
+    kind: ClusterIssuer
+  commonName: 'notice.touno.io'
+  dnsNames:
+  - "notice.touno.io"
+# ---
+# apiVersion: cert-manager.io/v1
+# kind: Issuer
+# metadata:
+#   name: letsencrypt
+#   namespace: cert-manager
+# spec:
+#   acme:
+#     server: https://acme-v02.api.letsencrypt.org/directory
+#     email: info.dvgamer@gmail.com
+#     privateKeySecretRef:
+#       name: letsencrypt
+#     solvers:
+#       - http01:
+#           ingress:
+#             class: traefik
