@@ -17,8 +17,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build image
-        run: docker build --tag $UI_NAME .
+      - name: Build image notice-ui
+        run: docker build -f notice-ui.Dockerfile -t $UI_NAME .
 
       - name: Log into docker.io
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin
@@ -51,8 +51,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build image
-        run: docker build --tag $API_NAME .
+      - name: Build image notice-api
+        run: docker build -f notice-api.Dockerfile -t $API_NAME .
 
       - name: Log into docker.io
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin
