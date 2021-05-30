@@ -1,6 +1,6 @@
 {
   "name": "line-notice",
-  "version": "5.3.2",
+  "version": "5.3.3",
   "description": "Server notify message to 3party.",
   "main": "index.js",
   "scripts": {
