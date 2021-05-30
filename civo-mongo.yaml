@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongodb
+spec:
+  storageClassName: civo-volume
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/data"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb
+  namespace: db-touno-io
+spec:
+  storageClassName: civo-volume
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    notice: mongodb
+  name: mongodb
+  namespace: db-touno-io
+spec:
+  selector:
+    matchLabels:
+      notice: mongodb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        notice: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:4.4
+        imagePullPolicy: "Always"
+        # args:
+        # - --smallfiles
+        # env:
+        # - name: MONGO_INITDB_ROOT_USERNAME
+        #   value: "root"
+        # - name: MONGO_INITDB_ROOT_PASSWORD
+        #   value: "NQ^^65qW%BG$Jaan"
+        # command:
+        # - mongod
+        # - --auth
+        # - --bind_ip
+        # - 0.0.0.0
+        ports:
+        - containerPort: 27017
+        resources:
+          requests:
+            memory: "250M"
+            cpu: "200m"
+          limits:
+            memory: "500M"
+            cpu: "500m"
+        volumeMounts:
+        - mountPath: /data/mongo-4.4
+          name: mongodb
+      restartPolicy: Always
+      volumes:
+      - name: mongodb
+        persistentVolumeClaim:
+          claimName: mongodb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    notice: mongodb
+  name: mongodb
+  namespace: db-touno-io
+spec:
+  ports:
+  - name: "mongodb"
+    port: 27017
+    targetPort: 27017
+  selector:
+    notice: mongodb

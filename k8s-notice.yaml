@@ -2,43 +2,90 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: notice-app
-  namespace: ris-utility
+  namespace: notice-line
 data:
   TZ: Asia/Bangkok
   NODE_ENV: production
-  HOST_API: https://sandbox.notice.touno.io/
-  PROXY_API: https://sandbox.notice.touno.io/
-  AXIOS_BASE_URL: https://sandbox.notice.touno.io/
-  MONGODB_URI: mongodb://notice-db:27017/
+  HOST_API: https://notice.touno.io/
+  PROXY_API: https://notice.touno.io/
+  AXIOS_BASE_URL: https://notice.touno.io/
+  MONGODB_URI: mongodb://mongodb.db-touno-io.svc.cluster.local:27017/
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    touno-io: notice-app
-  name: notice-app
-  namespace: ris-utility
+    touno-io: notice-ui
+  name: notice-ui
+  namespace: notice-line
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
-      touno-io: notice-app
+      touno-io: notice-ui
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0
-  progressDeadlineSeconds: 12
+  progressDeadlineSeconds: 5
   template:
     metadata:
       labels:
-        touno-io: notice-app
+        touno-io: notice-ui
     spec:
+      restartPolicy: Always
       containers:
-      - image: dvgamerr/line-notice:latest
-        name: notice-app
+      - name: notice-ui
+        image: dvgamerr/notice-ui:latest
         ports:
         - name: liveness
           containerPort: 4000
+        livenessProbe:
+          httpGet:
+            path: /
+            port: liveness
+          failureThreshold: 10
+          periodSeconds: 3
+        resources:
+          requests:
+            memory: "40M"
+            cpu: "40m"
+          limits:
+            memory: "80M"
+            cpu: "300m"
+        envFrom:
+        - configMapRef:
+            name: notice-app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    touno-io: notice-api
+  name: notice-api
+  namespace: notice-line
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      touno-io: notice-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  progressDeadlineSeconds: 5
+  template:
+    metadata:
+      labels:
+        touno-io: notice-api
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: notice-api
+        image: dvgamerr/notice-api:latest
+        ports:
+        - name: liveness
+          containerPort: 3000
         livenessProbe:
           httpGet:
             path: /health
@@ -47,50 +94,119 @@ spec:
           periodSeconds: 3
         resources:
           requests:
-            memory: "50M"
-            cpu: "10m"
+            memory: "60M"
+            cpu: "50m"
           limits:
-            memory: "300M"
-            cpu: "500m"
+            memory: "120M"
+            cpu: "300m"
         envFrom:
         - configMapRef:
             name: notice-app
-      restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    touno-io: notice-app
-  name: notice-app
-  namespace: ris-utility
+    touno-io: notice-ui
+  name: notice-ui
+  namespace: notice-line
 spec:
   selector:
-    touno-io: notice-app
+    touno-io: notice-ui
   ports:
-  - name: "notice"
+  - name: "notice-ui"
     port: 80
     targetPort: 4000
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    touno-io: notice-api
+  name: notice-api
+  namespace: notice-line
+spec:
+  selector:
+    touno-io: notice-api
+  ports:
+  - name: "notice-api"
+    port: 80
+    targetPort: 3000
+---
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: notice-app
-  namespace: ris-utility
-  annotations:
-    kubernetes.io/ingress.class: "dashboard"
-    cert-manager.io/cluster-issuer: "letsencrypt"
+  namespace: notice-line
 spec:
-  tls:
-  - hosts:
-    - sandbox.notice.touno.io
-    secretName: sandbox.notice
+  # tls:
+  # - hosts:
+  #   - notice.touno.io
+  #   secretName: notice-cert
   rules:
-  - host: sandbox.notice.touno.io
+  - host: notice.touno.io
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
-          serviceName: notice-app
-          servicePort: 80
+          service:
+            name: notice-ui
+            port:
+              number: 80
+      - path: /liff
+        pathType: Prefix
+        backend:
+          service:
+            name: notice-ui
+            port:
+              number: 80
+      - path: /line
+        pathType: Prefix
+        backend:
+          service:
+            name: notice-api
+            port:
+              number: 80
+      - path: /notify
+        pathType: Prefix
+        backend:
+          service:
+            name: notice-api
+            port:
+              number: 80
+      - path: /register
+        pathType: Prefix
+        backend:
+          service:
+            name: notice-api
+            port:
+              number: 80
+      - path: /revoke
+        pathType: Prefix
+        backend:
+          service:
+            name: notice-api
+            port:
+              number: 80
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: notice-api
+            port:
+              number: 80
+      - path: /webhook
+        pathType: Prefix
+        backend:
+          service:
+            name: notice-api
+            port:
+              number: 80
+      - path: /db
+        pathType: Prefix
+        backend:
+          service:
+            name: notice-api
+            port:
+              number: 80
