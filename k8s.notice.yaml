@@ -53,10 +53,10 @@ spec:
           periodSeconds: 3
         resources:
           requests:
-            memory: "40M"
+            memory: "60M"
             cpu: "40m"
           limits:
-            memory: "80M"
+            memory: "120M"
             cpu: "300m"
         envFrom:
         - configMapRef:
