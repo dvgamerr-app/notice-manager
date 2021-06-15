@@ -1,8 +1,8 @@
-# apiVersion: v1
-# kind: Namespace
-# metadata:
-#   name: notice-line
-# ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: notice-line
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -53,11 +53,11 @@ spec:
           periodSeconds: 3
         resources:
           requests:
-            memory: "60M"
-            cpu: "40m"
+            memory: "64M"
+            cpu: "100m"
           limits:
-            memory: "120M"
-            cpu: "300m"
+            memory: "512Mi"
+            cpu: "1"
         envFrom:
         - configMapRef:
             name: notice-app
@@ -99,11 +99,11 @@ spec:
           periodSeconds: 3
         resources:
           requests:
-            memory: "60M"
-            cpu: "50m"
+            memory: "64Mi"
+            cpu: "100m"
           limits:
-            memory: "120M"
-            cpu: "300m"
+            memory: "512Mi"
+            cpu: "1"
         envFrom:
         - configMapRef:
             name: notice-app
