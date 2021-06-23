@@ -3,98 +3,104 @@ kind: Namespace
 metadata:
   name: db-touno-io
 ---
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: local-retain
-provisioner: rancher.io/local-path
-reclaimPolicy: Retain
-volumeBindingMode: WaitForFirstConsumer
----
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: local-delete
-provisioner: rancher.io/local-path
-reclaimPolicy: Delete
-volumeBindingMode: WaitForFirstConsumer
----
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: db-storage
+  name: pvc-98bf408a-534b-4560-b7a5-1468e5f54d6f
 spec:
-  storageClassName: local-retain
+  accessModes:
+  - ReadWriteMany
   capacity:
     storage: 5Gi
-  accessModes:
-    - ReadWriteMany
-  hostPath:
-    path: "/data/mongo-4.4"
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: mongodb-pvc
+    namespace: db-touno-io
+  csi:
+    driver: csi.civo.com
+    fsType: ext4
+    volumeAttributes:
+      storage.kubernetes.io/csiProvisionerIdentity: 1624214639220-8081-csi.civo.com
+    volumeHandle: d232d6e2-2fbb-4e4e-ac73-19fc7869f6dc
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: civo-volume
+  volumeMode: Filesystem
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mongodb
+  name: mongodb-pvc
   namespace: db-touno-io
 spec:
-  storageClassName: local-retain
   accessModes:
-    - ReadWriteMany
+  - ReadWriteMany
   resources:
     requests:
-      storage: 2Gi
+      storage: 5Gi
+  storageClassName: civo-volume
+  volumeMode: Filesystem
+  volumeName: pvc-98bf408a-534b-4560-b7a5-1468e5f54d6f
+status:
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 5Gi
+  phase: Bound
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    notice: mongodb
   name: mongodb
   namespace: db-touno-io
 spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
   selector:
     matchLabels:
-      notice: mongodb
+      app: mongodb
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        notice: mongodb
+        app: mongodb
     spec:
       containers:
-      - name: mongodb
-        image: mongo:4.4
-        imagePullPolicy: "Always"
+      - env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: gchPh74RkPpK16f5xf8oIuTgfItF3e
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: ZpM3EOtDe3PlmhOvBKq3CU4C3LDAYw
+        image: mongo:4.2.12
+        imagePullPolicy: IfNotPresent
+        name: mongodb
         ports:
         - containerPort: 27017
+          name: mongodb
+          protocol: TCP
         resources:
           requests:
-            memory: "1Gi"
-            cpu: "500m"
+            memory: "256Mi"
+            cpu: "100m"
           limits:
-            memory: "4Gi"
-            cpu: "2"
+            memory: "1Gi"
+            cpu: "250m"
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /data/db
-          name: db-storage
-        livenessProbe:
-          exec:
-            command:
-            - mongo
-            - --eval
-            - "db.adminCommand('ping')"
-          initialDelaySeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 5
-          periodSeconds: 2
-          successThreshold: 1
+          name: mongodb-persistent-storage
+      dnsPolicy: ClusterFirst
       restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
       volumes:
-      - name: db-storage
+      - name: mongodb-persistent-storage
         persistentVolumeClaim:
-          claimName: mongodb
+          claimName: mongodb-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -104,10 +110,10 @@ metadata:
   name: mongodb
   namespace: db-touno-io
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - name: "mongodb"
     port: 27017
     targetPort: 27017
   selector:
-    notice: mongodb
+    app: mongodb

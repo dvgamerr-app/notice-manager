@@ -14,7 +14,7 @@ data:
   HOST_API: https://notice.touno.io/
   PROXY_API: https://notice.touno.io/
   AXIOS_BASE_URL: https://notice.touno.io/
-  MONGODB_URI: mongodb://mongodb.db-touno-io.svc.cluster.local:27017/
+  MONGODB_URI: mongodb://notice:B9pHqAADpMyFSZr8RGGUcBN@mongodb.db-touno-io.svc.cluster.local:27017/db-notice
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -50,14 +50,14 @@ spec:
             path: /
             port: liveness
           failureThreshold: 10
-          periodSeconds: 3
+          periodSeconds: 2
         resources:
           requests:
-            memory: "64M"
-            cpu: "100m"
+            memory: "16M"
+            cpu: "150m"
           limits:
-            memory: "512Mi"
-            cpu: "1"
+            memory: "128Mi"
+            cpu: "200m"
         envFrom:
         - configMapRef:
             name: notice-app
@@ -70,7 +70,7 @@ metadata:
   name: notice-api
   namespace: notice-line
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       touno-io: notice-api
@@ -96,14 +96,14 @@ spec:
             path: /health
             port: liveness
           failureThreshold: 10
-          periodSeconds: 3
+          periodSeconds: 2
         resources:
           requests:
-            memory: "64Mi"
-            cpu: "100m"
+            memory: "16Mi"
+            cpu: "150m"
           limits:
-            memory: "512Mi"
-            cpu: "1"
+            memory: "128Mi"
+            cpu: "400m"
         envFrom:
         - configMapRef:
             name: notice-app
