@@ -15,7 +15,13 @@ jobs:
   notice-ui:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout SourceCode
+        uses: actions/checkout@v2
+        with:
+          arch: armv7
+          distro: ubuntu18.04
+          githubToken: ${{ github.token }}
+          fetch-depth: 0
 
       - name: Build image notice-ui
         run: docker build . -f notice-ui.Dockerfile -t $UI_NAME
@@ -49,7 +55,13 @@ jobs:
   notice-api:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout SourceCode
+        uses: actions/checkout@v2
+        with:
+          arch: armv7
+          distro: ubuntu18.04
+          githubToken: ${{ github.token }}
+          fetch-depth: 0
 
       - name: Build image notice-api
         run: docker build -f notice-api.Dockerfile -t $API_NAME .
