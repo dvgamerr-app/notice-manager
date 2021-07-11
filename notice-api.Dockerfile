@@ -1,4 +1,5 @@
-FROM --platform=$BUILDPLATFORM node:lts-alpine
+ARG ARCH=arm32v7
+FROM ${ARCH}/node:lts-alpine
 
 LABEL MAINTAINER="Kananek T."
 

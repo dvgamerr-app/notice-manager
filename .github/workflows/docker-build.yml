@@ -43,7 +43,7 @@ jobs:
       - name: Run Buildx and Push image.
         run: |        
           docker buildx build \
-            --platform linux/arm/v7,linux/arm64,linux/amd64 \
+            --platform linux/arm/v7 \
             --tag ${{ steps.prepare.outputs.image_tags }} \
             --file $IMAGE_FILE \
             --output type=image,push=true .
@@ -83,7 +83,7 @@ jobs:
       - name: Run BuildX and Push image.
         run: |        
           docker buildx build \
-            --platform linux/arm/v7,linux/arm64,linux/amd64 \
+            --platform linux/arm/v7 \
             --tag ${{ steps.prepare.outputs.image_tags }} \
             --file $IMAGE_FILE \
             --output type=image,push=true .
