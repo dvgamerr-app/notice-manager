@@ -7,30 +7,26 @@ on:
     tags:
       - v*
 
-env:
-  UI_NAME: notice-ui
-  API_NAME: notice-api
-
 jobs:
   notice-ui:
     runs-on: ubuntu-18.04
+    env:
+      IMAGE_FILE: notice-uiDockerfile
+      IMAGE_NAME: notice-ui
     steps:
       - uses: actions/checkout@v2.1.0
 
-      - name: Build image notice-ui
-        run: docker build . -f notice-ui.Dockerfile -t $UI_NAME --build-arg ARCH=arm32v7
+      - name: Set up Docker BuildX     
+        uses: crazy-max/ghaction-docker-buildx@v1     
 
       - name: Log into docker.io
-        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin    
 
-      - name: Push image to docker.io
+      - name: Prepare image and tag name
+        id: prepare
         run: |
-          IMAGE_ID=${{ github.actor }}/$UI_NAME
-
-          # Change all uppercase to lowercase
+          IMAGE_ID=${{ github.actor }}/$IMAGE_NAME
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-
-          # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Strip "v" prefix from tag name
@@ -42,40 +38,36 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-          docker tag $UI_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+          echo ::set-output name=image_tags::$IMAGE_ID:$VERSION
 
-          
-  notice-api:
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2.1.0
-
-      - name: Set up Docker Buildx      
-        uses: crazy-max/ghaction-docker-buildx@v1     
-        with:        
-          version: latest    
-
-      - name: Run Buildx (push image)      
-        if: success()      
+      - name: Run Buildx and Push image.
         run: |        
           docker buildx build \
             --platform linux/arm/v7 \
-            --tag $API_NAME \
-            --file notice-api.Dockerfile \
-            --build-arg ARCH=arm32v7 .
+            --tag ${{ steps.prepare.outputs.image_tags }} \
+            --file $IMAGE_FILE \
+            --build-arg ARCH=arm32v7 \
+            --output type=image,push=true .
+          
+  notice-api:
+    runs-on: ubuntu-18.04
+    env:
+      IMAGE_FILE: notice-api.Dockerfile
+      IMAGE_NAME: notice-api
+    steps:
+      - uses: actions/checkout@v2.1.0
+
+      - name: Set up Docker BuildX     
+        uses: crazy-max/ghaction-docker-buildx@v1     
 
       - name: Log into docker.io
-        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin    
 
-      - name: Push image to docker.io
+      - name: Prepare image and tag name
+        id: prepare
         run: |
-          IMAGE_ID=${{ github.actor }}/$API_NAME
-
-          # Change all uppercase to lowercase
+          IMAGE_ID=${{ github.actor }}/$IMAGE_NAME
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-
-          # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Strip "v" prefix from tag name
@@ -87,5 +79,13 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-          docker tag $API_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+          echo ::set-output name=image_tags::$IMAGE_ID:$VERSION
+
+      - name: Run BuildX and Push image.
+        run: |        
+          docker buildx build \
+            --platform linux/arm/v7 \
+            --tag ${{ steps.prepare.outputs.image_tags }} \
+            --file $IMAGE_FILE \
+            --build-arg ARCH=arm32v7 \
+            --output type=image,push=true .
