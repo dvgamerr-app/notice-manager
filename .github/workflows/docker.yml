@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build image notice-ui
-        run: docker build -f notice-ui.Dockerfile -t $UI_NAME .
+        run: docker build . -f notice-ui.Dockerfile -t $UI_NAME
 
       - name: Log into docker.io
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin

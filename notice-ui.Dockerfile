@@ -1,4 +1,6 @@
-FROM node:lts AS builder
+ARG ARCH=amd64
+
+FROM ${ARCH}/node:lts AS builder
 LABEL MAINTAINER="Kananek T."
 
 WORKDIR /app
@@ -20,7 +22,7 @@ RUN rm -Rf ./.github \
   ./pages \
   ./node_modules
 
-FROM node:lts-alpine
+FROM ${ARCH}/node:lts-alpine
 LABEL MAINTAINER="Kananek T."
 
 ENV TZ Asia/Bangkok

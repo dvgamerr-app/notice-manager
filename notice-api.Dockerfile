@@ -1,4 +1,7 @@
-FROM node:lts-alpine
+ARG ARCH=amd64
+
+FROM ${ARCH}/node:lts-alpine
+
 LABEL MAINTAINER="Kananek T."
 
 ENV TZ Asia/Bangkok
