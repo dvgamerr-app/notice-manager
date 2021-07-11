@@ -17,14 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2.1.0
       - uses: uraimo/run-on-arch-action@v2.0.5
-        with:
-          arch: armv7
-          distro: ubuntu18.04
-          githubToken: ${{ github.token }}
-          fetch-depth: 0
 
       - name: Build image notice-ui
-        run: docker build . -f notice-ui.Dockerfile -t $UI_NAME
+        run: docker build . -f notice-ui.Dockerfile -t $UI_NAME --build-arg ARCH=arm32v7
 
       - name: Log into docker.io
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin
@@ -57,14 +52,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2.1.0
       - uses: uraimo/run-on-arch-action@v2.0.5
-        with:
-          arch: armv7
-          distro: ubuntu18.04
-          githubToken: ${{ github.token }}
-          fetch-depth: 0
 
       - name: Build image notice-api
-        run: docker build -f notice-api.Dockerfile -t $API_NAME .
+        run: docker build . -f notice-api.Dockerfile -t $API_NAME --build-arg ARCH=arm32v7
 
       - name: Log into docker.io
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin
