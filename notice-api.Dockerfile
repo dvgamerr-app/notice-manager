@@ -1,6 +1,4 @@
-ARG ARCH=amd64
-
-FROM ${ARCH}/node:lts-alpine
+FROM --platform=$BUILDPLATFORM node:lts-alpine
 
 LABEL MAINTAINER="Kananek T."
 
