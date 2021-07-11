@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2.1.0
+
       - name: Build image notice-ui
         run: docker build . -f notice-ui.Dockerfile -t $UI_NAME --build-arg ARCH=arm32v7
 
@@ -49,8 +50,21 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2.1.0
-      - name: Build image notice-api
-        run: docker build . -f notice-api.Dockerfile -t $API_NAME --build-arg ARCH=arm32v7
+
+      - name: Set up Docker Buildx      
+        uses: crazy-max/ghaction-docker-buildx@v1     
+        with:        
+          version: latest    
+
+      - name: Run Buildx (push image)      
+        if: success()      
+        run: |        
+          docker buildx build \
+            --platform linux/arm/v7 \
+            --tag $API_NAME \
+            --file notice-api.Dockerfile \
+            --build-arg ARCH=arm32v7 \
+            --output type=image,push=true .
 
       - name: Log into docker.io
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin
