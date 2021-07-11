@@ -63,7 +63,7 @@ jobs:
             --platform linux/arm/v7 \
             --tag $API_NAME \
             --file notice-api.Dockerfile \
-            --build-arg ARCH=arm32v7
+            --build-arg ARCH=arm32v7 .
 
       - name: Log into docker.io
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin
