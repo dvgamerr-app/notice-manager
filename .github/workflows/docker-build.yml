@@ -16,8 +16,6 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2.1.0
-      - uses: uraimo/run-on-arch-action@v2.0.5
-
       - name: Build image notice-ui
         run: docker build . -f notice-ui.Dockerfile -t $UI_NAME --build-arg ARCH=arm32v7
 
@@ -51,8 +49,6 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2.1.0
-      - uses: uraimo/run-on-arch-action@v2.0.5
-
       - name: Build image notice-api
         run: docker build . -f notice-api.Dockerfile -t $API_NAME --build-arg ARCH=arm32v7
 
