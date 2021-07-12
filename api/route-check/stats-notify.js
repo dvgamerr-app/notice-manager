@@ -11,7 +11,7 @@ const getStats = async (botname) => {
     created: { $gte: date.toISOString() }
   })
 
-  return { usage: push, limited: 1000, reply: 0, push, updated: dayjs().toDate() }
+  return { usage: push, limited: 1000, reply: 0, push: push || 0, updated: dayjs().toDate() }
 }
 
 module.exports = async (req) => {
