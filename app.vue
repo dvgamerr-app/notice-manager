@@ -2,9 +2,9 @@
   <transition name="fade">
     <div>
       <client-only>
-        <div slot="placeholder">
+        <slot name="placeholder">
           <b-spinner variant="success" />
-        </div>
+        </slot>
         <b-navbar v-if="$store.state.full" class="navtop">
           <b-container fluid>
             <b-navbar-brand>
@@ -30,7 +30,7 @@
         <footer class="footer">
           <b-container fluid>
             <p>
-              LINE-BOT v{{ require('../package.json').version }}
+              LINE-BOT v0.0.0
             </p>
           </b-container>
         </footer>
@@ -39,25 +39,34 @@
   </transition>
 </template>
 <script>
-export default {
-  transition: 'fade',
-  data: () => ({
-  }),
-  computed: {
-    profile () {
-      return this.$store.state.profile
-    }
-  },
-  methods: {
-    // loggedIn () {
-    //   return this.$liff.isLoggedIn()
-    // }
-  }
-}
+import Vue from 'vue'
+import BootstrapVue3 from 'bootstrap-vue-3'
+
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue-3/dist/bootstrap-vue-3.css'
+
+Vue.use(BootstrapVue3)
+
+// export default {
+//   transition: 'fade',
+//   data: () => ({
+//   }),
+//   computed: {
+//     profile () {
+//       return this.$store.state.profile
+//     }
+//   },
+//   methods: {
+//     // loggedIn () {
+//     //   return this.$liff.isLoggedIn()
+//     // }
+//   }
+// }
 </script>
 
 <style lang="scss">
-@import '../assets/fonts/stylesheet.css';
+@import '/assets/index.scss';
+@import '/assets/fonts/stylesheet.css';
 
 body {
   .main {

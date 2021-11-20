@@ -6,8 +6,7 @@ module.exports = {
     node: true
   },
   extends: [
-    'eslint:recommended',
-    '@nuxtjs'
+    'eslint:recommended'
   ],
   parserOptions: {
     ecmaVersion: 12
