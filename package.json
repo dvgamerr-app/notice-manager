@@ -15,6 +15,7 @@
   "author": "Kananek T.",
   "license": "ISC",
   "devDependencies": {
+    "@nuxtjs/eslint-config": "^7.0.0",
     "env-cmd": "^10.1.0",
     "nodemon": "^2.0.15",
     "nuxt3": "latest",

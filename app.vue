@@ -38,7 +38,7 @@
     </div>
   </transition>
 </template>
-<script>
+<script setup>
 import Vue from 'vue'
 import BootstrapVue3 from 'bootstrap-vue-3'
 
