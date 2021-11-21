@@ -2,7 +2,7 @@ const { Server } = require('@hapi/hapi')
 const Sentry = require('@sentry/node')
 
 const { notice } = require('@touno-io/db/schema')
-const logger = require('@touno-io/debuger')('nuxt')
+const logger = require('@touno-io/debuger')('hapi')
 // const { lineInitilize, cmdExpire } = require('./api/tracking')
 
 const routes = require('./api')
@@ -10,7 +10,7 @@ const routes = require('./api')
 const server = new Server({
   port: 3000,
   host: '0.0.0.0',
-  routes: { state: { parse: true, failAction: 'ignore' } }
+  routes: { state: { parse: true }, cors: { origin: ['*'], additionalHeaders: ['cache-control', 'x-requested-with'] } }
 })
 const nuxtCreateBuilder = async () => {
   logger.info('MongoDB db-notice connecting...')
@@ -33,6 +33,14 @@ const nuxtCreateBuilder = async () => {
     options: { client: { dsn: process.env.SENTRY_DSN || false } }
   })
 
+  // server.ext('onRequest', async (req, h)=>{
+  //   const userId = req.headers['x-id']
+  //   if (!userId) {
+  //     throw Boom.unauthorized('User is unauthorized.')
+  //   }
+  //   return h.continue
+  // })
+  
   server.route(routes)
 
   await server.start()

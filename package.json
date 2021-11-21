@@ -36,6 +36,7 @@
     "doc": "docs"
   },
   "dependencies": {
+    "@hapi/boom": "^9.1.4",
     "@hapi/hapi": "^20.2.1",
     "@line/bot-sdk": "^7.4.0",
     "@sentry/node": "^6.15.0",
