@@ -8,8 +8,8 @@ ENV TZ Asia/Bangkok
 ENV NODE_ENV production
 
 WORKDIR /app
-COPY api index.js package.json yarn.lock ./
+COPY ./api ./index.js ./package.json ./yarn.lock ./
 
-RUN yarn
+RUN yarn --production --frozen-lockfile
 
 CMD ["yarn", "start:api"]
