@@ -39,13 +39,10 @@
   </transition>
 </template>
 <script setup>
-import Vue from 'vue'
-import BootstrapVue3 from 'bootstrap-vue-3'
-
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue-3/dist/bootstrap-vue-3.css'
-
-Vue.use(BootstrapVue3)
+import 'assets/index.scss'
+import 'assets/fonts/stylesheet.css'
 
 // export default {
 //   transition: 'fade',
@@ -65,8 +62,6 @@ Vue.use(BootstrapVue3)
 </script>
 
 <style lang="scss">
-@import '/assets/index.scss';
-@import '/assets/fonts/stylesheet.css';
 
 body {
   .main {
