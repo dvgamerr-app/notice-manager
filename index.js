@@ -12,6 +12,7 @@ const server = new Server({
   host: '0.0.0.0',
   routes: { state: { parse: true }, cors: { origin: ['*'], additionalHeaders: ['cache-control', 'x-requested-with'] } }
 })
+
 const nuxtCreateBuilder = async () => {
   logger.info('MongoDB db-notice connecting...')
   await notice.open()
@@ -40,7 +41,7 @@ const nuxtCreateBuilder = async () => {
   //   }
   //   return h.continue
   // })
-  
+
   server.route(routes)
 
   await server.start()

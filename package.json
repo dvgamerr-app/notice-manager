@@ -9,7 +9,8 @@
     "serv": "env-cmd nodemon -w ./api index.js",
     "build": "nuxi build",
     "start:ui": "node .output/server/index.mjs",
-    "start:api": "node ."
+    "start:api": "node .",
+    "eslint": "eslint --ext \".js,.vue\" --ignore-path .gitignore ."
   },
   "keywords": [],
   "author": "Kananek T.",
@@ -45,6 +46,7 @@
     "bootstrap": "^5.1.3",
     "bootstrap-vue-3": "^0.0.5",
     "dayjs": "^1.10.7",
+    "eslint": "^8.3.0",
     "hapi-sentry": "^3.2.0",
     "numeral": "^2.0.6",
     "simple-oauth2": "^4.2.0",
