@@ -2,8 +2,7 @@ name: Docker
 
 on:
   push:
-    branches: 
-      - main
+    branches: [ master, main, feature/rebuild-nuxt3 ]
     tags:
       - v*
 
@@ -14,76 +13,146 @@ jobs:
       IMAGE_FILE: notice-ui.Dockerfile
       IMAGE_NAME: notice-ui
     steps:
-      - uses: actions/checkout@v2.1.0
+      - uses: actions/checkout@v2
 
-      - name: Set up Docker BuildX     
-        uses: crazy-max/ghaction-docker-buildx@v1     
+      - name: Build image $IMAGE_NAME
+        run: docker build -f $IMAGE_FILE -t $IMAGE_NAME .
 
       - name: Log into docker.io
-        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin    
+        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin
 
-      - name: Prepare image and tag name
-        id: prepare
+      - name: Push image to docker.io
         run: |
           IMAGE_ID=${{ github.actor }}/$IMAGE_NAME
+
+          # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Strip "v" prefix from tag name
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
           # Use Docker `latest` tag convention
-          [ "$VERSION" == "main" ] && VERSION=latest
+          [ "$VERSION" == "master" ] && VERSION=latest
 
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-          echo ::set-output name=image_tags::$IMAGE_ID:$VERSION
-
-      - name: Run Buildx and Push image.
-        run: |        
-          docker buildx build \
-            --platform linux/arm/v7 \
-            --tag ${{ steps.prepare.outputs.image_tags }} \
-            --file $IMAGE_FILE \
-            --output type=image,push=true .
-          
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
   notice-api:
     runs-on: ubuntu-18.04
     env:
       IMAGE_FILE: notice-api.Dockerfile
       IMAGE_NAME: notice-api
     steps:
-      - uses: actions/checkout@v2.1.0
+      - uses: actions/checkout@v2
 
-      - name: Set up Docker BuildX     
-        uses: crazy-max/ghaction-docker-buildx@v1     
+      - name: Build image $IMAGE_NAME
+        run: docker build -f $IMAGE_FILE -t $IMAGE_NAME .
 
       - name: Log into docker.io
-        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin    
+        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin
 
-      - name: Prepare image and tag name
-        id: prepare
+      - name: Push image to docker.io
         run: |
           IMAGE_ID=${{ github.actor }}/$IMAGE_NAME
+
+          # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Strip "v" prefix from tag name
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
           # Use Docker `latest` tag convention
-          [ "$VERSION" == "main" ] && VERSION=latest
+          [ "$VERSION" == "master" ] && VERSION=latest
 
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-          echo ::set-output name=image_tags::$IMAGE_ID:$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+  # notice-ui:
+  #   runs-on: ubuntu-18.04
+  #   env:
+  #     IMAGE_FILE: notice-ui.Dockerfile
+  #     IMAGE_NAME: notice-ui
+  #   steps:
+  #     - uses: actions/checkout@v2.1.0
 
-      - name: Run BuildX and Push image.
-        run: |        
-          docker buildx build \
-            --platform linux/arm/v7 \
-            --tag ${{ steps.prepare.outputs.image_tags }} \
-            --file $IMAGE_FILE \
-            --output type=image,push=true .
+  #     - name: Set up Docker BuildX     
+  #       uses: crazy-max/ghaction-docker-buildx@v1     
+
+  #     - name: Log into docker.io
+  #       run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin    
+
+  #     - name: Prepare image and tag name
+  #       id: prepare
+  #       run: |
+  #         IMAGE_ID=${{ github.actor }}/$IMAGE_NAME
+  #         IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+  #         VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+  #         # Strip "v" prefix from tag name
+  #         [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+  #         # Use Docker `latest` tag convention
+  #         [ "$VERSION" == "main" ] && VERSION=latest
+
+  #         echo IMAGE_ID=$IMAGE_ID
+  #         echo VERSION=$VERSION
+
+  #         echo ::set-output name=image_tags::$IMAGE_ID:$VERSION
+
+  #     - name: Run Buildx and Push image.
+  #       run: |        
+  #         docker buildx build \
+  #           --platform linux/arm/v7 \
+  #           --tag ${{ steps.prepare.outputs.image_tags }} \
+  #           --file $IMAGE_FILE \
+  #           --output type=image,push=true .
+          
+  # notice-api:
+  #   runs-on: ubuntu-18.04
+  #   env:
+  #     IMAGE_FILE: notice-api.Dockerfile
+  #     IMAGE_NAME: notice-api
+  #   steps:
+  #     - uses: actions/checkout@v2.1.0
+
+  #     - name: Set up Docker BuildX     
+  #       uses: crazy-max/ghaction-docker-buildx@v1     
+
+  #     - name: Log into docker.io
+  #       run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin    
+
+  #     - name: Prepare image and tag name
+  #       id: prepare
+  #       run: |
+  #         IMAGE_ID=${{ github.actor }}/$IMAGE_NAME
+  #         IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+  #         VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+  #         # Strip "v" prefix from tag name
+  #         [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+  #         # Use Docker `latest` tag convention
+  #         [ "$VERSION" == "main" ] && VERSION=latest
+
+  #         echo IMAGE_ID=$IMAGE_ID
+  #         echo VERSION=$VERSION
+
+  #         echo ::set-output name=image_tags::$IMAGE_ID:$VERSION
+
+  #     - name: Run BuildX and Push image.
+  #       run: |        
+  #         docker buildx build \
+  #           --platform linux/arm/v7 \
+  #           --tag ${{ steps.prepare.outputs.image_tags }} \
+  #           --file $IMAGE_FILE \
+  #           --output type=image,push=true .

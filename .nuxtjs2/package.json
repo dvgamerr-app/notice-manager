@@ -1,0 +1,79 @@
+{
+  "name": "line-notice",
+  "version": "5.3.3",
+  "description": "Server notify message to 3party.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start:ui": "nuxt start",
+    "start:api": "node index.js",
+    "serv": "env-cmd nodemon -w ./api index.js",
+    "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore .",
+    "lint": "npm run lint:js"
+  },
+  "keywords": [],
+  "author": "Kananek T.",
+  "license": "ISC",
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.34",
+    "@fortawesome/free-brands-svg-icons": "^5.15.2",
+    "@fortawesome/free-regular-svg-icons": "^5.15.2",
+    "@fortawesome/free-solid-svg-icons": "^5.15.2",
+    "@hapi/hapi": "^20.1.3",
+    "@line/bot-sdk": "^7.3.0",
+    "@line/liff": "^2.10.0",
+    "@nuxtjs/auth": "^4.9.1",
+    "@nuxtjs/axios": "^5.13.1",
+    "@nuxtjs/fontawesome": "^1.1.2",
+    "@nuxtjs/hapi": "^3.0.0",
+    "@nuxtjs/pwa": "^3.3.5",
+    "@riophae/vue-treeselect": "^0.4.0",
+    "@sentry/node": "^6.4.1",
+    "@touno-io/db": "^3.2.1",
+    "@touno-io/debuger": "^2.4.0",
+    "@vuex-orm/core": "^0.36.4",
+    "axios": "^0.21.1",
+    "axios-retry": "^3.1.8",
+    "body-parser": "^1.19.0",
+    "bootstrap": "^4.6.0",
+    "bootstrap-vue": "^2.21.2",
+    "core-js": "^2.5.7",
+    "dayjs": "^1.10.4",
+    "debounce": "^1.2.0",
+    "hapi-cors": "^1.0.3",
+    "hapi-sentry": "^3.1.0",
+    "marked": "^2.0.6",
+    "node-cron": "^3.0.0",
+    "numeral": "^2.0.6",
+    "nuxt": "^2.15.3",
+    "simple-oauth2": "^4.2.0",
+    "vue-clipboards": "^1.3.0"
+  },
+  "devDependencies": {
+    "@hapi/code": "^8.0.2",
+    "@hapi/lab": "^24.2.1",
+    "@nuxtjs/eslint-config": "^6.0.0",
+    "@nuxtjs/eslint-module": "^3.0.2",
+    "@nuxtjs/stylelint-module": "^4.0.0",
+    "env-cmd": "^10.1.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.22.0",
+    "eslint-plugin-nuxt": "^2.0.0",
+    "eslint-plugin-vue": "^7.7.0",
+    "node-sass": "^5.0.0",
+    "nodemon": "^2.0.7",
+    "sass-loader": "^10.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com//touno-io/line-notice.git"
+  },
+  "bugs": {
+    "url": "https://github.com//touno-io/line-notice/issues"
+  },
+  "homepage": "https://github.com//touno-io/line-notice#readme",
+  "directories": {
+    "doc": "docs"
+  }
+}

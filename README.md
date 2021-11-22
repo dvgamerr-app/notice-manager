@@ -1,33 +1,29 @@
-# LINE-BOT and LINE Notify Web GUI
-สร้าง http router สำหรับใช้ noti ข้อมูล
+# Nuxt 3 Minimal Starter
 
-### Supported
-- LINE BOT
-- LINE Notify
-- Slack
+We recommend to look at the [documentation](https://v3.nuxtjs.org).
 
-#### Dashboard
-![Dashboard](https://raw.githubusercontent.com/touno-io/line-notice/master/docs/dashboard.png)
-![Documentation](https://raw.githubusercontent.com/touno-io/line-notice/master/docs/documentation.png)
+## Setup
 
-### Installation
+Make sure to install the dependencies
+
 ```bash
-git clone https://github.com/touno-io/line-notice.git line-notice
-cd line-notice
-npm i
-npm run dev
-# open browser http://localhost:4000
+yarn install
 ```
 
-#### Environment
+## Development
 
-- `HOST_API` require domain name and api. example 'https://notice.domain.com'
+Start the development server on http://localhost:3000
 
-```env
-TZ=Asia/Bangkok
-MONGODB_URI=
-```
-### Deploy
+```bash
+yarn dev
 ```
 
+## Production
+
+Build the application for production:
+
+```bash
+yarn build
 ```
+
+Checkout the [deployment documentation](https://v3.nuxtjs.org/docs/deployment).
