@@ -1,6 +1,5 @@
-# ARG ARCH=arm32v7
-# FROM ${ARCH}/node:lts-alpine
-FROM node:lts-alpine
+ARG ARCH=arm32v7
+FROM ${ARCH}/node:lts-alpine
 
 LABEL MAINTAINER="Kananek T."
 
@@ -8,9 +7,8 @@ ENV TZ Asia/Bangkok
 ENV NODE_ENV production
 
 WORKDIR /app
-COPY ./api ./api/
-COPY index.js package.json yarn.lock ./
+COPY . /app
 
-RUN yarn --production --frozen-lockfile
+RUN npm i --production
 
-CMD ["yarn", "start:api"]
+CMD ["npm", "run", "start:api"]

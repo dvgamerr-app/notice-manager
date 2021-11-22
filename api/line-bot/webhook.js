@@ -1,4 +1,3 @@
-const Boom = require('@hapi/boom')
 const logger = require('@touno-io/debuger')('API')
 const { notice } = require('@touno-io/db/schema')
 const sdkClient = require('../sdk-client')
@@ -25,86 +24,81 @@ const getVariable = async (e) => {
 }
 
 module.exports = async (req, h) => {
-  let delayTime = 0
   const startTime = new Date().getTime()
 
-  try {
-    await notice.open()
-    const { LineInbound } = notice.get()
-    const { botname } = req.params
+  await notice.open()
+  const { LineInbound } = notice.get()
+  const { botname } = req.params
 
-    const { line, pushMessage } = await sdkClient(botname)
+  const { line, pushMessage } = await sdkClient(botname)
 
-    if (!req.payload || !req.payload.events.length) { return { OK: true } }
+  if (!req.payload || !req.payload.events.length) { return { OK: true } }
 
-    const { events } = req.payload
+  let delayTime = 0
+  const { events } = req.payload
 
-    for (const e of events) {
-      if (e.replyToken === _VERIFY_TOKEN) { continue }
+  for (const e of events) {
+    if (e.replyToken === _VERIFY_TOKEN) { continue }
 
-      delayTime = new Date().getTime() - new Date(e.timestamp).getTime()
+    delayTime = new Date().getTime() - new Date(e.timestamp).getTime()
 
-      const state = await getVariable(e) || {}
-      new LineInbound(Object.assign(e, { botname })).save()
+    const state = await getVariable(e) || {}
+    new LineInbound(Object.assign(e, { botname })).save()
 
-      if (state.data && state.data.bypass) {
-        let forceStop = false
-        if (e.type === 'message' && e.message.type === 'text' && state.userId === e.source.userId) {
-          const { text } = e.message
-          const txtBot = /บอท|bot/i.exec(text)
-          const txtCancel = /ยกเลิก|cancel|ปิด/i.exec(e.message.text)
-          if (!txtBot || !txtCancel) { forceStop = true }
-        }
-        await userCustom[botname][state.data.index].bypass.call(this, e, pushMessage, line, forceStop)
-        continue
-      }
-
-      if (e.type === 'message' && e.message.type === 'text') {
+    if (state.data && state.data.bypass) {
+      let forceStop = false
+      if (e.type === 'message' && e.message.type === 'text' && state.userId === e.source.userId) {
         const { text } = e.message
-        const { groups } = /^\/(?<name>[-_a-zA-Z]+)(?<arg>\W.*|)/ig.exec(text) || {}
-
-        if (groups) {
-          const args = groups.arg.trim().split(' ').filter(e => e !== '')
-
-          if (!e.replyToken || !groups || !onCommands[groups.name]) { continue }
-          // await LineCMD.updateOne({ _id: cmd._id }, { $set: { executing: true } })
-          const result = await onCommands[groups.name].call(this, botname, args, e, line)
-          // await LineCMD.updateOne({ _id: cmd._id }, { $set: { executed: true } })
-          await pushMessage(e, result)
-        } else {
-          const txtBot = /บอท|bot/i.exec(text)
-          if (!txtBot || !userCustom[botname]) { continue }
-
-          for (const custom of userCustom[botname]) {
-            const cmdCustom = custom.cmd.filter(e => text.indexOf(e) > txtBot.index)
-            if (!cmdCustom.length) { continue }
-            await custom.job.call(this, e, pushMessage, line)
-            break
-          }
-        }
-      } else if (typeof onEvents[e.type] === 'function') {
-        const result = await onEvents[e.type].call(this, botname, e, line)
-        await pushMessage(e, result)
-      // } else if (e.type === 'postback') {
-      //   await new LineCMD({
-      //     botname: bot,
-      //     userId: e.source.userId,
-      //     command: e.type,
-      //     args: null,
-      //     text: e.postback.data,
-      //     event: e,
-      //     executing: false,
-      //     executed: false,
-      //     updated: null,
-      //     created: new Date()
-      //   }).save()
+        const txtBot = /บอท|bot/i.exec(text)
+        const txtCancel = /ยกเลิก|cancel|ปิด/i.exec(e.message.text)
+        if (!txtBot || !txtCancel) { forceStop = true }
       }
+      await userCustom[botname][state.data.index].bypass.call(this, e, pushMessage, line, forceStop)
+      continue
     }
 
-    logger.info(`Webhook delay: ${delayTime}ms. and used ${new Date().getTime() - startTime}ms.`)
-  } catch (ex) {
-    throw Boom.internal(ex.message, ex)
+    if (e.type === 'message' && e.message.type === 'text') {
+      const { text } = e.message
+      const { groups } = /^\/(?<name>[-_a-zA-Z]+)(?<arg>\W.*|)/ig.exec(text) || {}
+
+      if (groups) {
+        const args = groups.arg.trim().split(' ').filter(e => e !== '')
+
+        if (!e.replyToken || !groups || !onCommands[groups.name]) { continue }
+        // await LineCMD.updateOne({ _id: cmd._id }, { $set: { executing: true } })
+        const result = await onCommands[groups.name].call(this, botname, args, e, line)
+        // await LineCMD.updateOne({ _id: cmd._id }, { $set: { executed: true } })
+        await pushMessage(e, result)
+      } else {
+        const txtBot = /บอท|bot/i.exec(text)
+        if (!txtBot || !userCustom[botname]) { continue }
+
+        for (const custom of userCustom[botname]) {
+          const cmdCustom = custom.cmd.filter(e => text.indexOf(e) > txtBot.index)
+          if (!cmdCustom.length) { continue }
+          await custom.job.call(this, e, pushMessage, line)
+          break
+        }
+      }
+    } else if (typeof onEvents[e.type] === 'function') {
+      const result = await onEvents[e.type].call(this, botname, e, line)
+      await pushMessage(e, result)
+    // } else if (e.type === 'postback') {
+    //   await new LineCMD({
+    //     botname: bot,
+    //     userId: e.source.userId,
+    //     command: e.type,
+    //     args: null,
+    //     text: e.postback.data,
+    //     event: e,
+    //     executing: false,
+    //     executed: false,
+    //     updated: null,
+    //     created: new Date()
+    //   }).save()
+    }
   }
 
-  return { OK: true, delay: delayTime, used: new Date().getTime() - startTime }
+  logger.info(`Webhook delay: ${delayTime}ms. and used ${new Date().getTime() - startTime}ms.`)
+  return { OK: true }
 }

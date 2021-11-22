@@ -1,9 +1,10 @@
+const qs = require('querystring')
 
 const synologyHost = process.env.SYNOLOGY_HOST || 'http://localhost:5000'
 const synologyAppId = process.env.SYNOLOGY_APPID || 'xxxxxxxxxxxxxxxxx'
 
 module.exports = (req, h) => {
-  const sso = new URLSearchParams({
+  const sso = qs.stringify({
     app_id: synologyAppId,
     scope: 'user_id',
     state: `notice-auth_${parseInt(Math.random() * 99999)}`,
