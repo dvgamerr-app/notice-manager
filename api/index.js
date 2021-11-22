@@ -9,15 +9,13 @@ module.exports = [
       return { OK: true }
     }
   },
-  // { method: 'GET', path: '/auth/sso', handler: require('./auth/sso') },
-  // { method: 'POST', path: '/auth/login', handler: require('./auth/login') },
-  // { method: 'POST', path: '/auth/user', handler: require('./auth/user') },
+  { method: 'GET', path: '/auth/sso', handler: require('./auth/sso') },
+  { method: 'POST', path: '/auth/login', handler: require('./auth/login') },
+  { method: 'POST', path: '/auth/user', handler: require('./auth/user') },
 
   { method: 'POST', path: '/line/{botname}', handler: require('./line-bot/webhook') },
   { method: 'PUT', path: '/line/{botname}/{to}', handler: require('./line-bot/push-message') },
   { method: ['GET', 'PATCH', 'PUT'], path: '/line/{botname}/{roomname}/{funcId}', handler: require('./line-bot/webhook-func') },
-
-  { method: 'PUT', path: '/telegram/{bot}/{room}', handler: require('./telegram/message') },
 
   // { method: 'PUT', path: '/flex/{name}/{to}', handler: require('./route-bot/push-flex') },
 
