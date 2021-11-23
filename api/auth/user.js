@@ -10,7 +10,7 @@ module.exports = async (req, h) => {
 
     const regexBearer = /^Bearer./i
     if (!regexBearer.test(authorization)) { return {} }
-  
+
     const sso = new URLSearchParams({
       app_id: synologyAppId,
       action: 'exchange',
@@ -20,7 +20,7 @@ module.exports = async (req, h) => {
       method: 'GET',
       url: `${synologyHost}/webman/sso/SSOAccessToken.cgi?${sso}`
     })
-  
+
     return { user: res.success ? res.data : null }
   } catch (ex) {
     return Boom.internal(ex.message, ex)
