@@ -19,7 +19,7 @@
     "@nuxtjs/eslint-config": "^7.0.0",
     "env-cmd": "^10.1.0",
     "nodemon": "^2.0.15",
-    "nuxt3": "latest",
+    "nuxt3": "^3.0.0-27296423.f3082ca",
     "pug": "^3.0.2",
     "pug-plain-loader": "^1.1.0",
     "sass": "^1.43.4",
@@ -37,8 +37,6 @@
     "doc": "docs"
   },
   "dependencies": {
-    "@hapi/boom": "^9.1.4",
-    "@hapi/hapi": "^20.2.1",
     "@line/bot-sdk": "^7.4.0",
     "@sentry/node": "^6.15.0",
     "@touno-io/db": "^3.2.1",
@@ -47,9 +45,10 @@
     "bootstrap-vue-3": "^0.0.5",
     "dayjs": "^1.10.7",
     "eslint": "^8.3.0",
-    "hapi-sentry": "^3.2.0",
+    "fastify": "^3.24.0",
+    "fastify-cors": "^6.0.2",
+    "mongoose": "^6.0.13",
     "numeral": "^2.0.6",
-    "simple-oauth2": "^4.2.0",
-    "telegraf": "^4.4.2"
+    "simple-oauth2": "^4.2.0"
   }
 }

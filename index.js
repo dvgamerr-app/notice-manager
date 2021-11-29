@@ -1,60 +1,69 @@
-const { Server } = require('@hapi/hapi')
+const os = require('os')
+
+const fastify = require('fastify')({ logger: false })
 const Sentry = require('@sentry/node')
-
 const { notice } = require('@touno-io/db/schema')
-const logger = require('@touno-io/debuger')('hapi')
-// const { lineInitilize, cmdExpire } = require('./api/tracking')
+const logger = require('@touno-io/debuger')('API')
 
-const routes = require('./api')
+const apiRoute = require('./api')
+const pkg = require('./package.json')
 
-const server = new Server({
-  port: 3000,
-  host: '0.0.0.0',
-  routes: { state: { parse: true }, cors: { origin: ['*'], additionalHeaders: ['cache-control', 'x-requested-with'] } }
+const production = process.env.NODE_ENV === 'production'
+const infoInit = {
+  serverName: os.hostname(),
+  environment: process.env.NODE_ENV || 'development',
+  release: pkg.name || 'funcless',
+  debug: !production,
+  dsn: production ? process.env.SENTRY_DSN : null,
+  tracesSampleRate: 1.0
+}
+logger.info('Sentry:', JSON.stringify(infoInit))
+Sentry.init(infoInit)
+
+fastify.setErrorHandler(function (ex, req, reply) {
+  logger.error(ex)
+  Sentry.captureException(ex)
+  reply.status(500).send(ex)
 })
 
-const nuxtCreateBuilder = async () => {
-  logger.info('MongoDB db-notice connecting...')
-  await notice.open()
-
-  logger.start(`Server initialize... (${process.env.NODE_ENV})`)
-  await server.initialize()
-  // await (Promise.all([lineInitilize(), cmdExpire()]))
-  // await server.register({
-  //   plugin: require('hapi-cors'),
-  //   options: {
-  //     origins: [process.env.NODE_ENV !== 'production' ? '*' : 'http://localhost:4000'],
-  //     headers: [process.env.NODE_ENV !== 'production' ? '*' : 'x-id'],
-  //     methods: [process.env.NODE_ENV !== 'production' ? '*' : 'head,get,put,post,delete']
-  //   }
-  // })
-
-  await server.register({
-    plugin: require('hapi-sentry'),
-    options: { client: { dsn: process.env.SENTRY_DSN || false } }
+fastify.register(require('fastify-cors'))
+fastify.register((fastify, options, done) => {
+  fastify.addHook('onRequest', (req, reply, done) => {
+    req.userId = req.headers['x-userId']
+    reply.header('x-developer', '@dvgamerr')
+    done()
   })
 
-  // server.ext('onRequest', async (req, h)=>{
-  //   const userId = req.headers['x-id']
-  //   if (!userId) {
-  //     throw Boom.unauthorized('User is unauthorized.')
-  //   }
-  //   return h.continue
-  // })
+  fastify.get('/health', (req, reply) => reply.code(200).send('☕'))
+  done()
+})
 
-  server.route(routes)
-
-  await server.start()
-  logger.start(`Server running on ${server.info.uri}`)
+for (const api of apiRoute) {
+  fastify.route(api)
 }
 
-process.on('unhandledRejection', (ex) => {
+const initialize = async () => {
+  await notice.open()
+}
+
+const exitHandler = (err, exitCode) => {
+  notice.close()
+  logger.error(`${exitCode}:Exiting... (${err})`)
+  process.exit(0)
+}
+
+process.on('SIGINT', exitHandler)
+process.on('SIGTERM', exitHandler)
+process.on('SIGUSR1', exitHandler)
+process.on('SIGUSR2', exitHandler)
+process.on('uncaughtException', exitHandler)
+
+initialize().then(async () => {
+  await fastify.listen(3000, '0.0.0.0')
+  logger.info('fastify listen:3000')
+}).catch((ex) => {
   Sentry.captureException(ex)
-  logger.error(ex)
-  process.exit(1)
-})
-nuxtCreateBuilder().catch((ex) => {
-  Sentry.captureException(ex)
+  fastify.log.error(ex)
   logger.error(ex)
   process.exit(1)
 })
