@@ -8,9 +8,9 @@ module.exports = [
   { method: 'POST', path: '/line/:bot', handler: require('./line-bot/webhook') },
 
   // API Notify
-  { method: 'GET', path: '/register/:service/:room?', handler: require('./route-bot/oauth') },
-  { method: 'PUT', path: '/revoke/:service/:room', handler: require('./route-bot/revoke') },
-  { method: ['PUT', 'POST'], path: '/notify/:service/:room', handler: require('./route-bot/notify') },
+  { method: 'GET', path: '/register/:service/:room', handler: require('./line-notify/oauth') },
+  { method: 'PUT', path: '/revoke/:service/:room', handler: require('./line-notify/revoke') },
+  { method: ['PUT', 'POST'], path: '/notify/:service/:room', handler: require('./line-notify/message') },
 
   // API UI
   { method: 'GET', path: '/api/line', handler: require('./route-db/line-bot') },

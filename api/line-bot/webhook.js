@@ -31,9 +31,9 @@ module.exports = async (req, h) => {
   try {
     await notice.open()
     const { LineInbound } = notice.get()
-    const { botname } = req.params
+    const { bot } = req.params
 
-    const { line, pushMessage } = await sdkClient(botname)
+    const { line, pushMessage } = await sdkClient(bot)
 
     if (!req.payload || !req.payload.events.length) { return { OK: true } }
 
@@ -45,7 +45,7 @@ module.exports = async (req, h) => {
       delayTime = new Date().getTime() - new Date(e.timestamp).getTime()
 
       const state = await getVariable(e) || {}
-      new LineInbound(Object.assign(e, { botname })).save()
+      new LineInbound(Object.assign(e, { botname: bot })).save()
 
       if (state.data && state.data.bypass) {
         let forceStop = false
@@ -55,7 +55,7 @@ module.exports = async (req, h) => {
           const txtCancel = /ยกเลิก|cancel|ปิด/i.exec(e.message.text)
           if (!txtBot || !txtCancel) { forceStop = true }
         }
-        await userCustom[botname][state.data.index].bypass.call(this, e, pushMessage, line, forceStop)
+        await userCustom[bot][state.data.index].bypass.call(this, e, pushMessage, line, forceStop)
         continue
       }
 
@@ -68,14 +68,14 @@ module.exports = async (req, h) => {
 
           if (!e.replyToken || !groups || !onCommands[groups.name]) { continue }
           // await LineCMD.updateOne({ _id: cmd._id }, { $set: { executing: true } })
-          const result = await onCommands[groups.name].call(this, botname, args, e, line)
+          const result = await onCommands[groups.name].call(this, bot, args, e, line)
           // await LineCMD.updateOne({ _id: cmd._id }, { $set: { executed: true } })
           await pushMessage(e, result)
         } else {
           const txtBot = /บอท|bot/i.exec(text)
-          if (!txtBot || !userCustom[botname]) { continue }
+          if (!txtBot || !userCustom[bot]) { continue }
 
-          for (const custom of userCustom[botname]) {
+          for (const custom of userCustom[bot]) {
             const cmdCustom = custom.cmd.filter(e => text.indexOf(e) > txtBot.index)
             if (!cmdCustom.length) { continue }
             await custom.job.call(this, e, pushMessage, line)
@@ -83,7 +83,7 @@ module.exports = async (req, h) => {
           }
         }
       } else if (typeof onEvents[e.type] === 'function') {
-        const result = await onEvents[e.type].call(this, botname, e, line)
+        const result = await onEvents[e.type].call(this, bot, e, line)
         await pushMessage(e, result)
       // } else if (e.type === 'postback') {
       //   await new LineCMD({

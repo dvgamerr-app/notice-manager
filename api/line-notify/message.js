@@ -1,4 +1,3 @@
-const { nullFormat } = require('numeral')
 const { notice } = require('@touno-io/db/schema')
 const sdkNotify = require('../sdk-notify')
 
@@ -15,16 +14,17 @@ const packageSticker = {
   ]
 }
 
-module.exports = async (req, res) => {
+module.exports = async (req, reply) => {
+  const startTime = new Date().getTime()
   const IsWebhook = req.method === 'post'
   const { room, service } = req.params
-  const { sticker, imageThumbnail, imageFullsize, notificationDisabled, imageFile } = req.payload
-  let { message, stickerPackageId, stickerId } = req.payload
-  let outbound = nullFormat
+  const { sticker, imageThumbnail, imageFullsize, notificationDisabled, imageFile } = req.body
+  let { message, stickerPackageId, stickerId } = req.body
   const { LineOutbound, ServiceWebhook } = notice.get()
 
-  outbound = await new LineOutbound({ botname: service, userTo: room, type: IsWebhook ? 'webhook' : 'notify', sender: JSON.stringify(req.payload) || {} }).save()
-  const { pushNotify } = await sdkNotify(service, room)
+  const outbound = await new LineOutbound({ service, userTo: room, type: IsWebhook ? 'webhook' : 'notify', sender: req.body || {}, sended: true }).save()
+  reply.header('x-line-outbound-id', outbound._id)
+
   if (!IsWebhook) {
     if (message) { message = message.replace(/\\n|newline/ig, '\n') }
     if (sticker) {
@@ -47,16 +47,22 @@ module.exports = async (req, res) => {
     }
   }
 
-  const { headers, data } = await pushNotify({ message, imageThumbnail, imageFullsize, stickerPackageId, stickerId, imageFile, notificationDisabled })
+  try {
+    const { pushNotify } = await sdkNotify(service, room)
+    let delayTime = new Date().getTime()
+    const { headers, data } = await pushNotify({ message, imageThumbnail, imageFullsize, stickerPackageId, stickerId, imageFile, notificationDisabled })
+    delayTime = new Date().getTime() - delayTime
+    const ratelimit = {
+      remaining: parseInt(headers['x-ratelimit-remaining']),
+      image: parseInt(headers['x-ratelimit-imageremaining']),
+      reset: parseInt(headers['x-ratelimit-reset']) * 1000
+    }
+    if (data.status !== 200) {
+      await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: false, error: data.message } })
+    }
 
-  const ratelimit = {
-    remaining: parseInt(headers['x-ratelimit-remaining']),
-    image: parseInt(headers['x-ratelimit-imageremaining']),
-    reset: parseInt(headers['x-ratelimit-reset']) * 1000
+    return Object.assign({ OK: true, delay: delayTime, used: new Date().getTime() - startTime }, { ratelimit })
+  } catch (ex) {
+    return reply.status(400).send({ statusCode: 400, error: 'Bad Request', message: ex.message })
   }
-  // await ServiceBotOauth.updateOne({ room, service }, { $set: { limit: result } })
-  if (data.status === 200) {
-    await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: true } })
-  }
-  return Object.assign(data, { ratelimit })
 }

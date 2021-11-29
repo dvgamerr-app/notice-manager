@@ -7,7 +7,7 @@ const getToken = async (service, room) => {
 
   const { ServiceBotOauth } = notice.get()
   const oauth = await ServiceBotOauth.findOne({ service, room })
-  if (!oauth || !oauth.accessToken) { return logger.log(`Oauth: ${service} in ${room}, No access token.`) }
+  if (!oauth || !oauth.accessToken) { throw new Error(`OAuth: ${service} in ${room}, No accessToken.`) }
   return oauth.accessToken
 }
 

@@ -6,7 +6,7 @@ const sdkNotify = require('../sdk-notify')
 module.exports = async (req) => {
   try {
     const { type, name: botname, to: userTo, msg } = req.params
-    const sender = req.payload || {}
+    const sender = req.body || {}
 
     const { LineOutbound } = notice.get()
 

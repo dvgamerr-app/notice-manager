@@ -1,4 +1,3 @@
-const qs = require('querystring')
 const axios = require('axios')
 const apiLINE = 'https://notify-api.line.me/api'
 
@@ -31,11 +30,14 @@ const pushNotify = async (accessToken, message) => {
     if (!message[key]) { delete message[key] }
   }
 
+  if (Object.keys(message).length === 0) {
+    throw new Error('\'message\' in body is empty.')
+  }
   const res = await instance({
     method: 'POST',
     headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/x-www-form-urlencoded' },
     url: `${apiLINE}/notify`,
-    data: qs.stringify(message)
+    data: new URLSearchParams(message)
   })
   return res
 }

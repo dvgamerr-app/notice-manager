@@ -1,7 +1,7 @@
 const numeral = require('numeral')
 const dayjs = require('dayjs')
 const { notice } = require('@touno-io/db/schema')
-const { loggingLINE } = require('./logging')
+const { monitorLINE } = require('./monitor')
 
 const loggingExpire = async () => {
   const { LineOutbound, LineInbound, LineCMD } = notice.get() // LineInbound, LineOutbound, LineCMD,
@@ -62,6 +62,6 @@ module.exports = {
 
     const body = `*Notice LINE* weekly stats.\n${fect1.join('\n')}${fect2 ? fect2.join('\n') : ''}`
 
-    await loggingLINE(body)
+    await monitorLINE(body)
   }
 }

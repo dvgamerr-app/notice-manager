@@ -1,5 +1,5 @@
 const { notice } = require('@touno-io/db/schema')
-const { loggingLINE } = require('../../logging')
+const { monitorLINE } = require('../../monitor')
 
 module.exports = async (req) => {
   const data = req.payload
@@ -27,6 +27,6 @@ module.exports = async (req) => {
       }
     })
   }
-  await loggingLINE(`Notify Bot add *${data.name}*`)
+  await monitorLINE(`Notify Bot add *${data.name}*`)
   return {}
 }

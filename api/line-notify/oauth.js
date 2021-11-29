@@ -2,7 +2,7 @@ const { AuthorizationCode } = require('simple-oauth2')
 const debuger = require('@touno-io/debuger')
 const { notice } = require('@touno-io/db/schema')
 const sdkNotify = require('../sdk-notify')
-const { loggingLINE } = require('../logging')
+const { monitorLINE } = require('../monitor')
 
 const uuid = (length) => {
   let result = ''
@@ -15,7 +15,7 @@ const uuid = (length) => {
 const hosts = process.env.HOST_API || 'https://notice.touno.io'
 const logger = debuger('OAUTH')
 
-module.exports = async (req, h) => {
+module.exports = async (req, reply) => {
   // Authorization oauth2 URI
   const { code, state, error } = req.query
   const { service, room } = req.params
@@ -65,7 +65,7 @@ module.exports = async (req, h) => {
       if (res.status !== 200) { throw new Error('Status is not verify.') }
 
       await ServiceBotOauth.updateOne({ state }, { $set: { name: res.target } })
-      await loggingLINE(`Join room *${res.target}* \`${res.message}\` with service *${service}*`)
+      await monitorLINE(`Join room *${res.target}* \`${res.message}\` with service *${service}*`)
     } catch (ex) {
       await ServiceBotOauth.updateOne({ state }, { $set: { active: false } })
       if (ex.data && ex.data.payload) {
@@ -77,9 +77,9 @@ module.exports = async (req, h) => {
       }
       throw ex
     }
-    return h.redirect(`${hosts}/liff/close`)
+    return reply.redirect(`${hosts}/liff/close`)
   } else if (error) {
-    return h.redirect(hosts)
+    return reply.redirect(hosts)
   } else {
     if (!service || !room) { throw new Error('Service or Room is not verify.') }
 
@@ -102,6 +102,6 @@ module.exports = async (req, h) => {
       await new ServiceBotOauth({ name: room, service, room, response_type: responseType, redirect_uri: redirectUri, state: newState }).save()
     }
     const authorizationUri = client.authorizeURL({ response_type: responseType, redirect_uri: redirectUri, scope, state: newState })
-    return h.redirect(authorizationUri)
+    return reply.redirect(authorizationUri)
   }
 }

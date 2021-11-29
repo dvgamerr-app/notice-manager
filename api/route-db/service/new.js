@@ -1,5 +1,5 @@
 const { notice } = require('@touno-io/db/schema')
-const { loggingLINE } = require('../../logging')
+const { monitorLINE } = require('../../monitor')
 
 module.exports = async (req) => {
   const userId = req.headers['x-id']
@@ -28,6 +28,6 @@ module.exports = async (req) => {
       }
     })
   }
-  await loggingLINE(`Notify service add *${data.name}*`)
+  await monitorLINE(`Notify service add *${data.name}*`)
   return { _id: serviceId }
 }

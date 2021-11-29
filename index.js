@@ -4,6 +4,7 @@ const fastify = require('fastify')({ logger: false })
 const Sentry = require('@sentry/node')
 const { notice } = require('@touno-io/db/schema')
 const logger = require('@touno-io/debuger')('API')
+const { monitorLINE } = require('./api/monitor')
 
 const apiRoute = require('./api')
 const pkg = require('./package.json')
@@ -61,6 +62,7 @@ process.on('uncaughtException', exitHandler)
 initialize().then(async () => {
   await fastify.listen(3000, '0.0.0.0')
   logger.info('fastify listen:3000')
+  if (production) { await monitorLINE(`*[Started]* \`${os.hostname()}\` is running Notice-LINE.`) }
 }).catch((ex) => {
   Sentry.captureException(ex)
   fastify.log.error(ex)

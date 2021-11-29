@@ -1,5 +1,5 @@
 const { notice } = require('@touno-io/db/schema')
-const { loggingLINE } = require('../logging')
+const { monitorLINE } = require('../monitor')
 const helpFlex = require('./flex-help')
 
 const api = process.env.PROXY_API || 'http://localhost:4000'
@@ -50,12 +50,12 @@ module.exports = {
   onEvents: {
     join: async (botname, event) => {
       await joinBotRoom(botname, getID(event), event.source.type)
-      await loggingLINE(`Bot your join in ${event.source.type} (${getID(event)}).`)
+      await monitorLINE(`Bot your join in ${event.source.type} (${getID(event)}).`)
       return 'มาแล้วๆ'
     },
     leave: async (botname, event) => {
       await leaveBotRoom(botname, getID(event), event.source.type)
-      await loggingLINE(`Bot your leave from ${event.source.type} (${getID(event)}).`)
+      await monitorLINE(`Bot your leave from ${event.source.type} (${getID(event)}).`)
     }
   },
   onCommands: {

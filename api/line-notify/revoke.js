@@ -1,11 +1,11 @@
 const { notice } = require('@touno-io/db/schema')
 const { setRevoke } = require('../sdk-notify')
-const { loggingLINE } = require('../logging')
+const { monitorLINE } = require('../monitor')
 
 module.exports = async (req, res) => {
   // Authorization oauth2 URI
   const { room, service } = req.params
-  const { revoke } = req.payload
+  const { revoke } = req.body
 
   const { ServiceBotOauth } = notice.get()
 
@@ -15,6 +15,6 @@ module.exports = async (req, res) => {
   const data = await setRevoke(token.accessToken)
   if (data.status !== 200) { throw new Error('Revoke Service fail.') }
   await ServiceBotOauth.updateOne({ service, room }, { $set: { accessToken: null } })
-  await loggingLINE(`Rovoke room *${room}* from *${service}*`)
-  return {}
+  await monitorLINE(`Rovoke room *${room}* from *${service}*`)
+  return { OK: true }
 }
