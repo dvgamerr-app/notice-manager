@@ -6,7 +6,7 @@ const pkgName = `LINE-BOT v${pkg.version}`
 const botName = process.env.TELEGRAM_TOKEN
 const roomName = process.env.TELEGRAM_CHAT
 
-logger.info('Telegram Monitor:', !botName || !roomName)
+logger.info('Telegram Monitor:', !(!botName || !roomName))
 module.exports = {
   pkgName,
   monitorLINE: async (ex) => {
