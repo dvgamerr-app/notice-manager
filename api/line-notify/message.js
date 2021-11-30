@@ -17,7 +17,7 @@ const packageSticker = {
 module.exports = async (req, reply) => {
   const startTime = new Date().getTime()
   const IsWebhook = req.method === 'post'
-  const { room, service } = req.params
+  const { service, room } = req.params
   const { sticker, imageThumbnail, imageFullsize, notificationDisabled, imageFile } = req.body
   let { message, stickerPackageId, stickerId } = req.body
   const { LineOutbound, ServiceWebhook } = notice.get()
@@ -26,7 +26,7 @@ module.exports = async (req, reply) => {
   reply.header('x-line-outbound-id', outbound._id)
 
   if (!IsWebhook) {
-    if (message) { message = message.replace(/\\n|newline/ig, '\n') }
+    if (typeof message === 'string') { message = message.replace(/\\n|newline/ig, '\n') }
     if (sticker) {
       stickerPackageId = 1
       stickerId = packageSticker[stickerPackageId][parseInt(Math.random() * 30)]
