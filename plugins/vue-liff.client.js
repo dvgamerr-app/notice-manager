@@ -1,11 +1,9 @@
-import liff from '@line/liff'
+import lineLiff from '@line/liff'
 import { defineNuxtPlugin } from '#app'
 
 export default defineNuxtPlugin(() => {
   return {
-    provide: {
-      liff: () => liff
-    }
+    provide: { liff: lineLiff }
   }
 })
 

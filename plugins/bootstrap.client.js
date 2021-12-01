@@ -1,12 +1,8 @@
-import liff from '@line/liff'
+import BootstrapVue3 from 'bootstrap-vue-3'
 import { defineNuxtPlugin } from '#app'
 
-export default defineNuxtPlugin(() => {
-  return {
-    provide: {
-      liff: () => liff
-    }
-  }
+export default defineNuxtPlugin((nuxtApp) => {
+  nuxtApp.vueApp.use(BootstrapVue3)
 })
 
 // /* eslint-disable no-console */

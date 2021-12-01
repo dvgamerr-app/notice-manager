@@ -1,49 +1,9 @@
 <template>
-  <transition name="fade">
-    <div>
-      <client-only>
-        <slot name="placeholder">
-          <b-spinner variant="success" />
-        </slot>
-        <b-navbar v-if="$store.state.full" class="navtop">
-          <b-container fluid>
-            <b-navbar-brand>
-              <div class="logo-grid d-grid">
-                <span class="logo-main">LINE</span>
-                <span class="logo-top">Notice</span>
-                <span class="logo-bottom">MANAGER</span>
-              </div>
-            </b-navbar-brand>
-            <b-navbar-nav class="ml-auto">
-              <div v-if="profile.userId" class="flex-user">
-                <span class="text-muted text-username" v-text="profile.displayName" />
-                <b-img :src="profile.pictureUrl" rounded="circle" alt="A" style="width:1.2rem;" />
-              </div>
-            </b-navbar-nav>
-          </b-container>
-        </b-navbar>
-        <b-container v-else class="navtop" />
-        <b-container class="navbottom" />
-        <b-container class="main">
-          <nuxt />
-        </b-container>
-        <footer class="footer">
-          <b-container fluid>
-            <p>
-              LINE-BOT v0.0.0
-            </p>
-          </b-container>
-        </footer>
-      </client-only>
-    </div>
-  </transition>
+  <div>
+    <NuxtPage />
+  </div>
 </template>
 <script setup>
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue-3/dist/bootstrap-vue-3.css'
-import 'assets/index.scss'
-import 'assets/fonts/stylesheet.css'
-
 // export default {
 //   transition: 'fade',
 //   data: () => ({
