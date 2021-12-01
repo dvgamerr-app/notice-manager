@@ -16,7 +16,7 @@
   "author": "Kananek T.",
   "license": "ISC",
   "devDependencies": {
-    "@nuxtjs/eslint-config": "^7.0.0",
+    "@nuxtjs/eslint-config": "^8.0.0",
     "env-cmd": "^10.1.0",
     "nodemon": "^2.0.15",
     "nuxt3": "^3.0.0-27296423.f3082ca",
@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@line/bot-sdk": "^7.4.0",
+    "@line/liff": "^2.17.0",
     "@sentry/node": "^6.15.0",
     "@touno-io/db": "^3.2.1",
     "@touno-io/debuger": "^2.4.0",
