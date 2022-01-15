@@ -43,7 +43,7 @@
     "debounce": "^1.2.0",
     "hapi-cors": "^1.0.3",
     "hapi-sentry": "^3.1.0",
-    "marked": "^2.0.6",
+    "marked": "^4.0.10",
     "node-cron": "^3.0.0",
     "numeral": "^2.0.6",
     "nuxt": "^2.15.3",
