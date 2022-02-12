@@ -1,6 +1,7 @@
 <template>
   <div>
-    <NuxtPage />
+    <h3>Welcome NuxtPage</h3>
+    <!-- <NuxtPage /> -->
   </div>
 </template>
 <script setup>

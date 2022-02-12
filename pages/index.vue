@@ -1,6 +1,7 @@
+
 <template>
   <div>
-    Home page {{ profile }}
+    {{ profile }}
   </div>
   <!-- <b-navbar v-if="$store.state.full" class="navtop">
     <b-container fluid>
@@ -34,19 +35,22 @@
 </template>
 
 <script setup>
+  import { useNuxtApp, ref } from 'Vue'
+  let profile = ref({})
+
   const { $liff } = useNuxtApp()
-  const profile = ref({})
+  // const profile = ref({})
   if ($liff) {
     await $liff.init({ liffId: '1607427050-pOvAm7RE' })
 
     if (!$liff.isLoggedIn()) {
       $liff.login({ redirectUri: 'https://notice.touno.io/' })
     } else {
-      await this.$liff.ready
-      profile = await this.$liff.getProfile()
+      await $liff.ready
+      profile = await $liff.getProfile()
     }
   }
-  
+
 
 // await $liff.init({ liffId })
 // if (!this.$liff.isInClient() && !isDev) {
