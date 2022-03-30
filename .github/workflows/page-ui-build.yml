@@ -45,7 +45,9 @@ jobs:
         run: yarn lint
 
       - name: Run Build ⚙️
-        run: yarn build
+        run: |
+          yarn build
+          yarn generate
 
 
       - name: Deploy 🚀

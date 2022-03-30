@@ -78,6 +78,26 @@ export default {
     '@nuxtjs/fontawesome',
     '@nuxtjs/eslint-module'
   ],
+  build: {
+    babel: { compact: true },
+    parallel: true,
+    cache: true,
+    extractCSS: true,
+    optimizeCSS: true,
+    optimization: {
+      minimize: true,
+      minimizer: [
+        // terser-webpack-plugin
+        // optimize-css-assets-webpack-plugin
+      ],
+      splitChunks: {
+        chunks: 'all',
+        automaticNameDelimiter: '.',
+        name: undefined,
+        cacheGroups: {}
+      }
+    }
+  },
   modules: [
     '@nuxtjs/markdownit',
     [
@@ -92,7 +112,5 @@ export default {
   ],
   axios: {
     baseURL: '/'
-  },
-  build: {
   }
 }
