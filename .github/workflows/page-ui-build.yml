@@ -45,10 +45,7 @@ jobs:
         run: yarn lint
 
       - name: Run Build ⚙️
-        run: |
-          yarn build
-          yarn generate
-
+        run: yarn generate
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@3.7.1

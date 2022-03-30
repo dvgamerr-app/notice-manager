@@ -2,6 +2,9 @@ export default {
   ssr: false,
   target: 'static',
   components: true,
+  router: {
+    base: '/line-notice/'
+  },
   head: {
     titleTemplate: title => `${title ? `${title} · ` : ''}Manager`,
     meta: [

@@ -87,11 +87,6 @@ export default {
       return ''
     }
   },
-  mounted () {
-    const base = document.createElement('base')
-    base.setAttribute('href', 'https://touno-io.github.io/line-notice/')
-    document.head.appendChild(base)
-  },
   created () {
   }
 }
