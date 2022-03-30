@@ -1,7 +1,7 @@
 const production = !(process.env.NODE_ENV === 'development')
 
 module.exports = {
-  target: 'server',
+  target: 'static',
   telemetry: false,
   components: true,
   head: {
@@ -67,13 +67,12 @@ module.exports = {
     color: '#00B900',
     height: '2px'
   },
-  middleware: ['auth'],
+  // middleware: ['auth'],
   css: [
     '~/assets/index.scss'
   ],
   plugins: [
     '~/plugins/vue-liff.client.js',
-    '~/plugins/vue-focus.js',
     '~/plugins/vue-tabindex.js',
     '~/plugins/vue-clipboards.js'
   ],
@@ -84,8 +83,7 @@ module.exports = {
   ],
   modules: [
     'bootstrap-vue/nuxt',
-    '@nuxtjs/axios',
-    '@nuxtjs/auth'
+    '@nuxtjs/axios'
     // '@nuxtjs/pwa'
   ],
   bootstrapVue: { bootstrapCSS: false, icons: false },
@@ -93,20 +91,21 @@ module.exports = {
     component: 'fa',
     icons: { solid: true, regular: true, brands: true }
   },
-  auth: {
-    strategies: {
-      local: {
-        token: { property: 'token' },
-        user: { property: 'user' },
-        endpoints: {
-          login: { url: '/auth/login', method: 'post' },
-          user: { url: '/auth/user', method: 'post' }
-        }
-      }
-    }
-  },
-  axios: { baseURL: process.env.AXIOS_BASE_URL || 'https://notice.touno.io' },
+  // auth: {
+  //   strategies: {
+  //     local: {
+  //       token: { property: 'token' },
+  //       user: { property: 'user' },
+  //       endpoints: {
+  //         login: { url: '/auth/login', method: 'post' },
+  //         user: { url: '/auth/user', method: 'post' }
+  //       }
+  //     }
+  //   }
+  // },
+  // axios: { baseURL: process.env.AXIOS_BASE_URL || 'https://notice.touno.io' },
   build: {
+    babel: { compact: true },
     parallel: !production,
     cache: true,
     extractCSS: production,
@@ -118,8 +117,7 @@ module.exports = {
       }
     }
   },
-  env: {
-    HOST_API: process.env.HOST_API || 'https://notice.touno.io'
-  },
-  server: { port: 4000, host: '0.0.0.0', timing: false }
+  // env: {
+  //   HOST_API: process.env.HOST_API || 'https://notice.touno.io'
+  // },
 }

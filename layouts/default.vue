@@ -75,10 +75,10 @@
 export default {
   computed: {
     loggedIn () {
-      return this.$auth.$state.loggedIn
+      return false
     },
     username () {
-      return this.$auth.$state.user.user_name
+      return ''
     }
   },
   created () {

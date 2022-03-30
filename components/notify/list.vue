@@ -78,7 +78,7 @@ export default {
   }),
   computed: {
     loggedIn () {
-      return this.$auth.$state.loggedIn
+      return false
     },
     list () {
       return Notify.query().orderBy('text').get()
@@ -88,9 +88,9 @@ export default {
     onChangeService (e) {
       const vm = this
       vm.add.value = e.value
-      vm.$nextTick(() => {
-        vm.$refs.room.focus()
-      })
+      // vm.$nextTick(() => {
+      //   // vm.$refs.room.focus()
+      // })
     },
     async onSaveName (e) {
       await this.$axios.post('/api/service/update', { name: this.edit.text, _id: e._id })

@@ -1,9 +1,9 @@
-import BootstrapVue3 from 'bootstrap-vue-3'
-import { defineNuxtPlugin } from '#app'
+// import BootstrapVue3 from 'bootstrap-vue-3'
+// import { defineNuxtPlugin } from '#app'
 
-export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.vueApp.use(BootstrapVue3)
-})
+// export default defineNuxtPlugin((nuxtApp) => {
+//   nuxtApp.vueApp.use(BootstrapVue3)
+// })
 
 // /* eslint-disable no-console */
 // import Vue from 'vue'

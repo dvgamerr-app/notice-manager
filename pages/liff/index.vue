@@ -33,7 +33,7 @@ export default {
   //   }
   // },
   mounted () {
-    const isDev = /localhost:/.test(this.hostname)
+    const isDev = !/localhost:/.test(this.hostname)
     this.$nextTick(async () => {
       this.$nuxt.$loading.start()
       this.$nuxt.$loading.increase(50)

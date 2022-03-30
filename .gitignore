@@ -80,3 +80,4 @@ typings/
 codealike.json
 static/sw.js
 static/sw.js
+dist/*
