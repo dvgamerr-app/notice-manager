@@ -94,7 +94,7 @@ export default {
         chunks: 'all',
         automaticNameDelimiter: '.',
         name: undefined,
-        cacheGroups: {}
+        cacheGroups: { styles: { name: 'styles', test: /\.(css|vue)$/, chunks: 'all', enforce: true } }
       }
     }
   },
