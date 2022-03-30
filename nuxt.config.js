@@ -2,9 +2,7 @@ export default {
   ssr: false,
   target: 'static',
   components: true,
-  router: {
-    base: '/line-notice/'
-  },
+  router: { base: '/line-notice/' },
   head: {
     titleTemplate: title => `${title ? `${title} · ` : ''}Manager`,
     meta: [
@@ -36,24 +34,24 @@ export default {
       theme_color: '#ffffff',
       background_color: '#ffffff',
       browser_action: {
-        default_icon: '/favicon.ico',
-        default_popup: '/'
+        default_icon: '/line-noticefavicon.ico',
+        default_popup: '/line-notice/'
       },
       icons: [
         {
-          src: '/favicon.ico',
+          src: '/line-notice/favicon.ico',
           sizes: '16x16',
           type: 'image/png',
           purpose: 'any maskable'
         },
         {
-          src: '/favicon.ico',
+          src: '/line-notice/favicon.ico',
           sizes: '64x64',
           type: 'image/png',
           purpose: 'any maskable'
         },
         {
-          src: '/favicon.ico',
+          src: '/line-notice/favicon.ico',
           sizes: '196x196',
           type: 'image/png',
           purpose: 'any maskable'
