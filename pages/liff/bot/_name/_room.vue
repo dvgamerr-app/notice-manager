@@ -24,8 +24,8 @@
 </template>
 
 <script>
-import Bot from '../../../../model/bot'
-import Botroom from '../../../../model/botRoom'
+// import Bot from '../../../../model/bot'
+// import Botroom from '../../../../model/botRoom'
 
 export default {
   layout: 'liff',
@@ -34,12 +34,12 @@ export default {
     return params
   },
   computed: {
-    bot () {
-      return Bot.query().where('value', this.name).first()
-    },
-    service () {
-      return Botroom.query().where('name', this.room).first()
-    },
+    // bot () {
+    //   return Bot.query().where('value', this.name).first()
+    // },
+    // service () {
+    //   return Botroom.query().where('name', this.room).first()
+    // },
     profile () {
       return this.$store.state.profile
     }

@@ -32,7 +32,7 @@
   </b-form>
 </template>
 <script>
-import notiRoom from '../../model/notiRoom'
+// import notiRoom from '../../model/notiRoom'
 
 export default {
   props: {
@@ -100,14 +100,14 @@ export default {
         url: `${this.hostname}/register/${this.serviceName}/${this.roomName}`,
         external: false
       })
-      notiRoom.insert({
-        data: {
-          service: this.serviceName,
-          name: this.roomName,
-          value: this.roomName,
-          removed: false
-        }
-      })
+      // notiRoom.insert({
+      //   data: {
+      //     service: this.serviceName,
+      //     name: this.roomName,
+      //     value: this.roomName,
+      //     removed: false
+      //   }
+      // })
 
       this.$router.push(`/liff/notify/${this.serviceName}`)
       return e.preventDefault()

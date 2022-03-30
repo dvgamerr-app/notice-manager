@@ -35,9 +35,9 @@
 <script>
 import dayjs from 'dayjs'
 import numeral from 'numeral'
-import Api from '../../../../model/api'
-import Notify from '../../../../model/notify'
-import Notiroom from '../../../../model/notiRoom'
+// import Api from '../../../../model/api'
+// import Notify from '../../../../model/notify'
+// import Notiroom from '../../../../model/notiRoom'
 
 export default {
   layout: 'liff',
@@ -53,13 +53,16 @@ export default {
   },
   computed: {
     api () {
-      return Api.query().first()
+      return {}
+      // return Api.query().first()
     },
     bot () {
-      return Notify.query().where('value', this.service).first()
+      return []
+      // return Notify.query().where('value', this.service).first()
     },
     room () {
-      return Notiroom.query().where('removed', false).where('service', this.service).get()
+      return []
+      // return Notiroom.query().where('removed', false).where('service', this.service).get()
     },
     profile () {
       return this.$store.state.profile
@@ -80,18 +83,18 @@ export default {
       const day = Math.round(dayjs().date() * max / dayjs().endOf('month').date())
       // value: 0 max: 1000 limit 0 day 3
       return limit >= day ? 0 : day - limit
-    },
-    remove (e) {
-      Notiroom.update({
-        $$id: e.$$id,
-        data: { removed: true }
-      })
-      // this.bot.room.splice(index, 1)
-      // await Bot.update((file) => {
-      //   console.log(file)
-      //   return false
-      // })
     }
+    // remove (e) {
+    //   Notiroom.update({
+    //     $$id: e.$$id,
+    //     data: { removed: true }
+    //   })
+    //   // this.bot.room.splice(index, 1)
+    //   // await Bot.update((file) => {
+    //   //   console.log(file)
+    //   //   return false
+    //   // })
+    // }
   }
   // computed: {
   //   getServiceSample () {

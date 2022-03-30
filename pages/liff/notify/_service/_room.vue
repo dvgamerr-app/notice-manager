@@ -25,9 +25,9 @@
 </template>
 
 <script>
-import Api from '../../../../model/api'
-import Notify from '../../../../model/notify'
-import Notiroom from '../../../../model/notiRoom'
+// import Api from '../../../../model/api'
+// import Notify from '../../../../model/notify'
+// import Notiroom from '../../../../model/notiRoom'
 
 export default {
   layout: 'liff',
@@ -43,13 +43,16 @@ export default {
   },
   computed: {
     api () {
-      return Api.query().first()
+      return []
+      // return Api.query().first()
     },
     bot () {
-      return Notify.query().where('value', this.service).first()
+      return []
+      // return Notify.query().where('value', this.service).first()
     },
     join () {
-      return Notiroom.query().where('removed', false).where('service', this.service).first()
+      return []
+      // return Notiroom.query().where('removed', false).where('service', this.service).first()
     },
     profile () {
       return this.$store.state.profile

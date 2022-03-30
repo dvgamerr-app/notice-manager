@@ -1,26 +1,28 @@
-import VuexORM from '@vuex-orm/core'
-import Api from '../model/api'
-import Notify from '../model/notify'
-import NotiRoom from '../model/notiRoom'
-import Bot from '../model/bot'
-import BotRoom from '../model/botRoom'
-import Webhook from '../model/webhook'
+// import VuexORM, { Database } from '@vuex-orm/core'
 
-// Create a new database instance.
-const database = new VuexORM.Database()
+// import Api from '../model/api'
+// import Notify from '../model/notify'
+// import NotiRoom from '../model/notiRoom'
+// import Bot from '../model/bot'
+// import BotRoom from '../model/botRoom'
+// import Webhook from '../model/webhook'
 
-// Register Models to the database.
-database.register(Api)
-database.register(Notify)
-database.register(NotiRoom)
-database.register(Bot)
-database.register(BotRoom)
-database.register(Webhook)
+// // Create a new database instance.
+// const database = new Database()
 
-// Create Vuex Store and register database through Vuex ORM.
-export const plugins = [
-  VuexORM.install(database)
-]
+// // Register Models to the database.
+// database.register(Api)
+// database.register(Notify)
+// database.register(NotiRoom)
+// database.register(Bot)
+// database.register(BotRoom)
+// database.register(Webhook)
+
+// // Create Vuex Store and register database through Vuex ORM.
+// export const plugins = [
+//   // eslint-disable-next-line import/no-named-as-default-member
+//   VuexORM.install(database)
+// ]
 
 export const state = () => ({
   wait: false,

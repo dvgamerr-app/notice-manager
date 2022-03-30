@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import Api from '../../../model/api'
+// import Api from '../../../model/api'
 
 export default {
   layout: 'liff',
@@ -18,7 +18,7 @@ export default {
     }
   },
   created () {
-    if (!Api.query().first()) { this.$router.back() }
+    // if (!Api.query().first()) { this.$router.back() }
   }
 }
 </script>

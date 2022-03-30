@@ -58,7 +58,13 @@
         </b-col> -->
       </b-row>
     </b-container>
-    <nuxt class="main" />
+    <b-container>
+      <b-row>
+        <b-col>
+          <nuxt class="main" />
+        </b-col>
+      </b-row>
+    </b-container>
     <footer class="footer">
       <b-container fluid>
         <p>

@@ -69,8 +69,8 @@
   </b-form>
 </template>
 <script>
-import Api from '../../model/api'
-import Notify from '../../model/notify'
+// import Api from '../../model/api'
+// import Notify from '../../model/notify'
 
 export default {
   data: () => ({
@@ -100,7 +100,8 @@ export default {
   }),
   computed: {
     api () {
-      return Api.query().first()
+      return {}
+      // return Api.query().first()
     },
     profile () {
       return this.$store.state.profile
@@ -172,16 +173,16 @@ export default {
         if (res.error) { throw new Error(res.error) }
 
         this.showToast('Successful.')
-        Notify.insert({
-          data: {
-            _id: res._id,
-            text: this.data.name,
-            value: this.data.name,
-            service: this.data.name,
-            type: 'notify',
-            removed: false
-          }
-        })
+        // Notify.insert({
+        //   data: {
+        //     _id: res._id,
+        //     text: this.data.name,
+        //     value: this.data.name,
+        //     service: this.data.name,
+        //     type: 'notify',
+        //     removed: false
+        //   }
+        // })
 
         this.$router.push(`/liff/notify/${this.data.name}`)
       } catch (ex) {

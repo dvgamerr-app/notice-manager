@@ -1,4 +1,4 @@
-name: Docker
+name: page-ui-api-build
 
 on:
   push:
@@ -8,17 +8,46 @@ on:
 
 jobs:
   notice-ui:
-    name: UI - Build and Deploy
-    runs-on: ubuntu-18.04
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node: [14]
+
     steps:
-      - name: Checkout SourceCode
-        uses: actions/checkout@v2
+      - name: Checkout 🛎
+        uses: actions/checkout@master
+
+      - name: Setup node env 🏗
+        uses: actions/setup-node@v2.1.5
         with:
-          fetch-depth: 0
-      - name: Install and Build 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
-        run: |
-          yarn
-          yarn build
+          node-version: ${{ matrix.node }}
+          check-latest: true
+
+      - name: Get yarn cache directory path 🛠
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Cache node_modules 📦
+        uses: actions/cache@v2.1.4
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies 👨🏻‍💻
+        run: yarn
+
+      - name: Run linter 👀
+        run: yarn lint
+
+      - name: Run Build ⚙️
+        run: yarn build
+
+
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
@@ -26,6 +55,7 @@ jobs:
           BRANCH: gh-pages
           FOLDER: dist
           CLEAN: true
+
   # notice-ui:
   #   runs-on: ubuntu-18.04
   #   env:

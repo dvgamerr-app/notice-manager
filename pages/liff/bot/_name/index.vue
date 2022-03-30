@@ -33,8 +33,8 @@
 <script>
 import dayjs from 'dayjs'
 import numeral from 'numeral'
-import Bot from '../../../../model/bot'
-import Botroom from '../../../../model/botRoom'
+// import Bot from '../../../../model/bot'
+// import Botroom from '../../../../model/botRoom'
 
 export default {
   layout: 'liff',
@@ -49,12 +49,12 @@ export default {
     }
   },
   computed: {
-    bot () {
-      return Bot.query().where('value', this.name).first()
-    },
-    room () {
-      return Botroom.query().where('removed', false).where('botname', this.name).get()
-    },
+    // bot () {
+    //   return Bot.query().where('value', this.name).first()
+    // },
+    // room () {
+    //   return Botroom.query().where('removed', false).where('botname', this.name).get()
+    // },
     profile () {
       return this.$store.state.profile
     }
@@ -74,18 +74,18 @@ export default {
       const day = Math.round(dayjs().date() * max / dayjs().endOf('month').date())
       // value: 0 max: 1000 limit 0 day 3
       return limit >= day ? 0 : day - limit
-    },
-    remove (e) {
-      Botroom.update({
-        $$id: e.$$id,
-        data: { removed: true }
-      })
-      // this.bot.room.splice(index, 1)
-      // await Bot.update((file) => {
-      //   console.log(file)
-      //   return false
-      // })
     }
+    // remove (e) {
+    //   Botroom.update({
+    //     $$id: e.$$id,
+    //     data: { removed: true }
+    //   })
+    //   // this.bot.room.splice(index, 1)
+    //   // await Bot.update((file) => {
+    //   //   console.log(file)
+    //   //   return false
+    //   // })
+    // }
   }
   // computed: {
   //   getServiceSample () {

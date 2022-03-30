@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import Api from '../../../../model/api'
+// import Api from '../../../../model/api'
 
 export default {
   layout: 'liff',
@@ -18,9 +18,9 @@ export default {
     })
   },
   computed: {
-    api () {
-      return Api.query().first()
-    },
+    // api () {
+    //   return Api.query().first()
+    // },
     profile () {
       return this.$store.state.profile
     }

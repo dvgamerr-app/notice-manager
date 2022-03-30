@@ -1,34 +1,19 @@
-# LINE-BOT and LINE Notify Web GUI
-สร้าง http router สำหรับใช้ noti ข้อมูล
+## LINE-BOT and LINE Notify Web GUI
+สร้าง http api แบบง่ายๆ โดยใช้เพียง url webhook เท่านั้น
 
 ### Supported
-- LINE BOT
 - LINE Notify
+- LINE BOT `feature`
+- Discord `feature`
+- Telegram `feature`
 
-### Installation
-```bash
-git clone https://github.com/touno-io/line-notice.git line-notice
-cd line-notice
-yarn
+### UI Sample
 
-# UI
-yarn dev
-# open browser http://localhost:4000
-# API
-yarn serv
-# open browser http://localhost:3000
-```
+| Notify | Room | Detail |
+| --- | ----------- | ----------- |
+| ![notify](~/static/liff-notify.png) | ![room](~/static/liff-room.png) | ![detail](~/static/liff-detail.png) |
 
-#### Environment
+### Rich Menu
 
-- `HOST_API` require domain name and api. example 'https://notice.domain.com'
+![richmenu](/richmenu.jpg)
 
-```env
-TZ=Asia/Bangkok
-MONGODB_URI=
-```
-
-### Deploy
-```
-
-```

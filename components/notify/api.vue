@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import Api from '../../model/api'
+// import Api from '../../model/api'
 
 export default {
   props: {
@@ -54,7 +54,8 @@ export default {
   }),
   methods: {
     api () {
-      return Api.query().first()
+      return {}
+      // return Api.query().first()
     }
   }
 }

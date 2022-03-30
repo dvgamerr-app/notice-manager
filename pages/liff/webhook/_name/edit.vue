@@ -8,19 +8,19 @@
 
 <script>
 // import Api from '../model/api'
-import Notify from '../../../../model/notify'
-import Bot from '../../../../model/bot'
+// import Notify from '../../../../model/notify'
+// import Bot from '../../../../model/bot'
 
 export default {
   layout: 'liff',
   transition: 'fade',
   computed: {
-    notifyList () {
-      return Notify.query().orderBy('service').get()
-    },
-    botList () {
-      return Bot.query().orderBy('botname').get()
-    },
+    // notifyList () {
+    //   return Notify.query().orderBy('service').get()
+    // },
+    // botList () {
+    //   return Bot.query().orderBy('botname').get()
+    // },
     profile () {
       return this.$store.state.profile
     }

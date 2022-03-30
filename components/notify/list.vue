@@ -59,7 +59,7 @@
   </div>
 </template>
 <script>
-import Notify from '../../model/notify'
+// import Notify from '../../model/notify'
 
 export default {
   data: () => ({
@@ -81,7 +81,8 @@ export default {
       return false
     },
     list () {
-      return Notify.query().orderBy('text').get()
+      return []
+      // return Notify.query().orderBy('text').get()
     }
   },
   methods: {
@@ -94,10 +95,10 @@ export default {
     },
     async onSaveName (e) {
       await this.$axios.post('/api/service/update', { name: this.edit.text, _id: e._id })
-      Notify.update({
-        where: e.$id,
-        data: { text: this.edit.text }
-      })
+      // Notify.update({
+      //   where: e.$id,
+      //   data: { text: this.edit.text }
+      // })
       this.edit.mode = null
       this.edit.text = ''
       this.edit.service = ''
@@ -118,7 +119,7 @@ export default {
     async onDeleteService (e) {
       if (e.room.length > 0) { return this.showToast('Please remove room join all before remove service.') }
       await this.$axios.post('/api/service/update', { _id: e._id, active: false })
-      Notify.delete(e._id)
+      // Notify.delete(e._id)
     },
     onTrash (r) {
       this.btn.trash = r._id
@@ -133,10 +134,10 @@ export default {
       if (data.error) { return this.showToast(data.error) }
 
       this.btn.remove = null
-      Notify.update({
-        where: e.$id,
-        data: { room: e.room.filter(l => l._id !== r._id) }
-      })
+      // Notify.update({
+      //   where: e.$id,
+      //   data: { room: e.room.filter(l => l._id !== r._id) }
+      // })
     }
   }
 }

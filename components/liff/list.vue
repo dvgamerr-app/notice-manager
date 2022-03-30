@@ -37,8 +37,8 @@
 
 <script>
 // import Api from '../model/api'
-import Notify from '../../model/notify'
-import Bot from '../../model/bot'
+// import Notify from '../../model/notify'
+// import Bot from '../../model/bot'
 
 export default {
   props: {
@@ -54,11 +54,12 @@ export default {
   },
   computed: {
     listItems () {
-      const n = this.type === 'all' || this.type === 'notify' ? Notify.query().where('removed', false).withAll().get() : []
-      const b = this.type === 'all' || this.type === 'bot' ? Bot.query().where('removed', false).withAll().get() : []
-      return ([...n, ...b]).filter((e) => {
-        return new RegExp(this.search, 'ig').test(e.text) || new RegExp(this.search, 'ig').test(e.value)
-      }).sort((a, b) => a.value > b.value ? 1 : -1)
+      return []
+      // const n = this.type === 'all' || this.type === 'notify' ? Notify.query().where('removed', false).withAll().get() : []
+      // const b = this.type === 'all' || this.type === 'bot' ? Bot.query().where('removed', false).withAll().get() : []
+      // return ([...n, ...b]).filter((e) => {
+      //   return new RegExp(this.search, 'ig').test(e.text) || new RegExp(this.search, 'ig').test(e.value)
+      // }).sort((a, b) => a.value > b.value ? 1 : -1)
     },
     profile () {
       return this.$store.state.profile
