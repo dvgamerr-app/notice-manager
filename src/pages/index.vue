@@ -19,7 +19,7 @@
 ![richmenu](/richmenu.jpg)
 
 </template>
-<style lang="scss" scoped>
+<style lang="scss">
 img {
   max-width:100%;
   max-height:100%;

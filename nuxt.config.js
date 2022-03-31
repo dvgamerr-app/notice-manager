@@ -1,9 +1,12 @@
+const devEnv = process.env.NODE_ENV === 'development'
+const repositoryName = devEnv ? '' : '/line-notice'
+
 export default {
   ssr: false,
   target: 'static',
   components: true,
   srcDir: 'src',
-  router: { base: '/line-notice/' },
+  router: { base: `${repositoryName}/` },
   head: {
     titleTemplate: title => `${title ? `${title} · ` : ''}Manager`,
     meta: [
@@ -29,30 +32,30 @@ export default {
       lang: 'en',
       description: process.env.npm_package_description,
       short_name: 'Notice',
-      start_url: '/line-notice/',
+      start_url: `${repositoryName}/`,
       display: 'standalone',
       orientation: 'portrait',
       theme_color: '#ffffff',
       background_color: '#ffffff',
       browser_action: {
-        default_icon: '/line-noticefavicon.ico',
-        default_popup: '/line-notice/'
+        default_icon: `${repositoryName}/favicon.ico`,
+        default_popup: `${repositoryName}/`
       },
       icons: [
         {
-          src: '/line-notice/favicon.ico',
+          src: `${repositoryName}/favicon.ico`,
           sizes: '16x16',
           type: 'image/png',
           purpose: 'any maskable'
         },
         {
-          src: '/line-notice/favicon.ico',
+          src: `${repositoryName}/favicon.ico`,
           sizes: '64x64',
           type: 'image/png',
           purpose: 'any maskable'
         },
         {
-          src: '/line-notice/favicon.ico',
+          src: `${repositoryName}/favicon.ico`,
           sizes: '196x196',
           type: 'image/png',
           purpose: 'any maskable'
@@ -69,12 +72,12 @@ export default {
   },
   // middleware: ['auth'],
   css: [
-    '~/assets/index.scss'
+    '@/assets/index.scss'
   ],
   plugins: [
-    '~/plugins/vue-liff.client.js',
-    '~/plugins/vue-tabindex.js',
-    '~/plugins/vue-clipboards.js'
+    '@/plugins/vue-liff.client.js',
+    '@/plugins/vue-tabindex.js',
+    '@/plugins/vue-clipboards.js'
   ],
   buildModules: [
     '@nuxtjs/fontawesome',
@@ -84,7 +87,7 @@ export default {
     babel: { compact: true },
     parallel: true,
     cache: true,
-    extractCSS: true,
+    extractCSS: !devEnv,
     optimizeCSS: true,
     optimization: {
       minimize: true,
@@ -102,17 +105,16 @@ export default {
   },
   modules: [
     '@nuxtjs/markdownit',
-    [
-      'bootstrap-vue/nuxt', {
-        component: 'fa',
-        suffix: true,
-        proIcons: { solid: true, regular: true }
-      }
-    ],
+    'bootstrap-vue/nuxt',
     '@nuxtjs/axios',
     '@nuxtjs/pwa'
   ],
   axios: {
     baseURL: '/'
+  },
+  bootstrapVue: { bootstrapCSS: false, icons: false },
+  fontawesome: {
+    component: 'fa',
+    icons: { solid: true, regular: true, brands: true }
   }
 }

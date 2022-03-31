@@ -143,7 +143,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 ul.line-notify {
   padding-left: 5px;
   font-size: 0.75rem;

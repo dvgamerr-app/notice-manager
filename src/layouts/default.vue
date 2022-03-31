@@ -61,7 +61,7 @@
     <b-container>
       <b-row>
         <b-col>
-          <nuxt class="main" />
+          <nuxt class="markdown-body" />
         </b-col>
       </b-row>
     </b-container>
@@ -71,7 +71,7 @@
           <span class="d-none d-md-inline-block">
             The source code is licensed <a href="http://opensource.org/licenses/mit-license.php">MIT</a>,
           </span>
-          Design By <a href="https://mr.touno.io/" target="_blank">Kananek T.</a> <small>(LINE-BOT v{{ require('../package.json').version }})</small>
+          Design By <a href="https://mr.touno.io/" target="_blank">Kananek T.</a> <small>(LINE-BOT v{{ require('../../package.json').version }})</small>
         </p>
       </b-container>
     </footer>
@@ -118,6 +118,7 @@ footer {
   background: #fafbfc;
   border-top: 1px solid #e6e6e6;
   color: #a3a6ad;
+  margin-top: -2px;
   a, a:hover {
     color: #16c464;
   }

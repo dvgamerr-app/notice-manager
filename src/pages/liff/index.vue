@@ -33,23 +33,23 @@ export default {
   //   }
   // },
   mounted () {
-    const isDev = !/localhost:/.test(this.hostname)
+    const isDev = /localhost:/.test(this.hostname)
     this.$nextTick(async () => {
       this.$nuxt.$loading.start()
       this.$nuxt.$loading.increase(50)
       this.$store.commit('toggleWait')
 
       await this.$liff.init({ liffId: this.liffId })
-      if (!this.$liff.isInClient() && !isDev) {
-        return this.$nuxt.context.redirect(200, '/')
-      }
+      // if (!this.$liff.isInClient() && !isDev) {
+      //   return this.$nuxt.context.redirect(200, '/')
+      // }
 
-      if (!this.$liff.isLoggedIn() && !isDev) {
+      if (!this.$liff.isLoggedIn() && !!isDev) {
         return this.$liff.login({ redirectUri: `${this.hostname}${this.uri}` })
       }
 
       let profile = {}
-      if (isDev) {
+      if (!isDev) {
         profile = {
           userId: 'U9e0a870c01ca97da20a4ec462bf72991',
           displayName: 'KEM',

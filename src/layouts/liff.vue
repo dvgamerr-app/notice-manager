@@ -30,7 +30,7 @@
         <footer class="footer">
           <b-container fluid>
             <p>
-              LINE-BOT v{{ require('../package.json').version }}
+              LINE-BOT v{{ require('../../package.json').version }}
             </p>
           </b-container>
         </footer>

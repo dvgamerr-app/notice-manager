@@ -22,7 +22,7 @@ export default {
   }
 }
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 div.notify {
   font-size: 1.2rem;
   line-height: 1.2rem;
