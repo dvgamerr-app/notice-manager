@@ -12,7 +12,7 @@ export default {
   transition: 'fade',
   data: () => ({ bot: '', err: '' }),
   mounted () {
-    const liffId = '1607427050-GWg637kn'
+    const liffId = '1607427050-pOvAm7RE'
     this.$nuxt.$loading.start()
     this.$nuxt.$loading.increase(25)
     this.$store.commit('toggleWait')
