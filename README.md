@@ -4,16 +4,13 @@
 ### Supported
 - LINE Notify
 - LINE BOT `feature`
-- Discord `feature`
-- Telegram `feature`
 
 ### UI Sample
 
 | Notify | Room | Detail |
 | --- | ----------- | ----------- |
-| ![notify](~/static/liff-notify.png) | ![room](~/static/liff-room.png) | ![detail](~/static/liff-detail.png) |
+| ![notify](./src/static/liff-notify.png) | ![room](./src/static/liff-room.png) | ![detail](./src/static/liff-detail.png) |
 
 ### Rich Menu
 
-![richmenu](/richmenu.jpg)
-
+![richmenu](./src/static/richmenu.jpg)

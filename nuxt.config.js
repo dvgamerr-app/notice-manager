@@ -2,6 +2,7 @@ export default {
   ssr: false,
   target: 'static',
   components: true,
+  srcDir: 'src',
   router: { base: '/line-notice/' },
   head: {
     titleTemplate: title => `${title ? `${title} · ` : ''}Manager`,
@@ -24,11 +25,11 @@ export default {
   },
   pwa: {
     manifest: {
-      name: 'Notice',
+      name: 'Notice Manager',
       lang: 'en',
-      description: '',
+      description: process.env.npm_package_description,
       short_name: 'Notice',
-      start_url: '/',
+      start_url: '/line-notice/',
       display: 'standalone',
       orientation: 'portrait',
       theme_color: '#ffffff',

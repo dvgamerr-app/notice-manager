@@ -1,4 +1,4 @@
-name: page-ui-api-build
+name: "Build GithubPages"
 
 on:
   push:
