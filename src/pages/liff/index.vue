@@ -10,9 +10,12 @@
 export default {
   layout: 'liff',
   transition: 'fade',
+  asyncData ({ env }) {
+    return { env }
+  },
   data: () => ({ bot: '', err: '' }),
   mounted () {
-    const liffId = '1607427050-pOvAm7RE'
+    const liffId = !this.env.devEnv ? '1607427050-pOvAm7RE' : '1607427050-GWg637kn'
     this.$nuxt.$loading.start()
     this.$nuxt.$loading.increase(25)
     this.$store.commit('toggleWait')

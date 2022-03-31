@@ -58,7 +58,7 @@ module.exports = async (req, h) => {
       }
     }
   } catch (ex) {
-    throw Boom.internal(ex.message, ex)
+    throw ex.message
   }
   return { OK: true }
 }

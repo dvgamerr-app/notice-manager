@@ -7,6 +7,10 @@ export default {
   components: true,
   srcDir: 'src',
   router: { base: `${repositoryName}/` },
+  env: {
+    baseUrl: `${repositoryName}/`,
+    devEnv
+  },
   head: {
     titleTemplate: title => `${title ? `${title} · ` : ''}Manager`,
     meta: [

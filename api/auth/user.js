@@ -23,6 +23,6 @@ module.exports = async (req, h) => {
 
     return { user: res.success ? res.data : null }
   } catch (ex) {
-    return Boom.internal(ex.message, ex)
+    return ex
   }
 }

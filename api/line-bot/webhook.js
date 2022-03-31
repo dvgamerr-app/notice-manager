@@ -103,7 +103,7 @@ module.exports = async (req, h) => {
 
     logger.info(`Webhook delay: ${delayTime}ms. and used ${new Date().getTime() - startTime}ms.`)
   } catch (ex) {
-    throw Boom.internal(ex.message, ex)
+    throw ex.message
   }
 
   return { OK: true, delay: delayTime, used: new Date().getTime() - startTime }

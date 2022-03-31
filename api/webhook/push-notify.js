@@ -23,7 +23,7 @@ module.exports = async (req) => {
     }
     await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: true } })
   } catch (ex) {
-    throw Boom.internal(ex.message, ex)
+    throw ex.message
   }
 
   return { OK: true }
