@@ -29,11 +29,13 @@ fastify.setErrorHandler(function (ex, req, reply) {
 
 fastify.register(require('fastify-cors'))
 fastify.register((fastify, options, done) => {
-  fastify.addHook('onRequest', (req, reply, done) => {
-    req.userId = req.headers['x-userId']
-    reply.header('x-developer', '@dvgamerr')
-    done()
-  })
+  // fastify.addHook('onRequest', (req, reply, done) => {
+  //   req.userId = req.headers['x-userId']
+  //   // eslint-disable-next-line no-console
+  //   console.log('userId:', req.userId)
+  //   reply.header('x-developer', '@dvgamerr')
+  //   done()
+  // })
 
   fastify.get('/health', (req, reply) => reply.code(200).send('☕'))
   done()
@@ -60,8 +62,8 @@ process.on('SIGUSR2', exitHandler)
 process.on('uncaughtException', exitHandler)
 
 initialize().then(async () => {
-  await fastify.listen(3000, '0.0.0.0')
-  logger.info('fastify listen:3000')
+  await fastify.listen(3001, '0.0.0.0')
+  logger.info('fastify listen:3001')
   if (production) { await monitorLINE(`*[Started]* \`${os.hostname()}\` is running Notice-LINE.`) }
 }).catch((ex) => {
   Sentry.captureException(ex)

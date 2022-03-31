@@ -1,4 +1,4 @@
-const Boom = require('@hapi/boom')
+// const Boom = require('@hapi/boom')
 const logger = require('@touno-io/debuger')('API')
 const { notice } = require('@touno-io/db/schema')
 const sdkClient = require('../sdk-client')

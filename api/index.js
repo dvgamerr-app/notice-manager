@@ -23,7 +23,7 @@ module.exports = [
 
   { method: 'GET', path: '/api/history/:id', handler: require('./route-db/history') },
 
-  // { method: 'GET', path: '/api/service/dashboard', handler: require('./route-db/service/dashboard') },
+  { method: 'GET', path: '/api/service/dashboard', handler: require('./route-db/service/dashboard') },
   { method: 'POST', path: '/api/service/check', handler: require('./route-db/service/check') },
   { method: 'POST', path: '/api/service/update', handler: require('./route-db/service/update') },
   { method: 'POST', path: '/api/service', handler: require('./route-db/service/new') },

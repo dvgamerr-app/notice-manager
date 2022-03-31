@@ -1,5 +1,5 @@
 const axios = require('axios')
-const Boom = require('@hapi/boom')
+// const Boom = require('@hapi/boom')
 
 const synologyHost = process.env.SYNOLOGY_HOST || 'http://localhost:5000'
 const synologyAppId = process.env.SYNOLOGY_APPID || 'xxxxxxxxxxxxxxxxx'

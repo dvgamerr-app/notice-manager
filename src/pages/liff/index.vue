@@ -1,68 +1,46 @@
 <template>
-  <b-row v-if="!$store.state.wait">
+  <b-row>
     <b-col>
-      <lazy-liff-list />
+      <lazy-liff-list :err="err" />
     </b-col>
   </b-row>
 </template>
 
 <script>
-
 export default {
   layout: 'liff',
   transition: 'fade',
-  asyncData ({ env }) {
-    return {
-      liffId: '1607427050-pOvAm7RE',
-      uri: '/liff',
-      hostname: env.HOST_API
-    }
-  },
-  computed: {
-    profile () {
-      return this.$store.state.profile
-    }
-  },
-  // computed: {
-  //   getServiceSample () {
-  //     return Notify.query().get().map(e => ({ id: e.value, label: e.text }))
-  //   },
-  //   getRoomSample () {
-  //     const service = Notify.query().where('value', this.sample.service).get()[0] || {}
-  //     return (service.room || []).map(e => ({ id: e.value, label: e.text }))
-  //   }
-  // },
+  data: () => ({ bot: '', err: '' }),
   mounted () {
-    const isDev = /localhost:/.test(this.hostname)
-    this.$nextTick(async () => {
-      this.$nuxt.$loading.start()
-      this.$nuxt.$loading.increase(50)
-      this.$store.commit('toggleWait')
+    const liffId = '1607427050-GWg637kn'
+    this.$nuxt.$loading.start()
+    this.$nuxt.$loading.increase(25)
+    this.$store.commit('toggleWait')
 
-      await this.$liff.init({ liffId: this.liffId })
-      // if (!this.$liff.isInClient() && !isDev) {
-      //   return this.$nuxt.context.redirect(200, '/')
-      // }
-
-      if (!this.$liff.isLoggedIn() && !!isDev) {
-        return this.$liff.login({ redirectUri: `${this.hostname}${this.uri}` })
+    this.$liff.init({
+      liffId,
+      withLoginOnExternalBrowser: true
+    }).then(async () => {
+      await this.$liff.init({ liffId, withLoginOnExternalBrowser: true })
+      if (!this.$liff.isLoggedIn()) {
+        const { origin, pathname } = document.location
+        return this.$liff.login({ redirectUri: (new URL(origin, pathname)).toString() })
       }
 
-      let profile = {}
-      if (!isDev) {
-        profile = {
-          userId: 'U9e0a870c01ca97da20a4ec462bf72991',
-          displayName: 'KEM',
-          pictureUrl: 'https://profile.line-scdn.net/0hUG0jVRsoCmgNEyOtVqJ1PzFWBAV6PQwgdX1GW3sWAAp3I0s6YSBCCSgUXQ0gIERuMXMWXSkaVV8l',
-          statusMessage: 'You wanna make out.'
-        }
-      } else {
-        await this.$liff.ready.then(() => Promise.resolve())
-        profile = await this.$liff.getProfile()
-      }
-
+      await this.$liff.ready.then(() => Promise.resolve())
+      const profile = await this.$liff.getProfile()
       this.$store.commit('profile', profile)
-      await this.$line(this.profile.userId)
+
+      const { status, data: { lineBot, lineNotify } } = await this.$api.request('GET /service/dashboard', { headers: { 'x-user-liff': profile.userId } })
+      if (status === 200) {
+        this.$store.commit('lineBot', lineBot)
+        this.$store.commit('lineNotify', lineNotify)
+      } else {
+        throw new Error(`Request status ${status}`)
+      }
+    }).catch((ex) => {
+      this.err = ex.toString()
+    }).finally(() => {
       this.$nuxt.$loading.finish()
       this.$store.commit('toggleWait')
     })

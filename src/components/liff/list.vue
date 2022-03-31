@@ -1,8 +1,8 @@
 <template>
   <b-row v-if="!$store.state.wait">
-    <b-col :cols="type != 'all' ? 9 : 12" class="pt-3 mb-1">
+    <b-col v-if="countItem && !err" :cols="type != 'all' ? 9 : 12" class="pt-3 mb-1">
       <fa icon="search" class="fa-sm icon-search" />
-      <b-form-input v-model="search" :disabled="!listItems.length && !search" placeholder="Search" style="padding-left:2em" />
+      <b-form-input v-model="search" placeholder="Search" style="padding-left:2em" />
     </b-col>
     <b-col v-if="type != 'all'" cols="3" class="pl-0 pt-3 mb-1">
       <b-button :to="`/liff/${type}/new`" variant="primary" block class="btn-new">
@@ -10,10 +10,10 @@
       </b-button>
     </b-col>
     <b-col sm="12" class="pb-3">
-      <nuxt-link v-if="!listItems.length" to="#" class="d-block list-item empty py-3 border-bottom">
-        Empty.
+      <nuxt-link v-if="!countItem || err" :event="''" to="#" class="d-block list-item empty py-3 border-bottom">
+        {{ err || 'Empty.' }}
       </nuxt-link>
-      <lazy-liff-item-drop v-for="e in listItems" :key="e.$id" @delete="onRemove(e)">
+      <lazy-liff-item-drop v-for="e in getItem()" :key="e.$id" @delete="onRemove(e)">
         <nuxt-link :to="`/liff/${e.type}/${e.value}${type == 'all' ? `?view=1` : ''}`" class="d-flex align-items-center list-item py-3">
           <div class="icon px-1">
             <fa v-if="e.type == 'notify'" icon="bell" />
@@ -45,6 +45,10 @@ export default {
     type: {
       type: String,
       default: () => 'all'
+    },
+    err: {
+      type: String,
+      default: () => null
     }
   },
   data () {
@@ -53,19 +57,24 @@ export default {
     }
   },
   computed: {
-    listItems () {
-      return []
-      // const n = this.type === 'all' || this.type === 'notify' ? Notify.query().where('removed', false).withAll().get() : []
-      // const b = this.type === 'all' || this.type === 'bot' ? Bot.query().where('removed', false).withAll().get() : []
-      // return ([...n, ...b]).filter((e) => {
-      //   return new RegExp(this.search, 'ig').test(e.text) || new RegExp(this.search, 'ig').test(e.value)
-      // }).sort((a, b) => a.value > b.value ? 1 : -1)
+    getTypeBot () {
+      return this.type === 'all' || this.type === 'bot'
     },
-    profile () {
-      return this.$store.state.profile
+    getTypeNotify () {
+      return this.type === 'all' || this.type === 'notify'
+    },
+    countItem () {
+      const { lineNotify, lineBot } = this.$store.state
+      return (this.getTypeBot ? lineBot.length : 0) + (this.getTypeNotify ? lineNotify.length : 0)
     }
   },
   methods: {
+    getItem () {
+      const { lineNotify, lineBot } = this.$store.state
+      return ([...lineNotify, ...lineBot]).filter((e) => {
+        return new RegExp(this.search, 'ig').test(e.text) || new RegExp(this.search, 'ig').test(e.value)
+      }).sort((a, b) => a.value > b.value ? 1 : -1)
+    },
     onRemove (e) {
       // eslint-disable-next-line no-console
       console.log(e)

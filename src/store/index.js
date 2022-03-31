@@ -29,6 +29,8 @@ export const state = () => ({
   full: true,
   tall: false,
   compact: false,
+  lineBot: [],
+  lineNotify: [],
   profile: {
     userId: null,
     displayName: null,
@@ -38,6 +40,12 @@ export const state = () => ({
 })
 
 export const mutations = {
+  lineBot (state, value) {
+    state.lineBot = value
+  },
+  lineNotify (state, value) {
+    state.lineNotify = value
+  },
   profile (state, value) {
     state.profile = value
   },
