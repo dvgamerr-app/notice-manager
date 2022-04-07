@@ -12,7 +12,7 @@
 
 | Notify | Room | Detail |
 | --- | ----------- | ----------- |
-| ![notify](/liff-notify.png) | ![room](/liff-room.png) | ![detail](/liff-detail.png) |
+| ![notify](./liff-notify.png) | ![room].(/liff-room.png) | ![detail](./liff-detail.png) |
 
 ### Rich Menu
 
