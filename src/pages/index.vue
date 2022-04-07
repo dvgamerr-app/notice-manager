@@ -12,7 +12,7 @@
 
 | Notify | Room | Detail |
 | --- | ----------- | ----------- |
-| ![notify](./liff-notify.png) | ![room].(/liff-room.png) | ![detail](./liff-detail.png) |
+| ![notify](https://touno-io.github.io/line-notice/liff-notify.png) | ![room](https://touno-io.github.io/line-notice/liff-room.png) | ![detail](https://touno-io.github.io/line-notice/liff-detail.png) |
 
 ### Rich Menu
 
