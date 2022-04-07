@@ -16,7 +16,7 @@
 
 ### Rich Menu
 
-![richmenu](/richmenu.jpg)
+![richmenu](https://touno-io.github.io/line-notice/richmenu.jpg)
 
 </template>
 <style lang="scss">
