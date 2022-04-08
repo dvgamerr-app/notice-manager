@@ -31,17 +31,16 @@ module.exports = [
   { method: 'GET', path: '/api/check/stats', handler: require('./route-check/stats') },
   { method: 'GET', path: '/api/stats/bot/:name?', handler: require('./route-check/stats-bot') },
   { method: 'GET', path: '/api/stats/notify/:name?', handler: require('./route-check/stats-notify') },
-  { method: 'GET', path: '/api/stats/slack', handler: require('./route-check/stats-slack') },
+  { method: 'GET', path: '/api/stats/slack', handler: require('./route-check/stats-slack') }
 
   // API Get Database
-  { method: 'GET', path: '/db/cmd', handler: require('./route-db/bot-cmd') },
-  { method: 'GET', path: '/db/cmd/endpoint', handler: require('./route-db/bot-endpoint') },
-  { method: 'GET', path: '/db/:bot/cmd', handler: require('./route-db/bot-cmd') },
-  { method: 'POST', path: '/db/:bot/cmd/:id', handler: require('./route-db/bot-cmd') },
-  { method: 'GET', path: '/db/:bot/inbound', handler: require('./route-db/history') },
-  { method: 'GET', path: '/db/:bot/outbound', handler: require('./route-db/outbound') },
-
-  { method: ['GET', 'PATCH', 'PUT'], path: '/line/:bot/{room}/{funcId}', handler: require('./line-bot/function') }
+  // { method: 'GET', path: '/db/cmd', handler: require('./route-db/bot-cmd') },
+  // { method: 'GET', path: '/db/cmd/endpoint', handler: require('./route-db/bot-endpoint') },
+  // { method: 'GET', path: '/db/:bot/cmd', handler: require('./route-db/bot-cmd') },
+  // { method: 'POST', path: '/db/:bot/cmd/:id', handler: require('./route-db/bot-cmd') },
+  // { method: 'GET', path: '/db/:bot/inbound', handler: require('./route-db/history') },
+  // { method: 'GET', path: '/db/:bot/outbound', handler: require('./route-db/outbound') },
+  // { method: ['GET', 'PATCH', 'PUT'], path: '/line/:bot/{room}/{funcId}', handler: require('./line-bot/function') }
 
   // { method: 'POST', path: '/line/:bot/:to', handler: require('./webhook/push-webhook') },
   // { method: 'GET', path: '/webhook/:id', handler: require('./webhook') },
