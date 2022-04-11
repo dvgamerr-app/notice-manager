@@ -54,7 +54,11 @@ jobs:
           BRANCH: gh-pages
           FOLDER: dist
           CLEAN: true
+
   notice-api:
+    env:
+      IMAGE_FILE: notice-api
+
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -115,8 +119,8 @@ jobs:
   # notice-ui:
   #   runs-on: ubuntu-18.04
   #   env:
-  #     IMAGE_FILE: notice-ui.Dockerfile
-  #     IMAGE_NAME: notice-ui
+  #     IMAGE_NAME: notice-uis
+  #     IMAGE_FILE: notice-ui.Dockerfiles
   #   steps:
   #     - uses: actions/checkout@v2
 

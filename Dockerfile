@@ -14,4 +14,4 @@ COPY index.js package.json yarn.lock ./
 
 RUN yarn --production --frozen-lockfile
 
-CMD ["yarn", "start:api"]
+CMD ["yarn", "start"]
