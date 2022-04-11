@@ -65,7 +65,7 @@ jobs:
         node: [14]
 
     env:
-      IMAGE_FILE: notice-api
+      IMAGE_NAME: notice-api
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@master
