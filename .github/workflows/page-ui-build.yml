@@ -56,8 +56,6 @@ jobs:
           CLEAN: true
 
   notice-api:
-    env:
-      IMAGE_FILE: notice-api
 
     runs-on: ${{ matrix.os }}
 
@@ -66,6 +64,8 @@ jobs:
         os: [ubuntu-latest]
         node: [14]
 
+    env:
+      IMAGE_FILE: notice-api
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@master
@@ -90,7 +90,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Build image $IMAGE_NAME ⚙️
-        run: docker build -f $IMAGE_FILE -t $IMAGE_NAME .
+        run: docker build -t $IMAGE_NAME .
 
       - name: Log into docker.io
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin
