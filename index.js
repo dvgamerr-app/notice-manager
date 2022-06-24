@@ -36,8 +36,13 @@ fastify.register((fastify, options, done) => {
   //   reply.header('x-developer', '@dvgamerr')
   //   done()
   // })
-
-  fastify.get('/health', (req, reply) => reply.code(200).send('☕'))
+  fastify.get('/health', (req, reply) => {
+    if (notice.connected()) {
+      reply.code(200).send('☕')
+    } else {
+      reply.code(500).send('')
+    }
+  })
   done()
 })
 
@@ -62,8 +67,8 @@ process.on('SIGUSR2', exitHandler)
 process.on('uncaughtException', exitHandler)
 
 initialize().then(async () => {
-  await fastify.listen({ port: 3001, host: '0.0.0.0' })
-  logger.info('fastify listen:3001')
+  await fastify.listen({ port: 3000, host: '0.0.0.0' })
+  logger.info('fastify listen:3000')
   if (production) { await monitorLINE(`*[Started]* \`${os.hostname()}\` is running Notice-LINE.`) }
 }).catch((ex) => {
   Sentry.captureException(ex)
