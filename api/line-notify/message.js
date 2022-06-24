@@ -49,6 +49,7 @@ module.exports = async (req, reply) => {
 
   try {
     const { pushNotify } = await sdkNotify(service, room)
+
     let delayTime = new Date().getTime()
     const { headers, data } = await pushNotify({ message, imageThumbnail, imageFullsize, stickerPackageId, stickerId, imageFile, notificationDisabled })
     delayTime = new Date().getTime() - delayTime
@@ -59,9 +60,10 @@ module.exports = async (req, reply) => {
     }
     if (data.status !== 200) {
       await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: false, error: data.message } })
+      return reply.status(400).send({ statusCode: 400, error: 'Bad Request', message: data.message })
+    } else {
+      return Object.assign({ OK: true, delay: delayTime, used: new Date().getTime() - startTime }, { ratelimit })
     }
-
-    return Object.assign({ OK: true, delay: delayTime, used: new Date().getTime() - startTime }, { ratelimit })
   } catch (ex) {
     return reply.status(400).send({ statusCode: 400, error: 'Bad Request', message: ex.message })
   }
