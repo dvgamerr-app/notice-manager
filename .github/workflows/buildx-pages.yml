@@ -54,7 +54,7 @@ jobs:
     env:
       IMAGE_FILE: Dockerfile
       IMAGE_NAME: notice
-      PLATFORMS: linux/amd64,linux/386,linux/arm64
+      PLATFORMS: linux/amd64,linux/arm64
     steps:
       - uses: actions/checkout@v2
 
