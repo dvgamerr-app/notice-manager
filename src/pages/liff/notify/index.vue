@@ -19,12 +19,12 @@ export default {
     const updateProfile = async (e) => {
       this.$store.commit('profile', e)
 
-      const { status, data: { lineBot, lineNotify } } = await this.$api.request('GET /service/dashboard', { headers: { 'x-user-liff': e.userId } })
+      const { status, data: { lineBot, lineNotify, message } } = await this.$api.request('GET /dashboard', { headers: { 'x-user-liff': e.userId } })
       if (status === 200) {
         this.$store.commit('lineBot', lineBot)
         this.$store.commit('lineNotify', lineNotify)
       } else {
-        throw new Error(`Request status ${status}`)
+        throw new Error(`Request status ${message}`)
       }
     }
 
@@ -36,7 +36,9 @@ export default {
       this.$nuxt.$loading.finish()
       this.$store.commit('toggleWait')
 
-      return updateProfile(this.$tempProfile)
+      return updateProfile(this.$tempProfile).catch((ex) => {
+        this.err = ex.toString()
+      })
     }
 
     this.$liff.init({

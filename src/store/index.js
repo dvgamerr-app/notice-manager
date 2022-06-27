@@ -41,10 +41,18 @@ export const state = () => ({
 
 export const mutations = {
   lineBot (state, value) {
-    state.lineBot = value
+    if (value instanceof Array) {
+      state.lineBot = value
+    } else {
+      state.lineBot.push(value)
+    }
   },
   lineNotify (state, value) {
-    state.lineNotify = value
+    if (value instanceof Array) {
+      state.lineNotify = value
+    } else {
+      state.lineNotify.push(value)
+    }
   },
   profile (state, value) {
     state.profile = value

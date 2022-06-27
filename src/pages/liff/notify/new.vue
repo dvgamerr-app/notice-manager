@@ -7,18 +7,15 @@
 </template>
 
 <script>
-// import Api from '../../../model/api'
 
 export default {
   layout: 'liff',
   transition: 'fade',
-  computed: {
-    profile () {
-      return this.$store.state.profile
-    }
+  asyncData ({ env }) {
+    return { env }
   },
-  created () {
-    // if (!Api.query().first()) { this.$router.back() }
+  mounted () {
+    if (this.env.devEnv) { this.$store.commit('profile', this.$tempProfile) }
   }
 }
 </script>

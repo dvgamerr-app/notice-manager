@@ -23,10 +23,10 @@ module.exports = [
 
   { method: 'GET', path: '/api/history/:id', handler: require('./route-db/history') },
 
-  // { method: 'GET', path: '/api/notify/dashboard', handler: require('./route-db/notify/dashboard') },
-  { method: 'POST', path: '/api/notify/check', handler: require('./route-db/notify/check') },
-  { method: 'POST', path: '/api/notify/update', handler: require('./route-db/notify/update') },
+  { method: 'GET', path: '/api/dashboard', handler: require('./route-db/notify/dashboard') },
   { method: 'POST', path: '/api/notify', handler: require('./route-db/notify/new') },
+  { method: 'POST', path: '/api/notify/update', handler: require('./route-db/notify/update') },
+  { method: 'POST', path: '/api/notify/check', handler: require('./route-db/notify/check') },
   { method: 'POST', path: '/api/bot', handler: require('./route-db/bot/new') },
   { method: 'GET', path: '/api/check/stats', handler: require('./route-check/stats') },
   { method: 'GET', path: '/api/stats/bot/:name?', handler: require('./route-check/stats-bot') },

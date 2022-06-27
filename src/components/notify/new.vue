@@ -70,15 +70,8 @@
   </b-form>
 </template>
 <script>
-// import Api from '../../model/api'
-// import Notify from '../../model/notify'
 
 export default {
-  layout: 'liff',
-  transition: 'fade',
-  asyncData ({ env }) {
-    return { env }
-  },
   data: () => ({
     list: [],
     check: {
@@ -94,35 +87,13 @@ export default {
     data: {
       name: '',
       client_id: '',
-      client_secret: '',
-      url: '',
-      type: '',
-      webhook: ''
-    },
-    add: {
-      service: '',
-      room: ''
+      client_secret: ''
     }
   }),
   computed: {
-    api () {
-      return {}
-      // return query().first()
-    },
     profile () {
       return this.$store.state.profile
     }
-
-  //   getBotnameSample () {
-  //     return this.bot
-  //   },
-  //   getServiceSample () {
-  //     return this.list
-  //   },
-  //   getRoomSample () {
-  //     let service = this.list.filter(e => e.service === this.notify.service)
-  //     return service && service[0] ? service[0].room : []
-  //   }
   },
   methods: {
     showToast (msg) {
@@ -169,29 +140,23 @@ export default {
 
       this.btn.submit = true
       try {
-        await this.$liff.getProfile()
-        const { status, data } = await this.$api.request('POST /notify', { headers: { 'x-user-liff': e.userId } })
-        console.log(status, data)
-        const { data: res } = await this.$api({
-          method: 'POST',
-          url: '/api/service',
-          data: this.data,
-          headers: { 'x-id': this.profile.userId }
+        const { status, message, data } = await this.$api.request('POST /notify', Object.assign({
+          headers: { 'x-user-liff': this.profile.userId }
+        }, this.data))
+
+        if (status !== 200) { throw new Error(message) }
+
+        this.$store.commit('lineNotify', {
+          _id: data._id,
+          client: this.data.client_id,
+          secret: this.data.client_secret,
+          text: this.data.name,
+          value: this.data.name,
+          type: 'notify',
+          room: []
         })
 
-        if (res.error) { throw new Error(res.error) }
-        // Notify.insert({
-        //   data: {
-        //     _id: res._id,
-        //     text: this.data.name,
-        //     value: this.data.name,
-        //     service: this.data.name,
-        //     type: 'notify',
-        //     removed: false
-        //   }
-        // })
-
-        // this.$router.push(`/liff/notify/${this.data.name}`)
+        this.$router.push(`/liff/notify/${this.data.name}`)
       } catch (ex) {
         this.showToast(ex.stack || ex.message)
       } finally {
