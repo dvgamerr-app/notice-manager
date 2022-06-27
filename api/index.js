@@ -13,17 +13,19 @@ module.exports = [
   { method: ['PUT', 'POST'], path: '/notify/:service/:room', handler: require('./line-notify/message') },
 
   // API UI
+  { method: 'GET', path: '/api/dashboard', handler: require('./route-db/notify/dashboard') },
+
+  // LINE Bot
   { method: 'GET', path: '/api/line', handler: require('./route-db/line-bot') },
   { method: 'GET', path: '/api/line/:bot/room', handler: require('./route-db/line-bot') },
   { method: 'GET', path: '/api/line/:bot/history', handler: require('./route-db/history') },
 
-  { method: 'GET', path: '/api/notify', handler: require('./route-db/line-notify') },
+  // LINE Notify
   { method: 'GET', path: '/api/notify/:notify/room', handler: require('./route-db/line-notify') },
   { method: 'GET', path: '/api/notify/:notify/history', handler: require('./route-db/history') },
 
   { method: 'GET', path: '/api/history/:id', handler: require('./route-db/history') },
 
-  { method: 'GET', path: '/api/dashboard', handler: require('./route-db/notify/dashboard') },
   { method: 'POST', path: '/api/notify', handler: require('./route-db/notify/new') },
   { method: 'POST', path: '/api/notify/update', handler: require('./route-db/notify/update') },
   { method: 'POST', path: '/api/notify/check', handler: require('./route-db/notify/check') },

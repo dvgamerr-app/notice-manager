@@ -72,10 +72,6 @@ export default {
       return (this.getTypeBot ? lineBot.length : 0) + (this.getTypeNotify ? lineNotify.length : 0)
     }
   },
-  created () {
-    // eslint-disable-next-line no-console
-    console.log('list:', this.type)
-  },
   methods: {
     getItem () {
       const { lineNotify, lineBot } = this.$store.state
