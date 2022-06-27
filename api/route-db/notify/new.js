@@ -1,8 +1,10 @@
 const { notice } = require('@touno-io/db/schema')
 const { monitorLINE } = require('../../monitor')
 
-module.exports = async (req) => {
-  const userId = req.headers['x-id']
+module.exports = async (req, reply) => {
+  const userId = req.headers['x-user-liff']
+  if (!userId) { return reply.status(404).send({}) }
+
   const data = req.payload
   const { ServiceBot } = notice.get()
   if (await ServiceBot.findOne({ service: data.name, active: true })) { throw new Error('name is duplicate.') }

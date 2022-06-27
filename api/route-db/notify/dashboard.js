@@ -1,6 +1,6 @@
 const { notice } = require('@touno-io/db/schema')
 
-module.exports = async (req) => {
+module.exports = async (req, reply) => {
   const userId = req.headers['x-user-liff']
   const { LineBot, LineBotRoom, ServiceBot, ServiceBotOauth } = notice.get()
 
