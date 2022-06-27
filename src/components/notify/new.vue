@@ -14,12 +14,13 @@
             </b-input-group>
           </li>
           <li class="pt-1 pb-1">
-            Input <b>Service URL</b> <code>{{ api.hostname }}/</code>
+            Input <b>Service URL</b>
+            <span style="font-size:.9rem;"><code>{{ $hostApi }}/</code></span>
           </li>
           <li class="pt-1 pb-1">
             Input <b>Callback URL</b>
-            <span v-clipboard="`${api.hostname}/register/${data.name}`" class="copy-icon">
-              <code>{{ `${api.hostname}/register/${data.name}` }}</code>
+            <span v-clipboard="`${$hostApi}/register/${data.name}`" class="copy-icon">
+              <code>{{ `${$hostApi}/register/${data.name}` }}</code>
               <fa :icon="['far','copy']" />
             </span>
           </li>
@@ -73,6 +74,11 @@
 // import Notify from '../../model/notify'
 
 export default {
+  layout: 'liff',
+  transition: 'fade',
+  asyncData ({ env }) {
+    return { env }
+  },
   data: () => ({
     list: [],
     check: {
@@ -101,7 +107,7 @@ export default {
   computed: {
     api () {
       return {}
-      // return Api.query().first()
+      // return query().first()
     },
     profile () {
       return this.$store.state.profile
@@ -114,7 +120,7 @@ export default {
   //     return this.list
   //   },
   //   getRoomSample () {
-  //     let service = this.list.filter(e => e.service === this.api.notify.service)
+  //     let service = this.list.filter(e => e.service === this.notify.service)
   //     return service && service[0] ? service[0].room : []
   //   }
   },
@@ -163,7 +169,10 @@ export default {
 
       this.btn.submit = true
       try {
-        const { data: res } = await this.$axios({
+        await this.$liff.getProfile()
+        const { status, data } = await this.$api.request('POST /notify', { headers: { 'x-user-liff': e.userId } })
+        console.log(status, data)
+        const { data: res } = await this.$api({
           method: 'POST',
           url: '/api/service',
           data: this.data,
@@ -171,8 +180,6 @@ export default {
         })
 
         if (res.error) { throw new Error(res.error) }
-
-        this.showToast('Successful.')
         // Notify.insert({
         //   data: {
         //     _id: res._id,
@@ -184,7 +191,7 @@ export default {
         //   }
         // })
 
-        this.$router.push(`/liff/notify/${this.data.name}`)
+        // this.$router.push(`/liff/notify/${this.data.name}`)
       } catch (ex) {
         this.showToast(ex.stack || ex.message)
       } finally {

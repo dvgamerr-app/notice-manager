@@ -1,7 +1,7 @@
 <template>
   <b-row>
     <b-col>
-      <lazy-liff-list :err="err" />
+      <lazy-liff-list type="all" :err="err" />
     </b-col>
   </b-row>
 </template>
@@ -13,12 +13,32 @@ export default {
   asyncData ({ env }) {
     return { env }
   },
-  data: () => ({ bot: '', err: '' }),
+  data: () => ({ err: '' }),
   mounted () {
     const liffId = !this.env.devEnv ? '1607427050-pOvAm7RE' : '1607427050-GWg637kn'
+
+    const updateProfile = async (e) => {
+      this.$store.commit('profile', e)
+
+      const { status, data: { lineBot, lineNotify } } = await this.$api.request('GET /service/dashboard', { headers: { 'x-user-liff': e.userId } })
+      if (status === 200) {
+        this.$store.commit('lineBot', lineBot)
+        this.$store.commit('lineNotify', lineNotify)
+      } else {
+        throw new Error(`Request status ${status}`)
+      }
+    }
+
     this.$nuxt.$loading.start()
     this.$nuxt.$loading.increase(25)
     this.$store.commit('toggleWait')
+
+    if (this.env.devEnv) {
+      this.$nuxt.$loading.finish()
+      this.$store.commit('toggleWait')
+
+      return updateProfile(this.$tempProfile)
+    }
 
     this.$liff.init({
       liffId,
@@ -32,15 +52,8 @@ export default {
 
       await this.$liff.ready.then(() => Promise.resolve())
       const profile = await this.$liff.getProfile()
-      this.$store.commit('profile', profile)
 
-      const { status, data: { lineBot, lineNotify } } = await this.$api.request('GET /service/dashboard', { headers: { 'x-user-liff': profile.userId } })
-      if (status === 200) {
-        this.$store.commit('lineBot', lineBot)
-        this.$store.commit('lineNotify', lineNotify)
-      } else {
-        throw new Error(`Request status ${status}`)
-      }
+      await updateProfile(profile)
     }).catch((ex) => {
       this.err = ex.toString()
     }).finally(() => {

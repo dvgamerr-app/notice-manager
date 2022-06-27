@@ -1,13 +1,17 @@
 <template>
   <b-row v-if="!$store.state.wait">
-    <b-col v-if="countItem && !err" :cols="type != 'all' ? 9 : 12" class="pt-3 mb-1">
-      <fa icon="search" class="fa-sm icon-search" />
-      <b-form-input v-model="search" placeholder="Search" style="padding-left:2em" />
-    </b-col>
-    <b-col v-if="type != 'all'" cols="3" class="pl-0 pt-3 mb-1">
-      <b-button :to="`/liff/${type}/new`" variant="primary" block class="btn-new">
-        <fa icon="plus" /> <span>Create</span>
-      </b-button>
+    <b-col sm="12">
+      <b-row v-if="countItem && !err">
+        <b-col :cols="type != 'all' ? 9 : 12" class="pt-3 mb-1">
+          <fa icon="search" class="fa-sm icon-search" />
+          <b-form-input v-model="search" placeholder="Search" style="padding-left:2em" />
+        </b-col>
+        <b-col v-if="type != 'all'" cols="3" class="pl-0 pt-3 mb-1">
+          <b-button :to="`/liff/${type}/new`" variant="primary" block class="btn-new">
+            <fa icon="plus" class="d-sm-inline-block d-none" /> <span>Create</span>
+          </b-button>
+        </b-col>
+      </b-row>
     </b-col>
     <b-col sm="12" class="pb-3">
       <nuxt-link v-if="!countItem || err" :event="''" to="#" class="d-block list-item empty py-3 border-bottom">
@@ -68,10 +72,17 @@ export default {
       return (this.getTypeBot ? lineBot.length : 0) + (this.getTypeNotify ? lineNotify.length : 0)
     }
   },
+  created () {
+    // eslint-disable-next-line no-console
+    console.log('list:', this.type)
+  },
   methods: {
     getItem () {
       const { lineNotify, lineBot } = this.$store.state
-      return ([...lineNotify, ...lineBot]).filter((e) => {
+      let data = []
+      if (this.type === 'all' || this.type === 'notify') { data = data.concat(...lineNotify) }
+      if (this.type === 'all' || this.type === 'bot') { data = data.concat(...lineBot) }
+      return data.filter((e) => {
         return new RegExp(this.search, 'ig').test(e.text) || new RegExp(this.search, 'ig').test(e.value)
       }).sort((a, b) => a.value > b.value ? 1 : -1)
     },

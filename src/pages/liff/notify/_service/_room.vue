@@ -33,7 +33,7 @@ export default {
   layout: 'liff',
   transition: 'fade',
   async asyncData ({ params, $axios }) {
-    const { data: stats } = await $axios(`/api/stats/notify/${params.service}`)
+    const { data: stats } = await $axios(`/api/notify/${params.service}/room`)
     return Object.assign(params, { stats })
   },
   data () {
