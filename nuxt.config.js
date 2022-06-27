@@ -7,9 +7,12 @@ export default {
   components: true,
   srcDir: 'src',
   router: { base: `${repositoryName}/` },
+  server: { port: 8080 },
   env: {
     baseUrl: `${repositoryName}/`,
-    devEnv
+    devEnv,
+    userId: process.env.LIFF_USER_ID,
+    hostApi: process.env.HOST_API
   },
   head: {
     titleTemplate: title => `${title ? `${title} · ` : ''}Manager`,
