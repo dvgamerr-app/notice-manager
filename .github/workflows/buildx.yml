@@ -1,4 +1,4 @@
-name: "Deploy Docker Hub"
+name: BuildX
 
 on:
   push:
@@ -54,7 +54,10 @@ jobs:
     env:
       IMAGE_FILE: Dockerfile
       IMAGE_NAME: notice
-      PLATFORMS: linux/amd64,linux/arm64
+      PLATFORMS: linux/amd64,linux/386,linux/arm64
+    outputs:
+      container_name: ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }}
+      version: ${{ steps.prepare.outputs.version }}
     steps:
       - uses: actions/checkout@v2
 
@@ -98,3 +101,15 @@ jobs:
       - name: Inspect 🔍
         if: always() && github.event_name != 'pull_request'
         run: docker buildx imagetools inspect ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }}
+
+  k8s:
+    runs-on: ubuntu-18.04
+    needs: build
+    if: success() && github.event_name != 'pull_request' && !contains(github.ref, 'main')
+    steps:
+      - name: Trigger deploy 🚀
+        uses: ladislas14/kubernetes-action@1.0.1
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: set image deploy/notice-api notice-api=${{ needs.build.outputs.container_name }} -n notice-line
