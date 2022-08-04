@@ -67,7 +67,7 @@ jobs:
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=v$(echo $VERSION | sed -e 's/^v//')
 
           # Use Docker `latest` tag convention
 
@@ -112,4 +112,4 @@ jobs:
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
-          args: set image deploy/notice-api notice-api=${{ needs.build.outputs.container_name }} -n notice-line
+          args: set image deploy/notice-api notice-api=${{ needs.notice-api.outputs.container_name }} -n notice-line
