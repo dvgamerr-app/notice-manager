@@ -10,7 +10,7 @@ module.exports = async (req, reply) => {
   const { LineOutbound, LineBotRoom } = await notice.get()
 
   if (!/^[RUC]{1}/g.test(userTo) && (!/[0-9a-f]*/.test(userTo) || userTo.length !== 32)) {
-    const room = await LineBotRoom.findOne({ service: bot, room: userTo })
+    const room = await LineBotRoom.findOne({ service: bot, name: userTo })
     if (!room || !room.active) { return reply.status(400).send({ statusCode: 400, error: 'Bad Request', message: ' Bot name or Room name not found.' }) }
     userTo = room.userId
   }
@@ -28,6 +28,8 @@ module.exports = async (req, reply) => {
     reply.header('x-line-request-id', lineBot['x-line-request-id'])
   } catch (ex) {
     await LineOutbound.updateOne({ _id: outbound._id }, { $set: { sended: false, error: ex.message || ex.toString() } })
+    // eslint-disable-next-line no-console
+    console.log('pushMessage: ', ex.message || ex.toString())
     return reply.status(400).send({ statusCode: 400, error: 'Bad Request', message: 'Incorrect body format, https://developers.line.biz/en/docs/messaging-api/message-types/#text-messages' })
   }
 

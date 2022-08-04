@@ -90,7 +90,7 @@ module.exports = {
       await leaveBotRoom(botname, getID(event), event.source.type)
       if (event.source.type === 'user') { return 'ไม่! จะอยู่' }
 
-      await line.replyMessage(event.replyToken, { type: 'text', text: 'ไปก็ได้' })
+      await line.reply(event.replyToken, { type: 'text', text: 'ไปก็ได้' })
       if (event.source.type === 'group') {
         await line.leaveGroup(getID(event))
       } else if (event.source.type === 'room') {

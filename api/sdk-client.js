@@ -1,4 +1,4 @@
-const sdk = require('@line/bot-sdk')
+const linebot = require('linebot')
 const { notice } = require('@touno-io/db/schema')
 
 module.exports = async (botName) => {
@@ -10,24 +10,27 @@ module.exports = async (botName) => {
 
   if (!accesstoken) { throw new Error('LINE Channel AccessToken is undefined.') }
 
-  const line = new sdk.Client({ channelAccessToken: accesstoken })
+  const bot = linebot({
+    channelAccessToken: accesstoken
+  })
+
+  // const line = new sdk.Client({ channelAccessToken: accesstoken })
   const convertSender = msg => typeof msg === 'string' ? { type: 'text', text: msg } : typeof msg === 'function' ? msg() : msg
   const linePushId = ({ source }) => source[`${source.type}Id`]
   const pushMessage = async (to, sender) => {
     if (!sender) { return {} }
-
     if (typeof to === 'string') {
       if (!/^[RUC]{1}/g.test(to)) {
-        return await line.replyMessage(to, convertSender(sender))
+        return await bot.reply(to, convertSender(sender))
       } else {
-        return await line.pushMessage(to, convertSender(sender))
+        return await bot.push(to, convertSender(sender))
       }
     } else if (to.replyToken) {
-      return await line.replyMessage(to.replyToken, convertSender(sender))
+      return await bot.reply(to.replyToken, convertSender(sender))
     } else {
-      return await line.pushMessage(linePushId(to), convertSender(sender))
+      return await bot.push(linePushId(to), convertSender(sender))
     }
   }
 
-  return { line, pushMessage }
+  return { bot, pushMessage }
 }
