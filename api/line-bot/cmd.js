@@ -2,7 +2,7 @@ const { notice } = require('@touno-io/db/schema')
 const { monitorLINE } = require('../monitor')
 const helpFlex = require('./flex-help')
 
-const api = process.env.PROXY_API || 'http://localhost:4000'
+const api = process.env.HOST_API || 'http://localhost:4000'
 
 const getID = (e) => {
   if (!e || !e.source) { throw new Error('getID() :: Event is unknow source.') }
