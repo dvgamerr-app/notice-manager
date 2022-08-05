@@ -35,10 +35,9 @@ module.exports = async (req, h) => {
 
     const { line, pushMessage } = await sdkClient(bot)
 
-    if (!req.payload || !req.payload.events.length) { return { OK: true } }
+    if (!req.body || !req.body.events.length) { return { OK: true } }
 
-    const { events } = req.payload
-
+    const { events } = req.body
     for (const e of events) {
       if (e.replyToken === _VERIFY_TOKEN) { continue }
 
