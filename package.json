@@ -1,6 +1,6 @@
 {
   "name": "line-notice",
-  "version": "6.2.2",
+  "version": "6.2.3",
   "description": "Server notify message to 3party.",
   "private": true,
   "keywords": [],
