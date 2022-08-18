@@ -24,8 +24,8 @@ module.exports = async (req, res) => {
     await LineCMD.updateMany(where, {
       $set: Object.assign(
         updated,
-        Object.keys(req.payload).length > 0
-          ? req.payload
+        Object.keys(req.body).length > 0
+          ? req.body
           : { executed: true, executing: true }
       )
     })

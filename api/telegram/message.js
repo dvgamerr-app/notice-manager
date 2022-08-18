@@ -11,11 +11,11 @@ module.exports = async (req) => {
     botName,
     roomName,
     type: 'telegram',
-    sender: req.payload || {},
+    sender: req.body || {},
     sended: false
   }).save()
 
-  await sendMessage(botName, roomName, req.payload || {})
+  await sendMessage(botName, roomName, req.body || {})
 
   await LineOutbound.updateOne({ _id }, { $set: { sended: true } })
   return { OK: true, used_ms: new Date().getTime() - startTime }

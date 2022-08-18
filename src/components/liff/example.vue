@@ -71,7 +71,7 @@ export default {
         return
       }
       this.sended = true
-      const { data } = await this.$axios.put(
+      const { status, data } = await this.$axios.put(
         `/notify/${this.service}/${this.room}`,
         {
           message: '*LINE-Notify*\nTesting message.',
@@ -80,7 +80,7 @@ export default {
       )
       this.response = JSON.stringify(data, null, 2)
       this.sended = false
-      if (data.status !== 200) {
+      if (status !== 200) {
         this.showToast('Invalid request notify.')
         // eslint-disable-next-line no-console
         return console.error(data)

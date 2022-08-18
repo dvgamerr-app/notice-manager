@@ -3,7 +3,7 @@
 
 // module.exports = (req, res) => {
 //   const { LineOutbound } = mongo.get()
-//   const { icon, username, sender, message } = req.payload
+//   const { icon, username, sender, message } = req.body
 //   const { channel } = req.params
 //   let outbound = null
 //   try {
@@ -23,7 +23,7 @@
 
 //     res.json({ error: null })
 //   } catch (ex) {
-//     res.json({ error: ex.message || ex.toString(), type: req.payload.type })
+//     res.json({ error: ex.message || ex.toString(), type: req.body.type })
 //     if (outbound && outbound._id) {
 //       await LineOutbound.updateOne({ _id: outbound._id }, { $set: { error: ex.message || ex.toString() } })
 //     }

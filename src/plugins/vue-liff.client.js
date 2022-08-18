@@ -20,7 +20,7 @@ export default ({ env }, inject) => {
       'https://www.icmetl.org/wp-content/uploads/2020/11/user-icon-human-person-sign-vector-10206693.png'
   })
 
-  inject('hostApi', env.hostApi || 'https://notice.touno.io')
+  inject('hostApi', env.baseUrl || 'https://notice.touno.io')
 
   // You can access liff.init()'s return value (Promise object)
   // as this.$liffInit() by inject()

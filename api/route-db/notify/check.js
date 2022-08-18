@@ -1,7 +1,7 @@
 const { notice } = require('@touno-io/db/schema')
 
 module.exports = async (req) => {
-  const { service, room } = req.payload
+  const { service, room } = req.body
   const { ServiceBotOauth, ServiceBot } = notice.get()
 
   if (service && room) {

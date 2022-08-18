@@ -18,7 +18,7 @@ module.exports = [
   // API Notify
   {
     method: 'GET',
-    path: '/register/:service/:room',
+    path: '/register/:service/:room?',
     handler: require('./line-notify/oauth')
   },
   {

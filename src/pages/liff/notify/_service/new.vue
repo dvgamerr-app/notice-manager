@@ -1,7 +1,7 @@
 <template>
   <b-row v-if="!$store.state.wait">
     <b-col sm="12" class="notify py-3">
-      <notify-join :service-name="service" />
+      <notify-join :base-url="env.baseUrl" :service-name="service" />
     </b-col>
   </b-row>
 </template>

@@ -25,13 +25,13 @@
     <b-col cols="12" class="py-3">
       <lazy-liff-item-drop v-for="e in room" :key="e.$id" @delete="remove(e)">
         <nuxt-link
-          :to="`/liff/${item.type}/${item.value}/${e.value}`"
+          :to="`/liff/${item.type}/${item.value}/${e.room}`"
           class="d-flex align-items-center list-item py-3 border-bottom"
         >
           <div class="flex-grow-1 px-2">
             <div class="display" v-text="e.name" />
             <div class="name text-muted">
-              <small>{{ $hostApi }}/{{ service }}/{{ e.value }}</small>
+              <small>{{ $hostApi }}/{{ service }}/{{ e.room }}</small>
             </div>
           </div>
         </nuxt-link>
@@ -41,6 +41,8 @@
 </template>
 
 <script>
+// eslint-disable no-console
+
 import dayjs from 'dayjs'
 import numeral from 'numeral'
 // import Api from '../../../../model/api'

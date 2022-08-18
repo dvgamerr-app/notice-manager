@@ -3,7 +3,7 @@ const { notice } = require('@touno-io/db/schema')
 
 module.exports = async (req) => {
   const { name, to: userTo } = req.params
-  const sender = req.payload
+  const sender = req.body
   if (!sender) {
     throw new Error('Not Support payload.')
   }

@@ -1,7 +1,7 @@
 const { notice } = require('@touno-io/db/schema')
 
 module.exports = async (req) => {
-  const data = req.payload
+  const data = req.body
 
   const { ServiceBot } = notice.get() // LineInbound, LineOutbound, LineCMD, ServiceBotOauth
 

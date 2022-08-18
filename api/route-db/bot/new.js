@@ -2,7 +2,7 @@ const { notice } = require('@touno-io/db/schema')
 const { monitorLINE } = require('../../monitor')
 
 module.exports = async (req) => {
-  const data = req.payload
+  const data = req.body
   const { LineBot } = notice.get() // LineInbound, LineOutbound, LineCMD, ServiceBotOauth
 
   if (await LineBot.findOne({ botname: data.name, active: true })) {

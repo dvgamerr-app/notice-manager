@@ -12,7 +12,7 @@ module.exports = {
   plugins: [],
   // add your custom rules here
   rules: {
-    'vue/multi-word-component-names': false,
-    'vue/valid-attribute-name': false
+    'vue/multi-word-component-names': 0,
+    'vue/valid-attribute-name': 0
   }
 }
