@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@master
 
       - name: Setup node env 🏗
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v3.4.1
         with:
           node-version: 16
           check-latest: true
@@ -24,7 +24,7 @@ jobs:
         run: echo "::set-output name=dir::$(yarn cache dir)"
 
       - name: Cache node_modules 📦
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v3.0.7
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
@@ -42,7 +42,7 @@ jobs:
         run: yarn generate
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+        uses: JamesIves/github-pages-deploy-action@v4.4.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
@@ -89,7 +89,7 @@ jobs:
 
       - name: Login to DockerHub
         if: success() && github.event_name != 'pull_request'
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.DOCKER_TOKEN }}
@@ -108,7 +108,7 @@ jobs:
     if: success() && github.event_name != 'pull_request' && !contains(github.ref, 'main')
     steps:
       - name: Trigger deploy 🚀
-        uses: ladislas14/kubernetes-action@1.0.1
+        uses: ladislas14/kubernetes-action@1.02
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
