@@ -13,7 +13,7 @@
     "start": "node .",
     "generate": "nuxt generate",
     "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore .",
-    "lint": "yarn lint:js && yarn lint:prettier",
+    "lint": "yarn lint:js",
     "lintfix": "prettier --write --list-different . && yarn lint:js --fix"
   },
   "dependencies": {
