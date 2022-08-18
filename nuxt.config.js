@@ -1,15 +1,12 @@
 const devEnv = process.env.NODE_ENV === 'development'
-const repositoryName = devEnv ? '' : '/line-notice'
 
 export default {
-  ssr: false,
-  target: 'static',
+  ssr: true,
+  server: { port: 8080 },
   components: true,
   srcDir: 'src',
-  router: { base: `${repositoryName}/` },
-  server: { port: 8080 },
   env: {
-    baseUrl: `${repositoryName}/`,
+    baseUrl: process.env.BASE_URL || 'http://localhost:3000',
     devEnv,
     userId: process.env.LIFF_USER_ID,
     hostApi: process.env.HOST_API
@@ -39,30 +36,30 @@ export default {
       lang: 'en',
       description: process.env.npm_package_description,
       short_name: 'Notice',
-      start_url: `${repositoryName}/`,
+      start_url: '/',
       display: 'standalone',
       orientation: 'portrait',
       theme_color: '#ffffff',
       background_color: '#ffffff',
       browser_action: {
-        default_icon: `${repositoryName}/favicon.ico`,
-        default_popup: `${repositoryName}/`
+        default_icon: '/favicon.ico',
+        default_popup: '/'
       },
       icons: [
         {
-          src: `${repositoryName}/favicon.ico`,
+          src: '/favicon.ico',
           sizes: '16x16',
           type: 'image/png',
           purpose: 'any maskable'
         },
         {
-          src: `${repositoryName}/favicon.ico`,
+          src: '/favicon.ico',
           sizes: '64x64',
           type: 'image/png',
           purpose: 'any maskable'
         },
         {
-          src: `${repositoryName}/favicon.ico`,
+          src: '/favicon.ico',
           sizes: '196x196',
           type: 'image/png',
           purpose: 'any maskable'
@@ -117,7 +114,8 @@ export default {
     '@nuxtjs/pwa'
   ],
   axios: {
-    baseURL: '/'
+    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    retry: { retries: 3 }
   },
   bootstrapVue: { bootstrapCSS: false, icons: false },
   fontawesome: {

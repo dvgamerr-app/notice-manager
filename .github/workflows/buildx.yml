@@ -1,14 +1,24 @@
-name: BuildX
+name: Build & deploy next version
 
 on:
   push:
     branches: [ main ]
-    tags:
-      - v*
 
 jobs:
   notice-ui:
-    runs-on: ubuntu-18.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        node: [16]
+
+    env:
+      IMAGE_NAME: line-liff
+      PLATFORMS: linux/amd64,linux/arm64/v8
+      IMAGE_FILE: Dockerfile
+      KUBE_DEPLOY: deploy/line-liff
+      KUBE_CONTAINER: notice-api
+      KUBE_NAMESPACE: notice-line
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@master
@@ -16,7 +26,7 @@ jobs:
       - name: Setup node env 🏗
         uses: actions/setup-node@v2.1.5
         with:
-          node-version: 16
+          node-version: ${{ matrix.node }}
           check-latest: true
 
       - name: Get yarn cache directory path 🛠
@@ -39,22 +49,91 @@ jobs:
         run: yarn lint
 
       - name: Run Build ⚙️
-        run: yarn generate
+        run: yarn build
+      - name: Prepare 🔰
+        id: prepare
+        run: |
+          echo ::set-output name=kube_deploy::${KUBE_DEPLOY}
+          echo ::set-output name=kube_container::${KUBE_CONTAINER}
+          echo ::set-output name=kube_namespace::${KUBE_NAMESPACE}
 
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=v$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "main" ] && VERSION=latest
+
+          echo ::set-output name=docker_image::${{github.actor}}/${IMAGE_NAME}
+          echo ::set-output name=version::${VERSION}
+          echo ::set-output name=buildx_args::--platform $PLATFORMS \
+            --build-arg VERSION=${VERSION} \
+            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+            --build-arg VERSION=$VERSION \
+            --tag ${{github.actor}}/$IMAGE_NAME:$VERSION --file $IMAGE_FILE .
+
+      - name: Set up Docker Buildx 📐
+        uses: docker/setup-buildx-action@v2
+
+      - name: Docker Buildx ⚙️
+        run: docker buildx build --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_args }}
+
+      - name: Login to DockerHub
+        if: success() && github.event_name != 'pull_request'
+        uses: docker/login-action@v2
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: dist
-          CLEAN: true
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Docker Push 📌
+        if: success() && github.event_name != 'pull_request'
+        run: docker buildx build --output "type=image,push=true" ${{ steps.prepare.outputs.buildx_args }}
+
+      - name: Inspect 🔍
+        if: success() && github.event_name != 'pull_request'
+        run: docker buildx imagetools inspect ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }}
+
+      - name: Trigger deploy 🚀
+        if: success() && github.event_name != 'pull_request'
+        uses: ladislas14/kubernetes-action@1.02
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: set image ${{ steps.prepare.outputs.kube_deploy }} ${{ steps.prepare.outputs.kube_container }}=${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }} -n ${{ steps.prepare.outputs.kube_namespace }}
+
+      - name: Status deployment 🔍
+        if: success() && github.event_name != 'pull_request'
+        uses: ladislas14/kubernetes-action@1.02
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: rollout status ${{ steps.prepare.outputs.kube_deploy }} -n ${{ steps.prepare.outputs.kube_namespace }}
+
+      # - name: Run Build ⚙️
+      #   run: yarn generate
+
+      # - name: Deploy 🚀
+      #   uses: JamesIves/github-pages-deploy-action@3.7.1
+      #   with:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     BRANCH: gh-pages
+      #     FOLDER: dist
+      #     CLEAN: true
 
   notice-api:
-    runs-on: ubuntu-18.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        node: [16]
     env:
-      IMAGE_FILE: Dockerfile
+      IMAGE_FILE: ./api/Dockerfile
       IMAGE_NAME: notice
       PLATFORMS: linux/amd64,linux/arm64
+      KUBE_DEPLOY: deploy/notice-api
+      KUBE_CONTAINER: notice-api
+      KUBE_NAMESPACE: notice-line
     outputs:
       container_name: ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }}
       version: ${{ steps.prepare.outputs.version }}
@@ -64,6 +143,10 @@ jobs:
       - name: Prepare 🔰
         id: prepare
         run: |
+          echo ::set-output name=kube_deploy::${KUBE_DEPLOY}
+          echo ::set-output name=kube_container::${KUBE_CONTAINER}
+          echo ::set-output name=kube_namespace::${KUBE_NAMESPACE}
+
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Strip "v" prefix from tag name
@@ -102,14 +185,18 @@ jobs:
         if: always() && github.event_name != 'pull_request'
         run: docker buildx imagetools inspect ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }}
 
-  k8s:
-    runs-on: ubuntu-18.04
-    needs: notice-api
-    if: success() && github.event_name != 'pull_request' && !contains(github.ref, 'main')
-    steps:
       - name: Trigger deploy 🚀
-        uses: ladislas14/kubernetes-action@1.0.1
+        if: success() && github.event_name != 'pull_request'
+        uses: ladislas14/kubernetes-action@1.02
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
-          args: set image deploy/notice-api notice-api=${{ needs.notice-api.outputs.container_name }} -n notice-line
+          args: set image ${{ steps.prepare.outputs.kube_deploy }} ${{ steps.prepare.outputs.kube_container }}=${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }} -n ${{ steps.prepare.outputs.kube_namespace }}
+
+      - name: Status deployment 🔍
+        if: success() && github.event_name != 'pull_request'
+        uses: ladislas14/kubernetes-action@1.02
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: rollout status ${{ steps.prepare.outputs.kube_deploy }} -n ${{ steps.prepare.outputs.kube_namespace }}

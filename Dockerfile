@@ -1,15 +1,9 @@
-
 FROM node:lts-alpine
 
-LABEL MAINTAINER="Kananek T."
-
-ENV TZ Asia/Bangkok
-ENV NODE_ENV production
-
 WORKDIR /app
-COPY ./api ./api/
-COPY index.js package.json yarn.lock ./
+COPY . .
 
-RUN yarn --production --frozen-lockfile
+ENV HOST 0.0.0.0
+EXPOSE 8080
 
-CMD ["yarn", "start"]
+CMD [ "yarn", "start" ]
