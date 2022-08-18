@@ -19,6 +19,8 @@ jobs:
       KUBE_DEPLOY: deploy/line-liff
       KUBE_CONTAINER: notice-api
       KUBE_NAMESPACE: notice-line
+
+      BASE_URL: https://notice.touno.io
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@master
