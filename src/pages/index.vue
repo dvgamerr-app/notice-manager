@@ -14,11 +14,11 @@
 
 | Notify                                                            | Room                                                          | Detail                                                            |
 | ----------------------------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------- |
-| ![notify](https://touno-io.github.io/line-notice/liff-notify.png) | ![room](https://touno-io.github.io/line-notice/liff-room.png) | ![detail](https://touno-io.github.io/line-notice/liff-detail.png) |
+| ![notify](/liff-notify.png) | ![room](/liff-room.png) | ![detail](/liff-detail.png) |
 
 ### Rich Menu
 
-![richmenu](https://touno-io.github.io/line-notice/richmenu.jpg)
+![richmenu](/richmenu.jpg)
 </template>
 <style lang="scss">
 img {

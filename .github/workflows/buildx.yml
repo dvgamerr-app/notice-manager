@@ -96,13 +96,21 @@ jobs:
         if: success() && github.event_name != 'pull_request'
         run: docker buildx imagetools inspect ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }}
 
-      - name: Trigger deploy 🚀
+      # - name: Trigger deploy 🚀
+      #   if: success() && github.event_name != 'pull_request'
+      #   uses: ladislas14/kubernetes-action@1.02
+      #   env:
+      #     KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+      #   with:
+      #     args: set image ${{ steps.prepare.outputs.kube_deploy }} ${{ steps.prepare.outputs.kube_container }}=${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }} -n ${{ steps.prepare.outputs.kube_namespace }}
+
+      - name: Restart deployment 🚀
         if: success() && github.event_name != 'pull_request'
         uses: ladislas14/kubernetes-action@1.02
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
-          args: set image ${{ steps.prepare.outputs.kube_deploy }} ${{ steps.prepare.outputs.kube_container }}=${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }} -n ${{ steps.prepare.outputs.kube_namespace }}
+          args: rollout restart ${{ steps.prepare.outputs.kube_deploy }} -n ${{ steps.prepare.outputs.kube_namespace }}
 
       - name: Status deployment 🔍
         if: success() && github.event_name != 'pull_request'
@@ -187,13 +195,21 @@ jobs:
         if: always() && github.event_name != 'pull_request'
         run: docker buildx imagetools inspect ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }}
 
-      - name: Trigger deploy 🚀
+      # - name: Trigger deploy 🚀
+      #   if: success() && github.event_name != 'pull_request'
+      #   uses: ladislas14/kubernetes-action@1.02
+      #   env:
+      #     KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+      #   with:
+      #     args: set image ${{ steps.prepare.outputs.kube_deploy }} ${{ steps.prepare.outputs.kube_container }}=${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }} -n ${{ steps.prepare.outputs.kube_namespace }}
+
+      - name: Restart deployment 🚀
         if: success() && github.event_name != 'pull_request'
         uses: ladislas14/kubernetes-action@1.02
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
-          args: set image ${{ steps.prepare.outputs.kube_deploy }} ${{ steps.prepare.outputs.kube_container }}=${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }} -n ${{ steps.prepare.outputs.kube_namespace }}
+          args: rollout restart ${{ steps.prepare.outputs.kube_deploy }} -n ${{ steps.prepare.outputs.kube_namespace }}
 
       - name: Status deployment 🔍
         if: success() && github.event_name != 'pull_request'
