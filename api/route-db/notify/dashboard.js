@@ -6,7 +6,15 @@ module.exports = async (req, reply) => {
 
   const lineBot = await LineBot.aggregate([
     { $match: { active: true, userId } },
-    { $project: { _id: 1, text: '$name', value: '$botname', type: '$bot', stats: '$options.stats' } },
+    {
+      $project: {
+        _id: 1,
+        text: '$name',
+        value: '$botname',
+        type: '$bot',
+        stats: '$options.stats'
+      }
+    },
     { $sort: { botname: 1, name: 1 } }
   ])
 
@@ -22,13 +30,24 @@ module.exports = async (req, reply) => {
 
   const lineNotify = await ServiceBot.aggregate([
     { $match: { active: true, userId } },
-    { $project: { _id: 1, client: 1, secret: 1, text: '$name', value: '$service', type: '$notify' } },
+    {
+      $project: {
+        _id: 1,
+        client: 1,
+        secret: 1,
+        text: '$name',
+        value: '$service',
+        type: '$notify'
+      }
+    },
     { $sort: { service: 1 } }
   ])
 
   const service = await ServiceBotOauth.aggregate([
     { $match: { accessToken: { $ne: null } } },
-    { $project: { _id: 0, accessToken: 1, value: '$room', name: 1, service: 1 } },
+    {
+      $project: { _id: 0, accessToken: 1, value: '$room', name: 1, service: 1 }
+    },
     { $sort: { value: 1, name: 1 } }
   ])
 

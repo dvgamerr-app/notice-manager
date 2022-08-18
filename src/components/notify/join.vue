@@ -6,19 +6,33 @@
       </b-col>
       <b-col>
         <ol>
-          <li>Add <strong>LINE Notify</strong> friend from <strong>QR Code</strong>.</li>
-          <li>Input name from room to join in <strong>{{ serviceName }}</strong>.</li>
+          <li>
+            Add <strong>LINE Notify</strong> friend from
+            <strong>QR Code</strong>.
+          </li>
+          <li>
+            Input name from room to join in <strong>{{ serviceName }}</strong>.
+          </li>
           <li class="pt-1 pb-1">
             <b-row>
               <b-col>
                 <b-input-group>
                   <b-input-group-text>Room</b-input-group-text>
-                  <b-form-input ref="room" v-model.trim="roomName" maxlength="20" :state="check.room" @keyup.enter="onJoinRoom($event)" />
+                  <b-form-input
+                    ref="room"
+                    v-model.trim="roomName"
+                    maxlength="20"
+                    :state="check.room"
+                    @keyup.enter="onJoinRoom($event)"
+                  />
                 </b-input-group>
               </b-col>
             </b-row>
           </li>
-          <li>Your line account choose room and click <strong>agree and connect</strong>.</li>
+          <li>
+            Your line account choose room and click
+            <strong>agree and connect</strong>.
+          </li>
           <li>Invite <strong>LINE Notify</strong> to room your select.</li>
         </ol>
       </b-col>
@@ -85,7 +99,7 @@ export default {
         this.showToast('Name verify a-z,0-9, and - .')
         return e.preventDefault()
       }
-      const { data } = await this.$axios('/api/service/check', {
+      const { data } = await this.$axios('/api/notify/check', {
         method: 'POST',
         validateStatus: () => true,
         data: { room: this.roomName, service: this.serviceName }

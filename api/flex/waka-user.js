@@ -16,7 +16,14 @@ module.exports = (user, stats, rank = 0) => {
               {
                 type: 'box',
                 layout: 'vertical',
-                contents: [{ type: 'image', url: user.photo, aspectMode: 'cover', size: 'full' }],
+                contents: [
+                  {
+                    type: 'image',
+                    url: user.photo,
+                    aspectMode: 'cover',
+                    size: 'full'
+                  }
+                ],
                 cornerRadius: '100px',
                 width: '16px',
                 height: '16px',
@@ -29,9 +36,18 @@ module.exports = (user, stats, rank = 0) => {
                   {
                     type: 'text',
                     contents: [
-                      { type: 'span', text: user.display_name, weight: 'bold', color: '#000000' },
+                      {
+                        type: 'span',
+                        text: user.display_name,
+                        weight: 'bold',
+                        color: '#000000'
+                      },
                       { type: 'span', text: ' ' },
-                      { type: 'span', text: `(@${user.username})`, size: 'xxs' }
+                      {
+                        type: 'span',
+                        text: `(@${user.username})`,
+                        size: 'xxs'
+                      }
                     ],
                     size: 'sm',
                     wrap: false
@@ -39,7 +55,11 @@ module.exports = (user, stats, rank = 0) => {
                   {
                     type: 'text',
                     contents: [
-                      { type: 'span', text: `Rank #${rank} coded`, weight: 'bold' },
+                      {
+                        type: 'span',
+                        text: `Rank #${rank} coded`,
+                        weight: 'bold'
+                      },
                       { type: 'span', text: ' ' },
                       { type: 'span', text: stats.human_readable_total }
                     ],
@@ -49,7 +69,13 @@ module.exports = (user, stats, rank = 0) => {
                     type: 'box',
                     layout: 'baseline',
                     contents: [
-                      { type: 'text', text: 'Power by wakatime.com', size: 'xxs', color: '#bcbcbc', align: 'end' }
+                      {
+                        type: 'text',
+                        text: 'Power by wakatime.com',
+                        size: 'xxs',
+                        color: '#bcbcbc',
+                        align: 'end'
+                      }
                     ],
                     spacing: 'sm',
                     margin: 'md'

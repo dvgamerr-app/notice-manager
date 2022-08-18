@@ -11,14 +11,22 @@ const getStats = async (botname) => {
     created: { $gte: date.toISOString() }
   })
 
-  return { usage: push, limited: 1000, reply: 0, push: push || 0, updated: dayjs().toDate() }
+  return {
+    usage: push,
+    limited: 1000,
+    reply: 0,
+    push: push || 0,
+    updated: dayjs().toDate()
+  }
 }
 
 module.exports = async (req) => {
   const { name } = req.params
   const { ServiceBot } = notice.get()
   const bot = await ServiceBot.findOne({ service: name })
-  if (!bot) { return {} }
+  if (!bot) {
+    return {}
+  }
 
   return await getStats(bot.service)
 }

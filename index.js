@@ -66,13 +66,17 @@ process.on('SIGUSR1', exitHandler)
 process.on('SIGUSR2', exitHandler)
 process.on('uncaughtException', exitHandler)
 
-initialize().then(async () => {
-  await fastify.listen({ port: 3000, host: '0.0.0.0' })
-  logger.info('fastify listen:3000')
-  if (production) { await monitorLINE('*[Restarted]* is running LINE-Notice.') }
-}).catch((ex) => {
-  Sentry.captureException(ex)
-  fastify.log.error(ex)
-  logger.error(ex)
-  process.exit(1)
-})
+initialize()
+  .then(async () => {
+    await fastify.listen({ port: 3000, host: '0.0.0.0' })
+    logger.info('fastify listen:3000')
+    if (production) {
+      await monitorLINE('*[Restarted]* is running LINE-Notice.')
+    }
+  })
+  .catch((ex) => {
+    Sentry.captureException(ex)
+    fastify.log.error(ex)
+    logger.error(ex)
+    process.exit(1)
+  })

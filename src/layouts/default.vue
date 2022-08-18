@@ -12,7 +12,11 @@
         <b-navbar-nav class="ml-auto">
           <div v-if="loggedIn" class="flex-user">
             <span class="text-muted text-username" v-text="username" />
-            <fa icon="user-circle" class="text-muted" style="font-size:1.2rem" />
+            <fa
+              icon="user-circle"
+              class="text-muted"
+              style="font-size: 1.2rem"
+            />
           </div>
           <div v-else>
             <!-- <b-link href="/auth/sso" class="flex-sign">
@@ -69,9 +73,12 @@
       <b-container fluid>
         <p>
           <span class="d-none d-md-inline-block">
-            The source code is licensed <a href="http://opensource.org/licenses/mit-license.php">MIT</a>,
+            The source code is licensed
+            <a href="http://opensource.org/licenses/mit-license.php">MIT</a>,
           </span>
-          Design By <a href="https://mr.touno.io/" target="_blank">Kananek T.</a> <small>(LINE-BOT v{{ require('../../package.json').version }})</small>
+          Design By
+          <a href="https://mr.touno.io/" target="_blank">Kananek T.</a>
+          <small>(LINE-BOT v{{ require('../../package.json').version }})</small>
         </p>
       </b-container>
     </footer>
@@ -87,8 +94,7 @@ export default {
       return ''
     }
   },
-  created () {
-  }
+  created () {}
 }
 </script>
 
@@ -96,17 +102,18 @@ export default {
 @import '../assets/fonts/stylesheet.css';
 
 body .main {
-  font-family: "thaisansneue-semibold", "Open Sans", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'thaisansneue-semibold', 'Open Sans', Tahoma, Geneva, Verdana,
+    sans-serif;
   font-weight: normal;
   font-size: 1.2rem;
 }
 
 #__layout > div {
   grid-template:
-    "navtop" auto
-    "navbottom" auto
-    "main-content" 1fr
-    "footer" 32px;
+    'navtop' auto
+    'navbottom' auto
+    'main-content' 1fr
+    'footer' 32px;
 
   .spinner-border {
     position: absolute;
@@ -119,13 +126,14 @@ footer {
   border-top: 1px solid #e6e6e6;
   color: #a3a6ad;
   margin-top: -2px;
-  a, a:hover {
+  a,
+  a:hover {
     color: #16c464;
   }
   p {
     padding: 8px 0;
     margin: 0px;
-    font-size: .65rem;
+    font-size: 0.65rem;
   }
 }
 
@@ -148,7 +156,7 @@ footer {
 }
 
 .nav-link {
-  &.d-flex{
+  &.d-flex {
     flex: 1;
   }
 }
@@ -163,7 +171,7 @@ footer {
   }
 
   .text-username {
-    font-size: .8rem;
+    font-size: 0.8rem;
     font-weight: bold;
     margin-right: 6px;
   }

@@ -72,7 +72,8 @@ export default {
         profile = {
           userId: 'U9e0a870c01ca97da20a4ec462bf72991',
           displayName: 'KEM',
-          pictureUrl: 'https://profile.line-scdn.net/0hUG0jVRsoCmgNEyOtVqJ1PzFWBAV6PQwgdX1GW3sWAAp3I0s6YSBCCSgUXQ0gIERuMXMWXSkaVV8l',
+          pictureUrl:
+            'https://profile.line-scdn.net/0hUG0jVRsoCmgNEyOtVqJ1PzFWBAV6PQwgdX1GW3sWAAp3I0s6YSBCCSgUXQ0gIERuMXMWXSkaVV8l',
           statusMessage: 'You wanna make out.'
         }
       } else {
@@ -93,7 +94,7 @@ export default {
   color: #ced4da;
   position: absolute;
   margin-top: 0.75em;
-  margin-left: .65em;
+  margin-left: 0.65em;
 }
 .list-item {
   color: var(--dark);
@@ -115,18 +116,18 @@ export default {
 
   .icon {
     font-size: 1rem;
-    color: #CCCCCC;
+    color: #cccccc;
   }
   .display {
-    line-height: .8;
+    line-height: 0.8;
     font-weight: bold;
   }
   .name {
-    line-height: .8;
+    line-height: 0.8;
   }
   .badge {
     font-family: 'Segoe UI';
-    font-size: .85rem;
+    font-size: 0.85rem;
   }
   .config {
     margin: -15px 0 -15px 0;

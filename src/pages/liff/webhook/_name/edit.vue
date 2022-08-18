@@ -34,9 +34,7 @@ export default {
   //     return (service.room || []).map(e => ({ id: e.value, label: e.text }))
   //   }
   // },
-  mounted () {
-  }
+  mounted () {}
 }
 </script>
-<style lang="scss">
-</style>
+<style lang="scss"></style>

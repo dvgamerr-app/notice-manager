@@ -16,8 +16,16 @@
             </b-navbar-brand>
             <b-navbar-nav class="ml-auto">
               <div v-if="profile.userId" class="flex-user">
-                <span class="text-muted text-username" v-text="profile.displayName" />
-                <b-img :src="profile.pictureUrl" rounded="circle" alt="A" style="width:1.2rem;" />
+                <span
+                  class="text-muted text-username"
+                  v-text="profile.displayName"
+                />
+                <b-img
+                  :src="profile.pictureUrl"
+                  rounded="circle"
+                  alt="A"
+                  style="width: 1.2rem"
+                />
               </div>
             </b-navbar-nav>
           </b-container>
@@ -29,9 +37,7 @@
         </b-container>
         <footer class="footer">
           <b-container fluid>
-            <p>
-              LINE-BOT v{{ require('../../package.json').version }}
-            </p>
+            <p>LINE-BOT v{{ require('../../package.json').version }}</p>
           </b-container>
         </footer>
       </client-only>
@@ -41,8 +47,7 @@
 <script>
 export default {
   transition: 'fade',
-  data: () => ({
-  }),
+  data: () => ({}),
   computed: {
     profile () {
       return this.$store.state.profile
@@ -61,7 +66,8 @@ export default {
 
 body {
   .main {
-    font-family: "thaisansneue-semibold", "Open Sans", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'thaisansneue-semibold', 'Open Sans', Tahoma, Geneva, Verdana,
+      sans-serif;
     font-weight: normal;
     font-size: 1.2rem;
   }
@@ -72,10 +78,10 @@ body {
 
 #__layout > div {
   grid-template:
-    "navtop" auto
-    "navbottom" auto
-    "main-content" 1fr
-    "footer" 32px;
+    'navtop' auto
+    'navbottom' auto
+    'main-content' 1fr
+    'footer' 32px;
 
   .spinner-border {
     position: absolute;
@@ -87,13 +93,14 @@ footer {
   background: #fafbfc;
   border-top: 1px solid #e6e6e6;
   color: #a3a6ad;
-  a, a:hover {
+  a,
+  a:hover {
     color: #16c464;
   }
   p {
     padding: 8px 0;
     margin: 0px;
-    font-size: .65rem;
+    font-size: 0.65rem;
   }
 }
 
@@ -116,7 +123,7 @@ footer {
 }
 
 .nav-link {
-  &.d-flex{
+  &.d-flex {
     flex: 1;
   }
 }
@@ -131,7 +138,7 @@ footer {
   }
 
   .text-username {
-    font-size: .8rem;
+    font-size: 0.8rem;
     font-weight: bold;
     margin-right: 6px;
   }

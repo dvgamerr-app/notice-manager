@@ -7,7 +7,6 @@
 </template>
 
 <script>
-
 export default {
   layout: 'liff',
   transition: 'fade',
@@ -15,7 +14,9 @@ export default {
     return { env }
   },
   mounted () {
-    if (this.env.devEnv) { this.$store.commit('profile', this.$tempProfile) }
+    if (this.env.devEnv) {
+      this.$store.commit('profile', this.$tempProfile)
+    }
   }
 }
 </script>

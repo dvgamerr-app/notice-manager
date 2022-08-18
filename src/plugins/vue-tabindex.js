@@ -30,7 +30,7 @@ const focusPrev = (pool) => {
     return
   }
   const i = pool.indexOf(a)
-  pool[i > 0 ? (i - 1) : (pool.length - 1)].focus()
+  pool[i > 0 ? i - 1 : pool.length - 1].focus()
 }
 const focusNext = (pool) => {
   const a = document.activeElement
@@ -52,22 +52,28 @@ const elementFind = (el, tagname) => {
 }
 
 Vue.directive('tabindex', {
-  bind: () => { },
+  bind: () => {},
   inserted: (el, binding) => {
     el.$elem = []
     const settings = { enterKey: !!binding.modifiers.enter }
     elementFind(el, 'input')
     elementFind(el, 'button')
     elementFind(el, 'select')
-    el.$elem.sort((a, b) => { return a.tabIndex > b.tabIndex ? 1 : -1 })
+    el.$elem.sort((a, b) => {
+      return a.tabIndex > b.tabIndex ? 1 : -1
+    })
 
     for (const element of el.$elem) {
-      element.addEventListener('keydown', e => elemKeydown.bind(this, el.$elem, settings, e).apply())
+      element.addEventListener('keydown', e =>
+        elemKeydown.bind(this, el.$elem, settings, e).apply()
+      )
     }
   },
   unbind: (el) => {
     for (const element of el.$elem) {
-      element.removeEventListener('keydown', e => elemKeydown.bind(this, el.$elem, {}, e).apply())
+      element.removeEventListener('keydown', e =>
+        elemKeydown.bind(this, el.$elem, {}, e).apply()
+      )
     }
   }
 })

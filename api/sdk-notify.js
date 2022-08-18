@@ -3,11 +3,15 @@ const { notice } = require('@touno-io/db/schema')
 const { getStatus, setRevoke, pushNotify } = require('./sdk-line')
 
 const getToken = async (service, room) => {
-  if (!service || !room) { return logger.log('No service, No room.') }
+  if (!service || !room) {
+    return logger.log('No service, No room.')
+  }
 
   const { ServiceBotOauth } = notice.get()
   const oauth = await ServiceBotOauth.findOne({ service, room })
-  if (!oauth || !oauth.accessToken) { throw new Error(`OAuth: ${service} in ${room}, No accessToken.`) }
+  if (!oauth || !oauth.accessToken) {
+    throw new Error(`OAuth: ${service} in ${room}, No accessToken.`)
+  }
   return oauth.accessToken
 }
 

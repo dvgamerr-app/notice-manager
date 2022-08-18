@@ -41,7 +41,8 @@ export default {
         profile = {
           userId: 'U9e0a870c01ca97da20a4ec462bf72991',
           displayName: 'KEM',
-          pictureUrl: 'https://profile.line-scdn.net/0hUG0jVRsoCmgNEyOtVqJ1PzFWBAV6PQwgdX1GW3sWAAp3I0s6YSBCCSgUXQ0gIERuMXMWXSkaVV8l',
+          pictureUrl:
+            'https://profile.line-scdn.net/0hUG0jVRsoCmgNEyOtVqJ1PzFWBAV6PQwgdX1GW3sWAAp3I0s6YSBCCSgUXQ0gIERuMXMWXSkaVV8l',
           statusMessage: 'You wanna make out.'
         }
       } else {

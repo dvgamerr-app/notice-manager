@@ -7,7 +7,9 @@ module.exports = async (req, res) => {
   const { app, message, detail, botname } = req.payload
   req.params.bot = botname || 'health-check'
 
-  if (!app || !message) { return res.json({ error: 'app, message, detail is undefined.' }) }
+  if (!app || !message) {
+    return res.json({ error: 'app, message, detail is undefined.' })
+  }
   const data = { params: req.params }
   if (name === 'error') {
     data.body = await flexError(app, { message, stack: detail }, true)

@@ -7,16 +7,56 @@ module.exports = (title, msg, detail, color = '#009688', flex = false) => {
 
   if (/\n/.test(msg)) {
     const [header1, header2] = msg.split(/\n/)
-    contents.push({ type: 'text', weight: 'bold', text: header1, size: 'xs', color: '#666666', decoration: 'none', gravity: 'top', offsetTop: '2px' })
-    contents.push({ type: 'text', weight: 'regular', text: header2, size: 'xxs', color: '#666666', decoration: 'none', style: 'normal', gravity: 'top', wrap: true })
+    contents.push({
+      type: 'text',
+      weight: 'bold',
+      text: header1,
+      size: 'xs',
+      color: '#666666',
+      decoration: 'none',
+      gravity: 'top',
+      offsetTop: '2px'
+    })
+    contents.push({
+      type: 'text',
+      weight: 'regular',
+      text: header2,
+      size: 'xxs',
+      color: '#666666',
+      decoration: 'none',
+      style: 'normal',
+      gravity: 'top',
+      wrap: true
+    })
     msg = header1
   } else {
-    contents.push({ type: 'text', weight: 'regular', text: msg, size: 'xxs', color: '#666666', decoration: 'none', style: 'normal', gravity: 'top', wrap: true })
+    contents.push({
+      type: 'text',
+      weight: 'regular',
+      text: msg,
+      size: 'xxs',
+      color: '#666666',
+      decoration: 'none',
+      style: 'normal',
+      gravity: 'top',
+      wrap: true
+    })
   }
 
   if (detail) {
     contents.push({ type: 'separator', margin: 'sm' })
-    contents.push({ type: 'text', weight: 'regular', text: detail, size: 'xxs', color: '#939393', decoration: 'none', style: 'normal', gravity: 'top', wrap: true, margin: 'sm' })
+    contents.push({
+      type: 'text',
+      weight: 'regular',
+      text: detail,
+      size: 'xxs',
+      color: '#939393',
+      decoration: 'none',
+      style: 'normal',
+      gravity: 'top',
+      wrap: true,
+      margin: 'sm'
+    })
   }
 
   const data = {
@@ -33,8 +73,20 @@ module.exports = (title, msg, detail, color = '#009688', flex = false) => {
             type: 'box',
             layout: 'vertical',
             contents: [
-              { type: 'text', text: 'แจ้งเตือน', color: '#ffffff66', size: 'xxs' },
-              { type: 'text', text: title, color: '#ffffff', size: 'md', flex: 4, weight: 'bold' }
+              {
+                type: 'text',
+                text: 'แจ้งเตือน',
+                color: '#ffffff66',
+                size: 'xxs'
+              },
+              {
+                type: 'text',
+                text: title,
+                color: '#ffffff',
+                size: 'md',
+                flex: 4,
+                weight: 'bold'
+              }
             ]
           },
           {
@@ -44,7 +96,14 @@ module.exports = (title, msg, detail, color = '#009688', flex = false) => {
             offsetEnd: '10px',
             offsetTop: '15px',
             contents: [
-              { type: 'text', weight: 'bold', text: dayjs().format('D MMM YYYY HH:mm:ss'), size: 'xxs', align: 'end', color: '#ffffff99' }
+              {
+                type: 'text',
+                weight: 'bold',
+                text: dayjs().format('D MMM YYYY HH:mm:ss'),
+                size: 'xxs',
+                align: 'end',
+                color: '#ffffff99'
+              }
             ]
           }
         ],
@@ -56,7 +115,14 @@ module.exports = (title, msg, detail, color = '#009688', flex = false) => {
         cornerRadius: 'none',
         backgroundColor: color
       },
-      body: { type: 'box', layout: 'vertical', paddingAll: '5px', paddingStart: '10px', cornerRadius: 'none', contents }
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '5px',
+        paddingStart: '10px',
+        cornerRadius: 'none',
+        contents
+      }
     }
   }
   return !flex ? axios({ method: 'PUT', url, data }) : data

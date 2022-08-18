@@ -1,4 +1,3 @@
-
 const synologyHost = process.env.SYNOLOGY_HOST || 'http://localhost:5000'
 const synologyAppId = process.env.SYNOLOGY_APPID || 'xxxxxxxxxxxxxxxxx'
 

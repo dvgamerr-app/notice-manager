@@ -19,7 +19,12 @@ export default {
     const updateProfile = async (e) => {
       this.$store.commit('profile', e)
 
-      const { status, data: { lineBot, lineNotify, message } } = await this.$api.request('GET /dashboard', { headers: { 'x-user-liff': e.userId } })
+      const {
+        status,
+        data: { lineBot, lineNotify, message }
+      } = await this.$api.request('GET /dashboard', {
+        headers: { 'x-user-liff': e.userId }
+      })
       if (status === 200) {
         this.$store.commit('lineBot', lineBot)
         this.$store.commit('lineNotify', lineNotify)
@@ -41,26 +46,32 @@ export default {
       })
     }
 
-    this.$liff.init({
-      liffId,
-      withLoginOnExternalBrowser: true
-    }).then(async () => {
-      await this.$liff.init({ liffId, withLoginOnExternalBrowser: true })
-      if (!this.$liff.isLoggedIn()) {
-        const { origin, pathname } = document.location
-        return this.$liff.login({ redirectUri: (new URL(origin, pathname)).toString() })
-      }
+    this.$liff
+      .init({
+        liffId,
+        withLoginOnExternalBrowser: true
+      })
+      .then(async () => {
+        await this.$liff.init({ liffId, withLoginOnExternalBrowser: true })
+        if (!this.$liff.isLoggedIn()) {
+          const { origin, pathname } = document.location
+          return this.$liff.login({
+            redirectUri: new URL(origin, pathname).toString()
+          })
+        }
 
-      await this.$liff.ready.then(() => Promise.resolve())
-      const profile = await this.$liff.getProfile()
+        await this.$liff.ready.then(() => Promise.resolve())
+        const profile = await this.$liff.getProfile()
 
-      await updateProfile(profile)
-    }).catch((ex) => {
-      this.err = ex.toString()
-    }).finally(() => {
-      this.$nuxt.$loading.finish()
-      this.$store.commit('toggleWait')
-    })
+        await updateProfile(profile)
+      })
+      .catch((ex) => {
+        this.err = ex.toString()
+      })
+      .finally(() => {
+        this.$nuxt.$loading.finish()
+        this.$store.commit('toggleWait')
+      })
   }
 }
 </script>
@@ -69,7 +80,7 @@ export default {
   color: #ced4da;
   position: absolute;
   margin-top: 0.75em;
-  margin-left: .65em;
+  margin-left: 0.65em;
 }
 .list-item {
   color: var(--dark);
@@ -91,18 +102,18 @@ export default {
 
   .icon {
     font-size: 1rem;
-    color: #CCCCCC;
+    color: #cccccc;
   }
   .display {
-    line-height: .8;
+    line-height: 0.8;
     font-weight: bold;
   }
   .name {
-    line-height: .8;
+    line-height: 0.8;
   }
   .badge {
     font-family: 'Segoe UI';
-    font-size: .85rem;
+    font-size: 0.85rem;
   }
   .config {
     margin: -15px 0 -15px 0;

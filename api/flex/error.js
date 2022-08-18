@@ -22,10 +22,33 @@ module.exports = (app, ex, flex = false) => {
         type: 'box',
         layout: 'vertical',
         contents: [
-          { type: 'text', text: 'ข้อผิดพลาดภายใน', size: 'xxs', color: '#f44336cc' },
-          { type: 'text', text: ex.message, color: '#f44336', size: 'lg', flex: 4, weight: 'bold' },
+          {
+            type: 'text',
+            text: 'ข้อผิดพลาดภายใน',
+            size: 'xxs',
+            color: '#f44336cc'
+          },
+          {
+            type: 'text',
+            text: ex.message,
+            color: '#f44336',
+            size: 'lg',
+            flex: 4,
+            weight: 'bold'
+          },
           { type: 'separator', margin: 'sm' },
-          { type: 'text', weight: 'regular', text: ex.stack, size: 'xxs', color: '#666666', decoration: 'none', style: 'normal', gravity: 'top', wrap: true, margin: 'md' }
+          {
+            type: 'text',
+            weight: 'regular',
+            text: ex.stack,
+            size: 'xxs',
+            color: '#666666',
+            decoration: 'none',
+            style: 'normal',
+            gravity: 'top',
+            wrap: true,
+            margin: 'md'
+          }
         ],
         paddingAll: '5px',
         paddingStart: '10px',

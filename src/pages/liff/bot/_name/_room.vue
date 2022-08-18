@@ -4,7 +4,8 @@
       <ol class="breadcrumb p-1 px-2">
         <li class="breadcrumb-item active">
           <span class="d-flex align-items-center">
-            <fa :icon="['fab','line']" /> <span class="ml-1" v-text="bot.text" />
+            <fa :icon="['fab', 'line']" />
+            <span class="ml-1" v-text="bot.text" />
           </span>
         </li>
         <li class="breadcrumb-item active">
@@ -13,10 +14,10 @@
           </span>
         </li>
       </ol>
-      <div class="text-muted mb-1" style="font-size:1.1rem">
+      <div class="text-muted mb-1" style="font-size: 1.1rem">
         การใช้งานระบบอย่างรายละเอียด
       </div>
-      <div class="" style="font-size:1.1rem">
+      <div class="" style="font-size: 1.1rem">
         ...
       </div>
     </b-col>
@@ -45,7 +46,9 @@ export default {
     }
   },
   created () {
-    if (!this.bot) { this.$router.back() }
+    if (!this.bot) {
+      this.$router.back()
+    }
   },
   // computed: {
   //   getServiceSample () {
@@ -56,9 +59,7 @@ export default {
   //     return (service.room || []).map(e => ({ id: e.value, label: e.text }))
   //   }
   // },
-  mounted () {
-  }
+  mounted () {}
 }
 </script>
-<style lang="scss">
-</style>
+<style lang="scss"></style>

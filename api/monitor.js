@@ -10,7 +10,9 @@ logger.info('Telegram Monitor:', !(!botName || !roomName))
 module.exports = {
   pkgName,
   monitorLINE: async (ex) => {
-    if (!botName || !roomName) { return }
+    if (!botName || !roomName) {
+      return
+    }
     if (ex instanceof Error) {
       if (ex.response) {
         // The request was made and the server responded with a status code
@@ -20,7 +22,11 @@ module.exports = {
         ex = ex.request
       } else {
         // Something happened in setting up the request that triggered an ex
-        ex = ex.message ? `*${(ex.message || '').substring(0, 200)}*\n${(ex.stack || '').substring(0, 200)}` : ex
+        ex = ex.message
+          ? `*${(ex.message || '').substring(0, 200)}*\n${(
+              ex.stack || ''
+            ).substring(0, 200)}`
+          : ex
       }
     }
     await sendMessage(botName, roomName, { message: `*${pkgName}* ... ${ex}` })

@@ -1,25 +1,53 @@
 <template>
   <div>
-    <div v-if="!list || list.length == 0" class="mb-2" style="color: #989898;font-size:.9rem;">
+    <div
+      v-if="!list || list.length == 0"
+      class="mb-2"
+      style="color: #989898; font-size: 0.9rem"
+    >
       No service notify.
     </div>
-    <div v-for="e in list" :key="e.$id" @mouseover="() => edit.show = e._id" @mouseleave="() => edit.show = null">
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom mb-1">
-        <b-form-input v-if="edit.mode === e._id" v-model.trim="edit.text" class="edit-name col-10" maxlength="20" @keyup.enter="onSaveName(e)" />
-        <span v-if="edit.mode === e._id" class="edit-enter">
-          ENTER
-        </span>
+    <div
+      v-for="e in list"
+      :key="e.$id"
+      @mouseover="() => (edit.show = e._id)"
+      @mouseleave="() => (edit.show = null)"
+    >
+      <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom mb-1"
+      >
+        <b-form-input
+          v-if="edit.mode === e._id"
+          v-model.trim="edit.text"
+          class="edit-name col-10"
+          maxlength="20"
+          @keyup.enter="onSaveName(e)"
+        />
+        <span v-if="edit.mode === e._id" class="edit-enter"> ENTER </span>
         <h6 v-if="edit.mode !== e._id">
           {{ e.text }}
-          <small v-if="e.text !== e.value">
-            ({{ e.value }})
-          </small>
+          <small v-if="e.text !== e.value"> ({{ e.value }}) </small>
         </h6>
-        <div v-if="edit.show === e._id && edit.mode !== e._id && loggedIn" class="menu-notify">
-          <b-btn v-if="edit.mode !== e._id" class="edit" variant="icon" size="sm" @click="onUpdateName(e)">
+        <div
+          v-if="edit.show === e._id && edit.mode !== e._id && loggedIn"
+          class="menu-notify"
+        >
+          <b-btn
+            v-if="edit.mode !== e._id"
+            class="edit"
+            variant="icon"
+            size="sm"
+            @click="onUpdateName(e)"
+          >
             <fa icon="edit" />
           </b-btn>
-          <b-btn v-if="edit.mode !== e._id" v-b-modal="'trash-' + e._id" class="trash" variant="icon" size="sm">
+          <b-btn
+            v-if="edit.mode !== e._id"
+            v-b-modal="'trash-' + e._id"
+            class="trash"
+            variant="icon"
+            size="sm"
+          >
             <fa icon="trash-alt" />
           </b-btn>
         </div>
@@ -37,18 +65,32 @@
         </b-modal>
       </div>
       <ul class="line-notify">
-        <li v-if="!e.room || e.room.length == 0" style="color: #989898;">
+        <li v-if="!e.room || e.room.length == 0" style="color: #989898">
           No room join.
         </li>
         <li v-for="r in e.room" :key="r._id">
-          <b-btn v-if="btn.trash !== r._id" variant="icon" size="sm" @click.prevent="onTrash(r)">
-            <fa v-show="loggedIn" :icon="btn.remove !== r._id ? 'trash-alt' : 'circle-notch'" :spin="btn.remove === r._id" />
+          <b-btn
+            v-if="btn.trash !== r._id"
+            variant="icon"
+            size="sm"
+            @click.prevent="onTrash(r)"
+          >
+            <fa
+              v-show="loggedIn"
+              :icon="btn.remove !== r._id ? 'trash-alt' : 'circle-notch'"
+              :spin="btn.remove === r._id"
+            />
           </b-btn>
-          <div v-else style="display: inline;">
+          <div v-else style="display: inline">
             <b-btn variant="icon" size="sm" @click.prevent="onCancelTrash()">
               <fa icon="times" />
             </b-btn>
-            <b-btn variant="icon" class="text-danger" size="sm" @click.prevent="onApplyTrash(e, r)">
+            <b-btn
+              variant="icon"
+              class="text-danger"
+              size="sm"
+              @click.prevent="onApplyTrash(e, r)"
+            >
               <fa icon="trash-alt" />
             </b-btn>
           </div>
@@ -94,7 +136,10 @@ export default {
       // })
     },
     async onSaveName (e) {
-      await this.$axios.post('/api/service/update', { name: this.edit.text, _id: e._id })
+      await this.$axios.post('/api/service/update', {
+        name: this.edit.text,
+        _id: e._id
+      })
       // Notify.update({
       //   where: e.$id,
       //   data: { text: this.edit.text }
@@ -117,8 +162,15 @@ export default {
       })
     },
     async onDeleteService (e) {
-      if (e.room.length > 0) { return this.showToast('Please remove room join all before remove service.') }
-      await this.$axios.post('/api/service/update', { _id: e._id, active: false })
+      if (e.room.length > 0) {
+        return this.showToast(
+          'Please remove room join all before remove service.'
+        )
+      }
+      await this.$axios.post('/api/service/update', {
+        _id: e._id,
+        active: false
+      })
       // Notify.delete(e._id)
     },
     onTrash (r) {
@@ -130,8 +182,13 @@ export default {
     async onApplyTrash (e, r) {
       this.btn.trash = null
       this.btn.remove = r._id
-      const { data } = await this.$axios.put(`/revoke/${r.service}/${r.value}`, { revoke: 'agree' })
-      if (data.error) { return this.showToast(data.error) }
+      const { data } = await this.$axios.put(
+        `/revoke/${r.service}/${r.value}`,
+        { revoke: 'agree' }
+      )
+      if (data.error) {
+        return this.showToast(data.error)
+      }
 
       this.btn.remove = null
       // Notify.update({
@@ -151,11 +208,11 @@ ul.line-notify {
     display: block;
   }
   .btn-icon {
-    font-size: .68rem !important;
+    font-size: 0.68rem !important;
     padding: 0rem 0.2rem !important;
     margin-top: -2px !important;
     border-radius: 0px;
-    color: #CCC;
+    color: #ccc;
   }
   .btn-icon:hover {
     color: inherit;
@@ -178,7 +235,7 @@ ul.line-notify {
   border-color: transparent;
   outline: 0;
   box-shadow: none;
-  font-size: .9rem;
+  font-size: 0.9rem;
   padding: 2px 6px;
   height: auto;
 }

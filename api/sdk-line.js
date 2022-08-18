@@ -27,15 +27,20 @@ const pushNotify = async (accessToken, message) => {
     message = { message }
   }
   for (const key in message) {
-    if (!message[key]) { delete message[key] }
+    if (!message[key]) {
+      delete message[key]
+    }
   }
 
   if (Object.keys(message).length === 0) {
-    throw new Error('\'message\' in body is empty.')
+    throw new Error("'message' in body is empty.")
   }
   const res = await instance({
     method: 'POST',
-    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
     url: `${apiLINE}/notify`,
     data: new URLSearchParams(message)
   })

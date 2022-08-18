@@ -9,7 +9,9 @@ module.exports = async (req, h) => {
     const { authorization } = req.headers
 
     const regexBearer = /^Bearer./i
-    if (!regexBearer.test(authorization)) { return {} }
+    if (!regexBearer.test(authorization)) {
+      return {}
+    }
 
     const sso = new URLSearchParams({
       app_id: synologyAppId,

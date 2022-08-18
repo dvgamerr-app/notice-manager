@@ -11,7 +11,12 @@
           label="Type:"
           label-for="input-sm"
         >
-          <b-form-input id="input-sm" v-model.trim="row.type" size="sm" maxlength="40" />
+          <b-form-input
+            id="input-sm"
+            v-model.trim="row.type"
+            size="sm"
+            maxlength="40"
+          />
         </b-form-group>
       </b-col>
       <b-col>
@@ -23,7 +28,12 @@
           label="Name:"
           label-for="input-sm"
         >
-          <b-form-input id="input-sm" v-model.trim="row.webhook" size="sm" maxlength="40" />
+          <b-form-input
+            id="input-sm"
+            v-model.trim="row.webhook"
+            size="sm"
+            maxlength="40"
+          />
         </b-form-group>
       </b-col>
     </b-row>
@@ -37,17 +47,24 @@
           label="URL:"
           label-for="input-sm"
         >
-          <b-form-input id="input-sm" v-model.trim="row.url" size="sm" maxlength="500" />
+          <b-form-input
+            id="input-sm"
+            v-model.trim="row.url"
+            size="sm"
+            maxlength="500"
+          />
         </b-form-group>
       </b-col>
     </b-row>
-    <b-btn :variant="btn.webhook ? 'outline-secondary' : 'primary'" :disabled="btn.webhook" @click="onSubmitWebhook($event)">
+    <b-btn
+      :variant="btn.webhook ? 'outline-secondary' : 'primary'"
+      :disabled="btn.webhook"
+      @click="onSubmitWebhook($event)"
+    >
       <fa v-if="btn.webhook" icon="circle-notch" spin /> Add Webhook
     </b-btn>
   </b-form>
 </template>
 <script>
-export default {
-
-}
+export default {}
 </script>

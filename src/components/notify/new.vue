@@ -3,53 +3,92 @@
     <b-row class="mb-2">
       <b-col>
         <p>
-          ให้สร้าง service ก่อนเพื่อเชื่อมต่อ token กับ line notify แล้วค่อยเอา service ที่สร้างไป join เข้าห้องที่ต้องให้ใช้งาน notify.
+          ให้สร้าง service ก่อนเพื่อเชื่อมต่อ token กับ line notify แล้วค่อยเอา
+          service ที่สร้างไป join เข้าห้องที่ต้องให้ใช้งาน notify.
         </p>
         <h3>วิธีเพิ่ม service ใหม่</h3>
         <ol>
           <li class="pt-1 pb-1">
             <b-input-group>
               <b-input-group-text>ตั้งชื่อ</b-input-group-text>
-              <b-form-input v-model.trim="data.name" size="sm" maxlength="40" :state="check.service" @keyup.enter="onSubmitNotify($event)" />
+              <b-form-input
+                v-model.trim="data.name"
+                size="sm"
+                maxlength="40"
+                :state="check.service"
+                @keyup.enter="onSubmitNotify($event)"
+              />
             </b-input-group>
           </li>
           <li class="pt-1 pb-1">
             Input <b>Service URL</b>
-            <span style="font-size:.9rem;"><code>{{ $hostApi }}/</code></span>
+            <span style="font-size: 0.9rem"><code>{{ $hostApi }}/</code></span>
           </li>
           <li class="pt-1 pb-1">
             Input <b>Callback URL</b>
-            <span v-clipboard="`${$hostApi}/register/${data.name}`" class="copy-icon">
+            <span
+              v-clipboard="`${$hostApi}/register/${data.name}`"
+              class="copy-icon"
+            >
               <code>{{ `${$hostApi}/register/${data.name}` }}</code>
-              <fa :icon="['far','copy']" />
+              <fa :icon="['far', 'copy']" />
             </span>
           </li>
           <li class="pt-1 pb-1">
-            Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> to create service.
+            Click
+            <a
+              href="https://notify-bot.line.me/my/services/new"
+              target="_blank"
+            >Add Service</a>
+            to create service.
           </li>
           <li class="pt-1 pb-1">
             Click <b>Argee and Contuiue</b> and click <b>Add</b>.
           </li>
           <li class="pt-1 pb-1">
-            Goto <a href="https://notify-bot.line.me/my/services/" target="_blank">My Services</a> and click your service.
+            Goto
+            <a
+              href="https://notify-bot.line.me/my/services/"
+              target="_blank"
+            >My Services</a>
+            and click your service.
           </li>
           <li class="pt-1 pb-1">
-            <span class="badge badge-warning">IMPORTANT</span> <b>Check your mailbox becouse client secret will be valid after verify in email.</b>
+            <span class="badge badge-warning">IMPORTANT</span>
+            <b>Check your mailbox becouse client secret will be valid after
+              verify in email.</b>
           </li>
           <li class="pt-1 pb-1">
             <b-input-group>
               <b-input-group-text>Client ID</b-input-group-text>
-              <b-form-input v-model.trim="data.client_id" size="sm" maxlength="32" :state="check.client_id" @keyup.enter="onSubmitNotify($event)" />
+              <b-form-input
+                v-model.trim="data.client_id"
+                size="sm"
+                maxlength="32"
+                :state="check.client_id"
+                @keyup.enter="onSubmitNotify($event)"
+              />
             </b-input-group>
           </li>
           <li class="pt-1 pb-1">
             <b-input-group>
               <b-input-group-text>Client Secret</b-input-group-text>
-              <b-form-input v-model.trim="data.client_secret" size="sm" maxlength="64" :state="check.client_secret" @keyup.enter="onSubmitNotify($event)" />
+              <b-form-input
+                v-model.trim="data.client_secret"
+                size="sm"
+                maxlength="64"
+                :state="check.client_secret"
+                @keyup.enter="onSubmitNotify($event)"
+              />
             </b-input-group>
           </li>
         </ol>
-        <b-btn :variant="btn.submit ? 'outline-secondary' : 'primary'" block :disabled="btn.submit" @click="onSubmitNotify($event)">
+        <b-btn
+          :variant="btn.submit ? 'outline-secondary' : 'primary'"
+          block
+          :disabled="btn.submit"
+          @click="onSubmitNotify($event)"
+        >
           <fa v-if="btn.submit" icon="circle-notch" spin /> Create notify
         </b-btn>
         <b-modal
@@ -70,7 +109,6 @@
   </b-form>
 </template>
 <script>
-
 export default {
   data: () => ({
     list: [],
@@ -140,11 +178,19 @@ export default {
 
       this.btn.submit = true
       try {
-        const { status, message, data } = await this.$api.request('POST /notify', Object.assign({
-          headers: { 'x-user-liff': this.profile.userId }
-        }, this.data))
+        const { status, message, data } = await this.$api.request(
+          'POST /notify',
+          Object.assign(
+            {
+              headers: { 'x-user-liff': this.profile.userId }
+            },
+            this.data
+          )
+        )
 
-        if (status !== 200) { throw new Error(message) }
+        if (status !== 200) {
+          throw new Error(message)
+        }
 
         this.$store.commit('lineNotify', {
           _id: data._id,

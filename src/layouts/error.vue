@@ -9,7 +9,7 @@ export default {
 </script>
 <style>
 .error::before {
-  content: "404";
+  content: '404';
   color: #cecece;
   font-size: 10rem;
   position: absolute;

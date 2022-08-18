@@ -1,12 +1,22 @@
-
 <template>
   <div class="slider" :class="{ 'border-bottom': !comfirm }">
     <div class="panal" :class="{ removed: comfirm }">
       <!-- @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" -->
-      <div ref="item" class="item" :style="{transform: `translateX(${posX}px)`,'border-radius': posX !== 0 ? '4px' : '0px'}">
+      <div
+        ref="item"
+        class="item"
+        :style="{
+          transform: `translateX(${posX}px)`,
+          'border-radius': posX !== 0 ? '4px' : '0px',
+        }"
+      >
         <slot />
       </div>
-      <div ref="remove" class="remove flex-shrink-1" :style="{ opacity: comfirm ? 0 : 1 }">
+      <div
+        ref="remove"
+        class="remove flex-shrink-1"
+        :style="{ opacity: comfirm ? 0 : 1 }"
+      >
         <slot name="delete">
           <div class="remove-content py-2">
             <fa icon="trash-alt" class="fa-xs" />
@@ -41,19 +51,25 @@ export default {
   },
   methods: {
     touchStart (ev) {
-      if (ev.touches.length < 1 || this.comfirm || this.disabled) { return }
+      if (ev.touches.length < 1 || this.comfirm || this.disabled) {
+        return
+      }
       const [touch] = ev.touches
       this.startX = touch.clientX
     },
     touchMove (ev) {
-      if (ev.touches.length < 1 || this.comfirm || this.disabled) { return }
+      if (ev.touches.length < 1 || this.comfirm || this.disabled) {
+        return
+      }
       const [touch] = ev.touches
       const { offsetWidth: removeWidth } = this.$refs.remove
 
       const vm = this
       return debounce(() => {
         vm.disX = vm.startX - touch.clientX
-        if (Math.round(this.disX) < removeWidth) { return }
+        if (Math.round(this.disX) < removeWidth) {
+          return
+        }
 
         if (vm.disX < 0 || vm.disX === 0) {
           vm.posX = 0
@@ -63,14 +79,16 @@ export default {
       }, 100)()
     },
     touchEnd (ev) {
-      if (ev.changedTouches.length < 1 || this.comfirm || this.disabled) { return }
+      if (ev.changedTouches.length < 1 || this.comfirm || this.disabled) {
+        return
+      }
       const [changed] = ev.changedTouches
       const { offsetWidth } = this.$refs.item
 
       const vm = this
       return debounce(() => {
         vm.disX = vm.startX - changed.clientX
-        const emitEvent = Math.round(vm.disX * 100 / offsetWidth) < 65
+        const emitEvent = Math.round((vm.disX * 100) / offsetWidth) < 65
         if (emitEvent) {
           vm.posX = 0
         } else {
@@ -95,7 +113,7 @@ export default {
 .slider {
   @include flex(flex-start, row, center);
   &:last-child {
-    border-color: #F7F8FB !important;
+    border-color: #f7f8fb !important;
   }
 
   .panal {
@@ -108,7 +126,7 @@ export default {
       border-width: 0px !important;
     }
     .item {
-      background-color: #F7F8FB;
+      background-color: #f7f8fb;
       transition: all 0.1s ease-in-out;
       width: calc(100% + 65px);
       z-index: 1;
@@ -120,7 +138,7 @@ export default {
       &-content {
         width: 45px;
         text-align: center;
-        color: #F7F8FB;
+        color: #f7f8fb;
       }
     }
   }

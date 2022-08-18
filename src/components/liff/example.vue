@@ -5,12 +5,13 @@
         <h4 class="card-title">
           cURL.exe <small>(windows)</small>
         </h4>
-        <p class="sample-code">
-          <pre>curl -X PUT {{ url }} -H "Content-Type: application/json" -d "{ \"message\": \"Testing Message\" }"</pre>
-        </p>
-        <h4>
-          ทดสอบ
-        </h4>
+        <div class="sample-code">
+          <pre>
+curl -X PUT {{
+              url
+          }} -H "Content-Type: application/json" -d "{ \"message\": \"Testing Message\" }"</pre>
+        </div>
+        <h4>ทดสอบ</h4>
         <b-form class="sample-send">
           <b-row>
             <b-col>
@@ -20,8 +21,14 @@
           </b-row>
           <b-row>
             <b-col>
-              <b-button :variant="sended ? 'outline-secondary' : 'warning'" block :disabled="sended" @click="onSendNotify">
-                <b-spinner v-show="sended" class="send-spin" /> {{ sended ? 'Sending...' : 'Send' }} "Testing Message"
+              <b-button
+                :variant="sended ? 'outline-secondary' : 'warning'"
+                block
+                :disabled="sended"
+                @click="onSendNotify"
+              >
+                <b-spinner v-show="sended" class="send-spin" />
+                {{ sended ? 'Sending...' : 'Send' }} "Testing Message"
               </b-button>
             </b-col>
           </b-row>
@@ -60,12 +67,17 @@ export default {
   },
   methods: {
     async onSendNotify () {
-      if (!this.service || !this.room) { return }
+      if (!this.service || !this.room) {
+        return
+      }
       this.sended = true
-      const { data } = await this.$axios.put(`/notify/${this.service}/${this.room}`, {
-        message: '*LINE-Notify*\nTesting message.',
-        sticker: true
-      })
+      const { data } = await this.$axios.put(
+        `/notify/${this.service}/${this.room}`,
+        {
+          message: '*LINE-Notify*\nTesting message.',
+          sticker: true
+        }
+      )
       this.response = JSON.stringify(data, null, 2)
       this.sended = false
       if (data.status !== 200) {
@@ -81,7 +93,7 @@ export default {
 <style lang="scss">
 .sample-code {
   > pre {
-    font-size: .75rem;
+    font-size: 0.75rem;
     display: flex;
     word-break: break-word;
   }

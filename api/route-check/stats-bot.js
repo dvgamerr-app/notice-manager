@@ -34,7 +34,9 @@ module.exports = async (req) => {
   }
 
   const bot = await LineBot.findOne({ botname: name })
-  if (!bot) { return {} }
+  if (!bot) {
+    return {}
+  }
 
   let stats = bot.options.stats
   // if (dayjs().diff(dayjs(bot.options.stats.updated), 'hour') > 23) {
