@@ -51,7 +51,7 @@
     "env-cmd": "^10.1.0",
     "eslint": "^8.22.0",
     "eslint-plugin-nuxt": "^3.1.0",
-    "eslint-plugin-vue": "^8.2.0",
+    "eslint-plugin-vue": "^9.3.0",
     "marked": "^4.0.12",
     "nodemon": "^2.0.15",
     "nuxt": "^2.15.8",
