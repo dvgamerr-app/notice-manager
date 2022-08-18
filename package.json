@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^8.0.0",
-    "@octokit/core": "^3.6.0",
+    "@octokit/core": "^4.0.5",
     "@sentry/node": "^6.19.3",
     "@sentry/tracing": "^6.19.3",
     "@touno-io/db": "^3.2.3",
