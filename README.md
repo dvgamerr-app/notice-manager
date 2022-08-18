@@ -1,5 +1,7 @@
 ## LINE-BOT and LINE Notify Web GUI
 
+![notify](./docs/cover.jpg)
+
 สร้าง http api แบบง่ายๆ โดยใช้เพียง url webhook เท่านั้น
 
 ![Build (main)](https://img.shields.io/github/workflow/status/touno-io/line-notice/Deploy%20Docker%20Hub/main?style=flat-square)
