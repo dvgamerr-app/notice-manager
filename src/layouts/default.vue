@@ -65,7 +65,7 @@
     <b-container>
       <b-row>
         <b-col>
-          <nuxt class="markdown-body" />
+          <nuxt />
         </b-col>
       </b-row>
     </b-container>

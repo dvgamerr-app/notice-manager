@@ -71,9 +71,6 @@ body {
     font-weight: normal;
     font-size: 1.2rem;
   }
-  strong {
-    font-family: 'thaisansneue-ultrabold';
-  }
 }
 
 #__layout > div {

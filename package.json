@@ -9,7 +9,7 @@
   "scripts": {
     "dev:api": "env-cmd nodemon .",
     "dev": "env-cmd nuxt",
-    "build": "nuxt generate",
+    "build": "nuxt build",
     "start:ui": "nuxt start",
     "start": "node .",
     "generate": "nuxt generate",
@@ -58,7 +58,7 @@
     "nodemon": "^2.0.15",
     "nuxt": "^2.15.8",
     "sass": "^1.54.4",
-    "sass-loader": "13",
+    "sass-loader": "10.1.1",
     "vue-clipboards": "^1.3.0"
   },
   "repository": {

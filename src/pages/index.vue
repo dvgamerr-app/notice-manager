@@ -1,31 +1,90 @@
-<template lang="md">
-## LINE-BOT and LINE Notify Web GUI
+<template>
+<div class="markdown-body readme py-5" >
+  <h1>Notice-Manager Web GUI</h1>
+  <p>This is a template to help you if you want to implement Line Notify. It help us follow:</p>
+  <ul>
+    <li>Authenication with Line Notify server</li>
+    <li>Help you to access token from Line Notify server</li>
+    <li>A notify entry point to notify Line Notify server</li>
+  </ul>
+  <h2>Just want to try it?</h2>
+  <ol>
+    <img src="~/assets/notify-bot.webp" width="100%" height="100%" class="mt-2 mb-4" alt="notify-bot">
+    <li>
+      Add as a friends
+      <a href="https://line.me/R/ti/p/%40534vwrms" class="add-friend" target="_blank"><strong>LINE Notify</strong></a>
+      and
+      <a href="https://line.me/R/ti/p/%40534vwrms" class="add-friend" target="_blank"><strong>LINE Bot: Notice Manager</strong></a>
+      </li>
+    <li>After that, you will see a rich menu on the chat and items as follows:</li>
+    <img src="~/assets/richmenu.webp" width="100%" height="100%" class="mt-2 mb-4" alt="richmenu" />
+    <ul class="pb-3">
+      <li>NOTIFY</li>
+      <li>LINE BOT</li>
+      <li>Webhook</li>
+      <li>GitHub Repository</li>
+      <li>Dashboard</li>
+      <li>Documentation</li>
+    </ul>
+    <li>Click menu NOTIFY and CREATE button in LIFF menu.</li>
+    <img src="~/assets/liff-notify-service.webp" width="425" height="100%" class="mt-2 mb-4" alt="liff-notify-service" />
+    <li>Click <a href="https://notify-bot.line.me/my/services/new" target="_blank">Add Service</a> and your need to fill all related info you need</li>
+    <img src="~/assets/liff-notify-create.webp" width="425" height="100%" class="mt-2 mb-4" alt="liff-notify-create" />
+    <li>For <strong>"Service Site"</strong> and <strong>"Callback URL"</strong>, just fill arbitrary web site with <strong>"https://notice.touno.io/{service_name}"</strong> or copy <strong>No.3</strong> and put it to the topic.</li>
+    <img src="~/assets/notify-service-add.webp" width="650" height="100%" class="mt-2 mb-4" alt="notify-service-add" />
+    <li>Submit <strong>Agree and continue</strong> and check your mailbox becouse service you valid after click <strong>verify link</strong> in email.</li>
+    <li>Remember you need <strong>"Client ID"</strong> and <strong>"Client Secret"</strong> for LIFF.</li>
+    <img src="~/assets/liff-notify-create.webp" width="425" height="100%" class="mt-2 mb-4" alt="liff-notify-create" />
 
-สร้าง http api แบบง่ายๆ โดยใช้เพียง url webhook เท่านั้น
-
-### Supported
-
-- LINE Notify
-- LINE BOT `feature`
-- Discord `feature`
-- Telegram `feature`
-
-### UI Sample
-
-| Notify                      | Room                    | Detail                      |
-| --------------------------- | ----------------------- | --------------------------- |
-| ![notify](/liff-notify.png) | ![room](/liff-room.png) | ![detail](/liff-detail.png) |
-
-### Rich Menu
-
-![richmenu](/richmenu.jpg)
+    <li>After <strong>"Create Notify"</strong> and Click <strong>"Sure, Add now"</strong> then click <strong>{service_name}</strong> item your service and click <strong>join</strong></li>
+    <img src="~/assets/liff-notify-room.webp" width="425" height="100%" class="mt-2 mb-4" alt="liff-notify-room" />
+    <li>Input <strong>{room_name}</strong> and click <strong>"Join Room"</strong></li>
+    <img src="~/assets/liff-notify-join.webp" width="425" height="100%" class="mt-2 mb-4" alt="liff-notify-join" />
+    <li>Click this button and remember to login your Line account for authenication this notify.</li>
+    <li>Select one on one notification, click <strong>"Agreed and Connected"</strong></li>
+    <img src="~/assets/notify-service-join.webp" width="650" height="100%" class="mt-2 mb-4" alt="notify-service-join" />
+    <li>Back to LIFF click your <strong>{room_name}</strong> and click <strong>Send "Testing Message"</strong></li>
+    <img src="~/assets/liff-notify-example.webp" width="425" height="100%" class="mt-2 mb-4" alt="liff-notify-example" />
+    <li>A notification will be sent to your chat room, show that it's done</li>
+    <img src="~/assets/example-notify.webp" width="425" height="100%" class="mt-2 mb-4" alt="example-notify" />
+  </ol>
+</div>
 </template>
 <style lang="scss">
-img {
-  max-width: 100%;
-  max-height: 100%;
-}
-code {
-  font-size: 0.85rem;
+.readme {
+  img {
+    border: #adadad solid 1px;
+    padding: 1px;
+  }
+  code {
+    font-size: 0.85rem;
+  }
+  .add-friend {
+    display: inline-block;
+    background-color: #00b900;
+    border-radius: 1em;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 0 1em;
+
+    strong {
+      margin-left: 1.3em;
+      font-size: .9rem;
+    }
+
+    &::before {
+      display: inherit;
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      margin: 5px 0 0 -6px;
+      background-image: url(~/assets/sp_160829.webp);
+      background-size: cover;
+    }
+
+  }
+
 }
 </style>
