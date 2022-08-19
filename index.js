@@ -16,7 +16,7 @@ const infoInit = {
   release: pkg.name || 'notice',
   debug: !production,
   dsn: production ? process.env.SENTRY_DSN : null,
-  tracesSampleRate: 1.0
+  tracesSampleRate: 1.0,
 }
 logger.info('Sentry:', JSON.stringify(infoInit))
 Sentry.init(infoInit)

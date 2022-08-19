@@ -64,18 +64,18 @@ Vue.directive('tabindex', {
     })
 
     for (const element of el.$elem) {
-      element.addEventListener('keydown', e =>
+      element.addEventListener('keydown', (e) =>
         elemKeydown.bind(this, el.$elem, settings, e).apply()
       )
     }
   },
   unbind: (el) => {
     for (const element of el.$elem) {
-      element.removeEventListener('keydown', e =>
+      element.removeEventListener('keydown', (e) =>
         elemKeydown.bind(this, el.$elem, {}, e).apply()
       )
     }
-  }
+  },
 })
 // import { defineNuxtPlugin } from '#app'
 

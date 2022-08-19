@@ -35,39 +35,39 @@ export const state = () => ({
     userId: null,
     displayName: null,
     pictureUrl: '',
-    statusMessage: null
-  }
+    statusMessage: null,
+  },
 })
 
 export const mutations = {
-  lineBot (state, value) {
+  lineBot(state, value) {
     if (value instanceof Array) {
       state.lineBot = value
     } else {
       state.lineBot.push(value)
     }
   },
-  lineNotify (state, value) {
+  lineNotify(state, value) {
     if (value instanceof Array) {
       state.lineNotify = value
     } else {
       state.lineNotify.push(value)
     }
   },
-  profile (state, value) {
+  profile(state, value) {
     state.profile = value
   },
-  toggleWait (state, value) {
+  toggleWait(state, value) {
     state.wait = value || !state.wait
   },
-  setTall (state, value) {
+  setTall(state, value) {
     state.full = false
     state.tall = true
     state.compact = false
   },
-  setFull (state, value) {
+  setFull(state, value) {
     state.full = true
     state.tall = false
     state.compact = false
-  }
+  },
 }

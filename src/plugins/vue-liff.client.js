@@ -6,7 +6,7 @@ export default ({ env }, inject) => {
   const apiNotice = new Octokit({
     baseUrl: env.devEnv
       ? 'http://localhost:3000/api'
-      : 'https://notice.touno.io/api'
+      : 'https://notice.touno.io/api',
   })
 
   inject('liff', liff)
@@ -17,7 +17,7 @@ export default ({ env }, inject) => {
     displayName: 'User',
     statusMessage: 'Status',
     pictureUrl:
-      'https://www.icmetl.org/wp-content/uploads/2020/11/user-icon-human-person-sign-vector-10206693.png'
+      'https://www.icmetl.org/wp-content/uploads/2020/11/user-icon-human-person-sign-vector-10206693.png',
   })
 
   inject('hostApi', env.baseUrl || 'https://notice.touno.io')

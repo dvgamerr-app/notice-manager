@@ -6,7 +6,7 @@ const instance = axios.create({
 })
 
 const sendMessage = async (botToken, chatId, sender) => {
-  if (!sender?.message) {
+  if (!sender || !sender.message) {
     throw new Error('message text is empty')
   }
   const { data } = await instance({
