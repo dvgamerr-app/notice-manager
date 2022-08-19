@@ -15,7 +15,7 @@ jobs:
     env:
       IMAGE_NAME: line-liff
       PLATFORMS: linux/amd64,linux/arm64/v8
-      IMAGE_FILE: Dockerfile
+      IMAGE_FILE: notice-ui.Dockerfile
       KUBE_DEPLOY: deploy/line-liff
       KUBE_CONTAINER: line-liff
       KUBE_NAMESPACE: notice-line
@@ -138,7 +138,7 @@ jobs:
         os: [ubuntu-20.04]
         node: [16]
     env:
-      IMAGE_FILE: ./api/Dockerfile
+      IMAGE_FILE: notice-api.Dockerfile
       IMAGE_NAME: notice
       PLATFORMS: linux/amd64,linux/arm64
       KUBE_DEPLOY: deploy/notice-api
