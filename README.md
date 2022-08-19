@@ -13,10 +13,10 @@ This is a template to help you if you want to implement Line Notify. It help us 
 - Help you to access token from Line Notify server
 - A notify entry point to notify Line Notify server
 
-# (Just want to try it?)[https://notice.touno.io/]
+### [Just want to try it?](https://notice.touno.io/])
 
-### UI Sample
+## UI Sample
 
 | Notify                                   | Room                                 | Detail                                   |
 | ---------------------------------------- | ------------------------------------ | ---------------------------------------- |
-| ![notify](./src/static/liff-notify.webp) | ![room](./src/static/liff-room.webp) | ![detail](./src/static/liff-detail.webp) |
+| ![notify](./src/assets/liff-notify.webp) | ![room](./src/assets/liff-room.webp) | ![detail](./src/assets/liff-detail.webp) |
