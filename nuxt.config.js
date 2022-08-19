@@ -56,24 +56,24 @@ export default {
       theme_color: '#ffffff',
       background_color: '#ffffff',
       browser_action: {
-        default_icon: '/favicon.ico',
+        default_icon: '/icon.png',
         default_popup: '/',
       },
       icons: [
         {
-          src: '/favicon.ico',
+          src: '/icon.png',
           sizes: '16x16',
           type: 'image/png',
           purpose: 'any maskable',
         },
         {
-          src: '/favicon.ico',
+          src: '/icon.png',
           sizes: '64x64',
           type: 'image/png',
           purpose: 'any maskable',
         },
         {
-          src: '/favicon.ico',
+          src: '/icon.png',
           sizes: '196x196',
           type: 'image/png',
           purpose: 'any maskable',

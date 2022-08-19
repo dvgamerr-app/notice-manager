@@ -12,7 +12,7 @@
     <img src="~/assets/notify-bot.webp" width="100%" height="100%" class="mt-2 mb-4" alt="notify-bot">
     <li>
       Add as a friends
-      <a href="https://line.me/R/ti/p/%40534vwrms" class="add-friend" target="_blank"><strong>LINE Notify</strong></a>
+      <a href="https://line.me/R/ti/p/%40linenotify" class="add-friend" target="_blank"><strong>LINE Notify</strong></a>
       and
       <a href="https://line.me/R/ti/p/%40534vwrms" class="add-friend" target="_blank"><strong>LINE Bot: Notice Manager</strong></a>
       </li>
@@ -45,12 +45,33 @@
     <img src="~/assets/notify-service-join.webp" width="650" height="100%" class="mt-2 mb-4" alt="notify-service-join" />
     <li>Back to LIFF click your <strong>{room_name}</strong> and click <strong>Send "Testing Message"</strong></li>
     <img src="~/assets/liff-notify-example.webp" width="425" height="100%" class="mt-2 mb-4" alt="liff-notify-example" />
-    <li>A notification will be sent to your chat room, show that it's done</li>
+    <li>A notification will be sent to your chat room</li>
     <img src="~/assets/example-notify.webp" width="425" height="100%" class="mt-2 mb-4" alt="example-notify" />
+    <li>Show that it's done</li>
   </ol>
 </div>
 </template>
 <style lang="scss">
+@media (max-width: 576px) {
+  .readme {
+    ol {
+      > img {
+        margin-left: -1em;
+      }
+
+      li {
+        margin: 0 1em 0 -1em;
+
+        > a.add-friend {
+          display: block;
+          padding: 0.3em 1em;
+          margin: 0.5em 0;
+        }
+      }
+    }
+  }
+}
+
 .readme {
   img {
     border: #adadad solid 1px;

@@ -35,7 +35,7 @@ module.exports = async (req) => {
 
   const bot = await LineBot.findOne({ botname: name })
   if (!bot) {
-    return {}
+    return ({})
   }
 
   let stats = bot.options.stats

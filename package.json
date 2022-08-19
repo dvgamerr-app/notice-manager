@@ -7,7 +7,7 @@
   "author": "Kananek T.",
   "license": "ISC",
   "scripts": {
-    "dev:api": "env-cmd nodemon .",
+    "dev:api": "env-cmd nodemon -w api .",
     "dev": "env-cmd nuxt",
     "build": "nuxt build",
     "start:ui": "nuxt start",

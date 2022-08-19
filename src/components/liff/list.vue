@@ -1,7 +1,7 @@
 <template>
   <b-row v-if="!$store.state.wait">
     <b-col sm="12">
-      <b-row v-if="countItem && !err">
+      <b-row v-if="!err">
         <b-col :cols="type != 'all' ? 9 : 12" class="pt-3 mb-1">
           <fa icon="search" class="fa-sm icon-search" />
           <b-form-input
