@@ -1,5 +1,7 @@
 ## Notice-Manager Web GUI
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/84fd40319ce044538c32153536607057)](https://app.codacy.com/gh/touno-io/notice-manager?utm_source=github.com&utm_medium=referral&utm_content=touno-io/notice-manager&utm_campaign=Badge_Grade_Settings)
+
 ![Build (main)](https://img.shields.io/github/workflow/status/touno-io/line-notice/Deploy%20Docker%20Hub/main?style=flat-square)
 ![last commit (main)](https://img.shields.io/github/last-commit/touno-io/line-notice/main.svg?style=flat-square)
 ![MIT](https://img.shields.io/dub/l/vibe-d.svg?style=flat-square)
