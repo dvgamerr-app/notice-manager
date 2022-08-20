@@ -1,6 +1,7 @@
 ## Notice-Manager Web GUI
 
 ![Build (main)](https://img.shields.io/github/workflow/status/touno-io/line-notice/Deploy%20Docker%20Hub/main?style=flat-square)
+![Codacy (main)](https://img.shields.io/codacy/grade/3ec9018fd0994796b64484495342a131/main?style=flat-square)
 ![last commit (main)](https://img.shields.io/github/last-commit/touno-io/line-notice/main.svg?style=flat-square)
 ![MIT](https://img.shields.io/dub/l/vibe-d.svg?style=flat-square)
 ![Node](https://img.shields.io/badge/node-apline-green?style=flat-square)
