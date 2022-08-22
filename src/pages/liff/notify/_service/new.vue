@@ -119,14 +119,10 @@ export default {
         external: true
       })
 
-      // notiRoom.insert({
-      //   data: {
-      //     service: this.service,
-      //     name: this.roomName,
-      //     value: this.roomName,
-      //     removed: false
-      //   }
-      // })
+      this.$store.commit('lineNotifyAddRoom', {
+        service: this.service,
+        room: { name: this.roomName, room: this.roomName }
+      })
 
       this.$router.push(`/liff/notify/${this.service}`)
       return e.preventDefault()

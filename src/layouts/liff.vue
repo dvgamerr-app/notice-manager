@@ -31,7 +31,35 @@
           </b-container>
         </b-navbar>
         <b-container v-else class="navtop" />
-        <b-container class="navbottom" />
+        <b-container class="navbottom" fluid>
+          <b-row>
+            <b-col class="menu nav nav-pills border-bottom d-none d-md-inline-block" md="12">
+              <nuxt-link to="/liff/notify" class="nav-link d-md-inline-block">
+                <fa icon="bell" />
+                <span><span class="d-none d-lg-inline">LINE</span> Notify</span>
+              </nuxt-link>
+              <nuxt-link to="/liff/bot" class="nav-link d-md-inline-block disabled">
+                <fa :icon="['fab','line']" />
+                <span><span class="d-none d-lg-inline">LINE</span> BOT</span>
+              </nuxt-link>
+              <nuxt-link to="/liff/webhook" class="nav-link d-md-inline-block disabled">
+                <fa icon="link" />
+                <span>Webhook</span>
+              </nuxt-link>
+            </b-col>
+            <b-col class="menu nav nav-pills border-bottom d-flex d-md-none" md="12">
+              <nuxt-link to="/liff/notify" class="nav-link d-flex justify-content-center d-md-block">
+                <fa icon="bell" class="fa-lg m-2" />
+              </nuxt-link>
+              <nuxt-link to="/liff/bot" class="nav-link d-flex justify-content-center d-md-block disabled">
+                <fa :icon="['fab','line']" class="fa-lg m-2" />
+              </nuxt-link>
+              <nuxt-link to="/liff/webhook" class="nav-link d-flex justify-content-center d-md-block disabled">
+                <fa icon="link" class="fa-lg m-2" />
+              </nuxt-link>
+            </b-col>
+          </b-row>
+        </b-container>
         <b-container class="main">
           <nuxt />
         </b-container>

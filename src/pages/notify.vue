@@ -1,31 +1,7 @@
 <template>
 <div class="markdown-body readme py-5" >
-  <h1>Notice-Manager Web GUI</h1>
-  <p>This is a template to help you if you want to implement Line Notify. It help us follow:</p>
-  <ul>
-    <li>Authenication with Line Notify server</li>
-    <li>Help you to access token from Line Notify server</li>
-    <li>A notify entry point to notify Line Notify server</li>
-  </ul>
-  <h2>Just want to try it?</h2>
+  <h2>Notify LINE</h2>
   <ol>
-    <img src="~/assets/notify-bot.webp" width="100%" height="100%" class="mt-2 mb-4" alt="notify-bot">
-    <li>
-      Add as a friends
-      <a href="https://line.me/R/ti/p/%40linenotify" class="add-friend" target="_blank"><strong>LINE Notify</strong></a>
-      and
-      <a href="https://line.me/R/ti/p/%40534vwrms" class="add-friend" target="_blank"><strong>LINE Bot: Notice Manager</strong></a>
-      </li>
-    <li>After that, you will see a rich menu on the chat and items as follows:</li>
-    <img src="~/assets/richmenu.webp" width="100%" height="100%" class="mt-2 mb-4" alt="richmenu" />
-    <ul class="pb-3">
-      <li>NOTIFY</li>
-      <li>LINE BOT</li>
-      <li>Webhook</li>
-      <li>GitHub Repository</li>
-      <li>Dashboard</li>
-      <li>Documentation</li>
-    </ul>
     <li>Click menu <strong>"NOTIFY"</strong> and <strong>"CREATE"</strong> in LIFF menu.</li>
     <img src="~/assets/liff-notify-service.webp" width="425" height="100%" class="mt-2 mb-4" alt="liff-notify-service" />
     <li>Click <a href="https://notify-bot.line.me/my/services/new" target="_blank"><strong>"Add Service"</strong></a> and your need to fill all related info you need</li>

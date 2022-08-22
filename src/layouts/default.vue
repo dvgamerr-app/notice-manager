@@ -19,47 +19,53 @@
             />
           </div>
           <div v-else>
-            <!-- <b-link href="/auth/sso" class="flex-sign">
-              <fa icon="external-link-alt" /> Sign-In
+            <!-- <b-link href="https:" class="flex-sign">
+              <fa icon="external-link-alt" /> SignIn
             </b-link> -->
+            <b-link href="/liff" class="flex-sign">
+              <fa :icon="['fab','line']" /> LIFF
+            </b-link>
+            <nuxt-link v-if="$route.name !== 'index'" to="/" class="flex-sign pl-3">
+              <fa icon="chevron-left" /> Back
+            </nuxt-link>
           </div>
         </b-navbar-nav>
       </b-container>
     </b-navbar>
-    <b-container class="navbottom" fluid>
+    <b-container class="navbottom d-none" fluid>
       <b-row>
-        <!-- <b-col class="menu nav nav-pills border-bottom d-none d-md-inline-block" md="12">
-          <nuxt-link to="/" class="nav-link d-md-inline-block" exact>
+        <b-col class="menu nav nav-pills border-bottom d-none d-md-inline-block" md="12">
+          <nuxt-link to="/admin/dashbaord" class="nav-link d-md-inline-block" exact>
             <fa icon="home" />
             <span>Dashboard</span>
           </nuxt-link>
-          <nuxt-link to="/notify" class="nav-link d-md-inline-block">
+          <nuxt-link to="/admin/notify" class="nav-link d-md-inline-block">
             <fa icon="bell" />
             <span><span class="d-none d-lg-inline">LINE</span> Notify</span>
           </nuxt-link>
-          <nuxt-link to="/bot" class="nav-link d-md-inline-block">
+          <nuxt-link to="/admin/bot" class="nav-link d-md-inline-block disabled">
             <fa :icon="['fab','line']" />
             <span><span class="d-none d-lg-inline">LINE</span> BOT</span>
           </nuxt-link>
-          <nuxt-link to="/webhook" class="nav-link d-md-inline-block disabled">
+          <nuxt-link to="/admin/webhook" class="nav-link d-md-inline-block disabled">
             <fa icon="link" />
             <span>Webhook</span>
           </nuxt-link>
         </b-col>
         <b-col class="menu nav nav-pills border-bottom d-flex d-md-none" md="12">
-          <nuxt-link to="/" class="nav-link d-flex justify-content-center d-md-block">
+          <nuxt-link to="/admin/dashbaord" class="nav-link d-flex justify-content-center d-md-block">
             <fa icon="home" class="fa-lg m-2" />
           </nuxt-link>
-          <nuxt-link to="/notify" class="nav-link d-flex justify-content-center d-md-block">
+          <nuxt-link to="/admin/notify" class="nav-link d-flex justify-content-center d-md-block">
             <fa icon="bell" class="fa-lg m-2" />
           </nuxt-link>
-          <nuxt-link to="/bot" class="nav-link d-flex justify-content-center d-md-block">
+          <nuxt-link to="/admin/bot" class="nav-link d-flex justify-content-center d-md-block disabled">
             <fa :icon="['fab','line']" class="fa-lg m-2" />
           </nuxt-link>
-          <nuxt-link to="/webhook" class="nav-link d-flex justify-content-center d-md-block disabled">
+          <nuxt-link to="/admin/webhook" class="nav-link d-flex justify-content-center d-md-block disabled">
             <fa icon="link" class="fa-lg m-2" />
           </nuxt-link>
-        </b-col> -->
+        </b-col>
       </b-row>
     </b-container>
     <b-container>

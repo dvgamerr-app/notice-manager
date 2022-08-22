@@ -4,6 +4,7 @@
   "description": "Server notify message to 3party.",
   "private": true,
   "keywords": [],
+  "type": "module",
   "author": "Kananek T.",
   "license": "ISC",
   "scripts": {
@@ -27,6 +28,7 @@
     "axios": "^0.27.2",
     "core-js": "^3.19.3",
     "dayjs": "^1.11.0",
+    "dotenv": "^16.0.1",
     "fastify": "^4.5.2",
     "fastify-cors": "^6.0.3",
     "linebot": "^1.6.1",
@@ -36,7 +38,6 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.16.3",
-    "eslint-config-prettier": "^8.3.0",
     "@fortawesome/free-brands-svg-icons": "^6.1.1",
     "@fortawesome/free-regular-svg-icons": "^6.1.1",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
@@ -52,6 +53,7 @@
     "debounce": "^1.2.1",
     "env-cmd": "^10.1.0",
     "eslint": "^8.22.0",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-nuxt": "^3.1.0",
     "eslint-plugin-vue": "^8.2.0",
     "marked": "^4.0.12",

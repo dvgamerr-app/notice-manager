@@ -3,6 +3,8 @@ name: Build & deploy next version
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   notice-ui:
@@ -242,3 +244,7 @@ jobs:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
           args: rollout status ${{ steps.prepare.outputs.kube_deploy }} -n ${{ steps.prepare.outputs.kube_namespace }}
+
+
+
+# ${{ github.job }}
