@@ -98,7 +98,7 @@ jobs:
 
       # - name: Trigger deploy 🚀
       #   if: success() && github.event_name != 'pull_request'
-      #   uses: Consensys/kubernetes-action@1.1.0
+      #   uses: Consensys/kubernetes-action@1.02
       #   env:
       #     KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
       #   with:
@@ -106,7 +106,7 @@ jobs:
 
       - name: Restart deployment 🚀
         if: success() && github.event_name != 'pull_request'
-        uses: Consensys/kubernetes-action@1.1.0
+        uses: Consensys/kubernetes-action@1.02
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
@@ -114,7 +114,7 @@ jobs:
 
       - name: Status deployment 🔍
         if: success() && github.event_name != 'pull_request'
-        uses: Consensys/kubernetes-action@1.1.0
+        uses: Consensys/kubernetes-action@1.02
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
@@ -220,7 +220,7 @@ jobs:
 
       # - name: Trigger deploy 🚀
       #   if: success() && github.event_name != 'pull_request'
-      #   uses: Consensys/kubernetes-action@1.1.0
+      #   uses: Consensys/kubernetes-action@1.02
       #   env:
       #     KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
       #   with:
@@ -229,7 +229,7 @@ jobs:
 
       - name: Restart deployment 🚀
         if: success() && github.event_name != 'pull_request'
-        uses: Consensys/kubernetes-action@1.1.0
+        uses: Consensys/kubernetes-action@1.02
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
@@ -237,7 +237,7 @@ jobs:
 
       - name: Status deployment 🔍
         if: success() && github.event_name != 'pull_request'
-        uses: Consensys/kubernetes-action@1.1.0
+        uses: Consensys/kubernetes-action@1.02
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
