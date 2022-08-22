@@ -83,6 +83,10 @@ jobs:
       - name: Docker Buildx ⚙️
         run: docker buildx build --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_args }}
 
+      - name: Notify After Build Fail 🔔
+        if: failure() && github.event_name != 'pull_request'
+        run: curl -X PUT https://notice.touno.io/system/notice/%E2%9D%8C%20*%5BFailure%5D*%20Steps:%20Docker%20Buildx%20%E2%9A%99%EF%B8%8F`
+
       - name: Login to DockerHub
         if: success() && github.event_name != 'pull_request'
         uses: docker/login-action@v2
@@ -205,6 +209,10 @@ jobs:
       - name: Docker Buildx ⚙️
         run: docker buildx build --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_args }}
 
+      - name: Notify After Build Fail 🔔
+        if: failure() && github.event_name != 'pull_request'
+        run: curl -X PUT https://notice.touno.io/system/notice/%E2%9D%8C%20*%5BFailure%5D*%20Steps:%20Docker%20Buildx%20%E2%9A%99%EF%B8%8F`
+
       - name: Login to DockerHub
         if: success() && github.event_name != 'pull_request'
         uses: docker/login-action@v1
@@ -245,6 +253,21 @@ jobs:
         with:
           args: rollout status ${{ steps.prepare.outputs.kube_deploy }} -n ${{ steps.prepare.outputs.kube_namespace }}
 
+  notify-api:
+    runs-on: ubuntu-18.04
+    needs: notice-api
+    if: failure() && github.event_name != 'pull_request'
+    steps:
+      - name: Notify 🔔
+        run: curl -X PUT https://notice.touno.io/system/notice/%E2%9D%8C%20*%5BFailure%5D*%20Job:%20${{ github.job }}%20%E2%9A%99%EF%B8%8F`
+
+  notify-ui:
+    runs-on: ubuntu-18.04
+    needs: notice-ui
+    if: failure() && github.event_name != 'pull_request'
+    steps:
+      - name: Notify 🔔
+        run: curl -X PUT https://notice.touno.io/system/notice/%E2%9D%8C%20*%5BFailure%5D*%20Job:%20${{ github.job }}%20%E2%9A%99%EF%B8%8F`
 
 
 # ${{ github.job }}

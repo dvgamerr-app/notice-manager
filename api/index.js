@@ -6,6 +6,11 @@ module.exports = [
   // API Bot
   {
     method: 'PUT',
+    path: '/system/notice/:msg',
+    handler: require('./notice.js')
+  },
+  {
+    method: 'PUT',
     path: '/line/:bot/:to',
     handler: require('./line-bot/message')
   },

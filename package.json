@@ -4,7 +4,6 @@
   "description": "Server notify message to 3party.",
   "private": true,
   "keywords": [],
-  "type": "module",
   "author": "Kananek T.",
   "license": "ISC",
   "scripts": {
