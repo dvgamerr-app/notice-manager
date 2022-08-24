@@ -68,6 +68,9 @@ jobs:
 
           # Use Docker `latest` tag convention
           [ "$VERSION" == "main" ] && VERSION=latest
+          
+          # Use Docker `test` tag convention
+          [ "${{github.event_name}}" == "pull_request" ] && VERSION=test
 
           echo ::set-output name=docker_image::${{github.actor}}/${IMAGE_NAME}
           echo ::set-output name=version::${VERSION}
@@ -181,8 +184,10 @@ jobs:
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=v$(echo $VERSION | sed -e 's/^v//')
 
           # Use Docker `latest` tag convention
-
           [ "$VERSION" == "main" ] && VERSION=latest
+          
+          # Use Docker `test` tag convention
+          [ "${{github.event_name}}" == "pull_request" ] && VERSION=test
 
           echo ::set-output name=docker_image::${{github.actor}}/${IMAGE_NAME}
           echo ::set-output name=version::${VERSION}
