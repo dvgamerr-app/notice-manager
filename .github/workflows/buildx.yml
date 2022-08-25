@@ -1,4 +1,4 @@
-name: Build & deploy next version
+name: BuildMatrix
 
 on:
   push:
@@ -73,19 +73,19 @@ jobs:
           # Use Docker `test` tag convention
           [ "${{github.event_name}}" == "pull_request" ] && VERSION=test
 
-          echo ::set-output name=docker_image::${IMAGE_OWNER}/${IMAGE_NAME}
+          echo ::set-output name=docker_image::$IMAGE_OWNER/$IMAGE_NAME
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=buildx_args::--platform $PLATFORMS \
             --build-arg VERSION=${VERSION} \
             --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
             --build-arg VERSION=$VERSION \
-            --tag $USERNAME/$IMAGE_NAME:$VERSION --file $IMAGE_FILE .
+            --tag $IMAGE_OWNER/$IMAGE_NAME:$VERSION --file $IMAGE_FILE .
 
       - name: Set up Docker Buildx 📐
         uses: docker/setup-buildx-action@v2
 
       - name: Docker Buildx ⚙️
-        run: docker buildx build --output "type=image,push=${{github.event_name != 'pull_request'}}" ${{ steps.prepare.outputs.buildx_args }}
+        run: docker buildx build --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_args }}
 
       - name: Notify After Build Fail 🔔
         if: failure() && github.event_name != 'pull_request'
@@ -191,19 +191,19 @@ jobs:
           # Use Docker `test` tag convention
           [ "${{github.event_name}}" == "pull_request" ] && VERSION=test
 
-          echo ::set-output name=docker_image::${IMAGE_OWNER}/${IMAGE_NAME}
+          echo ::set-output name=docker_image::$IMAGE_OWNER/$IMAGE_NAME
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=buildx_args::--platform $PLATFORMS \
             --build-arg VERSION=${VERSION} \
             --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
             --build-arg VERSION=$VERSION \
-            --tag $USERNAME/$IMAGE_NAME:$VERSION --file $IMAGE_FILE .
+            --tag $IMAGE_OWNER/$IMAGE_NAME:$VERSION --file $IMAGE_FILE .
 
       - name: Set up Docker Buildx 📐
         uses: docker/setup-buildx-action@v1
 
       - name: Docker Buildx ⚙️
-        run: docker buildx build --output "type=image,push=${{github.event_name != 'pull_request'}}" ${{ steps.prepare.outputs.buildx_args }}
+        run: docker buildx build --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_args }}
 
       - name: Notify After Build Fail 🔔
         if: failure() && github.event_name != 'pull_request'
