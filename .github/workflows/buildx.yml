@@ -15,6 +15,7 @@ jobs:
         node: [16]
 
     env:
+      IMAGE_OWNER: dvgamerr
       IMAGE_NAME: line-liff
       PLATFORMS: linux/amd64,linux/arm64/v8
       IMAGE_FILE: notice-ui.Dockerfile
@@ -72,10 +73,7 @@ jobs:
           # Use Docker `test` tag convention
           [ "${{github.event_name}}" == "pull_request" ] && VERSION=test
 
-          USERNAME=${{github.actor}}
-          [ "${{github.actor}}" == "pull_request" ] && USERNAME=dvgamerr
-
-          echo ::set-output name=docker_image::$USERNAME/${IMAGE_NAME}
+          echo ::set-output name=docker_image::${IMAGE_OWNER}/${IMAGE_NAME}
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=buildx_args::--platform $PLATFORMS \
             --build-arg VERSION=${VERSION} \
@@ -87,7 +85,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Docker Buildx ⚙️
-        run: docker buildx build --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_args }}
+        run: docker buildx build --output "type=image,push=${{github.event_name != 'pull_request'}}" ${{ steps.prepare.outputs.buildx_args }}
 
       - name: Notify After Build Fail 🔔
         if: failure() && github.event_name != 'pull_request'
