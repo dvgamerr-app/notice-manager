@@ -89,7 +89,7 @@ jobs:
 
       - name: Notify After Build Fail 🔔
         if: failure() && github.event_name != 'pull_request'
-        run: curl -X PUT https://notice.touno.io/system/notice/%E2%9D%8C%20*%5BFailure%5D*%20Steps:%20Docker%20Buildx%20%E2%9A%99%EF%B8%8F`
+        run: curl -X PUT https://notice.touno.io/system/notice/%E2%9D%8C%20*%5BFailure%5D*%20Steps:%20Docker%20Buildx%20%E2%9A%99%EF%B8%8F
 
       - name: Login to DockerHub
         if: success() && github.event_name != 'pull_request'
@@ -137,6 +137,7 @@ jobs:
         os: [ubuntu-20.04]
         node: [16]
     env:
+      IMAGE_OWNER: dvgamerr
       IMAGE_FILE: notice-api.Dockerfile
       IMAGE_NAME: notice
       PLATFORMS: linux/amd64,linux/arm64
@@ -190,10 +191,7 @@ jobs:
           # Use Docker `test` tag convention
           [ "${{github.event_name}}" == "pull_request" ] && VERSION=test
 
-          USERNAME=${{github.actor}}
-          [ "${{github.actor}}" == "pull_request" ] && USERNAME=dvgamerr
-
-          echo ::set-output name=docker_image::$USERNAME/${IMAGE_NAME}
+          echo ::set-output name=docker_image::${IMAGE_OWNER}/${IMAGE_NAME}
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=buildx_args::--platform $PLATFORMS \
             --build-arg VERSION=${VERSION} \
@@ -201,16 +199,15 @@ jobs:
             --build-arg VERSION=$VERSION \
             --tag $USERNAME/$IMAGE_NAME:$VERSION --file $IMAGE_FILE .
 
-
       - name: Set up Docker Buildx 📐
         uses: docker/setup-buildx-action@v1
 
       - name: Docker Buildx ⚙️
-        run: docker buildx build --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_args }}
+        run: docker buildx build --output "type=image,push=${{github.event_name != 'pull_request'}}" ${{ steps.prepare.outputs.buildx_args }}
 
       - name: Notify After Build Fail 🔔
         if: failure() && github.event_name != 'pull_request'
-        run: curl -X PUT https://notice.touno.io/system/notice/%E2%9D%8C%20*%5BFailure%5D*%20Steps:%20Docker%20Buildx%20%E2%9A%99%EF%B8%8F`
+        run: curl -X PUT https://notice.touno.io/system/notice/%E2%9D%8C%20*%5BFailure%5D*%20Steps:%20Docker%20Buildx%20%E2%9A%99%EF%B8%8F
 
       - name: Login to DockerHub
         if: success() && github.event_name != 'pull_request'
@@ -253,7 +250,7 @@ jobs:
           args: rollout status ${{ steps.prepare.outputs.kube_deploy }} -n ${{ steps.prepare.outputs.kube_namespace }}
 
   notify-api:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     needs: notice-api
     if: failure() && github.event_name != 'pull_request'
     steps:
@@ -261,7 +258,7 @@ jobs:
         run: curl -X PUT https://notice.touno.io/system/notice/%E2%9D%8C%20*%5BFailure%5D*%20Job:%20${{ github.job }}%20%E2%9A%99%EF%B8%8F
 
   notify-ui:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     needs: notice-ui
     if: failure() && github.event_name != 'pull_request'
     steps:
