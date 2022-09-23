@@ -2195,6 +2195,15 @@
     "@sentry/utils" "7.13.0"
     tslib "^1.9.3"
 
+"@sentry/node@^7.12.1":
+  version "7.12.1"
+  resolved "https://registry.yarnpkg.com/@sentry/node/-/node-7.12.1.tgz#ced12d0db3ca5715d699858acb1e2f2ea1d7c59b"
+  integrity sha512-ZVT2+lLd3gbhOuCOczlFLHH2KnD4EXrq6jRp5Sb2vsSZGVHnVsbD5j7i54zbSBqcydlFqzVMqWSysGTKoYiimw==
+  dependencies:
+    "@sentry/types" "7.13.0"
+    "@sentry/utils" "7.13.0"
+    tslib "^1.9.3"
+
 "@sentry/node@^7.13.0":
   version "7.13.0"
   resolved "https://registry.yarnpkg.com/@sentry/node/-/node-7.13.0.tgz#0e073b75d4cce684db006d93ef18f2de2cf2f60e"
@@ -2209,14 +2218,14 @@
     lru_map "^0.3.3"
     tslib "^1.9.3"
 
-"@sentry/tracing@^7.12.1":
-  version "7.12.1"
-  resolved "https://registry.yarnpkg.com/@sentry/tracing/-/tracing-7.12.1.tgz#9f92985f152054ac90b6ec83a33c44e8084a008e"
-  integrity sha512-WnweIt//IqkEkJSjA8DtnIeCdItYIqJSxNQ6qK+r546/ufxRYFBck2fbmM0oKZJVg2evbwhadrBTIUzYkqNj4A==
+"@sentry/tracing@^7.13.0":
+  version "7.13.0"
+  resolved "https://registry.yarnpkg.com/@sentry/tracing/-/tracing-7.13.0.tgz#521dc021dab78e37e29b0f90b01cb444337adfc4"
+  integrity sha512-/MKSd25rGv6Pc0FPBLXJifkfvSaYVPA8XUOLzVeDN0gl07h8AXli4qG9amTh/4Wb5h4dFpbcscOvW2VC+pxkIA==
   dependencies:
-    "@sentry/hub" "7.12.1"
-    "@sentry/types" "7.12.1"
-    "@sentry/utils" "7.12.1"
+    "@sentry/hub" "7.13.0"
+    "@sentry/types" "7.13.0"
+    "@sentry/utils" "7.13.0"
     tslib "^1.9.3"
 
 "@sentry/types@7.12.1":
@@ -9095,10 +9104,10 @@ sass-loader@10.1.1:
     schema-utils "^3.0.0"
     semver "^7.3.2"
 
-sass@^1.54.9:
-  version "1.54.9"
-  resolved "https://registry.yarnpkg.com/sass/-/sass-1.54.9.tgz#b05f14ed572869218d1a76961de60cd647221762"
-  integrity sha512-xb1hjASzEH+0L0WI9oFjqhRi51t/gagWnxLiwUNMltA0Ab6jIDkAacgKiGYKM9Jhy109osM7woEEai6SXeJo5Q==
+sass@^1.55.0:
+  version "1.55.0"
+  resolved "https://registry.yarnpkg.com/sass/-/sass-1.55.0.tgz#0c4d3c293cfe8f8a2e8d3b666e1cf1bff8065d1c"
+  integrity sha512-Pk+PMy7OGLs9WaxZGJMn7S96dvlyVBwwtToX895WmCpAOr5YiJYEUJfiJidMuKb613z2xNWcXCHEuOvjZbqC6A==
   dependencies:
     chokidar ">=3.0.0 <4.0.0"
     immutable "^4.0.0"
