@@ -15,9 +15,7 @@ export default {
   },
   data: () => ({ err: '' }),
   mounted () {
-    const liffId = !this.env.devEnv
-      ? '1607427050-pOvAm7RE'
-      : '1607427050-GWg637kn'
+    const liffId = this.env.liffId
 
     const updateProfile = async (e) => {
       this.$store.commit('profile', e)
