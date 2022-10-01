@@ -6,7 +6,8 @@ export default {
   components: true,
   srcDir: 'src',
   env: {
-    liffId: process.env.LIFF_ID || '',
+    liffDashboardId: process.env.LIFF_DASHBOARD_ID || '',
+    liffNoticeId: process.env.LIFF_NOTICE_ID || '',
     baseUrl: process.env.BASE_URL || 'http://localhost:3000',
     devEnv,
     userId: process.env.LIFF_USER_ID,
