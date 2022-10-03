@@ -1,5 +1,7 @@
 FROM node:lts-alpine
 
+ENV BASE_URL http://localhost/
+
 WORKDIR /app
 COPY . .
 

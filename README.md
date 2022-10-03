@@ -14,7 +14,15 @@ This is a template to help you if you want to implement Line Notify. It help us 
 - Help you to access token from Line Notify server
 - A notify entry point to notify Line Notify server
 
-### [Just want to try it?](https://notice.touno.io/)
+### Just want to try it?
+- Download and Install [Rancher Desktop](https://rancherdesktop.io/)
+- Build Container with UI and API
+```
+docker build -e BASE_URL=http://localhost/ -f notice-api.Dockerfile -t notice-api:latest .
+docker build -e BASE_URL=http://localhost/ -f notice-ui.Dockerfile -t notice-ui:latest .
+
+kubectl apply -f deployments.yaml
+```
 
 ## UI Sample
 
