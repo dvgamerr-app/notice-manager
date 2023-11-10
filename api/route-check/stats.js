@@ -1,4 +1,5 @@
-const { notice } = require('@touno-io/db/schema')
+// const { notice } = require('@touno-io/db/schema')
+const notice = {}
 const { getStatus } = require('../sdk-line')
 
 module.exports = async (req) => {

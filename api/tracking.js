@@ -1,6 +1,7 @@
 const numeral = require('numeral')
 const dayjs = require('dayjs')
-const { notice } = require('@touno-io/db/schema')
+// const { notice } = require('@touno-io/db/schema')
+const notice = {}
 const { monitorLINE } = require('./monitor')
 
 const loggingExpire = async () => {

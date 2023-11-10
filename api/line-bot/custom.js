@@ -1,5 +1,6 @@
-const cron = require('node-cron')
-const { notice } = require('@touno-io/db/schema')
+// const cron = require('node-cron')
+// const { notice } = require('@touno-io/db/schema')
+const notice = {}
 const axios = require('axios')
 
 const wakaRank = require('../flex/waka-rank')
@@ -176,17 +177,17 @@ const wakaWelcomeUser = async (e, user, pushMessage) => {
 }
 
 const task = {}
-const msg = [
-  'ยังขาดอีก :n คนนะ 😄',
-  'เร็วๆ สิ 🤗ยังไม่ตอบ :n คน',
-  'เฮ้ยยย 😦 อีก :n คนนะ ยังไม่ตอบ',
-  'ไปไหนกันวะ อีก :n คนอะ?? 🙄',
-  'นี่ก็ไม่รู้ว่าใครนะ :n คนอะ 😓 ตอบเค้าหน่อยสิ',
-  'นี้!! 😭 จะไม่ตอบเค้าจิงๆ เหรอ :n คนนั้นอะ',
-  'ทำไม 🤬 ไม่ตอบวะ :n คนอะ',
-  ':n คนนั้น 😡 ถ้าไม่ตอบจะไปจริงๆ ละนะ'
-]
-const minutePeriod = 30
+// const msg = [
+//   'ยังขาดอีก :n คนนะ 😄',
+//   'เร็วๆ สิ 🤗ยังไม่ตอบ :n คน',
+//   'เฮ้ยยย 😦 อีก :n คนนะ ยังไม่ตอบ',
+//   'ไปไหนกันวะ อีก :n คนอะ?? 🙄',
+//   'นี่ก็ไม่รู้ว่าใครนะ :n คนอะ 😓 ตอบเค้าหน่อยสิ',
+//   'นี้!! 😭 จะไม่ตอบเค้าจิงๆ เหรอ :n คนนั้นอะ',
+//   'ทำไม 🤬 ไม่ตอบวะ :n คนอะ',
+//   ':n คนนั้น 😡 ถ้าไม่ตอบจะไปจริงๆ ละนะ'
+// ]
+// const minutePeriod = 30
 
 const regexWakaKey = (text) => {
   const [key] =
@@ -199,7 +200,7 @@ module.exports = {
   'ris-robo': [
     {
       cmd: ['จัดอันดับ'],
-      job: async (e, pushMessage, line) => {
+      job: async (e, pushMessage) => {
         if (!regexWakaKey(e.message.text)) {
           await setState(e, { bypass: true, index: 0, event: 'secret-save' })
           return await pushMessage(
@@ -214,7 +215,7 @@ module.exports = {
         }
         await wakaWelcomeUser(e, user, pushMessage)
       },
-      bypass: async (e, pushMessage, line, forceStop) => {
+      bypass: async (e, pushMessage) => {
         const eventName = await getState(e, 'event')
         if (eventName === 'secret-save') {
           const user = await wakaUserProfile(e, regexWakaKey(e.message.text))
@@ -229,7 +230,7 @@ module.exports = {
     },
     {
       cmd: ['แสดงอันดับ'],
-      job: async (e, pushMessage, line) => {
+      job: async (e, pushMessage) => {
         const room = await getRoomData(e)
         const flex = room.map(e => ({
           user: e.data.wakaUser,
@@ -261,31 +262,31 @@ module.exports = {
             type: 'text',
             text: '💬 ไหนมีใครมาบ้าง *เช็คชื่อสิ* !!'
           })
-          task[unqiueID].cron = cron.schedule('* * * * *', async () => {
-            const memberTotal = await getState(e, 'memberTotal')
-            const member = await getState(e, 'member')
+          // task[unqiueID].cron = cron.schedule('* * * * *', async () => {
+          //   const memberTotal = await getState(e, 'memberTotal')
+          //   const member = await getState(e, 'member')
 
-            task[unqiueID].count++
-            // sequence Math.ceil(task[unqiueID].count / (minutePeriod / msg.length)) - 1
-            let text = msg[Math.floor(Math.random() * msg.length)]
-            const total = memberTotal - member.length
-            if (memberTotal <= member.length) {
-              task[unqiueID].cron.stop()
-            }
+          //   task[unqiueID].count++
+          //   // sequence Math.ceil(task[unqiueID].count / (minutePeriod / msg.length)) - 1
+          //   let text = msg[Math.floor(Math.random() * msg.length)]
+          //   const total = memberTotal - member.length
+          //   if (memberTotal <= member.length) {
+          //     task[unqiueID].cron.stop()
+          //   }
 
-            if (task[unqiueID].count >= minutePeriod) {
-              task[unqiueID].cron.stop()
-              await setState(e, { bypass: false })
-              text = `บอทเสียใจ 😭 ม..ไม่มีใครคุยด้วยเลย😢 ป...ไปก็ได้😢 ยังขาดอีก *${total}* คนนะ`
-            }
+          //   if (task[unqiueID].count >= minutePeriod) {
+          //     task[unqiueID].cron.stop()
+          //     await setState(e, { bypass: false })
+          //     text = `บอทเสียใจ 😭 ม..ไม่มีใครคุยด้วยเลย😢 ป...ไปก็ได้😢 ยังขาดอีก *${total}* คนนะ`
+          //   }
 
-            await line.pushMessage(unqiueID, {
-              type: 'text',
-              text: text
-                ? text.replace(/:n/, `*${total}*`)
-                : `เร็วๆ ยังขาดอีก *${total}* คนนะ`
-            })
-          })
+          //   await line.pushMessage(unqiueID, {
+          //     type: 'text',
+          //     text: text
+          //       ? text.replace(/:n/, `*${total}*`)
+          //       : `เร็วๆ ยังขาดอีก *${total}* คนนะ`
+          //   })
+          // })
         }
       },
       bypass: async (e, lineMessage, line, forceStop) => {

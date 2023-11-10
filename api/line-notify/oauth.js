@@ -1,6 +1,7 @@
 const { AuthorizationCode } = require('simple-oauth2')
-const debuger = require('@touno-io/debuger')
-const { notice } = require('@touno-io/db/schema')
+// const debuger = require('@touno-io/debuger')
+// const { notice } = require('@touno-io/db/schema')
+const notice = {}
 const sdkNotify = require('../sdk-notify')
 const { monitorLINE } = require('../monitor')
 
@@ -14,7 +15,7 @@ const uuid = (length) => {
   return result
 }
 const hosts = process.env.BASE_URL || 'https://notice.touno.io'
-const logger = debuger('OAUTH')
+// const logger = debuger('OAUTH')
 
 module.exports = async (req, reply) => {
   // Authorization oauth2 URI
@@ -53,7 +54,7 @@ module.exports = async (req, reply) => {
         const { setRevoke } = await sdkNotify(bot.service, oauth.room)
         await setRevoke()
       } catch (ex) {
-        logger.error(ex)
+        console.error(ex)
       }
     }
     try {
@@ -110,7 +111,7 @@ module.exports = async (req, reply) => {
     const client = new AuthorizationCode(credentials)
 
     const newState = uuid(16)
-    logger.log(`${service} in ${room} new state is '${newState}'`)
+    console.log(`${service} in ${room} new state is '${newState}'`)
     const token = await ServiceBotOauth.findOne({ service, room })
     if (token) {
       await ServiceBotOauth.updateOne(

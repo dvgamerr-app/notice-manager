@@ -1,5 +1,6 @@
 const dayjs = require('dayjs')
-const { notice } = require('@touno-io/db/schema')
+// const { notice } = require('@touno-io/db/schema')
+const notice = {}
 
 const getStats = async (botname) => {
   const date = dayjs().startOf('month')

@@ -1,4 +1,5 @@
-const { notice } = require('@touno-io/db/schema')
+// const { notice } = require('@touno-io/db/schema')
+const notice = {}
 const sdkNotify = require('../sdk-notify')
 
 const packageSticker = {

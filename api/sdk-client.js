@@ -1,5 +1,6 @@
 const linebot = require('linebot')
-const { notice } = require('@touno-io/db/schema')
+// const { notice } = require('@touno-io/db/schema')
+const notice = {}
 
 module.exports = async (botName) => {
   const { LineBot } = notice.get()

@@ -1,5 +1,6 @@
 const axios = require('axios')
-const { notice } = require('@touno-io/db/schema')
+// const { notice } = require('@touno-io/db/schema')
+const notice = {}
 
 module.exports = async (req) => {
   const { name, to: userTo } = req.params
