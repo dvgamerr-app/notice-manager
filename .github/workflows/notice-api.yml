@@ -174,31 +174,25 @@ jobs:
       - name: Prepare 🔰
         id: prepare
         run: |
-          echo ::set-output name=kube_deploy::${KUBE_DEPLOY}
-          echo ::set-output name=kube_container::${KUBE_CONTAINER}
-          echo ::set-output name=kube_namespace::${KUBE_NAMESPACE}
+          echo "kube_container=${KUBE_CONTAINER}" >> $GITHUB_OUTPUT
+          echo "kube_namespace=${KUBE_NAMESPACE}" >> $GITHUB_OUTPUT
+          echo "docker_image=${{env.REGISTRY}}/${{github.actor}}/$IMAGE_NAME" >> $GITHUB_OUTPUT
 
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # # Strip "v" prefix from tag name
+          # [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=v$(echo $VERSION | sed -e 's/^v//')
+          # # Use Docker `latest` tag convention
+          # [ "$VERSION" == "main" ] && VERSION=latest
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=v$(echo $VERSION | sed -e 's/^v//')
-
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "main" ] && VERSION=latest
-
-          # Use Docker `test` tag convention
-          [ "${{github.event_name}}" == "pull_request" ] && VERSION=test
-
-          echo ::set-output name=docker_image::$IMAGE_OWNER/$IMAGE_NAME
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=buildx_args::--platform $PLATFORMS \
+          echo "buildx_args=--platform $PLATFORMS \
             --build-arg VERSION=${VERSION} \
             --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
             --build-arg VERSION=$VERSION \
-            --tag $IMAGE_OWNER/$IMAGE_NAME:$VERSION --file $IMAGE_FILE .
+            --tag ${{env.REGISTRY}}/${{github.actor}}/$IMAGE_NAME:$VERSION --file $IMAGE_FILE ." >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx 📐
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Docker Buildx ⚙️
         run: docker buildx build --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_args }}
@@ -215,8 +209,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Docker Push 📌
-        if: success() && github.event_name != 'pull_request'
-        run: docker buildx build --output "type=image,push=true" ${{ steps.prepare.outputs.buildx_args }}
+        run: docker buildx build --output "type=image,push=${{ github.event_name != 'pull_request' }}" ${{ steps.prepare.outputs.buildx_args }}
 
       - name: Inspect 🔍
         if: always() && github.event_name != 'pull_request'
