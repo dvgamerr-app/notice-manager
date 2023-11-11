@@ -1,9 +1,10 @@
-name: BuildMatrix
+name: notice-api
 
 on:
   push:
     branches: [main]
     paths:
+      - '.github/workflows/notice-api.yml'
       - 'api/**'
       - 'index.js'
   # pull_request:
