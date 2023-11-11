@@ -7,11 +7,11 @@
   "author": "Kananek T.",
   "license": "ISC",
   "scripts": {
+    "start": "node .",
     "dev": "env-cmd nodemon -w api .",
     "dev:web": "env-cmd nuxt",
     "build": "nuxt build",
     "start:ui": "nuxt start",
-    "start": "node .",
     "generate": "nuxt generate",
     "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore .",
     "lint": "yarn lint:js",
