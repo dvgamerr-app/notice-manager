@@ -212,10 +212,6 @@ jobs:
       - name: Docker Push 📌
         run: docker buildx build --output "type=image,push=${{ github.event_name != 'pull_request' }}" ${{ steps.prepare.outputs.buildx_args }}
 
-      - name: Inspect 🔍
-        if: always() && github.event_name != 'pull_request'
-        run: docker buildx imagetools inspect ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }}
-
       # - name: Trigger deploy 🚀
       #   if: success() && github.event_name != 'pull_request'
       #   uses: Consensys/kubernetes-action@1.1.0
