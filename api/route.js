@@ -34,7 +34,7 @@ module.exports = [
   {
     method: ['PUT', 'POST'],
     path: '/notify/:serviceName/:roomName',
-    handler: require('./notify-bot/to.js')
+    handler: require('./notify-bot/notify.js')
   },
 
   // API UI

@@ -1,4 +1,5 @@
 const sqlite3 = require('sqlite3').verbose()
+const logger = require('pino')()
 const db = new sqlite3.Database(process.env.SQLITE_PATH || './notice.db')
 
 const dbGetAll = (sql, params) => new Promise((resolve, reject) => {
@@ -19,4 +20,53 @@ const dbRun = (sql, params) => new Promise((resolve, reject) => {
   })
 })
 
-module.exports = { db, dbGetAll, dbGetOne, dbRun }
+const uuid = (length, hex = false) => {
+  let result = ''
+  const characters = !hex ?  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' : 'abcdef0123456789'
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length))
+  }
+  return result
+}
+
+const init = async () => {
+  logger.info(`init database...`)
+  return dbRun(`
+  CREATE TABLE IF NOT EXISTS notify_auth (
+    user_id VARCHAR NOT NULL,
+    service VARCHAR NOT NULL,
+    room VARCHAR NOT NULL,
+    state VARCHAR NOT NULL,
+    response_type VARCHAR NULL,
+    redirect_uri VARCHAR NULL,
+    access_token TEXT NULL,
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS notify_service (
+    user_id VARCHAR NOT NULL,
+    service VARCHAR NOT NULL,
+    client_id VARCHAR NOT NULL,
+    client_secret VARCHAR NOT NULL,
+    active BOOLEAN DEFAULT true,
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS history_notify (
+    uuid VARCHAR(32) NOT NULL,
+    category VARCHAR NOT NULL,
+    service VARCHAR NOT NULL,
+    room VARCHAR NOT NULL,
+    sender TEXT NULL,
+    error TEXT NULL,
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+
+
+  CREATE INDEX notify_auth_idx ON notify_auth(service, room);
+  CREATE INDEX notify_service_idx ON notify_service(service, active);
+  CREATE INDEX notify_auth_state_idx ON notify_auth(state);
+  `)
+}
+
+module.exports = { uuid, db, dbGetAll, dbGetOne, dbRun, init }

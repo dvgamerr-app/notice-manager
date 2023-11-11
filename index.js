@@ -1,6 +1,6 @@
 const fastify = require('fastify')({ console: false })
 const logger = require('pino')()
-const db = require('./api/db')
+const { db, init } = require('./api/db')
 
 // const Sentry = require('@sentry/node')
 // // const { notice } = require('@touno-io/db/schema')
@@ -53,9 +53,6 @@ for (const api of apiRoute) {
   fastify.route(api)
 }
 
-const initialize = async () => {
-
-}
 
 const exitHandler = (err, exitCode) => {
   db.close()
@@ -68,6 +65,10 @@ process.on('SIGINT', exitHandler)
 // process.on('SIGUSR1', exitHandler)
 // process.on('SIGUSR2', exitHandler)
 // process.on('uncaughtException', exitHandler)
+
+const initialize = () => Promise.all([
+  init()
+])
 
 initialize().then(async () => {
   logger.info('fastify listen:3000')

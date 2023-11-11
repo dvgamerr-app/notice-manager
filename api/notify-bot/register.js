@@ -1,17 +1,8 @@
 const { AuthorizationCode } = require('simple-oauth2')
 const logger = require('pino')()
-const { dbGetOne, dbRun } = require('../db')
+const { uuid, dbGetOne, dbRun } = require('../db')
 const sdkNotify = require('../sdk-notify')
 
-const uuid = (length) => {
-  let result = ''
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length))
-  }
-  return result
-}
 const hosts = process.env.BASE_URL || 'http://localhost:3000'
 
 module.exports = async (req, reply) => {
