@@ -35,6 +35,10 @@ module.exports = async (req, reply) => {
       client_id: notifyService.client_id,
       client_secret: notifyService.client_secret
     }
+    if (notifyAuth.access_token) {
+      const { setRevoke } = await sdkNotify(notifyAuth.access_token)
+      await setRevoke()
+    }
 
     const accessToken = await client.getToken(tokenConfig)
     logger.info({ msg: accessToken })
@@ -43,18 +47,16 @@ module.exports = async (req, reply) => {
       throw new Error(accessToken.token.message)
     }
 
-    await dbRun(`UPDATE notify_auth SET access_token = ? WHERE state = ?;`, [ accessToken.token.access_token, state])
+    await dbRun(`UPDATE notify_auth SET access_token = ?, code = ? WHERE state = ?;`, [ accessToken.token.access_token, code, state ])
     const { getStatus } = await sdkNotify(accessToken.token.access_token)
     const res = await getStatus()
     if (res.status !== 200) {
       throw new Error('Status is not verify.')
     }
-    logger.info({ msg: res })
     logger.info(`Join room *${res.target}* \`${res.message}\` with service *${serviceName}*`)
-    return reply.type('text/html').send(`<script>window.self.close();</script>`)
+    return reply.type('text/html').send(`<script>window.self.close();</script><body>Join room ${res.target} '${res.message}' with service ${serviceName}</body>`)
   } else if (error) {
-    this.log.error(error)
-    return reply.redirect(hosts)
+    return reply.type('text/html').send(`<script>window.self.close();</script><body>${error}</body>`)
   } else {
     logger.info(`redirectUri: ${redirectUri}`)
 
@@ -77,11 +79,7 @@ module.exports = async (req, reply) => {
     const newState = uuid(16)
     logger.info(`${serviceName} in ${roomName} new state is '${newState}'`)
 
-    // INSERT INTO notify_auth (service, room, state, response_type, redirect_uri)
-    //   VALUES(?, ?, ?, ?, ?, ?)
-    // ON CONFLICT(service) DO UPDATE SET
-    //   state = ?;
-    await dbRun(`UPDATE notify_auth SET state = ? WHERE user_id = ? AND service = ?;`, [ newState, notifyService.user_id, serviceName ])
+    await dbRun(`UPDATE notify_auth SET state = ?, room = ?, redirect_uri = ? WHERE user_id = ? AND service = ?;`, [ newState, roomName, redirectUri, notifyService.user_id, serviceName ])
 
     const redirectAuth = client.authorizeURL({
       response_type: responseType,

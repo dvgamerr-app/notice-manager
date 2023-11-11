@@ -23,9 +23,7 @@ const { db, init } = require('./api/db')
 // Sentry.init(infoInit)
 
 fastify.setErrorHandler(function (ex, req, reply) {
-  logger.error(ex)
-  this.log.error(ex)
-  // Send error response
+  logger.error({ msg: ex.stack || ex.message || ex })
   reply.status(500).send(ex)
 })
 

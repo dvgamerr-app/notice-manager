@@ -35,9 +35,9 @@ const init = async () => {
   CREATE TABLE IF NOT EXISTS notify_auth (
     user_id VARCHAR NOT NULL,
     service VARCHAR NOT NULL,
-    room VARCHAR NOT NULL,
-    state VARCHAR NOT NULL,
-    response_type VARCHAR NULL,
+    room VARCHAR NULL,
+    state VARCHAR NULL,
+    code VARCHAR NULL,
     redirect_uri VARCHAR NULL,
     access_token TEXT NULL,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -63,9 +63,10 @@ const init = async () => {
   );
 
 
-  CREATE INDEX notify_auth_idx ON notify_auth(service, room);
-  CREATE INDEX notify_service_idx ON notify_service(service, active);
-  CREATE INDEX notify_auth_state_idx ON notify_auth(state);
+  CREATE INDEX IF NOT EXISTS notify_auth_idx ON notify_auth(service, room);
+  CREATE INDEX IF NOT EXISTS notify_service_idx ON notify_service(service, active);
+  CREATE INDEX IF NOT EXISTS notify_auth_state_idx ON notify_auth(state);
+  CREATE UNIQUE INDEX IF NOT EXISTS notify_service_unq ON notify_service (service);
   `)
 }
 
