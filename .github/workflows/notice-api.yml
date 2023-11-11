@@ -155,22 +155,22 @@ jobs:
           node-version: 18
           check-latest: true
 
-      - name: Get yarn cache directory path 🛠
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
+      # - name: Get yarn cache directory path 🛠
+      #   uses: pnpm/action-setup@v2
+      #   with:
+      #     version: 8
+      #     run_install: true
 
-      - name: Cache node_modules 📦
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+      # - name: Cache node_modules 📦
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: node_modules
+      #     key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-pnpm-store-
 
-      - name: Install dependencies
-        run: pnpm i --prod
+      # - name: Install dependencies
+      #   run: pnpm i --prod
 
       - name: Prepare 🔰
         id: prepare

@@ -12,4 +12,7 @@ EXPOSE 3000
 
 COPY . .
 
+RUN npm i -g pnpm \
+  && pnpm i --prod
+
 CMD ["node", "index.js"]
