@@ -8,7 +8,6 @@ const db = require('./api/db')
 // const console = require('@touno-io/debuger')('API')
 // const { monitorLINE } = require('./api/monitor')
 
-const apiRoute = require('./api/route')
 // const pkg = require('./package.json')
 
 // const production = process.env.NODE_ENV === 'production'
@@ -49,6 +48,7 @@ fastify.register((fastify, _, done) => {
   done()
 })
 
+const apiRoute = require('./api/route')
 for (const api of apiRoute) {
   fastify.route(api)
 }

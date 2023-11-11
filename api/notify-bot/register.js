@@ -1,6 +1,6 @@
 const { AuthorizationCode } = require('simple-oauth2')
 const logger = require('pino')()
-const db = require('../db')
+const { dbGetOne, dbRun } = require('../db')
 const sdkNotify = require('../sdk-notify')
 
 const uuid = (length) => {
@@ -13,26 +13,6 @@ const uuid = (length) => {
   return result
 }
 const hosts = process.env.BASE_URL || 'http://localhost:3000'
-
-
-const dbGetAll = (sql, params) => new Promise((resolve, reject) => {
-  db.all(sql, params, (e, r) => {
-    if (e) return reject(e)
-    resolve(r)
-  })
-})
-const dbGetOne = async (sql, params) => {
-  const result = await dbGetAll(sql, params)
-  if (result) { return result[0] } else { return null }
-}
-
-const dbRun = (sql, params) => new Promise((resolve, reject) => {
-  db.run(sql, params, (e) => {
-    if (e) return reject(e)
-    resolve()
-  })
-})
-
 
 module.exports = async (req, reply) => {
   // Authorization oauth2 URI
@@ -80,7 +60,7 @@ module.exports = async (req, reply) => {
     }
     logger.info({ msg: res })
     logger.info(`Join room *${res.target}* \`${res.message}\` with service *${serviceName}*`)
-    return reply.type('text/html').send(`<script>window.self.close()();</script>`)
+    return reply.type('text/html').send(`<script>window.self.close();</script>`)
   } else if (error) {
     this.log.error(error)
     return reply.redirect(hosts)

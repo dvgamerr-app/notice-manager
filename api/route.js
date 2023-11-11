@@ -24,17 +24,17 @@ module.exports = [
   {
     method: 'GET',
     path: '/register/:serviceName/:roomName?',
-    handler: require('./line-notify/register')
+    handler: require('./notify-bot/register')
   },
   {
-    method: 'PUT',
+    method: 'DELETE',
     path: '/revoke/:serviceName/:roomName',
-    handler: require('./line-notify/revoke')
+    handler: require('./notify-bot/revoke')
   },
   {
     method: ['PUT', 'POST'],
     path: '/notify/:serviceName/:roomName',
-    handler: require('./line-notify/to.js')
+    handler: require('./notify-bot/to.js')
   },
 
   // API UI
