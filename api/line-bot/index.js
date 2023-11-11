@@ -1,6 +1,7 @@
 // const Boom = require('@hapi/boom')
-const logger = require('@touno-io/debuger')('API')
-const { notice } = require('@touno-io/db/schema')
+// const logger = require('@touno-io/debuger')('API')
+// const { notice } = require('@touno-io/db/schema')
+const notice = {}
 const sdkClient = require('../sdk-client')
 const { onEvents, onCommands } = require('./cmd')
 const userCustom = require('./custom')
@@ -138,7 +139,7 @@ module.exports = async (req, h) => {
       }
     }
 
-    logger.info(
+    console.info(
       `Webhook delay: ${delayTime}ms. and used ${
         new Date().getTime() - startTime
       }ms.`

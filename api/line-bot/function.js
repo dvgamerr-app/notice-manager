@@ -1,5 +1,6 @@
 // const Boom = require('@hapi/boom')
-const { notice } = require('@touno-io/db/schema')
+// const { notice } = require('@touno-io/db/schema')
+const notice = {}
 const axios = require('axios')
 
 const sdkClient = require('../sdk-client')

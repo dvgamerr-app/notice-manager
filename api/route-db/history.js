@@ -1,4 +1,5 @@
-const { notice } = require('@touno-io/db/schema')
+// const { notice } = require('@touno-io/db/schema')
+const notice = {}
 
 module.exports = async (req, reply) => {
   const { LineOutbound } = await notice.get()

@@ -1,4 +1,5 @@
-const { notice } = require('@touno-io/db/schema')
+// const { notice } = require('@touno-io/db/schema')
+const notice = {}
 const { monitorLINE } = require('../monitor')
 const helpFlex = require('./flex-help')
 

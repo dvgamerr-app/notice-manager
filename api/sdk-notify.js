@@ -1,25 +1,24 @@
-const logger = require('@touno-io/debuger')('notify')
-const { notice } = require('@touno-io/db/schema')
+// const logger = require('@touno-io/debuger')('notify')
+// const { notice } = require('@touno-io/db/schema')
 const { getStatus, setRevoke, pushNotify } = require('./sdk-line')
+const { dbGetOne } = require('./db')
 
-const getToken = async (service, room) => {
-  if (!service || !room) {
-    return logger.log('No service, No room.')
-  }
-
-  const { ServiceBotOauth } = notice.get()
-  const oauth = await ServiceBotOauth.findOne({ service, room })
-  if (!oauth || !oauth.accessToken) {
-    throw new Error(`OAuth: ${service} in ${room}, No accessToken.`)
-  }
-  return oauth.accessToken
+const getToken = async (serviceName, roomName) => {
+  const auth = await dbGetOne(`
+  SELECT access_token FROM notify_auth a INNER JOIN notify_service s ON a.service = s.service
+  WHERE a.service = ? AND a.room = ? AND s.active = true;
+  `, [ serviceName, roomName ])
+  if (!auth) return null
+  return auth.access_token
 }
 
-module.exports = async (service, room) => {
-  const accesstoken = await getToken(service, room)
+module.exports = async (serviceName, roomName) => {
+  let accessToken = serviceName
+  if (roomName != undefined) accessToken = await getToken(serviceName, roomName)
+
   return {
-    pushNotify: message => pushNotify(accesstoken, message),
-    getStatus: () => getStatus(accesstoken),
-    setRevoke: () => setRevoke(accesstoken)
+    pushNotify: message => pushNotify(accessToken, message),
+    getStatus: () => getStatus(accessToken),
+    setRevoke: () => setRevoke(accessToken)
   }
 }
