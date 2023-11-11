@@ -252,6 +252,3 @@ jobs:
   #   steps:
   #     - name: Notify 🔔
   #       run: curl -X PUT https://notice.touno.io/system/notice/%E2%9D%8C%20*%5BFailure%5D*%20Job:%20${{ github.job }}%20%E2%9A%99%EF%B8%8F
-
-
-# ${{ github.job }}

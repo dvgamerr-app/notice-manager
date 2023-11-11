@@ -8,6 +8,8 @@ ENV NODE_ENV production
 
 WORKDIR /app
 
+EXPOSE 3000
+
 COPY . .
 
-CMD ["pnpm", "start"]
+CMD ["node", "index.js"]
