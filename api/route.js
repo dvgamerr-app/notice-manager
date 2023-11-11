@@ -3,38 +3,38 @@ module.exports = [
   // { method: 'POST', path: '/auth/login', handler: require('./auth/login') },
   // { method: 'POST', path: '/auth/user', handler: require('./auth/user') },
 
-  // API Bot
-  {
-    method: 'PUT',
-    path: '/system/notice/:msg',
-    handler: require('./notice.js')
-  },
-  {
-    method: 'PUT',
-    path: '/line/:bot/:to',
-    handler: require('./line-bot/message')
-  },
-  {
-    method: 'POST',
-    path: '/line/:bot',
-    handler: require('./line-bot/webhook')
-  },
+  // // API Bot
+  // {
+  //   method: 'PUT',
+  //   path: '/system/notice/:msg',
+  //   handler: require('./notice.js')
+  // },
+  // {
+  //   method: 'PUT',
+  //   path: '/line/:bot/:to',
+  //   handler: require('./line-bot/to.js')
+  // },
+  // {
+  //   method: 'POST',
+  //   path: '/line/:bot',
+  //   handler: require('./line-bot/index.js')
+  // },
 
   // API Notify
   {
     method: 'GET',
-    path: '/register/:service/:room?',
-    handler: require('./line-notify/oauth')
+    path: '/register/:serviceName/:roomName?',
+    handler: require('./line-notify/register')
   },
   {
     method: 'PUT',
-    path: '/revoke/:service/:room',
+    path: '/revoke/:serviceName/:roomName',
     handler: require('./line-notify/revoke')
   },
   {
     method: ['PUT', 'POST'],
-    path: '/notify/:service/:room',
-    handler: require('./line-notify/message')
+    path: '/notify/:serviceName/:roomName',
+    handler: require('./line-notify/to.js')
   },
 
   // API UI

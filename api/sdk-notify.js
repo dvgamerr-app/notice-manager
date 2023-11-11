@@ -17,10 +17,12 @@ const getToken = async (service, room) => {
 }
 
 module.exports = async (service, room) => {
-  const accesstoken = await getToken(service, room)
+  let accessToken = service
+  if (room) accessToken = await getToken(service, room)
+
   return {
-    pushNotify: message => pushNotify(accesstoken, message),
-    getStatus: () => getStatus(accesstoken),
-    setRevoke: () => setRevoke(accesstoken)
+    pushNotify: message => pushNotify(accessToken, message),
+    getStatus: () => getStatus(accessToken),
+    setRevoke: () => setRevoke(accessToken)
   }
 }

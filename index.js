@@ -1,16 +1,17 @@
-// const os = require('os')
-const logger = require('pino')()
 const fastify = require('fastify')({ console: false })
+const logger = require('pino')()
+const db = require('./api/db')
+
 // const Sentry = require('@sentry/node')
 // // const { notice } = require('@touno-io/db/schema')
 // const notice = {}
 // const console = require('@touno-io/debuger')('API')
-const { monitorLINE } = require('./api/monitor')
+// const { monitorLINE } = require('./api/monitor')
 
-const apiRoute = require('./api')
+const apiRoute = require('./api/route')
 // const pkg = require('./package.json')
 
-const production = process.env.NODE_ENV === 'production'
+// const production = process.env.NODE_ENV === 'production'
 // const infoInit = {
 //   serverName: os.hostname(),
 //   environment: process.env.NODE_ENV || 'development',
@@ -24,7 +25,8 @@ const production = process.env.NODE_ENV === 'production'
 
 fastify.setErrorHandler(function (ex, req, reply) {
   logger.error(ex)
-  // Sentry.captureException(ex)
+  this.log.error(ex)
+  // Send error response
   reply.status(500).send(ex)
 })
 
@@ -52,32 +54,24 @@ for (const api of apiRoute) {
 }
 
 const initialize = async () => {
-  // await notice.open()
+
 }
 
-// const exitHandler = (err, exitCode) => {
-//   // notice.close()
-//   logger.error(`${exitCode}:Exiting... (${err})`)
-//   process.exit(0)
-// }
+const exitHandler = (err, exitCode) => {
+  db.close()
+  logger.error(`${exitCode}:Exiting... (${err})`)
+  process.exit(0)
+}
 
-// process.on('SIGINT', exitHandler)
+process.on('SIGINT', exitHandler)
 // process.on('SIGTERM', exitHandler)
 // process.on('SIGUSR1', exitHandler)
 // process.on('SIGUSR2', exitHandler)
 // process.on('uncaughtException', exitHandler)
 
-initialize()
-  .then(async () => {
-    await fastify.listen({ port: 3000, host: '0.0.0.0' })
-    logger.info('fastify listen:3000')
-    if (production) {
-      await monitorLINE('*[Restarted]* is running LINE-Notice.')
-    }
-  })
-  .catch((ex) => {
-    // Sentry.captureException(ex)
-    fastify.log.error(ex)
-    logger.error(ex)
-    process.exit(1)
-  })
+initialize().then(async () => {
+  logger.info('fastify listen:3000')
+  return fastify.listen({ port: 3000, host: '0.0.0.0' })
+}).catch((ex) => {
+  fastify.log.error(ex)
+})

@@ -7,7 +7,7 @@
   "author": "Kananek T.",
   "license": "ISC",
   "scripts": {
-    "dev": "env-cmd nodemon -w api . | pino-pretty",
+    "dev": "env-cmd nodemon -w api .",
     "dev:web": "env-cmd nuxt",
     "build": "nuxt build",
     "start:ui": "nuxt start",
@@ -29,6 +29,7 @@
     "numeral": "^2.0.6",
     "pino": "^8.16.1",
     "simple-oauth2": "^5.0.0",
+    "sqlite3": "^5.1.6",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
