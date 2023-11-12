@@ -14,21 +14,20 @@ module.exports = async (req, reply) => {
   }
 
   await dbRun(`
-  INSERT INTO notify_service (user_id, service, client_id, client_secret)
-    VALUES(?, ?, ?, ?)
-  ON CONFLICT(service) DO UPDATE SET
-    user_id = ?,
-    client_id = ?,
-    client_secret = ?,
-    active = true;
-
-  INSERT INTO notify_auth (user_id, service)VALUES(?, ?);
-
+    INSERT INTO notify_service (user_id, service, client_id, client_secret)
+      VALUES(?, ?, ?, ?)
+    ON CONFLICT(service) DO
+    UPDATE SET
+      user_id = ?,
+      client_id = ?,
+      client_secret = ?,
+      active = true;
   `, [
     userId, req.body.name, req.body.client_id, req.body.client_secret,
-    userId, req.body.client_id, req.body.client_secret,
-    userId, req.body.name
+    userId, req.body.client_id, req.body.client_secret
    ])
+
+   await dbRun(`INSERT INTO notify_auth (user_id, service, room) VALUES (?, ?, NULL);`, [ userId, req.body.name ])
 
   logger.info(`Notify service add *${req.body.name}*`)
   return reply.send({ statusCode: 200 })

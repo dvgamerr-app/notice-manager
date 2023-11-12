@@ -31,7 +31,7 @@ const uuid = (length, hex = false) => {
 
 const init = async () => {
   logger.info(`init database...`)
-  return dbRun(`
+  await dbRun(`
   CREATE TABLE IF NOT EXISTS notify_auth (
     user_id VARCHAR NOT NULL,
     service VARCHAR NOT NULL,
@@ -41,8 +41,9 @@ const init = async () => {
     redirect_uri VARCHAR NULL,
     access_token TEXT NULL,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  );
+  );`)
 
+  await dbRun(`
   CREATE TABLE IF NOT EXISTS notify_service (
     user_id VARCHAR NOT NULL,
     service VARCHAR NOT NULL,
@@ -50,8 +51,9 @@ const init = async () => {
     client_secret VARCHAR NOT NULL,
     active BOOLEAN DEFAULT true,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  );
+  );`)
 
+  await dbRun(`
   CREATE TABLE IF NOT EXISTS history_notify (
     uuid VARCHAR(32) NOT NULL,
     category VARCHAR NOT NULL,
@@ -60,14 +62,18 @@ const init = async () => {
     sender TEXT NULL,
     error TEXT NULL,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  );
+  );`)
 
+  await dbRun(`CREATE INDEX IF NOT EXISTS notify_auth_idx ON notify_auth(service, room);`)
+  await dbRun(`CREATE INDEX IF NOT EXISTS notify_service_idx ON notify_service(service, active);`)
+  await dbRun(`CREATE INDEX IF NOT EXISTS notify_auth_state_idx ON notify_auth(state);`)
+  await dbRun(`CREATE UNIQUE INDEX IF NOT EXISTS notify_service_unq ON notify_service (service);`)
 
-  CREATE INDEX IF NOT EXISTS notify_auth_idx ON notify_auth(service, room);
-  CREATE INDEX IF NOT EXISTS notify_service_idx ON notify_service(service, active);
-  CREATE INDEX IF NOT EXISTS notify_auth_state_idx ON notify_auth(state);
-  CREATE UNIQUE INDEX IF NOT EXISTS notify_service_unq ON notify_service (service);
-  `)
+  // await dbRun(`INSERT INTO notify_auth (user_id, service, room, state, response_type, redirect_uri)
+  // VALUES('U9e0a870c01ca97da20a4ec462bf72991', 'notify', 'kem', 'state', 'response_type', 'http://localhost:3000/');`)
+  // await dbRun(`INSERT INTO notify_service (user_id, service, client_id, client_secret)
+  // VALUES('U9e0a870c01ca97da20a4ec462bf72991', 'notify', 'gsEMv73f9egXaQlo7duPB2','y4tRybEVAmUnjArpW412cMRvqmLWXjrGYgyb490q3C3');`)
+
 }
 
 module.exports = { uuid, db, dbGetAll, dbGetOne, dbRun, init }
