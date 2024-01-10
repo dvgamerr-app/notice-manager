@@ -65,8 +65,8 @@ devDependencies:
     specifier: ^5.13.6
     version: 5.13.6
   '@nuxtjs/eslint-config':
-    specifier: ^11.0.0
-    version: 11.0.0(eslint@8.53.0)
+    specifier: ^12.0.0
+    version: 12.0.0(eslint@8.53.0)
   '@nuxtjs/eslint-module':
     specifier: ^3.1.0
     version: 3.1.0(eslint@8.53.0)(webpack@5.89.0)
@@ -3199,8 +3199,8 @@ packages:
       - debug
     dev: true
 
-  /@nuxtjs/eslint-config@11.0.0(eslint@8.53.0):
-    resolution: {integrity: sha512-o4zFOpU8gJgwrC/gLE7c2E0XEjkv2fEixCGG1y+dZYzBPyzTorkQmfxskSF3WRXcZkpkS9uUYlRkeOSdYB7z0w==}
+  /@nuxtjs/eslint-config@12.0.0(eslint@8.53.0):
+    resolution: {integrity: sha512-ewenelo75x0eYEUK+9EBXjc/OopQCvdkmYmlZuoHq5kub/vtiRpyZ/autppwokpHUq8tiVyl2ejMakoiHiDTrg==}
     peerDependencies:
       eslint: ^8.23.0
     dependencies:
@@ -3210,8 +3210,9 @@ packages:
       eslint-plugin-n: 15.7.0(eslint@8.53.0)
       eslint-plugin-node: 11.1.0(eslint@8.53.0)
       eslint-plugin-promise: 6.1.1(eslint@8.53.0)
-      eslint-plugin-unicorn: 43.0.2(eslint@8.53.0)
+      eslint-plugin-unicorn: 44.0.2(eslint@8.53.0)
       eslint-plugin-vue: 9.18.1(eslint@8.53.0)
+      local-pkg: 0.4.3
     transitivePeerDependencies:
       - '@typescript-eslint/parser'
       - eslint-import-resolver-typescript
@@ -6321,11 +6322,11 @@ packages:
       eslint: 8.53.0
     dev: true
 
-  /eslint-plugin-unicorn@43.0.2(eslint@8.53.0):
-    resolution: {integrity: sha512-DtqZ5mf/GMlfWoz1abIjq5jZfaFuHzGBZYIeuJfEoKKGWRHr2JiJR+ea+BF7Wx2N1PPRoT/2fwgiK1NnmNE3Hg==}
+  /eslint-plugin-unicorn@44.0.2(eslint@8.53.0):
+    resolution: {integrity: sha512-GLIDX1wmeEqpGaKcnMcqRvMVsoabeF0Ton0EX4Th5u6Kmf7RM9WBl705AXFEsns56ESkEs0uyelLuUTvz9Tr0w==}
     engines: {node: '>=14.18'}
     peerDependencies:
-      eslint: '>=8.18.0'
+      eslint: '>=8.23.1'
     dependencies:
       '@babel/helper-validator-identifier': 7.22.20
       ci-info: 3.9.0
@@ -8192,6 +8193,11 @@ packages:
       big.js: 5.2.2
       emojis-list: 3.0.0
       json5: 2.2.3
+    dev: true
+
+  /local-pkg@0.4.3:
+    resolution: {integrity: sha512-SFppqq5p42fe2qcZQqqEOiVRXl+WCP1MdT6k7BDEW1j++sp5fIY+/fdRQitvKgB5BrBcmrs5m/L0v2FrU5MY1g==}
+    engines: {node: '>=14'}
     dev: true
 
   /locate-path@3.0.0:
