@@ -9,8 +9,8 @@ dependencies:
     specifier: ^8.4.1
     version: 8.4.1
   '@octokit/core':
-    specifier: ^5.0.1
-    version: 5.0.1
+    specifier: ^5.1.0
+    version: 5.1.0
   axios:
     specifier: ^1.6.1
     version: 1.6.1
@@ -3296,8 +3296,8 @@ packages:
     engines: {node: '>= 18'}
     dev: false
 
-  /@octokit/core@5.0.1:
-    resolution: {integrity: sha512-lyeeeZyESFo+ffI801SaBKmCfsvarO+dgV8/0gD8u1d87clbEdWsP5yC+dSj3zLhb2eIf5SJrn6vDz9AheETHw==}
+  /@octokit/core@5.1.0:
+    resolution: {integrity: sha512-BDa2VAMLSh3otEiaMJ/3Y36GU4qf6GI+VivQ/P41NC6GHcdxpKlqV0ikSZ5gdQsmS3ojXeRx5vasgNTinF0Q4g==}
     engines: {node: '>= 18'}
     dependencies:
       '@octokit/auth-token': 4.0.0
