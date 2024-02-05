@@ -104,8 +104,8 @@ devDependencies:
     specifier: ^8.7.1
     version: 8.7.1(eslint@8.53.0)
   marked:
-    specifier: ^4.3.0
-    version: 4.3.0
+    specifier: ^12.0.0
+    version: 12.0.0
   nodemon:
     specifier: ^3.0.1
     version: 3.0.1
@@ -8377,9 +8377,9 @@ packages:
       uc.micro: 1.0.6
     dev: true
 
-  /marked@4.3.0:
-    resolution: {integrity: sha512-PRsaiG84bK+AMvxziE/lCFss8juXjNaWzVbN5tXAm4XjeaS9NAHhop+PjQxz2A9h8Q4M/xGmzP8vqNwy6JeK0A==}
-    engines: {node: '>= 12'}
+  /marked@12.0.0:
+    resolution: {integrity: sha512-Vkwtq9rLqXryZnWaQc86+FHLC6tr/fycMfYAhiOIXkrNmeGAyhSxjqu0Rs1i0bBqw5u0S7+lV9fdH2ZSVaoa0w==}
+    engines: {node: '>= 18'}
     hasBin: true
     dev: true
 
