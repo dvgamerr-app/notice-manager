@@ -15,8 +15,8 @@ dependencies:
     specifier: ^1.6.1
     version: 1.6.1
   core-js:
-    specifier: ^3.33.2
-    version: 3.33.2
+    specifier: ^3.36.0
+    version: 3.36.0
   dayjs:
     specifier: ^1.11.10
     version: 1.11.10
@@ -2741,7 +2741,7 @@ packages:
       '@babel/preset-env': 7.23.3(@babel/core@7.23.3)
       '@babel/runtime': 7.23.2
       '@vue/babel-preset-jsx': 1.4.0(@babel/core@7.23.3)(vue@2.7.15)
-      core-js: 3.33.2
+      core-js: 3.36.0
       core-js-compat: 3.33.2
       regenerator-runtime: 0.14.0
     transitivePeerDependencies:
@@ -5305,8 +5305,8 @@ packages:
       browserslist: 4.22.1
     dev: true
 
-  /core-js@3.33.2:
-    resolution: {integrity: sha512-XeBzWI6QL3nJQiHmdzbAOiMYqjrb7hwU7A39Qhvd/POSa/t9E1AeZyEZx3fNvp/vtM8zXwhoL0FsiS0hD0pruQ==}
+  /core-js@3.36.0:
+    resolution: {integrity: sha512-mt7+TUBbTFg5+GngsAxeKBTl5/VS0guFeJacYge9OmHb+m058UwwIm41SE9T4Den7ClatV57B6TYTuJ0CX1MAw==}
     requiresBuild: true
 
   /core-util-is@1.0.3:
@@ -11539,9 +11539,6 @@ packages:
   /sqlite3@5.1.6:
     resolution: {integrity: sha512-olYkWoKFVNSSSQNvxVUfjiVbz3YtBwTJj+mfV5zpHmqW3sELx2Cf4QCdirMelhM5Zh+KDVaKgQHqCxrqiWHybw==}
     requiresBuild: true
-    peerDependenciesMeta:
-      node-gyp:
-        optional: true
     dependencies:
       '@mapbox/node-pre-gyp': 1.0.11
       node-addon-api: 4.3.0
