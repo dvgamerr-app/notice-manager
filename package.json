@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^8.4.1",
-    "@octokit/core": "^5.0.1",
+    "@octokit/core": "^6.0.0",
     "axios": "^1.6.1",
     "core-js": "^3.33.2",
     "dayjs": "^1.11.10",
