@@ -104,8 +104,8 @@ devDependencies:
     specifier: ^8.7.1
     version: 8.7.1(eslint@8.53.0)
   marked:
-    specifier: ^4.3.0
-    version: 4.3.0
+    specifier: ^12.0.1
+    version: 12.0.1
   nodemon:
     specifier: ^3.0.1
     version: 3.0.1
@@ -8377,9 +8377,9 @@ packages:
       uc.micro: 1.0.6
     dev: true
 
-  /marked@4.3.0:
-    resolution: {integrity: sha512-PRsaiG84bK+AMvxziE/lCFss8juXjNaWzVbN5tXAm4XjeaS9NAHhop+PjQxz2A9h8Q4M/xGmzP8vqNwy6JeK0A==}
-    engines: {node: '>= 12'}
+  /marked@12.0.1:
+    resolution: {integrity: sha512-Y1/V2yafOcOdWQCX0XpAKXzDakPOpn6U0YLxTJs3cww6VxOzZV1BTOOYWLvH3gX38cq+iLwljHHTnMtlDfg01Q==}
+    engines: {node: '>= 18'}
     hasBin: true
     dev: true
 
@@ -11539,9 +11539,6 @@ packages:
   /sqlite3@5.1.6:
     resolution: {integrity: sha512-olYkWoKFVNSSSQNvxVUfjiVbz3YtBwTJj+mfV5zpHmqW3sELx2Cf4QCdirMelhM5Zh+KDVaKgQHqCxrqiWHybw==}
     requiresBuild: true
-    peerDependenciesMeta:
-      node-gyp:
-        optional: true
     dependencies:
       '@mapbox/node-pre-gyp': 1.0.11
       node-addon-api: 4.3.0
