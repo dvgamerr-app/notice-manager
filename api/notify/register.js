@@ -1,9 +1,7 @@
 import { AuthorizationCode } from 'simple-oauth2'
-import pino from 'pino'
 import { uuid, dbGetOne, dbRun } from '../../lib/db-conn'
 import { getStatus, setRevoke } from '../../lib/sdk-notify'
 
-const logger = pino()
 const hosts = process.env.BASE_URL || 'http://localhost:3000'
 
 export default async (req, reply) => {
@@ -41,23 +39,23 @@ export default async (req, reply) => {
     }
 
     const accessToken = await client.getToken(tokenConfig)
-    logger.info(accessToken.message)
 
     if (accessToken.token.status !== 200) {
       throw new Error(accessToken.token.message)
     }
+    req.log.info(accessToken.message)
 
     await dbRun(`UPDATE notify_auth SET access_token = ?, code = ? WHERE state = ?;`, [ accessToken.token.access_token, code, state ])
     const res = await getStatus(accessToken.token.access_token)
     if (res.status !== 200) {
       throw new Error('Status is not verify.')
     }
-    logger.info(`Join room *${res.data.target}* \`${res.data.message}\` with service *${serviceName}*`)
+    req.log.info(`Join room *${res.data.target}* \`${res.data.message}\` with service *${serviceName}*`)
     return reply.send({ error: null, message: `Join room ${res.data.target} '${res.data.message}' with service ${serviceName}` })
   } else if (error) {
     return reply.status(500).send({ error })
   } else {
-    logger.info(`redirectUri: ${redirectUri}`)
+    req.log.info(`redirectUri: ${redirectUri}`)
 
     if (!serviceName || !roomName) {
       throw new Error('Service or Room is not verify.')
@@ -76,7 +74,7 @@ export default async (req, reply) => {
     const client = new AuthorizationCode(credentials)
 
     const newState = uuid(16)
-    logger.info(`${serviceName} in ${roomName} new state is '${newState}'`)
+    req.log.info(`${serviceName} in ${roomName} new state is '${newState}'`)
 
     await dbRun(`
       INSERT INTO notify_auth (user_id, service, room, state, redirect_uri)

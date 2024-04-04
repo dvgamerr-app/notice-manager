@@ -1,8 +1,6 @@
-import pino from 'pino'
 import { dbGetOne, dbRun } from '../../lib/db-conn'
 import sdkNotify from '../../lib/sdk-notify'
 
-const logger = pino()
 
 export default async (req, reply) => {
   // Authorization oauth2 URI
@@ -20,6 +18,6 @@ export default async (req, reply) => {
 
   await setRevoke()
   await dbRun(`UPDATE notify_auth SET access_token = NULL WHERE service = ? AND room = ?;`, [ serviceName, roomName ])
-  logger.info(`Rovoke room *${roomName}* from *${serviceName}*`)
+  req.log.info(`Rovoke room *${roomName}* from *${serviceName}*`)
   return reply.send({ error: null })
 }

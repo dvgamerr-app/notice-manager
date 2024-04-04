@@ -1,7 +1,4 @@
-import pino from 'pino'
 import { dbRun, dbGetOne } from '../../lib/db-conn'
-
-const logger = pino()
 
 export default async (req, reply) => {
   const userId = req.headers['x-user-liff']
@@ -29,6 +26,6 @@ export default async (req, reply) => {
     userId, req.body.client_id, req.body.client_secret
   ])
 
-  logger.info(`Notify service updated *${req.body.name}*`)
+  req.log.info(`Notify service updated *${req.body.name}*`)
   return reply.send({ code: 200 })
 }

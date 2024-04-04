@@ -36,18 +36,8 @@ export default async (req, reply) => {
   let { message, stickerPackageId, stickerId } = req.body
   // const { LineOutbound, ServiceWebhook } = notice.get()
 
-  const xId = uuid(32, true)
+  const xId = uuid()
   reply.header('x-line-uuid', xId)
-
-  await dbRun(`INSERT INTO history_notify (uuid, category, service, room, sender) VALUES (?, 'notify', ?, ?, ?);`, [ xId, serviceName, roomName, JSON.stringify(req.body) ])
-
-  // const outbound = await new LineOutbound({
-  //   service,
-  //   userTo: room,
-  //   type: isWebhook ? 'webhook' : 'notify',
-  //   sender: req.body || {},
-  //   sended: true
-  // }).save()
 
   if (!isWebhook) {
     if (typeof message === 'string') {
@@ -72,13 +62,13 @@ export default async (req, reply) => {
     //   message = `*Webhook Payload*\n${process.env.HOST_API}/webhook/${outbound._id}`
     // }
   }
+  req.log.info(`message ${JSON.stringify(message)}`)
 
   try {
-    const { pushNotify } = await sdkNotify(serviceName, roomName || '')
+    const { pushNotify } = await sdkNotify(serviceName, roomName)
 
     let delayTime = new Date().getTime()
-
-    const { headers, data } = await pushNotify({
+    const { status, headers, data } = await pushNotify({
       message,
       imageThumbnail,
       imageFullsize,
@@ -87,26 +77,21 @@ export default async (req, reply) => {
       imageFile,
       notificationDisabled
     })
-
     delayTime = new Date().getTime() - delayTime
     const ratelimit = {
-      remaining: parseInt(headers['x-ratelimit-remaining']),
-      image: parseInt(headers['x-ratelimit-imageremaining']),
-      reset: parseInt(headers['x-ratelimit-reset']) * 1000
+      msg: parseInt(headers.get('x-ratelimit-remaining')),
+      img: parseInt(headers.get('x-ratelimit-imageremaining')),
+      reset: new Date(parseInt(headers.get('x-ratelimit-reset')) * 1000).toISOString()
     }
-
-    if (data.status !== 200) {
-      dbRun(`UPDATE history_notify SET error = ? WHERE uuid = ?;`, [ JSON.stringify(data), xId ])
-
-      // await LineOutbound.updateOne(
-      //   { _id: outbound._id },
-      //   { $set: { sended: false, error: data.message } }
-      // )
-      return reply.status(400).send({ code: data.status || 400, error: 'Bad pushNotify request', message: data.message || 'Bad Request' })
+    if (status !== 200) {
+      dbRun(`INSERT INTO history_notify (uuid, category, service, room, sender, error) VALUES (?, 'notify', ?, ?, ?, ?);`, [ xId, serviceName, roomName, JSON.stringify(req.body), JSON.stringify(data) ])
+      return reply.status(400).send({ code: status || 400, error: 'Bad pushNotify request', message: data.message || 'Bad Request' })
     }
-
+    
+    dbRun(`INSERT INTO history_notify (uuid, category, service, room, sender) VALUES (?, 'notify', ?, ?, ?);`, [ xId, serviceName, roomName, JSON.stringify(req.body) ])
     return reply.send({ code: 200, delay: delayTime, used: new Date().getTime() - startTime, ratelimit })
   } catch (ex) {
+    dbRun(`INSERT INTO history_notify (uuid, category, service, room, sender, error) VALUES (?, 'notify', ?, ?, ?, ?);`, [ xId, serviceName, roomName, JSON.stringify(req.body), ex.stack ])
     return reply.status(400).send({ code: 400, error: ex, message: ex.message })
   }
 }
