@@ -3,13 +3,10 @@
 # macOS
 .DS_Store
 
-
 packages/*
 .oldfile
-*.lockb
 *-lock.yaml
 *.db
-
 
 ### Node template
 # Logs
