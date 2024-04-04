@@ -1,16 +1,21 @@
-import register from './notify/register.js'
-import revoke from './notify/revoke.js'
-import message from './notify/message.js'
+import sdkNotify from '../lib/sdk-notify'
 
-import newNotify from './notify/message.js'
-import newNotify from './notify/message.js'
+import register from './notify/register'
+import revoke from './notify/revoke'
+import message from './notify/message'
+
+import newNotify from './notify/new'
+
+
+const sdk = sdkNotify('', '')
 export default [
+  { path: '/health', method: 'GET', handler: (_, reply) => reply.send({ ok: '☕' }) },
+  // LINE Notify
+  { path: '/api/notify/new', method: 'POST', handler: newNotify },
   // API Notify
   { path: '/register/:serviceName/:roomName?', method: 'GET', handler: register },
   { path: '/revoke/:serviceName/:roomName', method: 'DELETE', handler: revoke },
   { path: '/notify/:serviceName/:roomName', method: ['PUT', 'POST'], handler: message },
-  // LINE Notify
-  { path: '/api/notify', method: 'POST', handler: newNotify },
 
 
   // { method: 'GET', path: '/auth/sso', handler: require('./auth/sso') },
@@ -21,17 +26,17 @@ export default [
   // {
   //   method: 'PUT',
   //   path: '/system/notice/:msg',
-  //   handler: require('./notice.js')
+  //   handler: require('./notice')
   // },
   // {
   //   method: 'PUT',
   //   path: '/line/:bot/:to',
-  //   handler: require('./line-bot/to.js')
+  //   handler: require('./line-bot/to')
   // },
   // {
   //   method: 'POST',
   //   path: '/line/:bot',
-  //   handler: require('./line-bot/index.js')
+  //   handler: require('./line-bot/index')
   // },
 
   // // API UI

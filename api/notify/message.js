@@ -18,7 +18,7 @@ const packageSticker = {
 
 export default async (req, reply) => {
   if (!req.body) {
-    return reply.status(400).send({ statusCode: 400, error: 'Bad Request', message: `Need payload 'message'.`})
+    return reply.status(400).send({ code: 400, error: 'Bad Request', message: `Need payload 'message'.`})
   }
 
   const startTime = new Date().getTime()
@@ -102,11 +102,11 @@ export default async (req, reply) => {
       //   { _id: outbound._id },
       //   { $set: { sended: false, error: data.message } }
       // )
-      return reply.status(400).send({ statusCode: data.status || 400, error: 'Bad pushNotify request', message: data.message || 'Bad Request' })
+      return reply.status(400).send({ code: data.status || 400, error: 'Bad pushNotify request', message: data.message || 'Bad Request' })
     }
 
-    return reply.send({ statusCode: 200, delay: delayTime, used: new Date().getTime() - startTime, ratelimit })
+    return reply.send({ code: 200, delay: delayTime, used: new Date().getTime() - startTime, ratelimit })
   } catch (ex) {
-    return reply.status(400).send({ statusCode: 400, error: ex, message: ex.message })
+    return reply.status(400).send({ code: 400, error: ex, message: ex.message })
   }
 }

@@ -1,5 +1,5 @@
 import pino from 'pino'
-import { dbGetOne, dbRun } from '../../lib/db-conn'
+import { dbRun, dbGetOne } from '../../lib/db-conn'
 
 const logger = pino()
 
@@ -7,12 +7,12 @@ export default async (req, reply) => {
   const userId = req.headers['x-user-liff']
   if (!userId) return reply.status(404).send()
 
-  if (!req.body || !req.body.name) return reply.status(400).send({ statusCode: 400, message: `Need payload 'name'.`})
-  if (!req.body.client_id) return reply.status(400).send({ statusCode: 400, message: `Need payload 'client_id'.`})
-  if (!req.body.client_secret) return reply.status(400).send({ statusCode: 400, message: `Need payload 'client_secret'.`})
+  if (!req.body || !req.body.name) return reply.status(400).send({ code: 400, message: `Need payload 'name'.`})
+  if (!req.body.client_id) return reply.status(400).send({ code: 400, message: `Need payload 'client_id'.`})
+  if (!req.body.client_secret) return reply.status(400).send({ code: 400, message: `Need payload 'client_secret'.`})
 
-  if (await dbGetOne('SELECT service FROM notify_service WHERE service = ? AND active = true;', [ req.body.name ])) {
-    return reply.status(500).send({ statusCode: 500, message: 'name is duplicate.'})
+  if (await dbGetOne('SELECT service FROM notify_service WHERE service = ? AND user_id != ? AND active = true;', [ req.body.name, userId ])) {
+    return reply.status(500).send({ code: 500, message: 'name is duplicate.'})
   }
 
   await dbRun(`
@@ -27,10 +27,8 @@ export default async (req, reply) => {
   `, [
     userId, req.body.name, req.body.client_id, req.body.client_secret,
     userId, req.body.client_id, req.body.client_secret
-   ])
+  ])
 
-   await dbRun(`INSERT INTO notify_auth (user_id, service, room) VALUES (?, ?, NULL);`, [ userId, req.body.name ])
-
-  logger.info(`Notify service add *${req.body.name}*`)
-  return reply.send({ statusCode: 200 })
+  logger.info(`Notify service updated *${req.body.name}*`)
+  return reply.send({ code: 200 })
 }

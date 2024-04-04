@@ -7,7 +7,8 @@
   "author": "Kananek T.",
   "license": "MIT",
   "scripts": {
-    "start": "bun index.js"
+    "start": "bun index.js",
+    "dev": "bun --watch index.js | pino-pretty"
   },
   "dependencies": {
     "fastify": "^4.26.2",

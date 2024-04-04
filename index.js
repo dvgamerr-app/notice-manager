@@ -69,7 +69,9 @@ const initialize = () => Promise.all([
   initDbSchema(),
   (() => {
     // append router path
-    app.route(...routeApi)
+    for (const api of routeApi) {
+      app.route(api)
+    }
   })()
 ])
 

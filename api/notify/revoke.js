@@ -8,7 +8,7 @@ export default async (req, reply) => {
   // Authorization oauth2 URI
   const { serviceName, roomName } = req.params
   if (!req.body || req.body.revoke != 'agree') {
-    return reply.status(400).send({ statusCode: 400, error: 'Bad request', message: `Please confirm revoke ${roomName} in ${serviceName}?` })
+    return reply.status(400).send({ code: 400, error: 'Bad request', message: `Please confirm revoke ${roomName} in ${serviceName}?` })
   }
 
   const notifyAuth = await dbGetOne('SELECT access_token FROM notify_auth WHERE service = ? AND room = ?;', [ serviceName, roomName ])

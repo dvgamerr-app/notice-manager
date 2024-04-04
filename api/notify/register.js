@@ -1,7 +1,7 @@
 import { AuthorizationCode } from 'simple-oauth2'
 import pino from 'pino'
 import { uuid, dbGetOne, dbRun } from '../../lib/db-conn'
-import sdkNotify from '../../lib/sdk-notify'
+import { getStatus, setRevoke } from '../../lib/sdk-notify'
 
 const logger = pino()
 const hosts = process.env.BASE_URL || 'http://localhost:3000'
@@ -37,27 +37,25 @@ export default async (req, reply) => {
       client_secret: notifyService.client_secret
     }
     if (notifyAuth.access_token) {
-      const { setRevoke } = await sdkNotify(notifyAuth.access_token)
-      await setRevoke()
+      await setRevoke(notifyAuth.access_token)
     }
 
     const accessToken = await client.getToken(tokenConfig)
-    logger.info({ msg: accessToken })
+    logger.info(accessToken.message)
 
     if (accessToken.token.status !== 200) {
       throw new Error(accessToken.token.message)
     }
 
     await dbRun(`UPDATE notify_auth SET access_token = ?, code = ? WHERE state = ?;`, [ accessToken.token.access_token, code, state ])
-    const { getStatus } = await sdkNotify(accessToken.token.access_token)
-    const res = await getStatus()
+    const res = await getStatus(accessToken.token.access_token)
     if (res.status !== 200) {
       throw new Error('Status is not verify.')
     }
-    logger.info(`Join room *${res.target}* \`${res.message}\` with service *${serviceName}*`)
-    return reply.type('text/html').send(`<script>window.self.close();</script><body>Join room ${res.target} '${res.message}' with service ${serviceName}</body>`)
+    logger.info(`Join room *${res.data.target}* \`${res.data.message}\` with service *${serviceName}*`)
+    return reply.send({ error: null, message: `Join room ${res.data.target} '${res.data.message}' with service ${serviceName}` })
   } else if (error) {
-    return reply.type('text/html').send(`<script>window.self.close();</script><body>${error}</body>`)
+    return reply.status(500).send({ error })
   } else {
     logger.info(`redirectUri: ${redirectUri}`)
 
@@ -80,7 +78,16 @@ export default async (req, reply) => {
     const newState = uuid(16)
     logger.info(`${serviceName} in ${roomName} new state is '${newState}'`)
 
-    await dbRun(`UPDATE notify_auth SET state = ?, room = ?, redirect_uri = ? WHERE user_id = ? AND service = ?;`, [ newState, roomName, redirectUri, notifyService.user_id, serviceName ])
+    await dbRun(`
+      INSERT INTO notify_auth (user_id, service, room, state, redirect_uri)
+        VALUES(?, ?, ?, ?, ?)
+      ON CONFLICT(service, room) DO
+      UPDATE SET
+        state = ?,
+        redirect_uri = ?;
+    `, [
+        notifyService.user_id, serviceName, roomName, newState, redirectUri,
+        newState, redirectUri ])
 
     const redirectAuth = client.authorizeURL({
       response_type: responseType,
