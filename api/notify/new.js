@@ -1,7 +1,9 @@
-const logger = require('pino')()
-const { dbGetOne, dbRun } = require('../../db')
+import pino from 'pino'
+import { dbGetOne, dbRun } from '../../lib/db-conn'
 
-module.exports = async (req, reply) => {
+const logger = pino()
+
+export default async (req, reply) => {
   const userId = req.headers['x-user-liff']
   if (!userId) return reply.status(404).send()
 

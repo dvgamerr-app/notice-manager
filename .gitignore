@@ -1,4 +1,16 @@
 # Created by .ignore support plugin (hsz.mobi)
+
+# macOS
+.DS_Store
+
+
+packages/*
+.oldfile
+*.lockb
+*-lock.yaml
+*.db
+
+
 ### Node template
 # Logs
 /logs
@@ -83,11 +95,5 @@ dist
 # Service worker
 sw.*
 
-# macOS
-.DS_Store
-
 # Vim swap files
 *.swp
-
-.remove
-*.db
