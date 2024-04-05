@@ -1,14 +1,13 @@
-FROM oven/bun:debian as base
-WORKDIR /usr/src/app
+FROM oven/bun:alpine
+WORKDIR /app
+
+RUN apk add libstdc++
+
+# ENV SQLITE_PATH=/db/notice.db
 
 COPY . .
 
-RUN apt update && apt upgrade -y && apt-get install lib32stdc++6 -y && bun i
+RUN bun i
 
-# FROM oven/bun:alpine AS release
-
-# COPY --from=base /usr/src/app .
-
-USER bun
 EXPOSE 3000/tcp
 ENTRYPOINT ["bun", "start"]

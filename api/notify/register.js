@@ -1,5 +1,5 @@
 import { AuthorizationCode } from 'simple-oauth2'
-import { uuid, dbGetOne, dbRun } from '../../lib/db-conn'
+import { uuid, db } from '../../lib/db-conn'
 import { getStatus, setRevoke } from '../../lib/sdk-notify'
 
 const hosts = process.env.BASE_URL || 'http://localhost:3000'
@@ -14,12 +14,12 @@ export default async (req, reply) => {
 
   // If callback from notify-bot.line.me
   if (code) {
-    const notifyAuth = await dbGetOne('SELECT service, room, access_token FROM notify_auth WHERE state = ?;', [ state ])
+    const notifyAuth = db.query('SELECT service, room, access_token FROM notify_auth WHERE state = ?1;').get([ state ])
     if (!notifyAuth) {
       throw new Error(`Service ${serviceName} and State is not verify.`)
     }
 
-    const notifyService = await dbGetOne('SELECT user_id, client_id, client_secret FROM notify_service WHERE service = ? AND active = true;', [ serviceName ])
+    const notifyService = db.query('SELECT user_id, client_id, client_secret FROM notify_service WHERE service = ?1 AND active = true;').get([ serviceName ])
 
     const client = new AuthorizationCode({
       client: { id: notifyService.client_id, secret: notifyService.client_secret },
@@ -45,7 +45,7 @@ export default async (req, reply) => {
     }
     req.log.info(accessToken.message)
 
-    await dbRun(`UPDATE notify_auth SET access_token = ?, code = ? WHERE state = ?;`, [ accessToken.token.access_token, code, state ])
+    db.query(`UPDATE notify_auth SET access_token = ?, code = ? WHERE state = ?;`).values([ accessToken.token.access_token, code, state ])
     const res = await getStatus(accessToken.token.access_token)
     if (res.status !== 200) {
       throw new Error('Status is not verify.')
@@ -61,7 +61,7 @@ export default async (req, reply) => {
       throw new Error('Service or Room is not verify.')
     }
 
-    const notifyService = await dbGetOne('SELECT user_id, client_id, client_secret FROM notify_service WHERE service = ? AND active = true;', [ serviceName ])
+    const notifyService = await db.query('SELECT user_id, client_id, client_secret FROM notify_service WHERE service = ? AND active = true;').get([ serviceName ])
     if (!notifyService) {
       throw new Error(`Service ${serviceName} is not register.`)
     }
@@ -76,16 +76,14 @@ export default async (req, reply) => {
     const newState = uuid(16)
     req.log.info(`${serviceName} in ${roomName} new state is '${newState}'`)
 
-    await dbRun(`
+    db.query(`
       INSERT INTO notify_auth (user_id, service, room, state, redirect_uri)
-        VALUES(?, ?, ?, ?, ?)
+        VALUES(?1, ?2, ?3, ?4, ?5)
       ON CONFLICT(service, room) DO
       UPDATE SET
-        state = ?,
-        redirect_uri = ?;
-    `, [
-        notifyService.user_id, serviceName, roomName, newState, redirectUri,
-        newState, redirectUri ])
+        state = ?4,
+        redirect_uri = ?5;
+    `).values([ notifyService.user_id, serviceName, roomName, newState, redirectUri ])
 
     const redirectAuth = client.authorizeURL({
       response_type: responseType,

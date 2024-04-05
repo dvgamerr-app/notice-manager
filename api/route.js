@@ -1,13 +1,9 @@
-import sdkNotify from '../lib/sdk-notify'
-
 import register from './notify/register'
 import revoke from './notify/revoke'
 import message from './notify/message'
 
 import newNotify from './notify/new'
 
-
-const sdk = sdkNotify('', '')
 export default [
   { path: '/health', method: 'GET', handler: (_, reply) => reply.send({ ok: '☕' }) },
   // LINE Notify

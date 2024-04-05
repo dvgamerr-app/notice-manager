@@ -6,13 +6,6 @@ import routeApi from './api/route'
 const app = fastify({ console: false, logger: true })
 const logger = pino()
 
-const exitHandler = (err, exitCode) => {
-  logger.error(`${exitCode || 0}:Exiting... (${err})`)
-  process.exit(0)
-}
-
-process.on('SIGINT', exitHandler)
-
 app.addHook('onRequest', (req, reply, done) => {
   reply.header('x-developer', '@dvgamerr')
   done()

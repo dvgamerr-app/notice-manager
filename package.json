@@ -14,10 +14,9 @@
     "fastify": "^4.26.2",
     "pino": "^8.19.0",
     "simple-oauth2": "^5.0.0",
-    "sqlite3": "^5.1.7",
     "uuidv7": "^0.6.3"
   },
-  "devDependencies": {},
+  "devDependencies": { "@types/bun": "latest" },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dvgamerr-app/notice-manager.git"
@@ -28,5 +27,10 @@
   "homepage": "https://github.com/dvgamerr-app/notice-manager#readme",
   "directories": {
     "doc": "docs"
+  },
+  "module": "index.js",
+  "type": "module",
+  "peerDependencies": {
+    "typescript": "^5.0.0"
   }
 }

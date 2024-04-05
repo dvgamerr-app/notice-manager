@@ -1,4 +1,4 @@
-import { uuid, dbRun } from '../../lib/db-conn'
+import { uuid } from '../../lib/db-conn'
 import sdkNotify from '../../lib/sdk-notify'
 
 const packageSticker = {
@@ -84,14 +84,14 @@ export default async (req, reply) => {
       reset: new Date(parseInt(headers.get('x-ratelimit-reset')) * 1000).toISOString()
     }
     if (status !== 200) {
-      dbRun(`INSERT INTO history_notify (uuid, category, service, room, sender, error) VALUES (?, 'notify', ?, ?, ?, ?);`, [ xId, serviceName, roomName, JSON.stringify(req.body), JSON.stringify(data) ])
+      db.query(`INSERT INTO history_notify (uuid, category, service, room, sender, error) VALUES (?, 'notify', ?, ?, ?, ?);`).values([ xId, serviceName, roomName, JSON.stringify(req.body), JSON.stringify(data) ])
       return reply.status(400).send({ code: status || 400, error: 'Bad pushNotify request', message: data.message || 'Bad Request' })
     }
     
-    dbRun(`INSERT INTO history_notify (uuid, category, service, room, sender) VALUES (?, 'notify', ?, ?, ?);`, [ xId, serviceName, roomName, JSON.stringify(req.body) ])
+    db.query(`INSERT INTO history_notify (uuid, category, service, room, sender) VALUES (?, 'notify', ?, ?, ?);`).values([ xId, serviceName, roomName, JSON.stringify(req.body) ])
     return reply.send({ code: 200, delay: delayTime, used: new Date().getTime() - startTime, ratelimit })
   } catch (ex) {
-    dbRun(`INSERT INTO history_notify (uuid, category, service, room, sender, error) VALUES (?, 'notify', ?, ?, ?, ?);`, [ xId, serviceName, roomName, JSON.stringify(req.body), ex.stack ])
+    db.query(`INSERT INTO history_notify (uuid, category, service, room, sender, error) VALUES (?, 'notify', ?, ?, ?, ?);`).values([ xId, serviceName, roomName, JSON.stringify(req.body), ex.stack ])
     return reply.status(400).send({ code: 400, error: ex, message: ex.message })
   }
 }
