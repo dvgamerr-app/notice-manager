@@ -5,7 +5,7 @@ import message from './notify/message'
 import newNotify from './notify/new'
 
 export default [
-  { path: '/health', method: 'GET', handler: (_, reply) => reply.send({ ok: '☕' }) },
+  { path: '/health', method: 'GET', logLevel: 'error', handler: (_, reply) => reply.send({ ok: '☕' }) },
   // LINE Notify
   { path: '/api/notify/new', method: 'POST', handler: newNotify },
   // API Notify

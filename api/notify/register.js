@@ -14,12 +14,12 @@ export default async (req, reply) => {
 
   // If callback from notify-bot.line.me
   if (code) {
-    const notifyAuth = db.query('SELECT service, room, access_token FROM notify_auth WHERE state = ?1;').get([ state ])
+    const notifyAuth = db.query('SELECT service, room, access_token FROM notify_auth WHERE state = ?1;').get(state)
     if (!notifyAuth) {
       throw new Error(`Service ${serviceName} and State is not verify.`)
     }
 
-    const notifyService = db.query('SELECT user_id, client_id, client_secret FROM notify_service WHERE service = ?1 AND active = true;').get([ serviceName ])
+    const notifyService = db.query('SELECT user_id, client_id, client_secret FROM notify_service WHERE service = ?1 AND active = true;').get(serviceName)
 
     const client = new AuthorizationCode({
       client: { id: notifyService.client_id, secret: notifyService.client_secret },
@@ -45,7 +45,7 @@ export default async (req, reply) => {
     }
     req.log.info(accessToken.message)
 
-    db.query(`UPDATE notify_auth SET access_token = ?, code = ? WHERE state = ?;`).values([ accessToken.token.access_token, code, state ])
+    db.query(`UPDATE notify_auth SET access_token = ?1, code = ?2, created = current_timestamp WHERE state = ?3;`).values(accessToken.token.access_token, code, state)
     const res = await getStatus(accessToken.token.access_token)
     if (res.status !== 200) {
       throw new Error('Status is not verify.')
@@ -61,7 +61,7 @@ export default async (req, reply) => {
       throw new Error('Service or Room is not verify.')
     }
 
-    const notifyService = await db.query('SELECT user_id, client_id, client_secret FROM notify_service WHERE service = ? AND active = true;').get([ serviceName ])
+    const notifyService = await db.query('SELECT user_id, client_id, client_secret FROM notify_service WHERE service = ?1 AND active = true;').get(serviceName)
     if (!notifyService) {
       throw new Error(`Service ${serviceName} is not register.`)
     }
@@ -82,8 +82,9 @@ export default async (req, reply) => {
       ON CONFLICT(service, room) DO
       UPDATE SET
         state = ?4,
-        redirect_uri = ?5;
-    `).values([ notifyService.user_id, serviceName, roomName, newState, redirectUri ])
+        redirect_uri = ?5,
+        created = current_timestamp;
+    `).values(notifyService.user_id, serviceName, roomName, newState, redirectUri)
 
     const redirectAuth = client.authorizeURL({
       response_type: responseType,

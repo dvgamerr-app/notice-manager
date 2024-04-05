@@ -1,4 +1,4 @@
-import { uuid } from '../../lib/db-conn'
+import { uuid, db } from '../../lib/db-conn'
 import sdkNotify from '../../lib/sdk-notify'
 
 const packageSticker = {
@@ -17,7 +17,7 @@ const packageSticker = {
 }
 
 export default async (req, reply) => {
-  if (!req.body) {
+  if (!req.body?.message && !req.query.msg) {
     return reply.status(400).send({ code: 400, error: 'Bad Request', message: `Need payload 'message'.`})
   }
 
@@ -29,11 +29,12 @@ export default async (req, reply) => {
     imageFullsize,
     notificationDisabled,
     imageFile
-  } = req.body
+  } = req.body || {}
 
   const { serviceName, roomName } = req.params
+  const { msg } = req.query
 
-  let { message, stickerPackageId, stickerId } = req.body
+  let { message, stickerPackageId, stickerId } = req.body || {}
   // const { LineOutbound, ServiceWebhook } = notice.get()
 
   const xId = uuid()
@@ -42,11 +43,14 @@ export default async (req, reply) => {
   if (!isWebhook) {
     if (typeof message === 'string') {
       message = message.replace(/\\n|newline/gi, '\n')
+    } else if (msg) {
+      message = msg.replace(/\\n|newline/gi, '\n')
     }
     if (sticker) {
       stickerPackageId = 1
       stickerId = packageSticker[stickerPackageId][parseInt(Math.random() * 30)]
     }
+    
   } else {
     // const payload = await ServiceWebhook.findOne({ service, room })
     // if (payload) {
@@ -62,7 +66,7 @@ export default async (req, reply) => {
     //   message = `*Webhook Payload*\n${process.env.HOST_API}/webhook/${outbound._id}`
     // }
   }
-  req.log.info(`message ${JSON.stringify(message)}`)
+  req.log.info(`message ${JSON.stringify(message || 'N/A')}`)
 
   try {
     const { pushNotify } = await sdkNotify(serviceName, roomName)
@@ -78,20 +82,24 @@ export default async (req, reply) => {
       notificationDisabled
     })
     delayTime = new Date().getTime() - delayTime
+    req.log.info(JSON.stringify(headers))
+
+    if (status !== 200) {
+      db.query(`INSERT INTO history_notify (uuid, category, service, room, sender, error) VALUES (?, 'notify', ?, ?, ?, ?);`).values([ xId, serviceName, roomName, JSON.stringify(req.body), JSON.stringify(data) ])
+      return reply.status(400).send({ code: status || 400, error: 'Bad pushNotify request', message: data.message || 'Bad Request' })
+    }
+    
     const ratelimit = {
       msg: parseInt(headers.get('x-ratelimit-remaining')),
       img: parseInt(headers.get('x-ratelimit-imageremaining')),
       reset: new Date(parseInt(headers.get('x-ratelimit-reset')) * 1000).toISOString()
-    }
-    if (status !== 200) {
-      db.query(`INSERT INTO history_notify (uuid, category, service, room, sender, error) VALUES (?, 'notify', ?, ?, ?, ?);`).values([ xId, serviceName, roomName, JSON.stringify(req.body), JSON.stringify(data) ])
-      return reply.status(400).send({ code: status || 400, error: 'Bad pushNotify request', message: data.message || 'Bad Request' })
     }
     
     db.query(`INSERT INTO history_notify (uuid, category, service, room, sender) VALUES (?, 'notify', ?, ?, ?);`).values([ xId, serviceName, roomName, JSON.stringify(req.body) ])
     return reply.send({ code: 200, delay: delayTime, used: new Date().getTime() - startTime, ratelimit })
   } catch (ex) {
     db.query(`INSERT INTO history_notify (uuid, category, service, room, sender, error) VALUES (?, 'notify', ?, ?, ?, ?);`).values([ xId, serviceName, roomName, JSON.stringify(req.body), ex.stack ])
+    req.log.error(ex)
     return reply.status(400).send({ code: 400, error: ex, message: ex.message })
   }
 }
