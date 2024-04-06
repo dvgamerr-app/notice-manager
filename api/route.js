@@ -2,12 +2,20 @@ import register from './notify/register'
 import revoke from './notify/revoke'
 import message from './notify/message'
 
-import newNotify from './notify/new'
+import itemView from './notify/itemView'
+import itemCreate from './notify/itemCreate'
+import itemUpdate from './notify/itemUpdate'
 
 export default [
   { path: '/health', method: 'GET', logLevel: 'error', handler: (_, reply) => reply.send({ ok: '☕' }) },
+  
   // LINE Notify
-  { path: '/api/notify/new', method: 'POST', handler: newNotify },
+  { path: '/api/notify', method: 'GET', handler: itemView },
+  { path: '/api/notify', method: 'POST', handler: itemCreate },
+  { path: '/api/notify/:serviceName', method: 'PATCH', handler: itemUpdate },
+  // { path: '/api/notify/:notify/room', method: 'GET', handler: require('./db-api/line-notify') },
+  // { path: '/api/notify/:notify/history', method: 'GET', handler: require('./db-api/history') },
+
   // API Notify
   { path: '/register/:serviceName/:roomName?', method: 'GET', handler: register },
   { path: '/revoke/:serviceName/:roomName', method: 'DELETE', handler: revoke },
@@ -36,11 +44,6 @@ export default [
   // },
 
   // // API UI
-  // {
-  //   method: 'GET',
-  //   path: '/api/dashboard',
-  //   handler: require('./route-db/notify/dashboard')
-  // },
 
   // // LINE Bot
   // { method: 'GET', path: '/api/line', handler: require('./route-db/line-bot') },
@@ -55,21 +58,7 @@ export default [
   //   handler: require('./route-db/history')
   // },
 
-  // {
-  //   method: 'POST',
-  //   path: '/api/notify/update',
-  //   handler: require('./db-api/notify/update')
-  // },
-  // {
-  //   method: 'GET',
-  //   path: '/api/notify/:notify/room',
-  //   handler: require('./db-api/line-notify')
-  // },
-  // {
-  //   method: 'GET',
-  //   path: '/api/notify/:notify/history',
-  //   handler: require('./db-api/history')
-  // },
+
 
   // {
   //   method: 'GET',

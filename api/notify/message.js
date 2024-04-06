@@ -39,6 +39,11 @@ export default async (req, reply) => {
 
   const xId = uuid()
   reply.header('x-line-uuid', xId)
+  const { checkItem } = db.query(`SELECT COUNT(*) checkItem FROM notify_auth a INNER JOIN notify_service s ON a.service = s.service WHERE a.service = ?1 AND a.room = ?2 AND s.active`).get(serviceName, roomName)
+  if (!checkItem) {
+    return reply.status(400).send({ code: 400, error: 'Bad Request', message: `a request is bad`})
+  }
+
 
   if (!isWebhook) {
     if (typeof message === 'string') {
@@ -72,7 +77,7 @@ export default async (req, reply) => {
     const { pushNotify } = await sdkNotify(serviceName, roomName)
 
     let delayTime = new Date().getTime()
-    const { status, headers, data } = await pushNotify({
+    const payload = {
       message,
       imageThumbnail,
       imageFullsize,
@@ -80,12 +85,12 @@ export default async (req, reply) => {
       stickerId,
       imageFile,
       notificationDisabled
-    })
+    }
+    const { status, headers, data } = await pushNotify(payload)
     delayTime = new Date().getTime() - delayTime
-    req.log.info(JSON.stringify(headers))
 
     if (status !== 200) {
-      db.query(`INSERT INTO history_notify (uuid, category, service, room, sender, error) VALUES (?, 'notify', ?, ?, ?, ?);`).values([ xId, serviceName, roomName, JSON.stringify(req.body), JSON.stringify(data) ])
+      db.query(`INSERT INTO history_notify (uuid, category, service, room, sender, error) VALUES (?, 'notify', ?, ?, ?, ?);`).values([ xId, serviceName, roomName, JSON.stringify(payload), JSON.stringify(data) ])
       return reply.status(400).send({ code: status || 400, error: 'Bad pushNotify request', message: data.message || 'Bad Request' })
     }
     
@@ -95,10 +100,10 @@ export default async (req, reply) => {
       reset: new Date(parseInt(headers.get('x-ratelimit-reset')) * 1000).toISOString()
     }
     
-    db.query(`INSERT INTO history_notify (uuid, category, service, room, sender) VALUES (?, 'notify', ?, ?, ?);`).values([ xId, serviceName, roomName, JSON.stringify(req.body) ])
+    db.query(`INSERT INTO history_notify (uuid, category, service, room, sender) VALUES (?, 'notify', ?, ?, ?);`).values([ xId, serviceName, roomName, JSON.stringify(payload) ])
     return reply.send({ code: 200, delay: delayTime, used: new Date().getTime() - startTime, ratelimit })
   } catch (ex) {
-    db.query(`INSERT INTO history_notify (uuid, category, service, room, sender, error) VALUES (?, 'notify', ?, ?, ?, ?);`).values([ xId, serviceName, roomName, JSON.stringify(req.body), ex.stack ])
+    db.query(`INSERT INTO history_notify (uuid, category, service, room, sender, error) VALUES (?, 'notify', ?, ?, ?, ?);`).values([ xId, serviceName, roomName, JSON.stringify(payload), ex.stack ])
     req.log.error(ex)
     return reply.status(400).send({ code: 400, error: ex, message: ex.message })
   }
