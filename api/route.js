@@ -1,4 +1,27 @@
-module.exports = [
+import register from './notify/register'
+import revoke from './notify/revoke'
+import message from './notify/message'
+
+import itemView from './notify/itemView'
+import itemCreate from './notify/itemCreate'
+import itemUpdate from './notify/itemUpdate'
+
+export default [
+  { path: '/health', method: 'GET', logLevel: 'error', handler: (_, reply) => reply.send({ ok: '☕' }) },
+  
+  // LINE Notify
+  { path: '/api/notify', method: 'GET', handler: itemView },
+  { path: '/api/notify', method: 'POST', handler: itemCreate },
+  { path: '/api/notify/:serviceName', method: 'PATCH', handler: itemUpdate },
+  // { path: '/api/notify/:notify/room', method: 'GET', handler: require('./db-api/line-notify') },
+  // { path: '/api/notify/:notify/history', method: 'GET', handler: require('./db-api/history') },
+
+  // API Notify
+  { path: '/register/:serviceName/:roomName?', method: 'GET', handler: register },
+  { path: '/revoke/:serviceName/:roomName', method: 'DELETE', handler: revoke },
+  { path: '/notify/:serviceName/:roomName', method: ['PUT', 'POST'], handler: message },
+
+
   // { method: 'GET', path: '/auth/sso', handler: require('./auth/sso') },
   // { method: 'POST', path: '/auth/login', handler: require('./auth/login') },
   // { method: 'POST', path: '/auth/user', handler: require('./auth/user') },
@@ -7,44 +30,20 @@ module.exports = [
   // {
   //   method: 'PUT',
   //   path: '/system/notice/:msg',
-  //   handler: require('./notice.js')
+  //   handler: require('./notice')
   // },
   // {
   //   method: 'PUT',
   //   path: '/line/:bot/:to',
-  //   handler: require('./line-bot/to.js')
+  //   handler: require('./line-bot/to')
   // },
   // {
   //   method: 'POST',
   //   path: '/line/:bot',
-  //   handler: require('./line-bot/index.js')
+  //   handler: require('./line-bot/index')
   // },
-
-  // API Notify
-  {
-    method: 'GET',
-    path: '/register/:serviceName/:roomName?',
-    handler: require('./notify-bot/register')
-  },
-  {
-    method: 'DELETE',
-    path: '/revoke/:serviceName/:roomName',
-    handler: require('./notify-bot/revoke')
-  },
-  {
-    method: ['PUT', 'POST'],
-    path: '/notify/:serviceName/:roomName',
-    handler: require('./notify-bot/notify.js')
-  },
-
-
 
   // // API UI
-  // {
-  //   method: 'GET',
-  //   path: '/api/dashboard',
-  //   handler: require('./route-db/notify/dashboard')
-  // },
 
   // // LINE Bot
   // { method: 'GET', path: '/api/line', handler: require('./route-db/line-bot') },
@@ -59,27 +58,7 @@ module.exports = [
   //   handler: require('./route-db/history')
   // },
 
-  // LINE Notify
-  {
-    method: 'POST',
-    path: '/api/notify',
-    handler: require('./db-api/notify/new')
-  },
-  // {
-  //   method: 'POST',
-  //   path: '/api/notify/update',
-  //   handler: require('./db-api/notify/update')
-  // },
-  // {
-  //   method: 'GET',
-  //   path: '/api/notify/:notify/room',
-  //   handler: require('./db-api/line-notify')
-  // },
-  // {
-  //   method: 'GET',
-  //   path: '/api/notify/:notify/history',
-  //   handler: require('./db-api/history')
-  // },
+
 
   // {
   //   method: 'GET',

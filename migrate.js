@@ -1,5 +1,0 @@
-// "line_bot" ("accesstoken", "active", "created", "name", "options", "secret", "service", "userId")
-// "line_bot_room" ("active", "created", "name", "service", "type", "userId")
-// "line_notify" ("active", "client", "created", "name", "secret", "service", "userId")
-// "line_notify_room" ("accessToken", "created", "limit", "name", "redirect_uri", "response_type", "room", "service", "state")
-// "webhook" ("body", "room", "service")
