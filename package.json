@@ -8,9 +8,12 @@
   "license": "MIT",
   "scripts": {
     "start": "bun index.js",
-    "dev": "bun --watch index.js | pino-pretty"
+    "dev": "bun --watch index.js | pino-pretty",
+    "ui": "astro dev",
+    "build": "astro build"
   },
   "dependencies": {
+    "astro": "^4.5.16",
     "fastify": "^4.26.2",
     "pino": "^8.19.0",
     "simple-oauth2": "^5.0.0",
