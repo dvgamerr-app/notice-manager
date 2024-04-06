@@ -1,11 +1,12 @@
-name: notice-api
+name: notice
 
 on:
   push:
     branches: [main]
     paths:
-      - '.github/workflows/notice-api.yml'
+      - '.github/workflows/notice.yml'
       - 'api/**'
+      - 'lib/**'
       - 'index.js'
   # pull_request:
   #   branches: [main]
@@ -130,30 +131,21 @@ jobs:
   #       with:
   #         args: rollout status ${{ steps.prepare.outputs.kube_deploy }} -n ${{ steps.prepare.outputs.kube_namespace }}
 
-  notice-api:
+  notice:
     runs-on: ubuntu-20.04
 
     env:
       IMAGE_OWNER: dvgamerr
-      IMAGE_FILE: notice-api.Dockerfile
+      IMAGE_FILE: Dockerfile
       IMAGE_NAME: notice
       PLATFORMS: linux/amd64,linux/arm64
-      # KUBE_DEPLOY: deploy/notice-api
-      # KUBE_CONTAINER: notice-api
-      # KUBE_NAMESPACE: notice-line
     outputs:
       container_name: ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }}
       version: ${{ steps.prepare.outputs.version }}
 
     steps:
       - name: Checkout 🛎
-        uses: actions/checkout@master
-
-      - name: Setup node env 🏗
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          check-latest: true
+        uses: actions/checkout@v4
 
       # - name: Get yarn cache directory path 🛠
       #   uses: pnpm/action-setup@v2
@@ -239,7 +231,7 @@ jobs:
 
   # notify-api:
   #   runs-on: ubuntu-20.04
-  #   needs: notice-api
+  #   needs: notice
   #   if: failure() && github.event_name != 'pull_request'
   #   steps:
   #     - name: Notify 🔔
