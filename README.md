@@ -15,17 +15,20 @@ This is a template to help you if you want to implement Line Notify. It help us 
 - A notify entry point to notify Line Notify server
 
 ### Just want to try it?
-- Download and Install [Rancher Desktop](https://rancherdesktop.io/)
 - Build Container with UI and API
+```bash
+docker pull dvgamerr/notice:latest
+docker run --rm -p 3000:3000 -v db-notice:/db -e SQLITE_PATH=/db/notice.db dvgamerr/notice:latest
 ```
-docker build -e BASE_URL=http://localhost/ -f notice-api.Dockerfile -t notice-api:latest .
-docker build -e BASE_URL=http://localhost/ -f notice-ui.Dockerfile -t notice-ui:latest .
 
-kubectl apply -f deployments.yaml
+#### Development
+```bash
+bun i
+bun --watch index.js | pino-pretty
 ```
 
 ## UI Sample
 
 | Notify                                   | Room                                 | Detail                                   |
 | ---------------------------------------- | ------------------------------------ | ---------------------------------------- |
-| ![notify](./src/assets/liff-notify.webp) | ![room](./src/assets/liff-room.webp) | ![detail](./src/assets/liff-detail.webp) |
+| ![notify](./docs/liff-notify.webp) | ![room](./docs/liff-room.webp) | ![detail](./docs/liff-detail.webp) |

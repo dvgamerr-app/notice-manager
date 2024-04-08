@@ -147,23 +147,6 @@ jobs:
       - name: Checkout 🛎
         uses: actions/checkout@v4
 
-      # - name: Get yarn cache directory path 🛠
-      #   uses: pnpm/action-setup@v2
-      #   with:
-      #     version: 8
-      #     run_install: true
-
-      # - name: Cache node_modules 📦
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: node_modules
-      #     key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-pnpm-store-
-
-      # - name: Install dependencies
-      #   run: pnpm i --prod
-
       - name: Prepare 🔰
         id: prepare
         run: |
