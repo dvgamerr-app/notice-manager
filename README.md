@@ -1,3 +1,5 @@
+# LINE Notify API has been deprecated and set to sunset on March 31, 2025
+
 ## Notice-Manager Web GUI
 
 ![Build (main)](https://img.shields.io/github/actions/workflow/status/dvgamerr-app/notice-manager/notice.yml?style=flat-square)
