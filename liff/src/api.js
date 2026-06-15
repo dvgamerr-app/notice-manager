@@ -1,11 +1,11 @@
 const BASE = import.meta.env.VITE_API_URL || ''
 
-const req = (userId) => async (method, path, body) => {
+const req = (token) => async (method, path, body) => {
   const res = await fetch(`${BASE}${path}`, {
     method,
     headers: {
       'Content-Type': 'application/json',
-      'x-user-liff': userId || ''
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
     },
     body: body ? JSON.stringify(body) : undefined
   })
@@ -16,8 +16,8 @@ const req = (userId) => async (method, path, body) => {
   return res.json()
 }
 
-export const createApi = (userId) => {
-  const call = req(userId)
+export const createApi = (token) => {
+  const call = req(token)
   return {
     getBots: () => call('GET', '/api/line'),
     getRooms: (bot) => call('GET', `/api/line/${bot}/room`),

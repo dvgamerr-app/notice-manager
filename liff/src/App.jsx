@@ -30,12 +30,12 @@ function LiffError({ message }) {
 }
 
 export default function App() {
-  const { profile, error, ready } = useLiff()
+  const { profile, token, error, ready } = useLiff()
 
   if (!ready) return <Loading />
   if (error) return <LiffError message={error} />
 
-  const api = createApi(profile?.userId)
+  const api = createApi(token)
 
   return (
     <HashRouter>

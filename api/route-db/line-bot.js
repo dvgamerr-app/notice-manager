@@ -1,10 +1,8 @@
 import { db } from '../../lib/db.js'
 
-export default async (req, reply) => {
-  const userId = req.headers['x-user-liff']
-  if (!userId) return reply.status(401).send({})
-
-  const { bot } = req.params
+export default async ({ params, set, userId }) => {
+  if (!userId) { set.status = 401; return {} }
+  const { bot } = params
 
   if (bot) {
     return db.selectFrom('line_bot_room').selectAll()

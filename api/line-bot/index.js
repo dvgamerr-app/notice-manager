@@ -6,29 +6,31 @@ import userCustom from './custom.js'
 const VERIFY_TOKEN = '00000000000000000000000000000000'
 const getSourceId = (e) => e.source[`${e.source.type}Id`]
 
-export default async (req, reply) => {
-  const { bot } = req.params
+export default async ({ params, body, headers, set }) => {
+  const { bot } = params
   const startTime = Date.now()
+
+  // body is raw string from scoped onParse in webhookRaw plugin
+  const rawBody = typeof body === 'string' ? body : JSON.stringify(body || {})
+  const { events = [] } = JSON.parse(rawBody)
 
   const botData = await db.selectFrom('line_bot').select(['access_token', 'secret'])
     .where('service', '=', bot).where('active', '=', true).executeTakeFirst()
-  if (!botData) return reply.status(404).send({ error: 'Bot not found' })
+  if (!botData) { set.status = 404; return { error: 'Bot not found' } }
 
-  const sig = req.headers['x-line-signature']
-  if (sig && req.rawBody) {
-    if (!verifySignature(botData.secret, req.rawBody, sig)) {
-      return reply.status(401).send({ error: 'Invalid signature' })
+  const sig = headers['x-line-signature']
+  if (sig && rawBody) {
+    if (!verifySignature(botData.secret, rawBody, sig)) {
+      set.status = 401; return { error: 'Invalid signature' }
     }
   }
 
   const client = lineClient(botData.access_token)
   const push = makePush(client)
-  const { events = [] } = req.body || {}
 
   for (const event of events) {
     if (event.replyToken === VERIFY_TOKEN) continue
 
-    // save inbound
     await db.insertInto('line_inbound').values({
       bot_name: bot, type: event.type,
       source: JSON.stringify(event.source),
@@ -43,7 +45,6 @@ export default async (req, reply) => {
     const variable = room?.variable || []
     const userState = variable.find(v => v.userId === event.source.userId)
 
-    // bypass mode (multi-step flows like WakaTime setup)
     if (userState?.data?.bypass) {
       const isText = event.type === 'message' && event.message?.type === 'text'
       const forceStop = isText && /ยกเลิก|cancel|ปิด/i.test(event.message.text)
@@ -83,6 +84,6 @@ export default async (req, reply) => {
   }
 
   const used = Date.now() - startTime
-  req.log.info(`webhook used ${used}ms for ${events.length} events`)
-  return { OK: true, used }
+  console.log(`webhook ${bot}: ${events.length} events in ${used}ms`)
+  return { ok: true, used }
 }

@@ -4,18 +4,18 @@ import alertFlex from '../flex/alert.js'
 import errorFlex from '../flex/error.js'
 
 // PUT /flex/:bot/:to — push an alert or error flex message to a bot room
-export default async (req, reply) => {
-  const { bot, to } = req.params
-  const { type = 'alert', title, message, detail } = req.body || {}
+export default async ({ params, body, set }) => {
+  const { bot, to } = params
+  const { type = 'alert', title, message, detail } = body || {}
 
   const botData = await db.selectFrom('line_bot').select(['access_token'])
     .where('service', '=', bot).where('active', '=', true).executeTakeFirst()
-  if (!botData) return reply.status(404).send({ error: 'Bot not found' })
+  if (!botData) { set.status = 404; return { error: 'Bot not found' } }
 
   const room = await db.selectFrom('line_bot_room').select('room_id')
     .where('bot_name', '=', bot).where('name', '=', to)
     .where('active', '=', true).executeTakeFirst()
-  if (!room) return reply.status(404).send({ error: `Room '${to}' not found` })
+  if (!room) { set.status = 404; return { error: `Room '${to}' not found` } }
 
   const flex = type === 'error'
     ? errorFlex(title || 'Error', message, detail)

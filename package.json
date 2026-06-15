@@ -8,17 +8,18 @@
   "license": "MIT",
   "scripts": {
     "start": "bun index.js",
-    "dev": "bun --watch index.js | pino-pretty",
+    "dev": "bun --watch index.js",
     "ui": "vite --config liff/vite.config.js",
     "build:ui": "vite build --config liff/vite.config.js",
     "preview:ui": "vite preview --config liff/vite.config.js"
   },
   "dependencies": {
-    "@fastify/static": "^6",
-    "fastify": "^4.26.2",
+    "@elysiajs/cors": "^1.4.2",
+    "@elysiajs/static": "^1.4.10",
+    "better-auth": "^1.6.18",
+    "elysia": "^1.4.28",
     "kysely": "^0.29.2",
-    "pg": "^8.21.0",
-    "pino": "^8.19.0"
+    "pg": "^8.21.0"
   },
   "devDependencies": {
     "@line/liff": "^2.29.0",
