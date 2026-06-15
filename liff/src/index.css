@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-line: #06C755;
+  --color-line-dark: #05a344;
+  --color-line-light: #e8f8ef;
+  --font-sans: 'Noto Sans Thai', 'Noto Sans', system-ui, sans-serif;
+}
+
+body {
+  background-color: #f0f0f0;
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS safe area support */
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
