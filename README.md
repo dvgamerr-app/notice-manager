@@ -1,6 +1,8 @@
-## Notice-Manager
+## Notice-Manager Web GUI
 
-![last commit](https://img.shields.io/github/last-commit/dvgamerr-app/notice-manager/main.svg?style=flat-square)
+![Build (main)](https://img.shields.io/github/actions/workflow/status/dvgamerr-app/notice-manager/notice.yml?style=flat-square)
+![Codacy (main)](https://img.shields.io/codacy/grade/3ec9018fd0994796b64484495342a131/main?style=flat-square)
+![last commit (main)](https://img.shields.io/github/last-commit/dvgamerr-app/notice-manager/main.svg?style=flat-square)
 ![MIT](https://img.shields.io/dub/l/vibe-d.svg?style=flat-square)
 ![Bun](https://img.shields.io/badge/runtime-bun-f9f1e1?style=flat-square)
 
