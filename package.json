@@ -9,16 +9,29 @@
   "scripts": {
     "start": "bun index.js",
     "dev": "bun --watch index.js | pino-pretty",
-    "ui": "astro dev",
-    "build": "astro build"
+    "ui": "vite --config liff/vite.config.js",
+    "build:ui": "vite build --config liff/vite.config.js",
+    "preview:ui": "vite preview --config liff/vite.config.js"
   },
   "dependencies": {
+    "@fastify/static": "^6",
     "fastify": "^4.26.2",
-    "pino": "^8.19.0",
-    "simple-oauth2": "^5.0.0",
-    "uuidv7": "^0.6.3"
+    "kysely": "^0.29.2",
+    "pg": "^8.21.0",
+    "pino": "^8.19.0"
   },
-  "devDependencies": { "@types/bun": "latest" },
+  "devDependencies": {
+    "@line/liff": "^2.29.0",
+    "@tailwindcss/vite": "^4.3.1",
+    "@types/bun": "latest",
+    "@types/pg": "^8.20.0",
+    "@vitejs/plugin-react": "^6.0.2",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.17.0",
+    "tailwindcss": "^4.3.1",
+    "vite": "^8.0.16"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dvgamerr-app/notice-manager.git"
