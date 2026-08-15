@@ -71,7 +71,7 @@ export default function BotDetail({ api }) {
             </div>
           </section>
 
-          <nav className="sticky top-14 z-[9] -mx-4 px-4 py-2 bg-[#f0f0f0]/95 backdrop-blur">
+          <nav className="sticky top-0 z-[9] -mx-4 px-4 py-2 bg-[#f0f0f0]/95 backdrop-blur">
             <div className="grid grid-cols-4 bg-white rounded-xl shadow-sm p-1">
               {tabs.map(([value, label]) => (
                 <button
