@@ -132,7 +132,7 @@ jobs:
   #         args: rollout status ${{ steps.prepare.outputs.kube_deploy }} -n ${{ steps.prepare.outputs.kube_namespace }}
 
   notice:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     env:
       IMAGE_OWNER: dvgamerr
@@ -213,7 +213,7 @@ jobs:
       #     args: rollout status ${{ steps.prepare.outputs.kube_deploy }} -n ${{ steps.prepare.outputs.kube_namespace }}
 
   # notify-api:
-  #   runs-on: ubuntu-20.04
+  #   runs-on: ubuntu-24.04
   #   needs: notice
   #   if: failure() && github.event_name != 'pull_request'
   #   steps:
