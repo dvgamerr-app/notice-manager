@@ -33,9 +33,14 @@ agent working in this repository.
   `user`, `group`, or `room`, and can be registered/unregistered in the dashboard.
 - Test sends validate the message through LINE before push and are recorded in
   `managed_delivery`.
+- The LIFF dashboard relies on LINE's host navigation and does not render a
+  duplicate back/title header inside the app.
 - The dashboard has four bot workspaces: Rooms, Monitor, API Keys, and Settings.
-  Rooms supports aliasing, registration, profile refresh, group/room leave,
-  multi-select sends, plain text, and raw LINE message JSON.
+  Rooms supports multi-select sends, plain text, and raw LINE message JSON. JSON
+  is selected by default and prefilled with a compact Flex message. One refresh
+  control above the list updates LINE metadata for every chat, while each chat
+  has a right-aligned Leave/Rejoin registration icon. Audit records render as
+  line items separated by dividers rather than cards.
 - External clients use bot-scoped API keys. Only a SHA-256 key hash is stored;
   the raw `lm_live_...` value is shown exactly once and can target only active,
   registered chats belonging to that bot.
