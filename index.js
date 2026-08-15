@@ -1,25 +1,13 @@
-import { Elysia } from 'elysia'
-import { staticPlugin } from '@elysiajs/static'
-import { cors } from '@elysiajs/cors'
-import { join } from 'path'
-import { initDbSchema } from './lib/db.js'
-import { auth } from './lib/auth.js'
-import routes from './api/route.js'
+import { createApp } from './app.js'
+import { databaseType, migrateToLatest } from './lib/db.js'
 
-const app = new Elysia()
-  .use(cors({
-    origin: ['https://liff.line.me', 'http://localhost:5173'],
-    credentials: true,
-  }))
-  .use(staticPlugin({
-    assets: join(import.meta.dirname, 'public', 'liff'),
-    prefix: '/liff',
-  }))
-  .onBeforeHandle(({ set }) => { set.headers['x-developer'] = '@dvgamerr' })
-  .all('/auth/*', ({ request }) => auth.handler(request))
-  .use(routes)
-
-initDbSchema().then(() => {
-  app.listen(parseInt(process.env.PORT || '3000'))
-  console.log('elysia listening on :3000')
-}).catch(ex => { console.error(ex); process.exit(1) })
+try {
+  await migrateToLatest()
+  const port = Number(process.env.PORT || 3000)
+  const app = createApp()
+  app.listen(port)
+  console.log(`LINE Manager listening on :${port} (${databaseType})`)
+} catch (error) {
+  console.error('Unable to start LINE Manager', error)
+  process.exit(1)
+}

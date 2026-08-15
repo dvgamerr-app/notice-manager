@@ -7,7 +7,8 @@ RUN apk add libstdc++
 
 COPY . .
 
-RUN bun i
+RUN bun install --frozen-lockfile
+RUN bun run build:ui
 
 EXPOSE 3000/tcp
 ENTRYPOINT ["bun", "start"]
