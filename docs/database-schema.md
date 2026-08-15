@@ -1,0 +1,43 @@
+# Database schema notes
+
+Read-only inspection of the configured PostgreSQL database found a legacy schema
+created by the previous startup-time SQL initializer.
+
+## Legacy tables
+
+- `line_bot`: integer primary key; globally unique `service`; plaintext
+  `access_token` and `secret`; nullable `user_id`; PostgreSQL `jsonb` options.
+- `line_bot_room`: integer primary key; unique `(bot_name, room_id)`; room type,
+  nickname, active flag, and PostgreSQL `jsonb` variable state.
+- `line_bot_user`: legacy per-room user metadata.
+- `line_inbound`: inbound event fragments in separate `source` and `message`
+  `jsonb` columns. It has only its primary-key index.
+- `line_outbound`: outbound payload/history with `jsonb` sender. It has only its
+  primary-key index.
+- `chat_webhook`: legacy generic webhook configuration.
+- `ba_user`, `ba_session`, `ba_account`, `ba_verification`: obsolete
+  better-auth tables.
+
+The legacy tables have no declared foreign keys between bot, room, inbound, and
+outbound records. Application code must not assume referential integrity.
+
+## New LINE Manager tables
+
+Kysely migration `001_line_management` deliberately uses `managed_bot`,
+`managed_chat`, `managed_webhook_event`, and `managed_delivery`, plus
+`app_setting`, `app_user`, and `app_session`. Migration
+`002_management_operations` adds chat profile metadata, `managed_api_key`, and
+`managed_audit_log`. The distinct `managed_` prefix avoids destructive `ALTER`
+or `DROP` operations and works on both PostgreSQL and SQLite.
+
+- `managed_chat.display_name` is the editable operator alias.
+- `managed_chat.line_display_name`, `picture_url`, and `metadata_payload` cache
+  the latest LINE profile/group summary without overwriting that alias.
+- `managed_api_key` stores a SHA-256 key hash and display prefix, never the raw
+  external API key.
+- `managed_audit_log` records management and external-delivery actions.
+
+Legacy bots can be adopted through `POST /api/bots/import-legacy`. The import
+validates each channel access token with LINE, encrypts the token and channel
+secret with AES-256-GCM, and writes only to the new tables. Legacy data remains
+unchanged.

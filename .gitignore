@@ -100,4 +100,5 @@ pnpm-debug.log*
 
 # environment variables
 .env
+CLAUDE.local.md
 .env.production
