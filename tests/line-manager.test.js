@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { createHmac } from 'node:crypto'
 import { DummyDriver, Kysely, PostgresDialect } from 'kysely'
 import { requiresLiffTunnel } from '../liff/src/environment.js'
+import { buildCompactFlexMessage } from '../liff/src/flex.js'
 import { normalizeMessages, verifySignature } from '../lib/sdk-line.js'
 import { up as createLineManagementSchema } from '../migrations/001_line_management.js'
 import { up as createOperationsSchema } from '../migrations/002_management_operations.js'
@@ -143,6 +144,34 @@ describe('LINE webhook security', () => {
     expect(normalizeMessages('hello')).toEqual([{ type: 'text', text: 'hello' }])
     expect(() => normalizeMessages([])).toThrow()
     expect(() => normalizeMessages(Array.from({ length: 6 }, () => ({ type: 'text' })))).toThrow()
+  })
+})
+
+describe('compact Flex card', () => {
+  test('builds a micro bubble with an optional URI action', () => {
+    const message = buildCompactFlexMessage({
+      title: 'Deployment complete',
+      body: 'Production is healthy',
+      actionLabel: 'Open dashboard',
+      actionUri: 'https://example.com/dashboard',
+    })
+    expect(message).toMatchObject({
+      type: 'flex',
+      altText: 'Deployment complete',
+      contents: {
+        type: 'bubble',
+        size: 'micro',
+        footer: {
+          contents: [{
+            action: {
+              type: 'uri',
+              label: 'Open dashboard',
+              uri: 'https://example.com/dashboard',
+            },
+          }],
+        },
+      },
+    })
   })
 })
 
