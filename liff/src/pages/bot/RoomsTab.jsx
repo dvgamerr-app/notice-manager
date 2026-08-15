@@ -1,17 +1,20 @@
-import { useMemo, useState } from 'react'
-import Notice from '../../components/Notice.jsx'
+import { useEffect, useMemo, useState } from 'react'
+import { LogIn, LogOut } from 'lucide-react'
+import Notice, { Toast } from '../../components/Notice.jsx'
+import { buildCompactFlexMessage } from '../../flex.js'
 
 const typeLabel = { group: 'กลุ่ม', room: 'ห้องหลายคน', user: 'แชตส่วนตัว' }
-const defaultJson = JSON.stringify([
-  { type: 'text', text: 'ทดสอบจาก LINE Manager' },
-], null, 2)
+const defaultJson = JSON.stringify(buildCompactFlexMessage({
+  title: 'แจ้งเตือน',
+  body: 'รายละเอียดแจ้งเตือนจาก LINE Manager',
+  actionLabel: 'เปิดดู',
+  actionUri: '',
+}), null, 2)
 
 export default function RoomsTab({ api, bot, chats, reload }) {
-  const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
   const [selected, setSelected] = useState([])
-  const [editing, setEditing] = useState({})
-  const [mode, setMode] = useState('text')
+  const [mode, setMode] = useState('json')
   const [message, setMessage] = useState('ทดสอบจาก LINE Manager')
   const [json, setJson] = useState(defaultJson)
   const [silent, setSilent] = useState(false)
@@ -19,18 +22,21 @@ export default function RoomsTab({ api, bot, chats, reload }) {
   const [notice, setNotice] = useState(null)
 
   const visible = useMemo(() => {
-    const needle = search.trim().toLowerCase()
     return chats.filter((chat) => {
-      const matchesSearch = !needle ||
-        `${chat.name} ${chat.sourceId} ${chat.type}`.toLowerCase().includes(needle)
       const matchesFilter =
         filter === 'all' ||
         (filter === 'registered' && chat.registered) ||
         (filter === 'unregistered' && !chat.registered) ||
         filter === chat.type
-      return matchesSearch && matchesFilter
+      return matchesFilter
     })
-  }, [chats, search, filter])
+  }, [chats, filter])
+
+  useEffect(() => {
+    if (notice?.type !== 'success') return undefined
+    const timeout = window.setTimeout(() => setNotice(null), 3000)
+    return () => window.clearTimeout(timeout)
+  }, [notice])
 
   const run = async (key, job, success) => {
     setBusy(key)
@@ -79,49 +85,52 @@ export default function RoomsTab({ api, bot, chats, reload }) {
         ? current.filter((id) => id !== chatId)
         : [...current, chatId])
 
-  const saveName = (chat) => run(
-    `name-${chat.id}`,
-    () => api.updateChat(bot.service, chat.id, {
-      name: editing[chat.id] ?? chat.name,
-    }),
-    () => 'บันทึกชื่อห้องแล้ว',
-  )
+  const toggleJoined = async (chat) => {
+    const joining = !chat.registered
+    const result = await run(
+      `${joining ? 'join' : 'leave'}-${chat.id}`,
+      () => api.updateChat(bot.service, chat.id, { registered: joining }),
+      () => joining ? 'Rejoin ห้องแล้ว' : 'Leave ห้องแล้ว',
+    )
+    if (result && !joining) {
+      setSelected((current) => current.filter((id) => id !== chat.id))
+    }
+  }
+
+  const refreshAll = async () => {
+    setBusy('refresh-all')
+    setNotice(null)
+    try {
+      const results = await Promise.allSettled(
+        chats.map((chat) => api.refreshChat(bot.service, chat.id)),
+      )
+      await reload()
+      const failed = results.filter((result) => result.status === 'rejected').length
+      if (failed) {
+        setNotice({
+          type: 'error',
+          text: `อัปเดตสำเร็จ ${results.length - failed}/${results.length} แชต · ล้มเหลว ${failed} แชต`,
+        })
+      } else {
+        setNotice({ type: 'success', text: `อัปเดตจาก LINE แล้ว ${results.length} แชต` })
+      }
+    } catch (error) {
+      setNotice({ type: 'error', text: error.message })
+    } finally {
+      setBusy('')
+    }
+  }
 
   return (
     <div className="space-y-3">
-      <Notice value={notice} onClose={() => setNotice(null)} />
-
-      <section className="bg-white rounded-2xl shadow-sm p-3 space-y-3">
-        <input
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="ค้นหาชื่อ, Chat ID หรือประเภท"
-          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#06C755]"
-        />
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {[
-            ['all', 'ทั้งหมด'],
-            ['registered', 'Registered'],
-            ['unregistered', 'ยังไม่ Register'],
-            ['user', 'ส่วนตัว'],
-            ['group', 'กลุ่ม'],
-            ['room', 'Room'],
-          ].map(([value, label]) => (
-            <button
-              type="button"
-              key={value}
-              onClick={() => setFilter(value)}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium ${
-                filter === value
-                  ? 'bg-[#06C755] text-white'
-                  : 'bg-gray-100 text-gray-600'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </section>
+      <Toast
+        value={notice?.type === 'success' ? notice : null}
+        onClose={() => setNotice(null)}
+      />
+      <Notice
+        value={notice?.type === 'error' ? notice : null}
+        onClose={() => setNotice(null)}
+      />
 
       <section className="bg-white rounded-2xl shadow-sm p-4 space-y-3">
         <div className="flex items-center justify-between">
@@ -129,7 +138,10 @@ export default function RoomsTab({ api, bot, chats, reload }) {
           <span className="text-xs text-gray-400">เลือกแล้ว {selected.length}/20</span>
         </div>
         <div className="flex rounded-xl bg-gray-100 p-1">
-          {['text', 'json'].map((value) => (
+          {[
+            ['text', 'Text'],
+            ['json', 'JSON'],
+          ].map(([value, label]) => (
             <button
               type="button"
               key={value}
@@ -138,7 +150,7 @@ export default function RoomsTab({ api, bot, chats, reload }) {
                 mode === value ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'
               }`}
             >
-              {value === 'text' ? 'Text' : 'Flex / JSON'}
+              {label}
             </button>
           ))}
         </div>
@@ -153,7 +165,7 @@ export default function RoomsTab({ api, bot, chats, reload }) {
           <textarea
             value={json}
             onChange={(event) => setJson(event.target.value)}
-            rows="8"
+            rows="12"
             spellCheck="false"
             className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-xs font-mono outline-none focus:border-[#06C755]"
           />
@@ -176,41 +188,31 @@ export default function RoomsTab({ api, bot, chats, reload }) {
         </button>
       </section>
 
-      <div className="flex items-center justify-between px-1">
-        <h3 className="text-sm font-semibold text-gray-500">Chats · {visible.length}</h3>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            disabled={!selected.length || Boolean(busy)}
-            onClick={() => run(
-              'bulk-register',
-              () => api.bulkUpdateChats(bot.service, {
-                chatIds: selected,
-                registered: true,
-              }),
-              (result) => `Register ${result.updated} ห้องแล้ว`,
-            )}
-            className="text-xs text-[#05a344] disabled:opacity-40"
+      <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-gray-500">Chats · {visible.length}</h3>
+          <select
+            value={filter}
+            onChange={(event) => setFilter(event.target.value)}
+            aria-label="กรองห้อง"
+            className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs text-gray-600 outline-none focus:border-[#06C755]"
           >
-            Register ที่เลือก
-          </button>
-          <button
-            type="button"
-            disabled={!selected.length || Boolean(busy)}
-            onClick={() => run(
-              'bulk-unregister',
-              () => api.bulkUpdateChats(bot.service, {
-                chatIds: selected,
-                registered: false,
-              }),
-              (result) => `Unregister ${result.updated} ห้องแล้ว`,
-            )}
-            className="text-xs text-amber-600 disabled:opacity-40"
-          >
-            Unregister ที่เลือก
-          </button>
-          <button type="button" onClick={reload} className="text-xs text-gray-500">รีเฟรช</button>
+            <option value="all">ทั้งหมด</option>
+            <option value="registered">Joined</option>
+            <option value="unregistered">Left</option>
+            <option value="user">ส่วนตัว</option>
+            <option value="group">กลุ่ม</option>
+            <option value="room">Room</option>
+          </select>
         </div>
+        <button
+          type="button"
+          disabled={Boolean(busy)}
+          onClick={refreshAll}
+          className="text-xs text-gray-500 disabled:opacity-40"
+        >
+          {busy === 'refresh-all' ? 'กำลังรีเฟรช...' : 'รีเฟรช'}
+        </button>
       </div>
 
       {!visible.length && (
@@ -220,14 +222,23 @@ export default function RoomsTab({ api, bot, chats, reload }) {
       )}
 
       {visible.map((chat) => (
-        <section key={chat.id} className="bg-white rounded-2xl shadow-sm p-4 space-y-3">
-          <div className="flex gap-3 items-start">
-            <input
-              type="checkbox"
-              checked={selected.includes(chat.id)}
-              onChange={() => toggleSelected(chat.id)}
-              className="mt-3"
-            />
+        <section
+          key={chat.id}
+          className={`flex items-center gap-2 rounded-2xl border bg-white p-4 shadow-sm transition ${
+            selected.includes(chat.id) ? 'border-[#06C755] ring-1 ring-[#06C755]' : 'border-transparent'
+          }`}
+        >
+          <button
+            type="button"
+            aria-pressed={selected.includes(chat.id)}
+            onClick={() => toggleSelected(chat.id)}
+            className="flex min-w-0 flex-1 items-start gap-3 text-left"
+          >
+            <span className={`mt-3 flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] ${
+              selected.includes(chat.id)
+                ? 'border-[#06C755] bg-[#06C755] text-white'
+                : 'border-gray-300 bg-white text-transparent'
+            }`}>✓</span>
             {chat.pictureUrl ? (
               <img src={chat.pictureUrl} alt="" className="w-10 h-10 rounded-full object-cover" />
             ) : (
@@ -236,77 +247,33 @@ export default function RoomsTab({ api, bot, chats, reload }) {
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <input
-                value={editing[chat.id] ?? chat.name}
-                onChange={(event) =>
-                  setEditing((current) => ({ ...current, [chat.id]: event.target.value }))}
-                className="w-full font-semibold border-b border-transparent focus:border-gray-300 outline-none"
-                placeholder="ตั้งชื่อห้อง"
-              />
+              <div className="truncate font-semibold text-gray-900">
+                {chat.lineName || chat.name || typeLabel[chat.type] || chat.sourceId}
+              </div>
               <div className="font-mono text-[11px] text-gray-400 truncate">{chat.sourceId}</div>
-              {chat.lineName && chat.lineName !== chat.name && (
-                <div className="text-[11px] text-gray-400 truncate">LINE: {chat.lineName}</div>
-              )}
               <div className="text-xs text-gray-500 mt-1">
                 {typeLabel[chat.type] || chat.type} · {chat.active ? 'online' : 'inactive'}
               </div>
             </div>
-            <button
-              type="button"
-              disabled={Boolean(busy)}
-              onClick={() => run(
-                `register-${chat.id}`,
-                () => api.updateChat(bot.service, chat.id, {
-                  registered: !chat.registered,
-                }),
-                () => chat.registered ? 'ยกเลิก Register แล้ว' : 'Register ห้องแล้ว',
-              )}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                chat.registered
-                  ? 'bg-[#e8f8ef] text-[#05a344]'
-                  : 'bg-gray-100 text-gray-500'
-              }`}
-            >
-              {chat.registered ? 'Registered' : 'Register'}
-            </button>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              disabled={Boolean(busy)}
-              onClick={() => saveName(chat)}
-              className="rounded-lg bg-gray-100 py-2 text-xs font-medium"
-            >
-              บันทึกชื่อ
-            </button>
-            <button
-              type="button"
-              disabled={Boolean(busy)}
-              onClick={() => run(
-                `refresh-${chat.id}`,
-                () => api.refreshChat(bot.service, chat.id),
-                () => 'อัปเดตข้อมูลจาก LINE แล้ว',
-              )}
-              className="rounded-lg bg-gray-100 py-2 text-xs font-medium"
-            >
-              Refresh
-            </button>
-            <button
-              type="button"
-              disabled={Boolean(busy) || chat.type === 'user'}
-              onClick={() => {
-                if (!window.confirm(`ให้บอตออกจาก ${chat.name || chat.sourceId} หรือไม่?`)) return
-                run(
-                  `leave-${chat.id}`,
-                  () => api.leaveChat(bot.service, chat.id),
-                  () => 'บอตออกจากห้องแล้ว',
-                )
-              }}
-              className="rounded-lg bg-red-50 text-red-600 py-2 text-xs font-medium disabled:opacity-40"
-            >
-              Leave
-            </button>
-          </div>
+          </button>
+          <button
+            type="button"
+            disabled={Boolean(busy)}
+            onClick={() => toggleJoined(chat)}
+            aria-label={chat.registered ? 'Leave chat' : 'Rejoin chat'}
+            title={chat.registered ? 'Leave' : 'Rejoin'}
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full disabled:opacity-40 ${
+              chat.registered
+                ? 'bg-red-50 text-red-600'
+                : 'bg-[#e8f8ef] text-[#05a344]'
+            }`}
+          >
+            {chat.registered ? (
+              <LogOut size={19} strokeWidth={2} aria-hidden="true" />
+            ) : (
+              <LogIn size={19} strokeWidth={2} aria-hidden="true" />
+            )}
+          </button>
         </section>
       ))}
     </div>

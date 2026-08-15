@@ -22,3 +22,19 @@ export function ErrorNotice({ children }) {
     </div>
   )
 }
+
+export function Toast({ value, onClose }) {
+  if (!value) return null
+  return (
+    <div className="pointer-events-none fixed inset-x-0 top-3 z-50 flex justify-center px-4">
+      <div
+        role="status"
+        className="pointer-events-auto flex max-w-sm items-center gap-3 rounded-full bg-gray-900 px-4 py-3 text-sm text-white shadow-xl"
+      >
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#06C755] text-xs font-bold">✓</span>
+        <span className="flex-1">{value.text}</span>
+        {onClose && <button type="button" onClick={onClose} aria-label="ปิด">×</button>}
+      </div>
+    </div>
+  )
+}
