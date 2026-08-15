@@ -4,14 +4,14 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   root: 'liff',
+  base: '/liff/',
+  envDir: '..',
   plugins: [react(), tailwindcss()],
   build: { outDir: '../public/liff', emptyOutDir: true },
   server: {
     port: 5173,
     proxy: {
       '/api': 'http://localhost:3000',
-      '/line': 'http://localhost:3000',
-      '/flex': 'http://localhost:3000',
       '/auth': 'http://localhost:3000',
     }
   }

@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout.jsx'
+import { ErrorNotice } from '../components/Notice.jsx'
+import Spinner from '../components/Spinner.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 
-export default function BotList({ api, profile }) {
+export default function BotList({ api, profile, logout }) {
   const [bots, setBots] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [importing, setImporting] = useState(false)
   const nav = useNavigate()
 
   useEffect(() => {
@@ -14,7 +17,26 @@ export default function BotList({ api, profile }) {
       .then(setBots)
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
-  }, [])
+  }, [api])
+
+  const importLegacy = async () => {
+    setImporting(true)
+    setError(null)
+    try {
+      const result = await api.importLegacyBots()
+      if (!result.legacyTableFound) {
+        setError('ไม่พบตาราง line_bot จากระบบเดิม')
+      } else if (!result.imported) {
+        setError(`ไม่มีบอตที่นำเข้าได้ (${result.skipped} รายการถูกข้าม)`)
+      } else {
+        setBots(await api.getBots())
+      }
+    } catch (cause) {
+      setError(cause.message)
+    } finally {
+      setImporting(false)
+    }
+  }
 
   const addBtn = (
     <button
@@ -29,7 +51,7 @@ export default function BotList({ api, profile }) {
   )
 
   return (
-    <Layout title="LINE Notice Manager" action={addBtn}>
+    <Layout title="LINE Manager" action={addBtn}>
       {/* User greeting */}
       {profile && (
         <div className="flex items-center gap-3 bg-white rounded-2xl p-4 shadow-sm">
@@ -37,10 +59,17 @@ export default function BotList({ api, profile }) {
             ? <img src={profile.pictureUrl} alt="" className="w-10 h-10 rounded-full" />
             : <div className="w-10 h-10 rounded-full bg-[#e8f8ef] flex items-center justify-center text-[#06C755] font-bold">{profile.displayName?.[0]}</div>
           }
-          <div>
+          <div className="min-w-0 flex-1">
             <p className="font-semibold text-gray-800 text-sm">{profile.displayName}</p>
-            <p className="text-xs text-gray-500">จัดการ LINE Bot ของคุณ</p>
+            <p className="text-xs text-gray-500">บัญชีผู้ดูแล LINE Manager</p>
           </div>
+          <button
+            type="button"
+            onClick={logout}
+            className="shrink-0 rounded-lg bg-gray-100 px-3 py-2 text-xs text-gray-600"
+          >
+            ออกจากระบบ
+          </button>
         </div>
       )}
 
@@ -48,18 +77,11 @@ export default function BotList({ api, profile }) {
 
       {loading && (
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-3 border-[#06C755] border-t-transparent rounded-full animate-spin" />
+          <Spinner className="h-8 w-8 border-3" />
         </div>
       )}
 
-      {error && (
-        <div className="bg-red-50 text-red-600 rounded-2xl p-4 text-sm flex gap-2">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="shrink-0 mt-0.5">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-          </svg>
-          {error}
-        </div>
-      )}
+      {error && <ErrorNotice>{error}</ErrorNotice>}
 
       {!loading && !error && bots.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
@@ -78,6 +100,14 @@ export default function BotList({ api, profile }) {
           >
             เพิ่ม LINE Bot
           </button>
+          <button
+            type="button"
+            disabled={importing}
+            onClick={importLegacy}
+            className="text-sm text-[#05a344] underline underline-offset-4 disabled:opacity-50"
+          >
+            {importing ? 'กำลังนำเข้า...' : 'นำเข้าบอตจากฐานข้อมูลเดิม'}
+          </button>
         </div>
       )}
 
@@ -95,7 +125,10 @@ export default function BotList({ api, profile }) {
           <div className="flex-1 min-w-0">
             <div className="font-semibold text-gray-900 truncate">{bot.name || bot.service}</div>
             <div className="text-xs text-gray-500 truncate font-mono mt-0.5">{bot.service}</div>
-            <div className="mt-1.5"><StatusBadge active={bot.active} /></div>
+            <div className="mt-1.5 flex items-center gap-2">
+              <StatusBadge active={bot.active} />
+              <span className="text-xs text-gray-400">{bot.chatCount || 0} chats</span>
+            </div>
           </div>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="2.5">
             <path d="M9 18l6-6-6-6" />
