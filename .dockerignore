@@ -10,12 +10,17 @@ LICENSE
 Makefile
 helm-charts
 .env
+.env.*
 .editorconfig
 .idea
 coverage*
 .oldfile
 docs
 dist
+tests
+.github
+AGENTS.md
+SECURITY.md
 *.sqlite
 *.db
 CLAUDE.local.md
