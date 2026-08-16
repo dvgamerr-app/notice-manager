@@ -27,8 +27,10 @@ Kysely migration `001_line_management` deliberately uses `managed_bot`,
 `managed_chat`, `managed_webhook_event`, and `managed_delivery`, plus
 `app_setting`, `app_user`, and `app_session`. Migration
 `002_management_operations` adds chat profile metadata, `managed_api_key`, and
-`managed_audit_log`. The distinct `managed_` prefix avoids destructive `ALTER`
-or `DROP` operations and works on both PostgreSQL and SQLite.
+`managed_audit_log`. Migration `003_webhook_processing` adds retryable webhook
+processing state, attempt counts, timestamps, and the supporting status index.
+The distinct `managed_` prefix avoids destructive changes to legacy tables and
+works on both PostgreSQL and SQLite.
 
 - `managed_chat.display_name` is the editable operator alias.
 - `managed_chat.line_display_name`, `picture_url`, and `metadata_payload` cache
@@ -36,8 +38,5 @@ or `DROP` operations and works on both PostgreSQL and SQLite.
 - `managed_api_key` stores a SHA-256 key hash and display prefix, never the raw
   external API key.
 - `managed_audit_log` records management and external-delivery actions.
-
-Legacy bots can be adopted through `POST /api/bots/import-legacy`. The import
-validates each channel access token with LINE, encrypts the token and channel
-secret with AES-256-GCM, and writes only to the new tables. Legacy data remains
-unchanged.
+- `managed_webhook_event.processing_status` and `attempt_count` distinguish a
+  completed duplicate from a failed event that LINE may safely redeliver.
