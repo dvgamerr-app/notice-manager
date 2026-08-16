@@ -6,8 +6,7 @@ WORKDIR /app
 RUN apk upgrade --no-cache
 
 COPY package.json bun.lockb ./
-RUN --mount=type=cache,target=/root/.bun/install/cache \
-    bun install --frozen-lockfile
+RUN bun install --frozen-lockfile
 
 FROM dependencies AS build
 ARG VITE_LIFF_ID=""
@@ -29,8 +28,7 @@ ENV NODE_ENV=production \
     PORT=3000
 
 COPY package.json bun.lockb ./
-RUN --mount=type=cache,target=/root/.bun/install/cache \
-    bun install --frozen-lockfile --production --ignore-scripts
+RUN bun install --frozen-lockfile --production --omit=peer --ignore-scripts
 
 COPY --chown=bun:bun index.js app.js ./
 COPY --chown=bun:bun api ./api
