@@ -261,9 +261,19 @@ bun start
 - `bun run smoke:prod` verifies the root redirect and production HTML/assets on
   an isolated in-memory database and port.
 
-Docker copies the repository, installs frozen Bun dependencies, builds the UI,
-and then starts the server. Because the image builds after `COPY`, ignored local
-`dist` output is not required in source control.
+Docker uses separate dependency/build/runtime stages. `VITE_LIFF_ID` and
+`VITE_API_URL` are public build arguments used only by the Vite stage. The
+runtime stage contains production dependencies, backend/migration sources, and
+the built `dist`; it runs as the non-root `bun` user with exactly
+`CMD ["bun", "index.js"]`. Ignored local `dist` output is not required.
+
+`.github/workflows/build-ghcr.yml` runs application checks plus Trivy repository
+and image gates, publishes SBOM/provenance multi-platform images to GHCR, and
+deploys the immutable manifest digest on the self-hosted Apple `container`
+runner. CI installs a pinned Trivy release only after GitHub artifact-attestation
+verification; do not replace this with a mutable third-party action tag. Required
+GitHub variables/secrets are documented in `README.md`. Do not move runtime
+secrets into Docker build arguments or image layers.
 
 ## Source map
 
@@ -290,6 +300,9 @@ and then starts the server. Because the image builds after `COPY`, ignored local
 - `scripts/smoke-*.js` and `scripts/verify-build.js` — repeatable runtime/build
   verification without production data.
 - `scripts/retention.js` — migration-aware retention command for a scheduler.
+- `.github/workflows/build-ghcr.yml` — Bun verification, Trivy scanning, GHCR
+  publication, and digest-pinned self-hosted deployment.
+- `Dockerfile` — multi-stage non-root production image running `bun index.js`.
 - `src/` — React LIFF dashboard.
 - `src/components/FlexMessagePreview.jsx` — LINE-like Flex bubble preview.
 - `src/flex.js` — compact Flex card builder.

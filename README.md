@@ -137,6 +137,49 @@ git diff --check
 PowerShell ใช้ `$env:DATABASE_URL=':memory:'; bun run migrate` สำหรับ migration
 ชุดเดียวกัน ปัจจุบันโปรเจกต์ยังไม่มี lint หรือ format script แยกต่างหาก
 
+## Container build และ deploy
+
+Dockerfile เป็น multi-stage build: stage แรกติดตั้ง dependency และ build LIFF,
+ส่วน runtime image ติดตั้งเฉพาะ production dependency, รันด้วย user `bun` และมี
+process หลักเพียง `bun index.js`
+
+```bash
+docker build \
+  --build-arg VITE_LIFF_ID=YOUR_LIFF_ID \
+  --build-arg VITE_API_URL=https://line-manager.example.com \
+  -t notice-manager:local .
+
+docker run --rm -p 3000:3000 \
+  -e DATABASE_URL=postgresql://user:password@host:5432/line_manager \
+  -e LINE_LOGIN_CHANNEL_ID=YOUR_CHANNEL_ID \
+  -e LINE_ADMIN_USER_IDS=YOUR_LINE_USER_ID \
+  -e PUBLIC_BASE_URL=https://line-manager.example.com \
+  -e CREDENTIAL_ENCRYPTION_KEY=REPLACE_WITH_32_PLUS_CHARACTERS \
+  notice-manager:local
+```
+
+`.github/workflows/build-ghcr.yml` ทำงานบน push เข้า `main`, tag `v*`, pull
+request และ manual dispatch โดยรัน Bun checks และ Trivy ก่อน publish image
+`linux/amd64` + `linux/arm64` ไปที่ `ghcr.io/<owner>/notice-manager` จากนั้น deploy
+ด้วย manifest digest บน self-hosted Apple `container` runner และตรวจ `/health`
+
+ตั้ง GitHub Actions configuration ก่อน deploy:
+
+| Type | Name | Purpose |
+|---|---|---|
+| Variable | `VITE_LIFF_ID` | LIFF ID ที่ฝังตอน build; จำเป็น |
+| Variable | `VITE_API_URL` | API origin ที่ฝังตอน build; เว้นว่างเพื่อใช้ same-origin |
+| Variable | `LINE_LOGIN_CHANNEL_ID` | Channel ID ที่ backend ใช้ตรวจ LIFF token |
+| Variable | `PUBLIC_BASE_URL` | Public HTTPS origin สำหรับ webhook/avatar |
+| Variable | `BASE_URL`, `CORS_ORIGINS`, `LOG_LEVEL`, `PORT` | Runtime URL, CORS, log level และ host port |
+| Secret | `DATABASE_URL` | Production PostgreSQL/SQLite connection |
+| Secret | `CREDENTIAL_ENCRYPTION_KEY` | คีย์เข้ารหัสอย่างน้อย 32 ตัวอักษร |
+| Secret | `LINE_ADMIN_USER_IDS` | allowlist ของ LINE administrator |
+| Secret | `DISCORD_WEBHOOK` | การแจ้งผล deploy; ไม่บังคับ |
+
+Self-hosted runner ต้องเป็น Apple silicon/macOS ที่ติดตั้งและเปิด Apple
+`container` service แล้ว และต้องเข้าถึง host port กับ production database ได้
+
 ## Dashboard
 
 - **Rooms** — filter ห้องส่วนตัว กลุ่ม และ room ข้างจำนวนแชต; กดการ์ดเพื่อเลือก

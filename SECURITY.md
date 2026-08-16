@@ -1,21 +1,32 @@
 # Security Policy
 
-## Supported Versions
+## Supported versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+Security fixes are applied to the current `7.x` release line and the latest
+container image built from `main`. Older releases are unsupported.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+## Reporting a vulnerability
 
-## Reporting a Vulnerability
+Do not open a public issue for a suspected vulnerability. Report it through a
+[private GitHub Security Advisory](https://github.com/dvgamerr-app/notice-manager/security/advisories/new)
+and include:
 
-Use this section to tell people how to report a vulnerability.
+- affected version, image tag, and digest when available;
+- reproduction steps and the expected security impact;
+- logs or screenshots with credentials and personal data removed.
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+Never include LINE tokens, LIFF tokens, database URLs, API keys, session tokens,
+or credential-encryption keys in a report.
+
+## Automated security gates
+
+The container workflow blocks publication and deployment when Trivy finds a
+fixable `HIGH` or `CRITICAL` repository, secret, configuration, operating-system,
+or application-library finding. Container findings are also uploaded to GitHub
+code scanning as SARIF. CI downloads a pinned Trivy release and verifies its
+GitHub artifact attestation before execution instead of trusting a mutable action
+tag. All other workflow actions are pinned to immutable commit SHAs. CodeQL and
+Dependabot remain enabled independently.
+
+Published images include an SBOM and build provenance. Deployment uses the
+published multi-platform manifest digest rather than a mutable tag.
