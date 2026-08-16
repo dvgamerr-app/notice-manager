@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import Layout from '../components/Layout.jsx'
 import Notice from '../components/Notice.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
@@ -18,11 +18,12 @@ const tabs = [
 
 export default function BotDetail({ api }) {
   const { name } = useParams()
+  const location = useLocation()
   const [bot, setBot] = useState(null)
   const [chats, setChats] = useState([])
   const [tab, setTab] = useState('rooms')
   const [loading, setLoading] = useState(true)
-  const [notice, setNotice] = useState(null)
+  const [notice, setNotice] = useState(() => location.state?.notice || null)
 
   const reload = useCallback(async () => {
     const [botData, chatData] = await Promise.all([
@@ -40,7 +41,7 @@ export default function BotDetail({ api }) {
   }, [reload])
 
   return (
-    <Layout title={bot?.name || name} back>
+    <Layout>
       <Notice value={notice} onClose={() => setNotice(null)} />
 
       {loading && (

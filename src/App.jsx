@@ -37,7 +37,9 @@ function TunnelRequired() {
   useEffect(() => {
     fetch('/app/config')
       .then((response) => response.ok ? response.json() : {})
-      .then((config) => setPublicBaseUrl(config.publicBaseUrl || ''))
+      .then((config) => setPublicBaseUrl(
+        /** @type {{ publicBaseUrl?: string }} */ (config).publicBaseUrl || '',
+      ))
       .catch(() => {})
   }, [])
 
@@ -74,7 +76,7 @@ function TunnelRequired() {
 }
 
 export default function App() {
-  const { profile, token, error, ready, requiresTunnel, logout } = useLiff()
+  const { token, error, ready, requiresTunnel } = useLiff()
   const api = useMemo(() => createApi(token), [token])
 
   if (requiresTunnel) return <TunnelRequired />
@@ -84,10 +86,7 @@ export default function App() {
   return (
     <HashRouter>
       <Routes>
-        <Route
-          path="/"
-          element={<BotList api={api} profile={profile} logout={logout} />}
-        />
+        <Route path="/" element={<BotList api={api} />} />
         <Route path="/bot/new" element={<BotCreate api={api} />} />
         <Route path="/bot/:name" element={<BotDetail api={api} />} />
         <Route path="/close" element={<Close />} />

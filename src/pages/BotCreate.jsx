@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout.jsx'
 import { ErrorNotice } from '../components/Notice.jsx'
@@ -11,8 +11,18 @@ export default function BotCreate({ api }) {
   const [error, setError] = useState(null)
   const [showToken, setShowToken] = useState(false)
   const [showSecret, setShowSecret] = useState(false)
+  const [publicBaseUrl, setPublicBaseUrl] = useState('')
+
+  useEffect(() => {
+    api.getAppConfig()
+      .then((config) => setPublicBaseUrl(config.publicBaseUrl || ''))
+      .catch(() => {})
+  }, [api])
 
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
+  const webhookEndpoint = publicBaseUrl && form.service
+    ? `${publicBaseUrl}/line/${encodeURIComponent(form.service.trim().toLowerCase())}`
+    : ''
 
   const submit = async (e) => {
     e.preventDefault()
@@ -21,15 +31,27 @@ export default function BotCreate({ api }) {
     setError(null)
     try {
       const created = await api.createBot(form)
-      nav(`/bot/${created.service}`, { replace: true })
+      const webhookMessage = created.webhookActive
+        ? `เพิ่มบอตและเปลี่ยน Webhook URL เป็น ${created.webhookEndpoint} แล้ว`
+        : `เพิ่มบอตและเปลี่ยน Webhook URL เป็น ${created.webhookEndpoint} แล้ว กรุณาเปิด Use webhook ใน LINE Developers Console`
+      nav(`/bot/${created.service}`, {
+        replace: true,
+        state: { notice: { type: 'success', text: webhookMessage } },
+      })
     } catch (err) {
-      setError(err.message)
+      const diagnostics = [
+        err.data?.lineReason && err.data.lineReason !== err.message
+          ? `LINE: ${err.data.lineReason}`
+          : '',
+        err.data?.requestId ? `Request ID: ${err.data.requestId}` : '',
+      ].filter(Boolean)
+      setError([err.message, ...diagnostics].join('\n'))
       setLoading(false)
     }
   }
 
   return (
-    <Layout title="เพิ่ม LINE Bot" back>
+    <Layout>
       <form onSubmit={submit} className="space-y-4">
         {error && <ErrorNotice>{error}</ErrorNotice>}
 
@@ -43,6 +65,18 @@ export default function BotCreate({ api }) {
             />
           </Field>
 
+          {webhookEndpoint && (
+            <div className="rounded-xl bg-[#e8f8ef] p-3">
+              <p className="text-xs font-medium text-[#057a36]">Webhook URL ที่ระบบจะตั้งให้</p>
+              <code className="mt-1 block break-all text-xs text-gray-700">
+                {webhookEndpoint}
+              </code>
+              <p className="mt-1 text-xs text-gray-500">
+                ระบบจะแทนที่ Webhook URL เดิมหลัง LINE ยืนยัน Channel Access Token สำเร็จ
+              </p>
+            </div>
+          )}
+
           <Field label="ชื่อแสดง" hint="ชื่อสำหรับแสดงในระบบ">
             <input
               value={form.name} onChange={set('name')}
@@ -51,7 +85,10 @@ export default function BotCreate({ api }) {
             />
           </Field>
 
-          <Field label="Channel Access Token *">
+          <Field
+            label="Channel Access Token *"
+            hint="คัดลอกจาก Messaging API > Channel access token (ไม่ใช่ LIFF access token)"
+          >
             <SecretInput
               value={form.access_token}
               onChange={set('access_token')}
@@ -84,8 +121,8 @@ export default function BotCreate({ api }) {
           className="flex w-full min-h-14 items-center justify-center gap-2 rounded-2xl bg-[#06C755] py-4 text-base font-semibold text-white transition-colors active:bg-[#05a344] disabled:opacity-60"
         >
           {loading
-            ? <><Spinner className="h-5 w-5 border-2" colorClassName="border-white" /> กำลังสร้าง...</>
-            : 'สร้าง LINE Bot'
+            ? <><Spinner className="h-5 w-5 border-2" colorClassName="border-white" /> กำลังเพิ่มบอตและตั้ง Webhook...</>
+            : 'เพิ่ม LINE Bot และตั้ง Webhook'
           }
         </button>
       </form>
@@ -126,7 +163,7 @@ function SecretInput({ value, onChange, visible, onToggle, name, placeholder }) 
   )
 }
 
-function Field({ label, hint, children }) {
+function Field({ label, hint = '', children }) {
   return (
     <div className="space-y-1.5">
       <label className="block text-sm font-medium text-gray-700">{label}</label>

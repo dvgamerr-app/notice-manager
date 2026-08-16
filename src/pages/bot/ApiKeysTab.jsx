@@ -61,7 +61,7 @@ export default function ApiKeysTab({ api, bot }) {
             value={name}
             onChange={(event) => setName(event.target.value)}
             required
-            maxLength="100"
+            maxLength={100}
             placeholder="เช่น Production monitoring"
             className="min-w-0 flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#06C755]"
           />
@@ -73,7 +73,7 @@ export default function ApiKeysTab({ api, bot }) {
           </button>
         </form>
         <p className="text-xs text-gray-500">
-          Key จำกัดสิทธิ์เฉพาะบอตนี้ และใช้ได้กับห้องที่ Registered เท่านั้น
+          Key จำกัดสิทธิ์เฉพาะบอตนี้ และใช้ได้กับห้องที่ Joined เท่านั้น
         </p>
       </section>
 

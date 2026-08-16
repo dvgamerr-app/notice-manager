@@ -5,11 +5,10 @@ import { ErrorNotice } from '../components/Notice.jsx'
 import Spinner from '../components/Spinner.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 
-export default function BotList({ api, profile, logout }) {
+export default function BotList({ api }) {
   const [bots, setBots] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [importing, setImporting] = useState(false)
   const nav = useNavigate()
 
   useEffect(() => {
@@ -19,61 +18,21 @@ export default function BotList({ api, profile, logout }) {
       .finally(() => setLoading(false))
   }, [api])
 
-  const importLegacy = async () => {
-    setImporting(true)
-    setError(null)
-    try {
-      const result = await api.importLegacyBots()
-      if (!result.legacyTableFound) {
-        setError('ไม่พบตาราง line_bot จากระบบเดิม')
-      } else if (!result.imported) {
-        setError(`ไม่มีบอตที่นำเข้าได้ (${result.skipped} รายการถูกข้าม)`)
-      } else {
-        setBots(await api.getBots())
-      }
-    } catch (cause) {
-      setError(cause.message)
-    } finally {
-      setImporting(false)
-    }
-  }
-
-  const addBtn = (
-    <button
-      onClick={() => nav('/bot/new')}
-      className="flex items-center justify-center w-11 h-11 -mr-2 rounded-full active:bg-white/20"
-      aria-label="เพิ่ม LINE Bot"
-    >
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <path d="M12 5v14M5 12h14" />
-      </svg>
-    </button>
-  )
-
   return (
-    <Layout title="LINE Manager" action={addBtn}>
-      {/* User greeting */}
-      {profile && (
-        <div className="flex items-center gap-3 bg-white rounded-2xl p-4 shadow-sm">
-          {profile.pictureUrl
-            ? <img src={profile.pictureUrl} alt="" className="w-10 h-10 rounded-full" />
-            : <div className="w-10 h-10 rounded-full bg-[#e8f8ef] flex items-center justify-center text-[#06C755] font-bold">{profile.displayName?.[0]}</div>
-          }
-          <div className="min-w-0 flex-1">
-            <p className="font-semibold text-gray-800 text-sm">{profile.displayName}</p>
-            <p className="text-xs text-gray-500">บัญชีผู้ดูแล LINE Manager</p>
-          </div>
-          <button
-            type="button"
-            onClick={logout}
-            className="shrink-0 rounded-lg bg-gray-100 px-3 py-2 text-xs text-gray-600"
-          >
-            ออกจากระบบ
-          </button>
-        </div>
-      )}
-
-      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide px-1">LINE Bots</h2>
+    <Layout>
+      <div className="flex min-h-11 items-center justify-between px-1">
+        <h1 className="text-sm font-semibold uppercase tracking-wide text-gray-500">LINE Bots</h1>
+        <button
+          type="button"
+          onClick={() => nav('/bot/new')}
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-[#06C755] text-white shadow-sm active:bg-[#05a344]"
+          aria-label="เพิ่ม LINE Bot"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
+      </div>
 
       {loading && (
         <div className="flex justify-center py-12">
@@ -99,14 +58,6 @@ export default function BotList({ api, profile, logout }) {
             className="mt-2 bg-[#06C755] text-white font-semibold px-6 py-3 rounded-full min-h-11 active:bg-[#05a344] transition-colors"
           >
             เพิ่ม LINE Bot
-          </button>
-          <button
-            type="button"
-            disabled={importing}
-            onClick={importLegacy}
-            className="text-sm text-[#05a344] underline underline-offset-4 disabled:opacity-50"
-          >
-            {importing ? 'กำลังนำเข้า...' : 'นำเข้าบอตจากฐานข้อมูลเดิม'}
           </button>
         </div>
       )}

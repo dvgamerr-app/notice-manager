@@ -165,11 +165,19 @@ export default function MonitorTab({ api, bot }) {
             <>
               <span className="rounded-full bg-blue-50 text-blue-600 px-2 py-1 text-xs">{row.type}</span>
               <span className="min-w-0 flex-1 truncate text-xs text-gray-500">{row.sourceId || '-'}</span>
+              <span className={`text-[10px] ${
+                row.processingStatus === 'failed' ? 'text-red-600' : 'text-gray-400'
+              }`}>
+                {row.processingStatus}{row.attemptCount > 1 ? ` · ${row.attemptCount} attempts` : ''}
+              </span>
               {row.redelivery && <span className="text-[10px] text-amber-600">redelivery</span>}
             </>
           )}
         >
           <p className="mt-2 text-[11px] text-gray-400">{formatDate(row.receivedAt)}</p>
+          {row.processingError && (
+            <p className="mt-2 text-xs text-red-600">{row.processingError}</p>
+          )}
         </RecordDetails>
       ))}
 

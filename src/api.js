@@ -24,7 +24,9 @@ const req = (token) => async (method, path, body) => {
   })
   const data = await response.json().catch(() => ({}))
   if (!response.ok) {
-    const error = new Error(data.error || response.statusText || 'Request failed')
+    const error = /** @type {Error & { status?: number, data?: any }} */ (
+      new Error(data.error || response.statusText || 'Request failed')
+    )
     error.status = response.status
     error.data = data
     throw error
@@ -35,11 +37,11 @@ const req = (token) => async (method, path, body) => {
 export const createApi = (token) => {
   const call = req(token)
   return {
+    getAppConfig: () => call('GET', '/app/config'),
     getSession: () => call('GET', '/api/session'),
     getBots: () => call('GET', '/api/bots'),
     getBot: (bot) => call('GET', `/api/bots/${encodeURIComponent(bot)}`),
     createBot: (data) => call('POST', '/api/bots', data),
-    importLegacyBots: () => call('POST', '/api/bots/import-legacy', {}),
     updateBot: (bot, data) =>
       call('PATCH', `/api/bots/${encodeURIComponent(bot)}`, data),
     getQuota: (bot) =>

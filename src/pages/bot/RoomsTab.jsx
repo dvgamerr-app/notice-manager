@@ -158,15 +158,15 @@ export default function RoomsTab({ api, bot, chats, reload }) {
           <textarea
             value={message}
             onChange={(event) => setMessage(event.target.value)}
-            rows="3"
+            rows={3}
             className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#06C755]"
           />
         ) : (
           <textarea
             value={json}
             onChange={(event) => setJson(event.target.value)}
-            rows="12"
-            spellCheck="false"
+            rows={12}
+            spellCheck={false}
             className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-xs font-mono outline-none focus:border-[#06C755]"
           />
         )}
