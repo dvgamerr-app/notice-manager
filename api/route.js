@@ -2,6 +2,7 @@ import { Elysia } from 'elysia'
 import { deleteSession, getSessionUser } from '../lib/auth.js'
 import liffAuth from './auth/liff.js'
 import externalApi from './routes/external.js'
+import { getAvatarOptions, getAvatarPng } from '../lib/avatars.js'
 import lineBotWebhook from './webhooks/line.js'
 import {
   addApiKey,
@@ -73,13 +74,30 @@ const getPublicBaseUrl = () => {
   }
 }
 
+const getAvatar = ({ params }) => {
+  const avatarId = String(params.file || '').replace(/\.png$/i, '')
+  const png = getAvatarPng(avatarId)
+  if (!png) return new Response('Avatar not found', { status: 404 })
+  return new Response(png, {
+    headers: {
+      'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=86400, immutable',
+    },
+  })
+}
+
 export default new Elysia({ name: 'routes' })
   .use(webhookRoutes)
   .use(externalApi)
   .get('/health', () => ({ ok: true }))
-  .get('/app/config', () => ({
-    publicBaseUrl: getPublicBaseUrl(),
-  }))
+  .get('/app/config', () => {
+    const publicBaseUrl = getPublicBaseUrl()
+    return {
+      publicBaseUrl,
+      avatars: getAvatarOptions(publicBaseUrl),
+    }
+  })
+  .get('/app/avatars/:file', /** @type {any} */ (getAvatar))
   .post('/auth/liff', /** @type {any} */ (liffAuth))
   .post('/auth/logout', async ({ headers }) => {
     await deleteSession(headers)

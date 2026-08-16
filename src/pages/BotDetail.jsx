@@ -21,17 +21,20 @@ export default function BotDetail({ api }) {
   const location = useLocation()
   const [bot, setBot] = useState(null)
   const [chats, setChats] = useState([])
+  const [appConfig, setAppConfig] = useState({ avatars: [] })
   const [tab, setTab] = useState('rooms')
   const [loading, setLoading] = useState(true)
   const [notice, setNotice] = useState(() => location.state?.notice || null)
 
   const reload = useCallback(async () => {
-    const [botData, chatData] = await Promise.all([
+    const [botData, chatData, configData] = await Promise.all([
       api.getBot(name),
       api.getChats(name),
+      api.getAppConfig(),
     ])
     setBot(botData)
     setChats(chatData)
+    setAppConfig(configData)
   }, [api, name])
 
   useEffect(() => {
@@ -63,11 +66,11 @@ export default function BotDetail({ api }) {
                 <h2 className="font-bold truncate">{bot.name}</h2>
                 <StatusBadge active={bot.active} />
               </div>
-              <p className="text-xs text-gray-500 font-mono truncate">
-                {bot.basicId || bot.botUserId}
-              </p>
-              <p className="text-xs text-gray-400 mt-1">
-                {chats.filter((chat) => chat.registered).length}/{chats.length} registered chats
+              <p className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-gray-500">
+                <span className="truncate font-mono">{bot.basicId || bot.botUserId}</span>
+                <span className="shrink-0 text-gray-400">
+                  · {chats.filter((chat) => chat.registered).length}/{chats.length} registered chats
+                </span>
               </p>
             </div>
           </section>
@@ -92,9 +95,15 @@ export default function BotDetail({ api }) {
           </nav>
 
           {tab === 'rooms' && (
-            <RoomsTab api={api} bot={bot} chats={chats} reload={reload} />
+            <RoomsTab
+              api={api}
+              bot={bot}
+              chats={chats}
+              appConfig={appConfig}
+              reload={reload}
+            />
           )}
-          {tab === 'monitor' && <MonitorTab api={api} bot={bot} />}
+          {tab === 'monitor' && <MonitorTab api={api} bot={bot} chats={chats} />}
           {tab === 'api' && <ApiKeysTab api={api} bot={bot} />}
           {tab === 'settings' && (
             <SettingsTab api={api} bot={bot} reload={reload} />

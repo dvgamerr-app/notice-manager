@@ -79,3 +79,30 @@ export const buildCompactFlexMessage = ({
     contents: bubble,
   }
 }
+
+export const applyMessageSender = (input, sender = {}) => {
+  const name = value(sender.name)
+  const iconUrl = value(sender.iconUrl)
+  if (name.length > 20) throw new Error('Display name ต้องไม่เกิน 20 ตัวอักษร')
+  if (iconUrl) {
+    let url
+    try {
+      url = new URL(iconUrl)
+    } catch {
+      throw new Error('URL ของ avatar ไม่ถูกต้อง')
+    }
+    if (url.protocol !== 'https:') throw new Error('Avatar สำหรับ LINE ต้องเป็น HTTPS')
+    if (iconUrl.length > 2_000) throw new Error('URL ของ avatar ยาวเกินกำหนด')
+  }
+  if (!name && !iconUrl) return input
+
+  const decorate = (message) => ({
+    ...message,
+    sender: {
+      ...(message.sender || {}),
+      ...(name ? { name } : {}),
+      ...(iconUrl ? { iconUrl } : {}),
+    },
+  })
+  return Array.isArray(input) ? input.map(decorate) : decorate(input)
+}

@@ -139,11 +139,12 @@ PowerShell ใช้ `$env:DATABASE_URL=':memory:'; bun run migrate` สำห�
 
 ## Dashboard
 
-- **Rooms** — filter ห้องส่วนตัว กลุ่ม และ room ข้างจำนวนแชต; เลือกทั้งการ์ด;
-  refresh metadata; Join/Leave; เลือกได้สูงสุด 20 ห้องเพื่อส่ง Text หรือ LINE
-  Flex card ขนาด micro หรือ message JSON โดย LINE จะ validate payload ก่อน push
-- **Monitor** — ดู delivery status, request ID/error, signed webhook event,
-  redelivery flag และ audit log แบบ filter และโหลดเพิ่มทีละหน้า
+- **Rooms** — filter ห้องส่วนตัว กลุ่ม และ room ข้างจำนวนแชต; กดการ์ดเพื่อเลือก
+  หรือกดค้าง 1 วินาทีเพื่อ copy Chat ID; refresh metadata; Join/Leave; เลือกได้
+  สูงสุด 20 ห้องเพื่อส่ง Text หรือ Flex พร้อม LINE-like preview, display name และ
+  avatar ผู้ส่ง โดย LINE จะ validate payload ก่อน push
+- **Monitor** — แสดงชื่อแชตแทน ID ใน delivery, signed webhook event และ audit
+  log ด้วย expandable record layout เดียวกัน พร้อม filter และโหลดเพิ่มทีละหน้า
 - **API Keys** — สร้าง/revoke bot-scoped key โดย raw key แสดงครั้งเดียว
 - **Settings** — sync/test webhook, เปิด/ปิดบอต, message quota และ rotate
   token/secret หลังตรวจว่าเป็น Official Account เดิม
@@ -159,7 +160,8 @@ shell, `Spinner` ใช้ loading indicator ร่วมกัน และ `No
 
 | Method | Endpoint | Purpose |
 |---|---|---|
-| `GET` | `/app/config` | อ่าน public tunnel URL สำหรับคำเตือนเมื่อเปิด LIFF ผ่าน localhost |
+| `GET` | `/app/config` | อ่าน public tunnel URL และตัวเลือก generated sender avatar |
+| `GET` | `/app/avatars/:file` | อ่าน generated PNG avatar สำหรับ LINE message sender |
 | `POST` | `/auth/liff` | แลก LIFF access token เป็น local reusable session |
 | `POST` | `/auth/logout` | ยกเลิก local session |
 | `GET/POST` | `/api/bots` | ดู/เพิ่ม Messaging API bot |

@@ -1,17 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Notice from '../../components/Notice.jsx'
 
 const PAGE_SIZE = 25
 const formatDate = (value) =>
   value ? new Date(value).toLocaleString('th-TH') : '-'
 
-function RecordDetails({ summary, summaryClassName = '', value, children }) {
+function MonitorRecord({ summary, value, children = null }) {
   return (
-    <details className="rounded-2xl bg-white p-4 shadow-sm">
-      <summary className={`list-none cursor-pointer ${summaryClassName}`}>
+    <details className="px-1 py-3">
+      <summary className="flex cursor-pointer list-none items-center gap-3">
         {summary}
       </summary>
-      <pre className="mt-3 overflow-auto whitespace-pre-wrap rounded-xl bg-gray-50 p-3 text-[11px]">
+      <pre className="mt-3 overflow-auto whitespace-pre-wrap border-l-2 border-gray-200 pl-3 text-[11px] text-gray-600">
         {JSON.stringify(value, null, 2)}
       </pre>
       {children}
@@ -19,7 +19,7 @@ function RecordDetails({ summary, summaryClassName = '', value, children }) {
   )
 }
 
-export default function MonitorTab({ api, bot }) {
+export default function MonitorTab({ api, bot, chats }) {
   const [view, setView] = useState('deliveries')
   const [records, setRecords] = useState({
     deliveries: [],
@@ -31,6 +31,19 @@ export default function MonitorTab({ api, bot }) {
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(false)
   const [notice, setNotice] = useState(null)
+  const chatLookup = useMemo(() => {
+    const lookup = new Map()
+    for (const chat of chats || []) {
+      lookup.set(chat.id, chat)
+      lookup.set(chat.sourceId, chat)
+    }
+    return lookup
+  }, [chats])
+
+  const chatDisplayName = (...identifiers) => {
+    const chat = identifiers.map((id) => chatLookup.get(id)).find(Boolean)
+    return chat?.lineName || chat?.name || identifiers.find(Boolean) || 'ไม่ทราบแชต'
+  }
 
   const fetchPage = async ({ append = false } = {}) => {
     const current = records[view]
@@ -132,74 +145,111 @@ export default function MonitorTab({ api, bot }) {
         </div>
       )}
 
-      {!loading && view === 'deliveries' && rows.map((row) => (
-        <RecordDetails
-          key={row.id}
-          value={row.messages}
-          summaryClassName="flex items-center gap-3"
-          summary={(
-            <>
-              <span className={`w-2.5 h-2.5 rounded-full ${
-                row.status === 'sent' ? 'bg-[#06C755]' :
-                row.status === 'failed' ? 'bg-red-500' : 'bg-amber-400'
-              }`} />
-              <div className="min-w-0 flex-1">
-                <div className="font-semibold text-sm">{row.status}</div>
-                <div className="text-xs text-gray-400 truncate">{row.recipientId}</div>
-              </div>
-              <time className="text-[11px] text-gray-400">{formatDate(row.createdAt)}</time>
-            </>
-          )}
-        >
-          {row.requestId && <p className="mt-2 text-xs">Request ID: {row.requestId}</p>}
-          {row.error && <p className="mt-2 text-xs text-red-600">{row.error}</p>}
-        </RecordDetails>
-      ))}
+      {!loading && view === 'deliveries' && rows.length > 0 && (
+        <div className="divide-y divide-gray-200 border-y border-gray-200">
+          {rows.map((row) => (
+            <MonitorRecord
+              key={row.id}
+              value={row.messages}
+              summary={(
+                <>
+                  <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+                    row.status === 'sent' ? 'bg-[#06C755]' :
+                    row.status === 'failed' ? 'bg-red-500' : 'bg-amber-400'
+                  }`} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-semibold text-gray-800">
+                      {chatDisplayName(row.chatId, row.recipientId)}
+                    </div>
+                    <div className="mt-0.5 truncate text-xs text-gray-500">{row.status}</div>
+                  </div>
+                  <time className="shrink-0 text-right text-[11px] text-gray-400">
+                    {formatDate(row.createdAt)}
+                  </time>
+                </>
+              )}
+            >
+              <p className="mt-2 border-l-2 border-gray-200 pl-3 font-mono text-[10px] text-gray-400">
+                Chat ID: {row.recipientId}
+              </p>
+              {row.requestId && (
+                <p className="mt-1 border-l-2 border-gray-200 pl-3 text-xs text-gray-500">
+                  Request ID: {row.requestId}
+                </p>
+              )}
+              {row.error && (
+                <p className="mt-1 border-l-2 border-red-200 pl-3 text-xs text-red-600">
+                  {row.error}
+                </p>
+              )}
+            </MonitorRecord>
+          ))}
+        </div>
+      )}
 
-      {!loading && view === 'events' && rows.map((row) => (
-        <RecordDetails
-          key={row.id}
-          value={row.payload}
-          summaryClassName="flex items-center gap-3"
-          summary={(
-            <>
-              <span className="rounded-full bg-blue-50 text-blue-600 px-2 py-1 text-xs">{row.type}</span>
-              <span className="min-w-0 flex-1 truncate text-xs text-gray-500">{row.sourceId || '-'}</span>
-              <span className={`text-[10px] ${
-                row.processingStatus === 'failed' ? 'text-red-600' : 'text-gray-400'
-              }`}>
-                {row.processingStatus}{row.attemptCount > 1 ? ` · ${row.attemptCount} attempts` : ''}
-              </span>
-              {row.redelivery && <span className="text-[10px] text-amber-600">redelivery</span>}
-            </>
-          )}
-        >
-          <p className="mt-2 text-[11px] text-gray-400">{formatDate(row.receivedAt)}</p>
-          {row.processingError && (
-            <p className="mt-2 text-xs text-red-600">{row.processingError}</p>
-          )}
-        </RecordDetails>
-      ))}
+      {!loading && view === 'events' && rows.length > 0 && (
+        <div className="divide-y divide-gray-200 border-y border-gray-200">
+          {rows.map((row) => (
+            <MonitorRecord
+              key={row.id}
+              value={row.payload}
+              summary={(
+                <>
+                  <span className="shrink-0 rounded-full bg-blue-50 px-2 py-1 text-[10px] font-semibold text-blue-600">
+                    {row.type}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-semibold text-gray-800">
+                      {chatDisplayName(row.sourceId)}
+                    </div>
+                    <div className={`mt-0.5 truncate text-xs ${
+                      row.processingStatus === 'failed' ? 'text-red-600' : 'text-gray-500'
+                    }`}>
+                      {row.processingStatus}
+                      {row.attemptCount > 1 ? ` · ${row.attemptCount} attempts` : ''}
+                      {row.redelivery ? ' · redelivery' : ''}
+                    </div>
+                  </div>
+                  <time className="shrink-0 text-right text-[11px] text-gray-400">
+                    {formatDate(row.receivedAt)}
+                  </time>
+                </>
+              )}
+            >
+              <p className="mt-2 border-l-2 border-gray-200 pl-3 font-mono text-[10px] text-gray-400">
+                Chat ID: {row.sourceId || '-'}
+              </p>
+              {row.processingError && (
+                <p className="mt-1 border-l-2 border-red-200 pl-3 text-xs text-red-600">
+                  {row.processingError}
+                </p>
+              )}
+            </MonitorRecord>
+          ))}
+        </div>
+      )}
 
       {!loading && view === 'audits' && rows.length > 0 && (
         <div className="divide-y divide-gray-200 border-y border-gray-200">
           {rows.map((row) => (
-            <details key={row.id} className="px-1 py-3">
-              <summary className="flex cursor-pointer list-none items-center gap-3">
+            <MonitorRecord
+              key={row.id}
+              value={row.metadata}
+              summary={(
+                <>
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-semibold text-gray-800">{row.action}</div>
                   <div className="mt-0.5 truncate text-xs text-gray-500">
                     {row.actorType} · {row.entityType}
+                    {row.entityType === 'chat' ? ` · ${chatDisplayName(row.entityId)}` : ''}
                   </div>
                 </div>
                 <time className="shrink-0 text-right text-[11px] text-gray-400">
                   {formatDate(row.createdAt)}
                 </time>
-              </summary>
-              <pre className="mt-3 overflow-auto whitespace-pre-wrap border-l-2 border-gray-200 pl-3 text-[11px] text-gray-600">
-                {JSON.stringify(row.metadata, null, 2)}
-              </pre>
-            </details>
+                </>
+              )}
+            />
           ))}
         </div>
       )}

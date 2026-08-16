@@ -3,7 +3,7 @@ import { createHmac } from 'node:crypto'
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { DummyDriver, Kysely, PostgresDialect } from 'kysely'
 import { requiresLiffTunnel } from '../src/environment.js'
-import { buildCompactFlexMessage } from '../src/flex.js'
+import { applyMessageSender, buildCompactFlexMessage } from '../src/flex.js'
 import viteConfig from '../vite.config.js'
 import { normalizeMessages, verifySignature } from '../lib/sdk-line.js'
 
@@ -213,6 +213,23 @@ describe('compact Flex card', () => {
         },
       },
     })
+  })
+
+  test('applies validated LINE sender display name and avatar to every message', () => {
+    const messages = applyMessageSender([
+      { type: 'text', text: 'First' },
+      buildCompactFlexMessage({ title: 'Second', body: 'Body' }),
+    ], {
+      name: 'Operations',
+      iconUrl: 'https://line-manager.example.com/app/avatars/mint.png',
+    })
+    expect(messages).toHaveLength(2)
+    expect(messages.every((message) => message.sender?.name === 'Operations')).toBe(true)
+    expect(messages.every((message) => message.sender?.iconUrl.endsWith('/mint.png'))).toBe(true)
+    expect(() => applyMessageSender(
+      { type: 'text', text: 'Invalid' },
+      { iconUrl: 'http://localhost/avatar.png' },
+    )).toThrow('HTTPS')
   })
 })
 
@@ -908,9 +925,22 @@ describe('Elysia application', () => {
         new Request('http://localhost:3000/app/config'),
       )
       expect(configResponse.status).toBe(200)
-      expect(await configResponse.json()).toEqual({
-        publicBaseUrl: 'https://line-manager.example.com',
+      const config = await configResponse.json()
+      expect(config.publicBaseUrl).toBe('https://line-manager.example.com')
+      expect(config.avatars).toHaveLength(3)
+      expect(config.avatars[0]).toMatchObject({
+        id: 'mint',
+        previewUrl: '/app/avatars/mint.png',
+        iconUrl: 'https://line-manager.example.com/app/avatars/mint.png',
       })
+
+      const avatarResponse = await app.handle(
+        new Request('http://localhost:3000/app/avatars/mint.png'),
+      )
+      expect(avatarResponse.status).toBe(200)
+      expect(avatarResponse.headers.get('content-type')).toBe('image/png')
+      expect([...new Uint8Array(await avatarResponse.arrayBuffer()).slice(0, 8)])
+        .toEqual([137, 80, 78, 71, 13, 10, 26, 10])
 
       const rootResponse = await app.handle(new Request('http://localhost:3000/'))
       expect(rootResponse.status).toBe(200)

@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { LogIn, LogOut } from 'lucide-react'
+import FlexMessagePreview from '../../components/FlexMessagePreview.jsx'
 import Notice, { Toast } from '../../components/Notice.jsx'
-import { buildCompactFlexMessage } from '../../flex.js'
+import { applyMessageSender, buildCompactFlexMessage } from '../../flex.js'
 
-const typeLabel = { group: 'กลุ่ม', room: 'ห้องหลายคน', user: 'แชตส่วนตัว' }
+const typeLabel = { group: 'กลุ่ม', room: 'หลายคน', user: 'ส่วนตัว' }
 const defaultJson = JSON.stringify(buildCompactFlexMessage({
   title: 'แจ้งเตือน',
   body: 'รายละเอียดแจ้งเตือนจาก LINE Manager',
@@ -11,15 +12,44 @@ const defaultJson = JSON.stringify(buildCompactFlexMessage({
   actionUri: '',
 }), null, 2)
 
-export default function RoomsTab({ api, bot, chats, reload }) {
+export default function RoomsTab({ api, bot, chats, appConfig, reload }) {
   const [filter, setFilter] = useState('all')
   const [selected, setSelected] = useState([])
-  const [mode, setMode] = useState('json')
+  const [mode, setMode] = useState('flex')
   const [message, setMessage] = useState('ทดสอบจาก LINE Manager')
-  const [json, setJson] = useState(defaultJson)
+  const [flexJson, setFlexJson] = useState(defaultJson)
+  const [displayName, setDisplayName] = useState('')
+  const [avatarId, setAvatarId] = useState('default')
   const [silent, setSilent] = useState(false)
   const [busy, setBusy] = useState('')
   const [notice, setNotice] = useState(null)
+  const pressTimer = useRef(null)
+  const longPressHandled = useRef(false)
+
+  const avatarOptions = useMemo(() => [
+    {
+      id: 'default',
+      label: 'รูปโปรไฟล์บอต',
+      previewUrl: bot.pictureUrl || '',
+      iconUrl: null,
+    },
+    ...(appConfig?.avatars || []),
+  ], [appConfig?.avatars, bot.pictureUrl])
+  const selectedAvatar = avatarOptions.find((avatar) => avatar.id === avatarId)
+    || avatarOptions[0]
+
+  const parsedFlex = useMemo(() => {
+    try {
+      const value = JSON.parse(flexJson)
+      const messages = Array.isArray(value) ? value : [value]
+      if (!messages.length || messages.some((item) => item?.type !== 'flex')) {
+        throw new Error('Flex JSON ต้องเป็น Flex message object หรือ array')
+      }
+      return { value, error: '' }
+    } catch (error) {
+      return { value: null, error: error.message }
+    }
+  }, [flexJson])
 
   const visible = useMemo(() => {
     return chats.filter((chat) => {
@@ -38,6 +68,10 @@ export default function RoomsTab({ api, bot, chats, reload }) {
     return () => window.clearTimeout(timeout)
   }, [notice])
 
+  useEffect(() => () => {
+    if (pressTimer.current) window.clearTimeout(pressTimer.current)
+  }, [])
+
   const run = async (key, job, success) => {
     setBusy(key)
     setNotice(null)
@@ -55,12 +89,24 @@ export default function RoomsTab({ api, bot, chats, reload }) {
   }
 
   const payload = () => {
-    if (mode === 'text') return { message, notificationDisabled: silent }
-    const messages = JSON.parse(json)
-    if (!Array.isArray(messages) && !messages?.type) {
-      throw new Error('JSON ต้องเป็น LINE message object หรือ array')
+    let messages
+    if (mode === 'text') {
+      if (!message.trim()) throw new Error('กรุณากรอกข้อความ')
+      messages = { type: 'text', text: message }
+    } else {
+      if (parsedFlex.error) throw new Error(parsedFlex.error)
+      messages = parsedFlex.value
     }
-    return { messages, notificationDisabled: silent }
+    if (avatarId !== 'default' && !selectedAvatar?.iconUrl) {
+      throw new Error('ตั้งค่า PUBLIC_BASE_URL แบบ HTTPS ก่อนใช้ avatar ตัวอย่างส่งเข้า LINE')
+    }
+    return {
+      messages: applyMessageSender(messages, {
+        name: displayName,
+        iconUrl: selectedAvatar?.iconUrl || '',
+      }),
+      notificationDisabled: silent,
+    }
   }
 
   const sendBulk = async () => {
@@ -84,6 +130,51 @@ export default function RoomsTab({ api, bot, chats, reload }) {
       current.includes(chatId)
         ? current.filter((id) => id !== chatId)
         : [...current, chatId])
+
+  const copyChatId = async (chat) => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(chat.sourceId)
+      } else {
+        const input = document.createElement('textarea')
+        input.value = chat.sourceId
+        input.style.position = 'fixed'
+        input.style.opacity = '0'
+        document.body.appendChild(input)
+        input.select()
+        document.execCommand('copy')
+        input.remove()
+      }
+      setNotice({ type: 'success', text: `คัดลอก Chat ID แล้ว · ${chat.sourceId}` })
+    } catch {
+      setNotice({ type: 'error', text: 'คัดลอก Chat ID ไม่สำเร็จ' })
+    }
+  }
+
+  const cancelLongPress = () => {
+    if (pressTimer.current) window.clearTimeout(pressTimer.current)
+    pressTimer.current = null
+  }
+
+  const startLongPress = (chat) => {
+    cancelLongPress()
+    longPressHandled.current = false
+    pressTimer.current = window.setTimeout(() => {
+      longPressHandled.current = true
+      pressTimer.current = null
+      copyChatId(chat)
+    }, 1000)
+  }
+
+  const selectChat = (event, chatId) => {
+    cancelLongPress()
+    if (longPressHandled.current) {
+      event.preventDefault()
+      longPressHandled.current = false
+      return
+    }
+    toggleSelected(chatId)
+  }
 
   const toggleJoined = async (chat) => {
     const joining = !chat.registered
@@ -140,7 +231,7 @@ export default function RoomsTab({ api, bot, chats, reload }) {
         <div className="flex rounded-xl bg-gray-100 p-1">
           {[
             ['text', 'Text'],
-            ['json', 'JSON'],
+            ['flex', 'Flex'],
           ].map(([value, label]) => (
             <button
               type="button"
@@ -154,6 +245,43 @@ export default function RoomsTab({ api, bot, chats, reload }) {
             </button>
           ))}
         </div>
+
+        <div className="grid grid-cols-[1fr_116px] gap-2 rounded-xl bg-gray-50 p-3">
+          <label className="min-w-0 text-[11px] font-medium text-gray-500">
+            Display name
+            <input
+              value={displayName}
+              onChange={(event) => setDisplayName(event.target.value)}
+              maxLength={20}
+              placeholder={bot.name}
+              className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-xs text-gray-800 outline-none focus:border-[#06C755]"
+            />
+          </label>
+          <label className="text-[11px] font-medium text-gray-500">
+            Avatar
+            <div className="mt-1 flex items-center gap-1.5">
+              {selectedAvatar?.previewUrl ? (
+                <img
+                  src={selectedAvatar.previewUrl}
+                  alt=""
+                  className="h-8 w-8 shrink-0 rounded-full object-cover"
+                />
+              ) : (
+                <div className="h-8 w-8 shrink-0 rounded-full bg-[#06C755]" />
+              )}
+              <select
+                value={avatarId}
+                onChange={(event) => setAvatarId(event.target.value)}
+                aria-label="เลือก avatar ผู้ส่ง"
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white px-1.5 py-2 text-[11px] text-gray-700 outline-none focus:border-[#06C755]"
+              >
+                {avatarOptions.map((avatar) => (
+                  <option key={avatar.id} value={avatar.id}>{avatar.label}</option>
+                ))}
+              </select>
+            </div>
+          </label>
+        </div>
         {mode === 'text' ? (
           <textarea
             value={message}
@@ -162,13 +290,27 @@ export default function RoomsTab({ api, bot, chats, reload }) {
             className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#06C755]"
           />
         ) : (
-          <textarea
-            value={json}
-            onChange={(event) => setJson(event.target.value)}
-            rows={12}
-            spellCheck={false}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-xs font-mono outline-none focus:border-[#06C755]"
-          />
+          <div className="space-y-2">
+            <textarea
+              value={flexJson}
+              onChange={(event) => setFlexJson(event.target.value)}
+              rows={9}
+              spellCheck={false}
+              aria-label="Flex message JSON"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-xs font-mono outline-none focus:border-[#06C755]"
+            />
+            {parsedFlex.error ? (
+              <div className="rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600">
+                {parsedFlex.error}
+              </div>
+            ) : (
+              <FlexMessagePreview
+                message={parsedFlex.value}
+                displayName={displayName || bot.name}
+                avatarUrl={selectedAvatar?.previewUrl || bot.pictureUrl}
+              />
+            )}
+          </div>
         )}
         <label className="flex items-center gap-2 text-xs text-gray-600">
           <input
@@ -231,8 +373,15 @@ export default function RoomsTab({ api, bot, chats, reload }) {
           <button
             type="button"
             aria-pressed={selected.includes(chat.id)}
-            onClick={() => toggleSelected(chat.id)}
-            className="flex min-w-0 flex-1 items-start gap-3 text-left"
+            aria-label={`เลือก ${chat.lineName || chat.name || chat.sourceId}; กดค้างหนึ่งวินาทีเพื่อคัดลอก ID`}
+            title="กดเพื่อเลือก · กดค้าง 1 วินาทีเพื่อคัดลอก ID"
+            onClick={(event) => selectChat(event, chat.id)}
+            onPointerDown={() => startLongPress(chat)}
+            onPointerUp={cancelLongPress}
+            onPointerLeave={cancelLongPress}
+            onPointerCancel={cancelLongPress}
+            onContextMenu={(event) => event.preventDefault()}
+            className="flex min-w-0 flex-1 touch-pan-y select-none items-start gap-3 text-left"
           >
             <span className={`mt-3 flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] ${
               selected.includes(chat.id)
@@ -247,13 +396,20 @@ export default function RoomsTab({ api, bot, chats, reload }) {
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <div className="truncate font-semibold text-gray-900">
-                {chat.lineName || chat.name || typeLabel[chat.type] || chat.sourceId}
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-600">
+                  {typeLabel[chat.type] || chat.type}
+                </span>
+                <span className="truncate font-semibold text-gray-900">
+                  {chat.lineName || chat.name || chat.sourceId}
+                </span>
+                {!chat.active && (
+                  <span className="shrink-0 rounded-full bg-red-50 px-1.5 py-0.5 text-[9px] font-medium text-red-600">
+                    inactive
+                  </span>
+                )}
               </div>
               <div className="font-mono text-[11px] text-gray-400 truncate">{chat.sourceId}</div>
-              <div className="text-xs text-gray-500 mt-1">
-                {typeLabel[chat.type] || chat.type} · {chat.active ? 'online' : 'inactive'}
-              </div>
             </div>
           </button>
           <button

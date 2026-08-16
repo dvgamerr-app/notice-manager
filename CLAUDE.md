@@ -64,7 +64,9 @@ The backend and Vite configuration contain the new proxy/build architecture:
   registered automatically; sending `/hi` explicitly registers the current chat
   and replies with confirmation. `/id` replies with the chat ID and source type.
 - Chat names shown in Rooms come from LINE and are read-only. Pressing the whole
-  chat card selects it. The room filter sits beside `Chats · n`.
+  chat card selects it; holding it for one second copies the LINE chat ID. The
+  source type is a badge before the chat name, and active chats do not show a
+  redundant online label. The room filter sits beside `Chats · n`.
 - Each chat row has a right-aligned Leave/Rejoin icon. The control is a logical
   registration toggle. Leave does not
   remove the Official Account from LINE, so Join can enable the target again.
@@ -72,10 +74,16 @@ The backend and Vite configuration contain the new proxy/build architecture:
   LINE provides no API that can make a bot join the chat again afterward.
 - Rooms has one refresh control above the chat list. It refreshes LINE metadata
   for every chat; individual chat rows do not have refresh buttons.
-- The message composer retains Text and raw JSON modes. JSON is selected by
-  default and prefilled with a compact LINE Flex card (`bubble` size `micro`).
-  Test sends validate the message with LINE before push and write a
-  `managed_delivery` record.
+- The message composer retains Text and Flex modes. Flex is selected by default,
+  is prefilled with a compact LINE Flex card (`bubble` size `micro`), and renders
+  a LINE-like card preview while editing the JSON. The composer can attach a
+  per-message sender display name and either the bot picture or a generated
+  example avatar. Generated avatars require an HTTPS `PUBLIC_BASE_URL` so LINE
+  can retrieve them. Test sends validate the message with LINE before push and
+  write a `managed_delivery` record.
+- The bot detail header keeps the registered/total chat count inline after the
+  bot ID. Monitor resolves stored chat IDs to their LINE display names and uses
+  the same expandable record layout as Audit; raw IDs remain in record details.
 - Successful Rooms actions use an auto-dismissing top-center toast. Errors stay
   inline so diagnostic details remain visible.
 - External systems use bot-scoped `lm_live_...` API keys. Only SHA-256 hashes are
@@ -161,8 +169,9 @@ handlers must resolve those rows under the selected bot and pass
 ## Public and authenticated routes
 
 - `GET /health` — health check.
-- `GET /app/config` — safe public configuration containing only the validated
-  HTTPS `publicBaseUrl`.
+- `GET /app/config` — safe public configuration containing the validated HTTPS
+  `publicBaseUrl` and generated sender-avatar choices.
+- `GET /app/avatars/:file` — public generated PNG sender avatars for LINE.
 - `POST /auth/liff`, `POST /auth/logout` — LIFF session lifecycle.
 - `POST /line/:bot` — primary signed LINE webhook.
 - `/api/bots...` — authenticated bot, webhook, quota, chat, delivery, API-key,
@@ -270,6 +279,7 @@ and then starts the server. Because the image builds after `COPY`, ignored local
 - `lib/sdk-line.js` — LINE API client, message normalization, token diagnostics,
   and signature verification.
 - `lib/delivery.js` — shared validate/push/delivery/audit flow.
+- `lib/avatars.js` — deterministic generated PNG sender avatars.
 - `lib/rate-limit.js` — atomic database-backed external API quota consumption.
 - `lib/retention.js` — portable batched retention policy execution.
 - `lib/secrets.js` — credential encryption and legacy read compatibility.
@@ -280,6 +290,7 @@ and then starts the server. Because the image builds after `COPY`, ignored local
   verification without production data.
 - `scripts/retention.js` — migration-aware retention command for a scheduler.
 - `src/` — React LIFF dashboard.
+- `src/components/FlexMessagePreview.jsx` — LINE-like Flex bubble preview.
 - `src/flex.js` — compact Flex card builder.
 - `vite.config.js` — `/liff/` base, port 5173 HMR, API proxies, and
   `dist/liff` build output.
