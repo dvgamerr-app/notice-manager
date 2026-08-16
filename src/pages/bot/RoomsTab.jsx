@@ -5,17 +5,18 @@ import Notice, { Toast } from '../../components/Notice.jsx'
 import { applyMessageSender, buildCompactFlexMessage } from '../../flex.js'
 
 const typeLabel = { group: 'กลุ่ม', room: 'หลายคน', user: 'ส่วนตัว' }
+const testFlexMessage = buildCompactFlexMessage({
+  title: 'ข้อความทดสอบ',
+  body: 'ทดสอบการส่ง Flex message จาก LINE Manager',
+  actionLabel: '',
+  actionUri: '',
+})
+
 export default function RoomsTab({ api, bot, chats, appConfig, reload }) {
   const [filter, setFilter] = useState('all')
   const [selected, setSelected] = useState([])
   const [mode, setMode] = useState('flex')
   const [message, setMessage] = useState('ทดสอบจาก LINE Manager')
-  const [flexFields, setFlexFields] = useState({
-    title: 'แจ้งเตือน',
-    body: 'รายละเอียดแจ้งเตือนจาก LINE Manager',
-    actionLabel: 'เปิดดู',
-    actionUri: '',
-  })
   const [displayName, setDisplayName] = useState('')
   const [avatarId, setAvatarId] = useState('default')
   const [silent, setSilent] = useState(false)
@@ -35,14 +36,6 @@ export default function RoomsTab({ api, bot, chats, appConfig, reload }) {
   ], [appConfig?.avatars, bot.pictureUrl])
   const selectedAvatar = avatarOptions.find((avatar) => avatar.id === avatarId)
     || avatarOptions[0]
-
-  const flexCard = useMemo(() => {
-    try {
-      return { value: buildCompactFlexMessage(flexFields), error: '' }
-    } catch (error) {
-      return { value: null, error: error.message }
-    }
-  }, [flexFields])
 
   const visible = useMemo(() => {
     return chats.filter((chat) => {
@@ -87,8 +80,7 @@ export default function RoomsTab({ api, bot, chats, appConfig, reload }) {
       if (!message.trim()) throw new Error('กรุณากรอกข้อความ')
       messages = { type: 'text', text: message }
     } else {
-      if (flexCard.error) throw new Error(flexCard.error)
-      messages = flexCard.value
+      messages = testFlexMessage
     }
     if (avatarId !== 'default' && !selectedAvatar?.iconUrl) {
       throw new Error('ตั้งค่า PUBLIC_BASE_URL แบบ HTTPS ก่อนใช้ avatar ตัวอย่างส่งเข้า LINE')
@@ -123,10 +115,6 @@ export default function RoomsTab({ api, bot, chats, appConfig, reload }) {
       current.includes(chatId)
         ? current.filter((id) => id !== chatId)
         : [...current, chatId])
-
-  const updateFlexField = (field, value) => {
-    setFlexFields((current) => ({ ...current, [field]: value }))
-  }
 
   const copyChatId = async (chat) => {
     try {
@@ -287,62 +275,11 @@ export default function RoomsTab({ api, bot, chats, appConfig, reload }) {
             className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#06C755]"
           />
         ) : (
-          <div className="space-y-2">
-            <div className="space-y-2 rounded-xl bg-gray-50 p-3">
-              <label className="block text-[11px] font-medium text-gray-500">
-                หัวข้อ
-                <input
-                  value={flexFields.title}
-                  onChange={(event) => updateFlexField('title', event.target.value)}
-                  placeholder="แจ้งเตือน"
-                  className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none focus:border-[#06C755]"
-                />
-              </label>
-              <label className="block text-[11px] font-medium text-gray-500">
-                รายละเอียด
-                <textarea
-                  value={flexFields.body}
-                  onChange={(event) => updateFlexField('body', event.target.value)}
-                  rows={3}
-                  placeholder="รายละเอียดที่ต้องการส่ง"
-                  className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none focus:border-[#06C755]"
-                />
-              </label>
-              <div className="grid grid-cols-[100px_1fr] gap-2">
-                <label className="block text-[11px] font-medium text-gray-500">
-                  ข้อความบนปุ่ม
-                  <input
-                    value={flexFields.actionLabel}
-                    onChange={(event) => updateFlexField('actionLabel', event.target.value)}
-                    maxLength={40}
-                    placeholder="เปิดดู"
-                    className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-xs text-gray-800 outline-none focus:border-[#06C755]"
-                  />
-                </label>
-                <label className="block min-w-0 text-[11px] font-medium text-gray-500">
-                  URL ของปุ่ม (ไม่บังคับ)
-                  <input
-                    value={flexFields.actionUri}
-                    onChange={(event) => updateFlexField('actionUri', event.target.value)}
-                    inputMode="url"
-                    placeholder="https://example.com"
-                    className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-xs text-gray-800 outline-none focus:border-[#06C755]"
-                  />
-                </label>
-              </div>
-            </div>
-            {flexCard.error ? (
-              <div className="rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600">
-                {flexCard.error}
-              </div>
-            ) : (
-              <FlexMessagePreview
-                message={flexCard.value}
-                displayName={displayName || bot.name}
-                avatarUrl={selectedAvatar?.previewUrl || bot.pictureUrl}
-              />
-            )}
-          </div>
+          <FlexMessagePreview
+            message={testFlexMessage}
+            displayName={displayName || bot.name}
+            avatarUrl={selectedAvatar?.previewUrl || bot.pictureUrl}
+          />
         )}
         <label className="flex items-center gap-2 text-xs text-gray-600">
           <input
