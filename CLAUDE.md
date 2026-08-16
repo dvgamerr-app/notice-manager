@@ -185,8 +185,10 @@ an old route list from conversation history.
 - Default local database: `sqlite://./notice-manager.sqlite`.
 - Run `bun run migrate`; startup also calls `migrateToLatest()` safely.
 - Current migrations: `001_line_management.js`, `002_management_operations.js`,
-  `003_webhook_processing.js`, `004_distributed_rate_limit.js`, and
-  `005_data_retention_indexes.js`.
+  `003_webhook_processing.js`, and `004_distributed_hardening.js`.
+- Applied migration filenames and contents are immutable. Never rename, delete,
+  reorder, or edit an existing migration; add the next numbered migration for
+  every later schema change.
 - Webhook events use processing state and attempt counters so a failed event can
   be claimed again on LINE redelivery instead of being discarded as a duplicate.
 - Core tables: `app_setting`, `app_user`, `app_session`, `managed_bot`,

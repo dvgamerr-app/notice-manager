@@ -29,10 +29,11 @@ Kysely migration `001_line_management` deliberately uses `managed_bot`,
 `002_management_operations` adds chat profile metadata, `managed_api_key`, and
 `managed_audit_log`. Migration `003_webhook_processing` adds retryable webhook
 processing state, attempt counts, timestamps, and the supporting status index.
-Migration `004_distributed_rate_limit` adds `managed_rate_limit_bucket` and
-`005_data_retention_indexes` adds global timestamp indexes used by batched
-retention cleanup. The distinct `managed_` prefix avoids destructive changes to
-legacy tables and works on both PostgreSQL and SQLite.
+Migration `004_distributed_hardening` adds `managed_rate_limit_bucket` and the
+global timestamp indexes used by batched retention cleanup. The distinct
+`managed_` prefix avoids destructive changes to legacy tables and works on both
+PostgreSQL and SQLite. Applied migration filenames and contents are immutable;
+future changes must use a new numbered migration.
 
 - `managed_chat.display_name` is the editable operator alias.
 - `managed_chat.line_display_name`, `picture_url`, and `metadata_payload` cache

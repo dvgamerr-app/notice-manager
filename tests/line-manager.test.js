@@ -218,6 +218,12 @@ describe('compact Flex card', () => {
 
 describe('portable Kysely database', () => {
   test('runs every migration using Bun native SQLite', async () => {
+    expect(migrationNames.slice(0, 4)).toEqual([
+      '001_line_management.js',
+      '002_management_operations.js',
+      '003_webhook_processing.js',
+      '004_distributed_hardening.js',
+    ])
     await migrateToLatest()
     const tables = await db.introspection.getTables()
     const names = tables.map((table) => table.name)
