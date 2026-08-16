@@ -23,10 +23,9 @@ or credential-encryption keys in a report.
 The container workflow blocks publication and deployment when Trivy finds a
 fixable `HIGH` or `CRITICAL` repository, secret, configuration, operating-system,
 or application-library finding. Container findings are also uploaded to GitHub
-code scanning as SARIF. CI downloads a pinned Trivy release and verifies its
-GitHub artifact attestation before execution instead of trusting a mutable action
-tag. All other workflow actions are pinned to immutable commit SHAs. CodeQL and
-Dependabot remain enabled independently.
+code scanning as SARIF. CI runs Trivy from a container image pinned by digest;
+all workflow actions are pinned to immutable commit SHAs. CodeQL and Dependabot
+remain enabled independently.
 
 Published images include an SBOM and build provenance. Deployment uses the
 published multi-platform manifest digest rather than a mutable tag.

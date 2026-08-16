@@ -13,7 +13,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   PLATFORMS: linux/amd64,linux/arm64
-  TRIVY_VERSION: 0.74.0
+  TRIVY_IMAGE: aquasec/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969
 
 jobs:
   build:
@@ -58,24 +58,14 @@ jobs:
             exit 1
           fi
 
-      - name: Install verified Trivy release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Scan repository with containerized Trivy
         run: |
-          archive="${RUNNER_TEMP}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
-          install_dir="${RUNNER_TEMP}/trivy-${TRIVY_VERSION}"
-          gh release download "v${TRIVY_VERSION}" \
-            --repo aquasecurity/trivy \
-            --pattern "trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" \
-            --output "${archive}"
-          gh attestation verify "${archive}" --repo aquasecurity/trivy
-          mkdir -p "${install_dir}"
-          tar -xzf "${archive}" -C "${install_dir}" trivy
-          echo "${install_dir}" >> "${GITHUB_PATH}"
-
-      - name: Scan repository with Trivy
-        run: |
-          trivy fs \
+          docker run --rm \
+            --volume "${PWD}:/workspace" \
+            --volume trivy-cache:/root/.cache/trivy \
+            --workdir /workspace \
+            "${TRIVY_IMAGE}" fs \
+            --skip-version-check \
             --scanners vuln,secret,misconfig \
             --severity HIGH,CRITICAL \
             --ignore-unfixed \
@@ -121,9 +111,17 @@ jobs:
 
       - name: Create Trivy image report
         run: |
-          trivy image \
+          docker run --rm \
+            --volume /var/run/docker.sock:/var/run/docker.sock \
+            --volume "${PWD}:/workspace" \
+            --volume trivy-cache:/root/.cache/trivy \
+            --workdir /workspace \
+            "${TRIVY_IMAGE}" image \
+            --image-src docker \
+            --skip-version-check \
+            --scanners vuln,secret \
             --format sarif \
-            --output trivy-image.sarif \
+            --output /workspace/trivy-image.sarif \
             --severity HIGH,CRITICAL \
             --ignore-unfixed \
             --exit-code 0 \
@@ -138,9 +136,14 @@ jobs:
 
       - name: Enforce Trivy image policy
         run: |
-          trivy image \
+          docker run --rm \
+            --volume /var/run/docker.sock:/var/run/docker.sock \
+            --volume trivy-cache:/root/.cache/trivy \
+            "${TRIVY_IMAGE}" image \
+            --image-src docker \
+            --skip-version-check \
             --scanners vuln \
-            --vuln-type os,library \
+            --pkg-types os,library \
             --severity HIGH,CRITICAL \
             --ignore-unfixed \
             --exit-code 1 \
@@ -192,16 +195,24 @@ jobs:
       CORS_ORIGINS: ${{ vars.CORS_ORIGINS }}
       LOG_LEVEL: ${{ vars.LOG_LEVEL || 'info' }}
       LINE_LOGIN_CHANNEL_ID: ${{ vars.LINE_LOGIN_CHANNEL_ID }}
+      SESSION_DAYS: ${{ vars.SESSION_DAYS || '30' }}
+      EXTERNAL_API_RATE_LIMIT: ${{ vars.EXTERNAL_API_RATE_LIMIT || '60' }}
+      RETENTION_WEBHOOK_EVENTS_DAYS: ${{ vars.RETENTION_WEBHOOK_EVENTS_DAYS || '30' }}
+      RETENTION_DELIVERIES_DAYS: ${{ vars.RETENTION_DELIVERIES_DAYS || '90' }}
+      RETENTION_AUDIT_LOGS_DAYS: ${{ vars.RETENTION_AUDIT_LOGS_DAYS || '365' }}
+      RETENTION_EXPIRED_SESSIONS_DAYS: ${{ vars.RETENTION_EXPIRED_SESSIONS_DAYS || '7' }}
+      RETENTION_RATE_LIMIT_BUCKETS_DAYS: ${{ vars.RETENTION_RATE_LIMIT_BUCKETS_DAYS || '2' }}
+      RETENTION_BATCH_SIZE: ${{ vars.RETENTION_BATCH_SIZE || '1000' }}
+      TZ: ${{ vars.TZ || 'Asia/Bangkok' }}
 
     steps:
       - name: Validate deployment configuration
         env:
           CREDENTIAL_ENCRYPTION_KEY: ${{ secrets.CREDENTIAL_ENCRYPTION_KEY }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          LINE_ADMIN_USER_IDS: ${{ secrets.LINE_ADMIN_USER_IDS }}
           VITE_LIFF_ID: ${{ vars.VITE_LIFF_ID }}
         run: |
-          for name in DATABASE_URL CREDENTIAL_ENCRYPTION_KEY LINE_ADMIN_USER_IDS PUBLIC_BASE_URL LINE_LOGIN_CHANNEL_ID VITE_LIFF_ID; do
+          for name in DATABASE_URL CREDENTIAL_ENCRYPTION_KEY PUBLIC_BASE_URL LINE_LOGIN_CHANNEL_ID VITE_LIFF_ID; do
             if [ -z "${!name}" ]; then
               echo "Missing required deployment setting: ${name}" >&2
               exit 1
@@ -231,8 +242,17 @@ jobs:
             -e PUBLIC_BASE_URL="${PUBLIC_BASE_URL}" \
             -e CORS_ORIGINS="${CORS_ORIGINS}" \
             -e LOG_LEVEL="${LOG_LEVEL}" \
+            -e TZ="${TZ}" \
             -e LINE_LOGIN_CHANNEL_ID="${LINE_LOGIN_CHANNEL_ID}" \
             -e LINE_ADMIN_USER_IDS="${LINE_ADMIN_USER_IDS}" \
+            -e SESSION_DAYS="${SESSION_DAYS}" \
+            -e EXTERNAL_API_RATE_LIMIT="${EXTERNAL_API_RATE_LIMIT}" \
+            -e RETENTION_WEBHOOK_EVENTS_DAYS="${RETENTION_WEBHOOK_EVENTS_DAYS}" \
+            -e RETENTION_DELIVERIES_DAYS="${RETENTION_DELIVERIES_DAYS}" \
+            -e RETENTION_AUDIT_LOGS_DAYS="${RETENTION_AUDIT_LOGS_DAYS}" \
+            -e RETENTION_EXPIRED_SESSIONS_DAYS="${RETENTION_EXPIRED_SESSIONS_DAYS}" \
+            -e RETENTION_RATE_LIMIT_BUCKETS_DAYS="${RETENTION_RATE_LIMIT_BUCKETS_DAYS}" \
+            -e RETENTION_BATCH_SIZE="${RETENTION_BATCH_SIZE}" \
             -e DATABASE_URL="${DATABASE_URL}" \
             -e CREDENTIAL_ENCRYPTION_KEY="${CREDENTIAL_ENCRYPTION_KEY}" \
             -p "${HOST_PORT}:3000" \
@@ -240,7 +260,7 @@ jobs:
 
       - name: Verify deployment health
         run: |
-          for attempt in $(seq 1 30); do
+          for _ in $(seq 1 30); do
             if curl --fail --silent --show-error "http://127.0.0.1:${HOST_PORT}/health" >/dev/null; then
               exit 0
             fi

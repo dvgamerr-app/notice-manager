@@ -171,14 +171,18 @@ request และ manual dispatch โดยรัน Bun checks และ Trivy 
 | Variable | `VITE_API_URL` | API origin ที่ฝังตอน build; เว้นว่างเพื่อใช้ same-origin |
 | Variable | `LINE_LOGIN_CHANNEL_ID` | Channel ID ที่ backend ใช้ตรวจ LIFF token |
 | Variable | `PUBLIC_BASE_URL` | Public HTTPS origin สำหรับ webhook/avatar |
-| Variable | `BASE_URL`, `CORS_ORIGINS`, `LOG_LEVEL`, `PORT` | Runtime URL, CORS, log level และ host port |
+| Variable | `BASE_URL`, `CORS_ORIGINS`, `LOG_LEVEL`, `PORT`, `TZ` | Runtime URL, CORS, log level, host port และ timezone |
+| Variable | `SESSION_DAYS`, `EXTERNAL_API_RATE_LIMIT` | อายุ session และ distributed API rate limit |
+| Variable | `RETENTION_*` | ระยะเก็บข้อมูลและ batch size; ใช้ค่า default จาก `.env.example` เมื่อไม่ตั้ง |
 | Secret | `DATABASE_URL` | Production PostgreSQL/SQLite connection |
 | Secret | `CREDENTIAL_ENCRYPTION_KEY` | คีย์เข้ารหัสอย่างน้อย 32 ตัวอักษร |
-| Secret | `LINE_ADMIN_USER_IDS` | allowlist ของ LINE administrator |
+| Secret | `LINE_ADMIN_USER_IDS` | allowlist ของ LINE administrator; ไม่บังคับ |
 | Secret | `DISCORD_WEBHOOK` | การแจ้งผล deploy; ไม่บังคับ |
 
 Self-hosted runner ต้องเป็น Apple silicon/macOS ที่ติดตั้งและเปิด Apple
 `container` service แล้ว และต้องเข้าถึง host port กับ production database ได้
+ขั้น deploy ส่ง runtime configuration เข้า `container run` ผ่าน `-e` โดยตรง;
+ค่า secret มาจาก GitHub Secrets เท่านั้นและไม่ถูกฝังใน image
 
 ## Dashboard
 

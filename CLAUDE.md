@@ -270,9 +270,9 @@ the built `dist`; it runs as the non-root `bun` user with exactly
 `.github/workflows/build-ghcr.yml` runs application checks plus Trivy repository
 and image gates, publishes SBOM/provenance multi-platform images to GHCR, and
 deploys the immutable manifest digest on the self-hosted Apple `container`
-runner. CI installs a pinned Trivy release only after GitHub artifact-attestation
-verification; do not replace this with a mutable third-party action tag. Required
-GitHub variables/secrets are documented in `README.md`. Do not move runtime
+runner. CI runs a digest-pinned Trivy container for filesystem and image scans.
+The deploy step passes runtime settings explicitly to `container run`. Required
+GitHub variables/secrets are documented in `README.md`; do not move runtime
 secrets into Docker build arguments or image layers.
 
 ## Source map
