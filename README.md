@@ -7,7 +7,7 @@ LIFF dashboard สำหรับจัดการ LINE Messaging API หลา
 - ค้นพบแชตส่วนตัว กลุ่ม และ multi-person chat จาก signed webhook
 - เลือกทั้งการ์ดห้อง แล้วกดส่งข้อความทดสอบได้จาก LIFF
 - แสดงชื่อห้องจาก LINE แบบอ่านอย่างเดียว, refresh ชื่อ/รูป และสลับ Join/Leave ได้
-- ส่งข้อความ Text, Flex card ขนาดเล็ก หรือ LINE message JSON ไปหลายห้องพร้อมกัน
+- ส่งข้อความ Text หรือสร้าง Flex card ขนาดเล็กจากฟอร์มไปหลายห้องพร้อมกัน
 - Monitor delivery, webhook redelivery และ audit trail พร้อม filter/pagination
 - สร้าง API key แยกต่อบอตเพื่อให้ระบบภายนอกส่งเข้า registered chat พร้อม
   distributed rate limit ที่ใช้ฐานข้อมูลร่วมกันทุก instance
@@ -141,8 +141,9 @@ PowerShell ใช้ `$env:DATABASE_URL=':memory:'; bun run migrate` สำห�
 
 - **Rooms** — filter ห้องส่วนตัว กลุ่ม และ room ข้างจำนวนแชต; กดการ์ดเพื่อเลือก
   หรือกดค้าง 1 วินาทีเพื่อ copy Chat ID; refresh metadata; Join/Leave; เลือกได้
-  สูงสุด 20 ห้องเพื่อส่ง Text หรือ Flex พร้อม LINE-like preview, display name และ
-  avatar ผู้ส่ง โดย LINE จะ validate payload ก่อน push
+  สูงสุด 20 ห้องเพื่อส่ง Text หรือ Flex จากฟอร์มสร้างการ์ดพร้อม LINE-like preview,
+  display name และ avatar ผู้ส่ง โดยไม่แสดง raw JSON และ LINE จะ validate payload
+  ก่อน push
 - **Monitor** — แสดงชื่อแชตแทน ID ใน delivery, signed webhook event และ audit
   log ด้วย expandable record layout เดียวกัน พร้อม filter และโหลดเพิ่มทีละหน้า
 - **API Keys** — สร้าง/revoke bot-scoped key โดย raw key แสดงครั้งเดียว

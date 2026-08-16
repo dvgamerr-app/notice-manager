@@ -84,6 +84,9 @@ export const applyMessageSender = (input, sender = {}) => {
   const name = value(sender.name)
   const iconUrl = value(sender.iconUrl)
   if (name.length > 20) throw new Error('Display name ต้องไม่เกิน 20 ตัวอักษร')
+  if (/\bline\b/i.test(name)) {
+    throw new Error('Display name ใช้คำว่า LINE ไม่ได้ตามข้อกำหนด Messaging API')
+  }
   if (iconUrl) {
     let url
     try {

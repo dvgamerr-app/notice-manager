@@ -76,11 +76,13 @@ The backend and Vite configuration contain the new proxy/build architecture:
   for every chat; individual chat rows do not have refresh buttons.
 - The message composer retains Text and Flex modes. Flex is selected by default,
   is prefilled with a compact LINE Flex card (`bubble` size `micro`), and renders
-  a LINE-like card preview while editing the JSON. The composer can attach a
+  a LINE-like card preview from title, body, button-label, and optional URL form
+  fields; raw JSON is not exposed in the UI. The composer can attach a
   per-message sender display name and either the bot picture or a generated
-  example avatar. Generated avatars require an HTTPS `PUBLIC_BASE_URL` so LINE
-  can retrieve them. Test sends validate the message with LINE before push and
-  write a `managed_delivery` record.
+  example avatar. This changes only that message bubble, not the Official
+  Account profile. Generated avatars require an HTTPS `PUBLIC_BASE_URL` so LINE
+  can retrieve the square PNG. Test sends validate the message with LINE before
+  push and write a `managed_delivery` record.
 - The bot detail header keeps the registered/total chat count inline after the
   bot ID. Monitor resolves stored chat IDs to their LINE display names and uses
   the same expandable record layout as Audit; raw IDs remain in record details.

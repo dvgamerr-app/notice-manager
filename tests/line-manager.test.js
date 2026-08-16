@@ -230,6 +230,10 @@ describe('compact Flex card', () => {
       { type: 'text', text: 'Invalid' },
       { iconUrl: 'http://localhost/avatar.png' },
     )).toThrow('HTTPS')
+    expect(() => applyMessageSender(
+      { type: 'text', text: 'Invalid' },
+      { name: 'LINE Support' },
+    )).toThrow('LINE')
   })
 })
 
