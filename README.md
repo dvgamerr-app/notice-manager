@@ -64,7 +64,7 @@ bun dev:ui
 ```
 
 `bun dev` เปิด backend แบบ watch ที่ `http://localhost:3000` และแสดง structured
-Pino logs ผ่าน `pino-pretty` ส่วน `bun dev:ui` เปิด Vite ที่
+Pino logs ผ่าน `pino-pretty` แบบหนึ่งบรรทัดต่อ log ส่วน `bun dev:ui` เปิด Vite ที่
 `http://127.0.0.1:5173` ให้รันแยก terminal กัน backend จะ proxy `/` และ
 `/liff/*` ไป Vite เพื่อใช้ React HMR
 

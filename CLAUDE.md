@@ -236,7 +236,8 @@ bun start
 ```
 
 - `bun dev` starts the backend watcher on port 3000 and formats Pino logs with
-  `pino-pretty`.
+  `pino-pretty`. Metadata and error objects stay on one terminal line; embedded
+  stack newlines are escaped as `\n`.
 - `bun run retention` applies configured cutoffs in bounded database batches;
   schedule it daily in production rather than tying cleanup to HTTP startup.
 - `bun dev:ui` starts Vite on port 5173; run it in a separate terminal.

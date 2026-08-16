@@ -864,6 +864,8 @@ describe('Elysia application', () => {
     )
     expect(packageJson.scripts.dev).toContain('bun --watch index.js')
     expect(packageJson.scripts.dev).toContain('pino-pretty')
+    expect(packageJson.scripts.dev).toContain('--singleLine')
+    expect(packageJson.scripts.dev).toContain('--errorLikeObjectKeys __none__')
     expect(packageJson.scripts['dev:ui']).toContain('vite')
     expect(existsSync(new URL('../scripts/dev.js', import.meta.url))).toBe(false)
     expect(viteConfig.server?.headers).toBeUndefined()
