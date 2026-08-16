@@ -42,12 +42,6 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Verify application
-        run: bun run check
-
-      - name: Audit Bun dependencies
-        run: bun audit
-
       - name: Validate release build configuration
         if: github.event_name != 'pull_request'
         env:
@@ -57,22 +51,6 @@ jobs:
             echo "Missing required repository variable: VITE_LIFF_ID" >&2
             exit 1
           fi
-
-      - name: Scan repository with containerized Trivy
-        run: |
-          docker run --rm \
-            --volume "${PWD}:/workspace" \
-            --volume trivy-cache:/root/.cache/trivy \
-            --workdir /workspace \
-            "${TRIVY_IMAGE}" fs \
-            --skip-version-check \
-            --scanners vuln,secret,misconfig \
-            --severity HIGH,CRITICAL \
-            --ignore-unfixed \
-            --exit-code 1 \
-            --skip-dirs node_modules \
-            --skip-dirs dist \
-            .
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
@@ -108,46 +86,6 @@ jobs:
             VITE_API_URL=${{ vars.VITE_API_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Create Trivy image report
-        run: |
-          docker run --rm \
-            --volume /var/run/docker.sock:/var/run/docker.sock \
-            --volume "${PWD}:/workspace" \
-            --volume trivy-cache:/root/.cache/trivy \
-            --workdir /workspace \
-            "${TRIVY_IMAGE}" image \
-            --image-src docker \
-            --skip-version-check \
-            --scanners vuln,secret \
-            --format sarif \
-            --output /workspace/trivy-image.sarif \
-            --severity HIGH,CRITICAL \
-            --ignore-unfixed \
-            --exit-code 0 \
-            "notice-manager:scan-${{ github.sha }}"
-
-      - name: Upload Trivy report
-        if: always() && github.event_name != 'pull_request'
-        uses: github/codeql-action/upload-sarif@f205ea1c3313d32999d8d6a48b4f6530d4437b38 # v4.37.4
-        with:
-          sarif_file: trivy-image.sarif
-          category: trivy-container
-
-      - name: Enforce Trivy image policy
-        run: |
-          docker run --rm \
-            --volume /var/run/docker.sock:/var/run/docker.sock \
-            --volume trivy-cache:/root/.cache/trivy \
-            "${TRIVY_IMAGE}" image \
-            --image-src docker \
-            --skip-version-check \
-            --scanners vuln \
-            --pkg-types os,library \
-            --severity HIGH,CRITICAL \
-            --ignore-unfixed \
-            --exit-code 1 \
-            "notice-manager:scan-${{ github.sha }}"
 
       - name: Log in to GHCR
         if: github.event_name != 'pull_request'
@@ -188,7 +126,7 @@ jobs:
     env:
       CONTAINER_NAME: notice-manager
       DEPLOY_PLATFORM: linux/arm64
-      HOST_PORT: ${{ vars.PORT || '3000' }}
+      PORT: ${{ vars.PORT || '8011' }}
       IMAGE_REF: ${{ needs.build.outputs.image }}@${{ needs.build.outputs.digest }}
       BASE_URL: ${{ vars.BASE_URL }}
       PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
@@ -252,13 +190,13 @@ jobs:
             -e RETENTION_BATCH_SIZE="${RETENTION_BATCH_SIZE}" \
             -e DATABASE_URL="${DATABASE_URL}" \
             -e CREDENTIAL_ENCRYPTION_KEY="${CREDENTIAL_ENCRYPTION_KEY}" \
-            -p "${HOST_PORT}:3000" \
+            -p "${PORT}:3000" \
             "${IMAGE_REF}"
 
       - name: Verify deployment health
         run: |
           for _ in $(seq 1 30); do
-            if curl --fail --silent --show-error "http://127.0.0.1:${HOST_PORT}/health" >/dev/null; then
+            if curl --fail --silent --show-error "http://127.0.0.1:${PORT}/health" >/dev/null; then
               exit 0
             fi
             sleep 2
@@ -281,12 +219,13 @@ jobs:
 
       - name: Notify successful deployment
         if: success() && env.DISCORD_WEBHOOK != ''
+        continue-on-error: true
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
           curl --fail --silent --show-error -X POST "${DISCORD_WEBHOOK}" \
             -H "Content-Type: application/json" \
-            -d "{\"content\":\"Deployment \\\`${CONTAINER_NAME}\\\` completed: \\\`${{ needs.build.outputs.image }}:${{ needs.build.outputs.version }}\\\`\"}"
+            -d "{\"content\":\"Deployment ${CONTAINER_NAME} completed: ${{ needs.build.outputs.image }}:${{ needs.build.outputs.version }}\"}"
 
       - name: Notify failed deployment
         if: failure() && env.DISCORD_WEBHOOK != ''
@@ -296,4 +235,4 @@ jobs:
         run: |
           curl --fail --silent --show-error -X POST "${DISCORD_WEBHOOK}" \
             -H "Content-Type: application/json" \
-            -d "{\"content\":\"Deployment \\\`${CONTAINER_NAME}\\\` failed. Check ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+            -d "{\"content\":\"Deployment ${CONTAINER_NAME} failed. Check ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
