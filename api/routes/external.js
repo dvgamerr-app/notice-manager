@@ -4,22 +4,14 @@ import { db } from '../../lib/db.js'
 import { deliverToChat } from '../../lib/delivery.js'
 import { LineApiError, normalizeMessages } from '../../lib/sdk-line.js'
 import { logger } from '../../lib/logger.js'
+import { consumeApiRateLimit } from '../../lib/rate-limit.js'
 
-const buckets = new Map()
-const configuredRateLimit = Number(process.env.EXTERNAL_API_RATE_LIMIT || 60)
-const rateLimit = Number.isFinite(configuredRateLimit)
-  ? Math.max(1, Math.trunc(configuredRateLimit))
-  : 60
-
-const consumeRateLimit = (keyId) => {
-  const minute = Math.floor(Date.now() / 60_000)
-  const current = buckets.get(keyId)
-  if (!current || current.minute !== minute) {
-    buckets.set(keyId, { minute, count: 1 })
-    return true
-  }
-  current.count += 1
-  return current.count <= rateLimit
+const applyRateLimitHeaders = (set, rate) => {
+  set.headers['RateLimit-Limit'] = String(rate.limit)
+  set.headers['RateLimit-Remaining'] = String(rate.remaining)
+  set.headers['RateLimit-Reset'] = String(
+    Math.max(0, Math.ceil((new Date(rate.resetAt).getTime() - Date.now()) / 1_000)),
+  )
 }
 
 const requireApiKey = async ({ headers, set }) => {
@@ -28,8 +20,11 @@ const requireApiKey = async ({ headers, set }) => {
     set.status = 401
     return { apiKey: null, authError: { error: 'Valid API key required' } }
   }
-  if (!consumeRateLimit(apiKey.id)) {
+  const rate = await consumeApiRateLimit({ apiKeyId: apiKey.id })
+  applyRateLimitHeaders(set, rate)
+  if (!rate.allowed) {
     set.status = 429
+    set.headers['Retry-After'] = set.headers['RateLimit-Reset']
     return { apiKey: null, authError: { error: 'API rate limit exceeded' } }
   }
   return { apiKey, authError: null }
