@@ -273,7 +273,9 @@ deploys the immutable manifest digest on the self-hosted Apple `container`
 runner. CI runs a digest-pinned Trivy container for filesystem and image scans.
 The deploy step passes runtime settings explicitly to `container run`. Required
 GitHub variables/secrets are documented in `README.md`; do not move runtime
-secrets into Docker build arguments or image layers.
+secrets into Docker build arguments or image layers. The published GHCR package
+is public, so the Apple runner pulls it anonymously rather than storing registry
+credentials in the macOS Keychain.
 
 ## Source map
 

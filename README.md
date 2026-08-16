@@ -183,6 +183,8 @@ Self-hosted runner ต้องเป็น Apple silicon/macOS ที่ติ�
 `container` service แล้ว และต้องเข้าถึง host port กับ production database ได้
 ขั้น deploy ส่ง runtime configuration เข้า `container run` ผ่าน `-e` โดยตรง;
 ค่า secret มาจาก GitHub Secrets เท่านั้นและไม่ถูกฝังใน image
+GHCR package เป็น public จึง pull manifest digest แบบ anonymous และไม่เรียก
+`container registry login` ซึ่งต้องใช้ interactive macOS Keychain
 
 ## Dashboard
 

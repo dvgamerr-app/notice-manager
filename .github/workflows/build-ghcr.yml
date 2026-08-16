@@ -219,9 +219,6 @@ jobs:
             fi
           done
 
-      - name: Log in to GHCR
-        run: printf '%s' '${{ secrets.GITHUB_TOKEN }}' | container registry login --username '${{ github.actor }}' --password-stdin ghcr.io
-
       - name: Pull verified image
         run: container image pull --platform "${DEPLOY_PLATFORM}" "${IMAGE_REF}"
 
@@ -300,7 +297,3 @@ jobs:
           curl --fail --silent --show-error -X POST "${DISCORD_WEBHOOK}" \
             -H "Content-Type: application/json" \
             -d "{\"content\":\"Deployment \\\`${CONTAINER_NAME}\\\` failed. Check ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
-
-      - name: Log out from GHCR
-        if: always()
-        run: container registry logout ghcr.io || true
