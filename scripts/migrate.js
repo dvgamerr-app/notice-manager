@@ -1,11 +1,12 @@
 import { databaseType, db, migrateToLatest } from '../lib/db.js'
+import { logger } from '../lib/logger.js'
 
 try {
-  console.log(`database: ${databaseType}`)
+  logger.info({ databaseType }, 'Starting database migrations')
   await migrateToLatest()
-  console.log('database migrations are up to date')
+  logger.info({ databaseType }, 'Database migrations are up to date')
 } catch (error) {
-  console.error('database migration failed', error)
+  logger.fatal({ err: error, databaseType }, 'Database migration failed')
   process.exitCode = 1
 } finally {
   await db.destroy()

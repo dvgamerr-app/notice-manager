@@ -4,19 +4,25 @@
   "packageManager": "bun@1.3.14",
   "description": "Multi-bot LINE Messaging API management console for LIFF.",
   "private": true,
+  "overrides": {
+    "nanoid": "3.3.18"
+  },
   "keywords": [],
   "author": "Kananek T.",
   "license": "MIT",
   "scripts": {
     "start": "bun index.js",
-    "dev": "NODE_ENV=development bun --watch index.js",
-    "ui": "vite --config liff/vite.config.js",
-    "build:ui": "vite build --config liff/vite.config.js",
-    "preview:ui": "vite preview --config liff/vite.config.js",
+    "dev": "NODE_ENV=development bun --watch index.js | pino-pretty --colorize",
+    "dev:ui": "vite --config vite.config.js",
+    "build:ui": "vite build --config vite.config.js",
+    "preview:ui": "vite preview --config vite.config.js",
+    "verify:build": "bun scripts/verify-build.js",
+    "smoke:dev": "bun scripts/smoke-development.js",
+    "smoke:prod": "bun scripts/smoke-production.js",
     "migrate": "bun scripts/migrate.js",
     "test": "bun test",
     "typecheck": "bun x tsc -p jsconfig.json",
-    "check": "bun run typecheck && bun test && bun run build:ui"
+    "check": "bun run typecheck && bun test && bun run build:ui && bun run verify:build"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.2",
@@ -24,18 +30,24 @@
     "elysia": "^1.4.29",
     "kysely": "^0.29.5",
     "lucide-react": "^1.31.0",
-    "pg": "^8.23.0"
+    "pg": "^8.23.0",
+    "pino": "^10.3.1"
   },
   "devDependencies": {
     "@line/liff": "^2.29.2",
     "@tailwindcss/vite": "^4.3.3",
     "@types/bun": "^1.3.14",
     "@types/pg": "^8.21.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@types/whatwg-fetch": "^0.0.33",
     "@vitejs/plugin-react": "^6.0.5",
+    "pino-pretty": "^13.1.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2",
     "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
     "vite": "^8.2.1"
   },
   "repository": {
@@ -50,8 +62,5 @@
     "doc": "docs"
   },
   "module": "index.js",
-  "type": "module",
-  "peerDependencies": {
-    "typescript": "^7.0.2"
-  }
+  "type": "module"
 }

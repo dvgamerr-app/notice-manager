@@ -1,8 +1,9 @@
 import { Elysia } from 'elysia'
-import { authenticateApiKey } from '../lib/api-keys.js'
-import { db } from '../lib/db.js'
-import { deliverToChat } from '../lib/delivery.js'
-import { LineApiError, normalizeMessages } from '../lib/sdk-line.js'
+import { authenticateApiKey } from '../../lib/api-keys.js'
+import { db } from '../../lib/db.js'
+import { deliverToChat } from '../../lib/delivery.js'
+import { LineApiError, normalizeMessages } from '../../lib/sdk-line.js'
+import { logger } from '../../lib/logger.js'
 
 const buckets = new Map()
 const configuredRateLimit = Number(process.env.EXTERNAL_API_RATE_LIMIT || 60)
@@ -111,17 +112,22 @@ const sendExternalMessage = async ({ params, body, apiKey, authError, set }) => 
     })
     return { ok: true, ...result }
   } catch (error) {
-    set.status = error instanceof LineApiError || error instanceof TypeError ? 400 : 500
+    const expectedError = error instanceof LineApiError || error instanceof TypeError
+    set.status = expectedError ? 400 : 500
+    if (!expectedError) logger.error({ err: error }, 'Unexpected external delivery failure')
     return {
-      error: error.message || 'Unable to send LINE message',
+      error: expectedError ? error.message : 'Unable to send LINE message',
       deliveryId: error.deliveryId || null,
-      requestId: error.requestId || null,
-      details: error.details || null,
+      requestId: error instanceof LineApiError ? error.requestId || null : null,
+      details: error instanceof LineApiError ? error.details || null : null,
     }
   }
 }
 
-export default new Elysia({ name: 'external-api' })
+// Elysia cannot infer the union returned by an async derive in JavaScript.
+const externalApi = /** @type {any} */ (new Elysia({ name: 'external-api' }))
   .derive(requireApiKey)
   .get('/v1/bots/:bot/chats', listExternalChats)
   .post('/v1/bots/:bot/chats/:chat/messages', sendExternalMessage)
+
+export default externalApi

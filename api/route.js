@@ -1,8 +1,8 @@
 import { Elysia } from 'elysia'
 import { deleteSession, getSessionUser } from '../lib/auth.js'
 import liffAuth from './auth/liff.js'
-import externalApi from './external.js'
-import lineBotWebhook from './line-bot/index.js'
+import externalApi from './routes/external.js'
+import lineBotWebhook from './webhooks/line.js'
 import {
   addApiKey,
   bulkTestChats,
@@ -11,7 +11,6 @@ import {
   getBot,
   getBotQuota,
   getSession,
-  importLegacyBots,
   leaveChat,
   listApiKeys,
   listAuditLogs,
@@ -26,22 +25,22 @@ import {
   testChat,
   updateBot,
   updateChat,
-} from './management.js'
+} from './management/index.js'
 
 const webhookRoutes = new Elysia({ name: 'line-webhooks' })
   .onParse(async ({ request, contentType }) => {
     if (contentType === 'application/json') return request.text()
   })
-  .post('/webhooks/line/:bot', lineBotWebhook)
-  // Backward-compatible endpoint for installations using the old webhook URL.
   .post('/line/:bot', lineBotWebhook)
+  // Compatibility alias for installations already using the longer route.
+  .post('/webhooks/line/:bot', lineBotWebhook)
 
-const managementRoutes = new Elysia({ name: 'management-routes' })
+// Elysia cannot infer a required value returned by an async derive in JavaScript.
+const managementRoutes = /** @type {any} */ (new Elysia({ name: 'management-routes' }))
   .derive(async ({ headers }) => ({ user: await getSessionUser(headers) }))
   .get('/api/session', getSession)
   .get('/api/bots', listBots)
   .post('/api/bots', createBot)
-  .post('/api/bots/import-legacy', importLegacyBots)
   .get('/api/bots/:bot', getBot)
   .patch('/api/bots/:bot', updateBot)
   .get('/api/bots/:bot/quota', getBotQuota)
@@ -81,7 +80,7 @@ export default new Elysia({ name: 'routes' })
   .get('/app/config', () => ({
     publicBaseUrl: getPublicBaseUrl(),
   }))
-  .post('/auth/liff', liffAuth)
+  .post('/auth/liff', /** @type {any} */ (liffAuth))
   .post('/auth/logout', async ({ headers }) => {
     await deleteSession(headers)
     return { ok: true }

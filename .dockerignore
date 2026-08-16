@@ -15,4 +15,9 @@ helm-charts
 coverage*
 .oldfile
 docs
-.sqlite
+dist
+*.sqlite
+*.db
+CLAUDE.local.md
+.agents
+.claude

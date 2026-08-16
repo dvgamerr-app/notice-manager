@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { db } from '../../lib/db.js'
 import { lineClient, verifySignature } from '../../lib/sdk-line.js'
 import { decryptSecret } from '../../lib/secrets.js'
+import { logger } from '../../lib/logger.js'
 
 const nowIso = () => new Date().toISOString()
 const safeJson = (value) => {
@@ -11,8 +12,12 @@ const safeJson = (value) => {
     return {}
   }
 }
-const sourceId = (source) =>
-  source?.userId || source?.groupId || source?.roomId || null
+const sourceId = (source) => {
+  if (source?.type === 'user') return source.userId || null
+  if (source?.type === 'group') return source.groupId || null
+  if (source?.type === 'room') return source.roomId || null
+  return null
+}
 
 const resolveMetadata = async (client, source) => {
   try {
@@ -45,8 +50,9 @@ const resolveMetadata = async (client, source) => {
   return { displayName: '', pictureUrl: null, metadata: {} }
 }
 
-const saveEvent = async (bot, event, rawEvent) => {
+const claimEvent = async (bot, event, rawEvent) => {
   const id = sourceId(event.source)
+  const attemptAt = nowIso()
   const inserted = await db
     .insertInto('managed_webhook_event')
     .values({
@@ -57,25 +63,88 @@ const saveEvent = async (bot, event, rawEvent) => {
       source_id: id,
       payload: JSON.stringify(rawEvent),
       is_redelivery: event.deliveryContext?.isRedelivery ? 1 : 0,
-      received_at: nowIso(),
+      received_at: attemptAt,
+      processing_status: 'processing',
+      attempt_count: 1,
+      last_attempt_at: attemptAt,
     })
     .onConflict((conflict) =>
       conflict.columns(['bot_id', 'webhook_event_id']).doNothing())
     .returning('id')
     .executeTakeFirst()
-  return Boolean(inserted)
+  if (inserted) return inserted.id
+  if (!event.webhookEventId) return null
+
+  const retry = async (status, staleBefore = null) => {
+    let claim = db
+      .updateTable('managed_webhook_event')
+      .set((expression) => ({
+        processing_status: 'processing',
+        attempt_count: expression('attempt_count', '+', 1),
+        last_attempt_at: attemptAt,
+        processing_error: null,
+        is_redelivery: event.deliveryContext?.isRedelivery ? 1 : 0,
+      }))
+      .where('bot_id', '=', bot.id)
+      .where('webhook_event_id', '=', event.webhookEventId)
+      .where('processing_status', '=', status)
+    if (staleBefore) claim = claim.where('last_attempt_at', '<', staleBefore)
+    return claim.returning('id').executeTakeFirst()
+  }
+
+  const failed = await retry('failed')
+  if (failed) return failed.id
+  const staleBefore = new Date(Date.now() - 5 * 60_000).toISOString()
+  return (await retry('processing', staleBefore))?.id || null
+}
+
+const finishEvent = (eventId) => db
+  .updateTable('managed_webhook_event')
+  .set({
+    processing_status: 'processed',
+    processed_at: nowIso(),
+    processing_error: null,
+  })
+  .where('id', '=', eventId)
+  .execute()
+
+const failEvent = async (eventId, error) => {
+  try {
+    await db
+      .updateTable('managed_webhook_event')
+      .set({
+        processing_status: 'failed',
+        processing_error: String(error?.message || error).slice(0, 2_000),
+      })
+      .where('id', '=', eventId)
+      .execute()
+  } catch (recordError) {
+    logger.error(
+      { err: recordError, webhookEventRecordId: eventId },
+      'Unable to persist webhook processing failure',
+    )
+  }
 }
 
 const upsertChat = async (bot, event, client) => {
   const id = sourceId(event.source)
   if (!id || !event.source?.type) return null
 
-  const current = await db
+  let current = await db
     .selectFrom('managed_chat')
     .selectAll()
     .where('bot_id', '=', bot.id)
     .where('source_id', '=', id)
     .executeTakeFirst()
+  if (!current && ['group', 'room'].includes(event.source.type) && event.source.userId) {
+    current = await db
+      .selectFrom('managed_chat')
+      .selectAll()
+      .where('bot_id', '=', bot.id)
+      .where('source_id', '=', event.source.userId)
+      .where('source_type', '=', event.source.type)
+      .executeTakeFirst()
+  }
   const resolved = current
     ? {
         displayName: current.line_display_name || current.display_name,
@@ -90,6 +159,7 @@ const upsertChat = async (bot, event, client) => {
     await db
       .updateTable('managed_chat')
       .set({
+        source_id: id,
         source_type: event.source.type,
         line_display_name: resolved.displayName,
         picture_url: resolved.pictureUrl,
@@ -102,6 +172,9 @@ const upsertChat = async (bot, event, client) => {
       .execute()
     return {
       ...current,
+      id: current.id,
+      source_id: id,
+      source_type: event.source.type,
       display_name: current.display_name,
       line_display_name: resolved.displayName,
       picture_url: resolved.pictureUrl,
@@ -166,25 +239,32 @@ export default async ({ params, body, headers, set }) => {
   let accepted = 0
   let duplicates = 0
   for (const event of payload.events || []) {
-    if (!await saveEvent(bot, event, event)) {
+    const eventId = await claimEvent(bot, event, event)
+    if (!eventId) {
       duplicates += 1
       continue
     }
-    const chat = await upsertChat(bot, event, client)
-    accepted += 1
+    try {
+      const chat = await upsertChat(bot, event, client)
 
-    const text = event.type === 'message' && event.message?.type === 'text'
-      ? event.message.text.trim()
-      : ''
-    if (chat && event.replyToken && /^\/(?:register|join)$/i.test(text)) {
-      await db.updateTable('managed_chat').set({ registered: 1, active: 1 })
-        .where('id', '=', chat.id).execute()
-      await client.reply(event.replyToken, 'ลงทะเบียนห้องนี้ใน LINE Manager แล้ว')
-    } else if (chat && event.replyToken && /^\/id$/i.test(text)) {
-      await client.reply(
-        event.replyToken,
-        `Chat ID: ${chat.source_id}\nType: ${chat.source_type}`,
-      )
+      const text = event.type === 'message' && event.message?.type === 'text'
+        ? event.message.text.trim()
+        : ''
+      if (chat && event.replyToken && /^\/hi$/i.test(text)) {
+        await db.updateTable('managed_chat').set({ registered: 1, active: 1 })
+          .where('id', '=', chat.id).execute()
+        await client.reply(event.replyToken, 'ลงทะเบียนห้องนี้ใน LINE Manager แล้ว')
+      } else if (chat && event.replyToken && /^\/id$/i.test(text)) {
+        await client.reply(
+          event.replyToken,
+          `Chat ID: ${chat.source_id}\nType: ${chat.source_type}`,
+        )
+      }
+      await finishEvent(eventId)
+      accepted += 1
+    } catch (error) {
+      await failEvent(eventId, error)
+      throw error
     }
   }
 
