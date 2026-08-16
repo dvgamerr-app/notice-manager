@@ -905,6 +905,32 @@ describe('Elysia application', () => {
     expect(session.status).toBe(401)
   })
 
+  test('serves public privacy policy and terms without LIFF authentication', async () => {
+    const app = createApp()
+    const [privacy, terms] = await Promise.all([
+      app.handle(new Request('http://localhost/privacy-policy')),
+      app.handle(new Request('http://localhost/terms-of-use')),
+    ])
+
+    for (const response of [privacy, terms]) {
+      expect(response.status).toBe(200)
+      expect(response.headers.get('content-type')).toContain('text/html')
+      expect(response.headers.get('content-security-policy')).toContain("default-src 'none'")
+      expect(response.headers.get('x-content-type-options')).toBe('nosniff')
+    }
+
+    const privacyHtml = await privacy.text()
+    expect(privacyHtml).toContain('<html lang="th">')
+    expect(privacyHtml).toContain('นโยบายความเป็นส่วนตัว')
+    expect(privacyHtml).toContain('LINE user ID')
+    expect(privacyHtml).toContain('info.dvgamer@gmail.com')
+
+    const termsHtml = await terms.text()
+    expect(termsHtml).toContain('ข้อกำหนดการใช้งาน')
+    expect(termsHtml).toContain('ข้อกำหนดของ LINE')
+    expect(termsHtml).toContain('/privacy-policy')
+  })
+
   test('renders LIFF at the local root in development', async () => {
     const previousNodeEnv = process.env.NODE_ENV
     const previousBaseUrl = process.env.BASE_URL

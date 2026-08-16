@@ -170,6 +170,8 @@ handlers must resolve those rows under the selected bot and pass
 ## Public and authenticated routes
 
 - `GET /health` — health check.
+- `GET /privacy-policy`, `GET /terms-of-use` — public Thai legal pages for the
+  LINE Developers Console; neither route starts LIFF authentication.
 - `GET /app/config` — safe public configuration containing the validated HTTPS
   `publicBaseUrl` and generated sender-avatar choices.
 - `GET /app/avatars/:file` — public generated PNG sender avatars for LINE.
@@ -283,6 +285,7 @@ credentials in the macOS Keychain.
 - `app.js` — security headers, development Vite HTTP proxy, production dist
   serving, and top-level error handling.
 - `api/route.js` — public, authentication, webhook, and management route wiring.
+- `api/legal.js` — standalone public privacy policy and terms pages.
 - `api/management/` — domain handlers for bots, chats, activity, API keys, and
   shared management concerns.
 - `api/webhooks/line.js` — raw signed webhook ingestion, retryable idempotency, chat
@@ -300,7 +303,8 @@ credentials in the macOS Keychain.
 - `lib/logger.js` — shared structured Pino logger and credential redaction.
 - `migrations/` — portable application schema.
 - `scripts/smoke-*.js` and `scripts/verify-build.js` — repeatable runtime/build
-  verification without production data.
+  verification without production data; the production smoke also verifies both
+  public legal pages.
 - `scripts/retention.js` — migration-aware retention command for a scheduler.
 - `.github/workflows/build-ghcr.yml` — Bun verification, Trivy scanning, GHCR
   publication, and digest-pinned self-hosted deployment.

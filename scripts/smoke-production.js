@@ -47,6 +47,22 @@ try {
   if (!htmlResponse.ok || html.includes('/@vite/client')) {
     throw new Error('Production LIFF HTML check failed')
   }
+
+  const [privacyResponse, termsResponse] = await Promise.all([
+    fetch(`${baseUrl}/privacy-policy`),
+    fetch(`${baseUrl}/terms-of-use`),
+  ])
+  const [privacyHtml, termsHtml] = await Promise.all([
+    privacyResponse.text(),
+    termsResponse.text(),
+  ])
+  if (!privacyResponse.ok || !privacyHtml.includes('นโยบายความเป็นส่วนตัว')) {
+    throw new Error('Production privacy policy check failed')
+  }
+  if (!termsResponse.ok || !termsHtml.includes('ข้อกำหนดการใช้งาน')) {
+    throw new Error('Production terms of use check failed')
+  }
+
   const assetPath = html.match(/src="(\/liff\/assets\/[^"]+\.js)"/)?.[1]
   if (!assetPath) throw new Error('Hashed production JavaScript reference missing')
 
@@ -57,7 +73,13 @@ try {
   if (!asset.ok || !favicon.ok) throw new Error('Production asset request failed')
 
   logger.info(
-    { rootStatus: root.status, htmlStatus: htmlResponse.status, assetStatus: 200 },
+    {
+      rootStatus: root.status,
+      htmlStatus: htmlResponse.status,
+      assetStatus: 200,
+      privacyStatus: privacyResponse.status,
+      termsStatus: termsResponse.status,
+    },
     'Production smoke passed',
   )
 } finally {

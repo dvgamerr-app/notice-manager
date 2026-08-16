@@ -33,6 +33,12 @@ LIFF dashboard สำหรับจัดการ LINE Messaging API หลา
    **Sync webhook** ใช้ตั้งค่าซ้ำ และ **Test webhook** ใช้ตรวจการเชื่อมต่อ
 8. ส่ง `/hi` ในแชตส่วนตัวหรือกลุ่มเพื่อให้ระบบค้นพบและ register ห้องนั้น
 
+หน้ากฎหมายสำหรับตั้งค่าใน LINE Developers Console เปิดแบบ public โดยไม่ต้อง
+เข้า LIFF หรือ login:
+
+- Privacy policy URL: `${PUBLIC_BASE_URL}/privacy-policy`
+- Terms of use URL: `${PUBLIC_BASE_URL}/terms-of-use`
+
 LINE Login/LIFF channel กับ Messaging API channels ที่ต้องการให้ user ID ตรงกัน
 ควรอยู่ใต้ provider เดียวกัน แต่ credential และ webhook ยังคงแยกต่อบอต
 
@@ -212,6 +218,8 @@ shell, `Spinner` ใช้ loading indicator ร่วมกัน และ `No
 |---|---|---|
 | `GET` | `/app/config` | อ่าน public tunnel URL และตัวเลือก generated sender avatar |
 | `GET` | `/app/avatars/:file` | อ่าน generated PNG avatar สำหรับ LINE message sender |
+| `GET` | `/privacy-policy` | นโยบายความเป็นส่วนตัวภาษาไทย (public) |
+| `GET` | `/terms-of-use` | ข้อกำหนดการใช้งานภาษาไทย (public) |
 | `POST` | `/auth/liff` | แลก LIFF access token เป็น local reusable session |
 | `POST` | `/auth/logout` | ยกเลิก local session |
 | `GET/POST` | `/api/bots` | ดู/เพิ่ม Messaging API bot |

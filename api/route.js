@@ -4,6 +4,7 @@ import liffAuth from './auth/liff.js'
 import externalApi from './routes/external.js'
 import { getAvatarOptions, getAvatarPng } from '../lib/avatars.js'
 import lineBotWebhook from './webhooks/line.js'
+import { privacyPolicy, termsOfUse } from './legal.js'
 import {
   addApiKey,
   bulkTestChats,
@@ -90,6 +91,8 @@ export default new Elysia({ name: 'routes' })
   .use(webhookRoutes)
   .use(externalApi)
   .get('/health', () => ({ ok: true }))
+  .get('/privacy-policy', privacyPolicy)
+  .get('/terms-of-use', termsOfUse)
   .get('/app/config', () => {
     const publicBaseUrl = getPublicBaseUrl()
     return {
