@@ -9,7 +9,8 @@ LIFF dashboard สำหรับจัดการ LINE Messaging API หลา
 - แสดงชื่อห้องจาก LINE แบบอ่านอย่างเดียว, refresh ชื่อ/รูป และสลับ Join/Leave ได้
 - ส่งข้อความ Text, Flex card ขนาดเล็ก หรือ LINE message JSON ไปหลายห้องพร้อมกัน
 - Monitor delivery, webhook redelivery และ audit trail พร้อม filter/pagination
-- สร้าง API key แยกต่อบอตเพื่อให้ระบบภายนอกส่งเข้า registered chat
+- สร้าง API key แยกต่อบอตเพื่อให้ระบบภายนอกส่งเข้า registered chat พร้อม
+  distributed rate limit ที่ใช้ฐานข้อมูลร่วมกันทุก instance
 - ดู message quota และ rotate credentials จากหน้า dashboard
 - ตรวจ `x-line-signature`, กัน webhook ซ้ำด้วย `webhookEventId` และเก็บ delivery log
 - ใช้ Bun, Elysia, React, Kysely และรองรับ PostgreSQL/SQLite
@@ -98,6 +99,17 @@ DATABASE_URL=postgresql://user:password@host:5432/line_manager bun run start
 `bun run migrate` เป็นคำสั่งเดียวสำหรับทั้ง PostgreSQL และ SQLite และ server
 จะเรียก migration ซ้ำอย่างปลอดภัยก่อนเริ่มรับ request ด้วย
 
+รัน data-retention cleanup เป็น scheduled job อย่างน้อยวันละครั้ง:
+
+```bash
+bun run retention
+```
+
+ค่าเริ่มต้นเก็บ webhook 30 วัน, delivery 90 วัน, audit log 365 วัน, session
+ที่หมดอายุแล้วอีก 7 วัน และ rate-limit bucket 2 วัน โดยลบทีละ 1,000 records
+ปรับได้ด้วย `RETENTION_*` ใน `.env.example`; ตั้ง policy รายตัวเป็น `0` เพื่อ
+ปิดการลบชุดนั้น ระบบจะไม่ลบ webhook ที่กำลังอยู่ในสถานะ `processing`
+
 ## Verification
 
 ตรวจ type safety, automated tests และ production LIFF build ด้วยคำสั่งรวม:
@@ -176,7 +188,10 @@ shell, `Spinner` ใช้ loading indicator ร่วมกัน และ `No
 
 ใช้ `X-API-Key` หรือ `Authorization: Bearer <key>` โดย key ใช้ได้เฉพาะบอตที่
 สร้าง key และเฉพาะห้องที่ active + registered เท่านั้น ค่าเริ่มต้นจำกัด 60
-requests ต่อนาทีต่อ key ปรับได้ด้วย `EXTERNAL_API_RATE_LIMIT`
+requests ต่อนาทีต่อ key ปรับได้ด้วย `EXTERNAL_API_RATE_LIMIT` ตัวนับเป็น atomic
+database bucket จึงใช้ quota เดียวกันทุก application instance และ response จะมี
+`RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset` รวมถึง `Retry-After`
+เมื่อถูกจำกัด
 
 ```bash
 curl -X POST \

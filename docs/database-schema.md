@@ -29,8 +29,10 @@ Kysely migration `001_line_management` deliberately uses `managed_bot`,
 `002_management_operations` adds chat profile metadata, `managed_api_key`, and
 `managed_audit_log`. Migration `003_webhook_processing` adds retryable webhook
 processing state, attempt counts, timestamps, and the supporting status index.
-The distinct `managed_` prefix avoids destructive changes to legacy tables and
-works on both PostgreSQL and SQLite.
+Migration `004_distributed_rate_limit` adds `managed_rate_limit_bucket` and
+`005_data_retention_indexes` adds global timestamp indexes used by batched
+retention cleanup. The distinct `managed_` prefix avoids destructive changes to
+legacy tables and works on both PostgreSQL and SQLite.
 
 - `managed_chat.display_name` is the editable operator alias.
 - `managed_chat.line_display_name`, `picture_url`, and `metadata_payload` cache
@@ -40,3 +42,15 @@ works on both PostgreSQL and SQLite.
 - `managed_audit_log` records management and external-delivery actions.
 - `managed_webhook_event.processing_status` and `attempt_count` distinguish a
   completed duplicate from a failed event that LINE may safely redeliver.
+- `managed_rate_limit_bucket` has one unique row per API key/minute. Atomic
+  upserts share quota across application instances; old windows are removed by
+  the retention job.
+
+## Data retention
+
+`bun run retention` removes expired sessions and old webhook, delivery, audit,
+and rate-limit records in bounded batches. Cutoffs are configured with the
+`RETENTION_*` environment variables documented in `.env.example`. A value of
+zero disables the corresponding policy. Webhook rows in `processing` state are
+excluded to avoid deleting an active claim. Run the command from a daily
+scheduler; concurrent executions remain idempotent.

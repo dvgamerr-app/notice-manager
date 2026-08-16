@@ -27,6 +27,9 @@ let getSessionUser
 let originalFetch
 let createApp
 let sessionToken
+let consumeApiRateLimit
+let resolveRetentionPolicy
+let runRetention
 const pushedMessages = []
 let replyFailuresRemaining = 0
 
@@ -157,6 +160,8 @@ beforeAll(async () => {
   originalFetch = globalThis.fetch
   ;({ db, migrateToLatest } = await import('../lib/db.js'))
   ;({ exchangeLiffAccessToken, getSessionUser } = await import('../lib/auth.js'))
+  ;({ consumeApiRateLimit } = await import('../lib/rate-limit.js'))
+  ;({ resolveRetentionPolicy, runRetention } = await import('../lib/retention.js'))
   ;({ createApp } = await import('../app.js'))
   await migrateToLatest()
 })
@@ -223,6 +228,7 @@ describe('portable Kysely database', () => {
     expect(names).toContain('managed_delivery')
     expect(names).toContain('managed_api_key')
     expect(names).toContain('managed_audit_log')
+    expect(names).toContain('managed_rate_limit_bucket')
     const webhookEvent = tables.find((table) => table.name === 'managed_webhook_event')
     expect(webhookEvent?.columns.map((column) => column.name)).toContain('processing_status')
     expect(webhookEvent?.columns.find((column) => column.name === 'attempt_count')?.dataType
@@ -549,6 +555,8 @@ describe('LIFF reusable session', () => {
       }),
     )
     expect(externalResponse.status).toBe(200)
+    expect(externalResponse.headers.get('ratelimit-limit')).toBe('60')
+    expect(externalResponse.headers.get('ratelimit-remaining')).toBe('59')
     expect(await externalResponse.json()).toMatchObject({ ok: true })
 
     const deliveriesResponse = await app.handle(
@@ -575,6 +583,259 @@ describe('LIFF reusable session', () => {
     )
     const audits = await auditResponse.json()
     expect(audits.some((row) => row.action === 'message.send')).toBe(true)
+  })
+})
+
+describe('distributed hardening', () => {
+  const fixture = {
+    userId: 'retention-user',
+    botId: 'retention-bot',
+    apiKeyId: 'retention-api-key',
+  }
+
+  beforeAll(async () => {
+    const now = '2026-01-30T00:00:00.000Z'
+    await db.insertInto('app_user').values({
+      id: fixture.userId,
+      display_name: 'Retention test',
+      picture_url: null,
+      role: 'admin',
+      created_at: now,
+      updated_at: now,
+    }).execute()
+    await db.insertInto('managed_bot').values({
+      id: fixture.botId,
+      owner_user_id: fixture.userId,
+      service: 'retention-bot',
+      name: 'Retention bot',
+      channel_access_token: 'test-token',
+      channel_secret: 'test-secret',
+      bot_user_id: 'U-retention-bot',
+      basic_id: null,
+      picture_url: null,
+      active: 1,
+      webhook_endpoint: null,
+      verified_at: now,
+      created_at: now,
+      updated_at: now,
+    }).execute()
+    await db.insertInto('managed_api_key').values({
+      id: fixture.apiKeyId,
+      owner_user_id: fixture.userId,
+      bot_id: fixture.botId,
+      name: 'Retention key',
+      key_prefix: 'lm_live_test',
+      key_hash: 'retention-key-hash',
+      active: 1,
+      last_used_at: null,
+      created_at: now,
+      revoked_at: null,
+    }).execute()
+  })
+
+  test('shares an atomic API rate-limit bucket across concurrent consumers', async () => {
+    const now = new Date('2026-01-30T12:34:30.000Z')
+    const results = await Promise.all(
+      Array.from({ length: 5 }, () => consumeApiRateLimit({
+        apiKeyId: fixture.apiKeyId,
+        limit: 3,
+        now,
+      })),
+    )
+
+    expect(results.filter((result) => result.allowed)).toHaveLength(3)
+    expect(results.map((result) => result.count).sort((a, b) => a - b))
+      .toEqual([1, 2, 3, 4, 5])
+    expect(results.at(-1)).toMatchObject({
+      allowed: false,
+      limit: 3,
+      remaining: 0,
+      resetAt: '2026-01-30T12:35:00.000Z',
+    })
+    expect(await db
+      .selectFrom('managed_rate_limit_bucket')
+      .select('request_count')
+      .where('api_key_id', '=', fixture.apiKeyId)
+      .executeTakeFirstOrThrow())
+      .toEqual({ request_count: 5 })
+  })
+
+  test('deletes expired records in batches while preserving active webhook work', async () => {
+    const old = '2026-01-01T00:00:00.000Z'
+    const recent = '2026-01-30T00:00:00.000Z'
+    await db.deleteFrom('managed_rate_limit_bucket')
+      .where('api_key_id', '=', fixture.apiKeyId).execute()
+    await db.insertInto('app_session').values([
+      {
+        id: 'retention-session-old',
+        token_hash: 'retention-session-old-hash',
+        user_id: fixture.userId,
+        expires_at: old,
+        created_at: old,
+        last_seen_at: old,
+      },
+      {
+        id: 'retention-session-recent',
+        token_hash: 'retention-session-recent-hash',
+        user_id: fixture.userId,
+        expires_at: recent,
+        created_at: old,
+        last_seen_at: recent,
+      },
+    ]).execute()
+    await db.insertInto('managed_webhook_event').values([
+      {
+        id: 'retention-webhook-old',
+        bot_id: fixture.botId,
+        webhook_event_id: 'retention-webhook-old',
+        event_type: 'message',
+        source_id: null,
+        payload: '{}',
+        is_redelivery: 0,
+        received_at: old,
+        processing_status: 'processed',
+        attempt_count: 1,
+        last_attempt_at: old,
+        processed_at: old,
+        processing_error: null,
+      },
+      {
+        id: 'retention-webhook-processing',
+        bot_id: fixture.botId,
+        webhook_event_id: 'retention-webhook-processing',
+        event_type: 'message',
+        source_id: null,
+        payload: '{}',
+        is_redelivery: 0,
+        received_at: old,
+        processing_status: 'processing',
+        attempt_count: 1,
+        last_attempt_at: old,
+        processed_at: null,
+        processing_error: null,
+      },
+      {
+        id: 'retention-webhook-recent',
+        bot_id: fixture.botId,
+        webhook_event_id: 'retention-webhook-recent',
+        event_type: 'message',
+        source_id: null,
+        payload: '{}',
+        is_redelivery: 0,
+        received_at: recent,
+        processing_status: 'processed',
+        attempt_count: 1,
+        last_attempt_at: recent,
+        processed_at: recent,
+        processing_error: null,
+      },
+    ]).execute()
+    await db.insertInto('managed_delivery').values([
+      {
+        id: 'retention-delivery-old',
+        bot_id: fixture.botId,
+        chat_id: null,
+        recipient_id: 'recipient',
+        message_payload: '[]',
+        status: 'sent',
+        line_request_id: null,
+        response_payload: null,
+        error: null,
+        created_at: old,
+        sent_at: old,
+      },
+      {
+        id: 'retention-delivery-recent',
+        bot_id: fixture.botId,
+        chat_id: null,
+        recipient_id: 'recipient',
+        message_payload: '[]',
+        status: 'sent',
+        line_request_id: null,
+        response_payload: null,
+        error: null,
+        created_at: recent,
+        sent_at: recent,
+      },
+    ]).execute()
+    await db.insertInto('managed_audit_log').values([
+      {
+        id: 'retention-audit-old',
+        actor_type: 'system',
+        actor_id: null,
+        bot_id: fixture.botId,
+        action: 'retention.test',
+        entity_type: 'test',
+        entity_id: null,
+        metadata_payload: '{}',
+        created_at: old,
+      },
+      {
+        id: 'retention-audit-recent',
+        actor_type: 'system',
+        actor_id: null,
+        bot_id: fixture.botId,
+        action: 'retention.test',
+        entity_type: 'test',
+        entity_id: null,
+        metadata_payload: '{}',
+        created_at: recent,
+      },
+    ]).execute()
+    await db.insertInto('managed_rate_limit_bucket').values([
+      {
+        id: 'retention-rate-old',
+        api_key_id: fixture.apiKeyId,
+        window_started_at: old,
+        request_count: 1,
+        updated_at: old,
+      },
+      {
+        id: 'retention-rate-recent',
+        api_key_id: fixture.apiKeyId,
+        window_started_at: recent,
+        request_count: 1,
+        updated_at: recent,
+      },
+    ]).execute()
+
+    const deleted = await runRetention({
+      now: new Date('2026-01-31T00:00:00.000Z'),
+      policy: {
+        webhookEventsDays: 10,
+        deliveriesDays: 10,
+        auditLogsDays: 10,
+        expiredSessionsDays: 10,
+        rateLimitBucketsDays: 10,
+        batchSize: 2,
+      },
+    })
+    expect(deleted).toEqual({
+      webhookEvents: 1,
+      deliveries: 1,
+      auditLogs: 1,
+      expiredSessions: 1,
+      rateLimitBuckets: 1,
+    })
+    expect(await db.selectFrom('managed_webhook_event').select('id')
+      .where('id', '=', 'retention-webhook-processing').executeTakeFirst())
+      .toEqual({ id: 'retention-webhook-processing' })
+    for (const [table, oldId, recentId] of [
+      ['app_session', 'retention-session-old', 'retention-session-recent'],
+      ['managed_delivery', 'retention-delivery-old', 'retention-delivery-recent'],
+      ['managed_audit_log', 'retention-audit-old', 'retention-audit-recent'],
+      ['managed_rate_limit_bucket', 'retention-rate-old', 'retention-rate-recent'],
+    ]) {
+      expect(await db.selectFrom(table).select('id').where('id', '=', oldId).executeTakeFirst())
+        .toBeUndefined()
+      expect(await db.selectFrom(table).select('id').where('id', '=', recentId).executeTakeFirst())
+        .toEqual({ id: recentId })
+    }
+  })
+
+  test('validates retention configuration and supports disabling a policy', () => {
+    expect(() => resolveRetentionPolicy({ RETENTION_AUDIT_LOGS_DAYS: '-1' })).toThrow()
+    expect(resolveRetentionPolicy({ RETENTION_AUDIT_LOGS_DAYS: '0' }).auditLogsDays).toBe(0)
   })
 })
 

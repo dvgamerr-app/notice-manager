@@ -171,7 +171,9 @@ handlers must resolve those rows under the selected bot and pass
   `GET /api/line/:bot/history` are read-only compatibility aliases.
 - `GET /v1/bots/:bot/chats` and
   `POST /v1/bots/:bot/chats/:chat/messages` use bot-scoped API keys and
-  per-process rate limiting.
+  an atomic database-backed per-minute rate-limit bucket shared by every
+  application instance. Rate-limit responses expose standard limit, remaining,
+  reset, and retry headers.
 
 Refer to `api/route.js` before documenting an exact management route; do not copy
 an old route list from conversation history.
@@ -183,12 +185,16 @@ an old route list from conversation history.
 - Default local database: `sqlite://./notice-manager.sqlite`.
 - Run `bun run migrate`; startup also calls `migrateToLatest()` safely.
 - Current migrations: `001_line_management.js`, `002_management_operations.js`,
-  and `003_webhook_processing.js`.
+  `003_webhook_processing.js`, `004_distributed_rate_limit.js`, and
+  `005_data_retention_indexes.js`.
 - Webhook events use processing state and attempt counters so a failed event can
   be claimed again on LINE redelivery instead of being discarded as a duplicate.
 - Core tables: `app_setting`, `app_user`, `app_session`, `managed_bot`,
   `managed_chat`, `managed_webhook_event`, `managed_delivery`,
-  `managed_api_key`, and `managed_audit_log`.
+  `managed_api_key`, `managed_audit_log`, and `managed_rate_limit_bucket`.
+- Run `bun run retention` from one or more safe scheduled jobs. Cleanup is
+  idempotent, batched, safe under concurrent runners, and never deletes webhook
+  rows currently marked `processing`.
 - The `managed_` prefix deliberately avoids collisions with legacy `line_*`
   tables. Do not reintroduce legacy import behavior without an explicit request.
 
@@ -201,6 +207,10 @@ an old route list from conversation history.
 - Ownership/session: `LINE_ADMIN_USER_IDS`, `SESSION_DAYS`.
 - Security: `CREDENTIAL_ENCRYPTION_KEY`.
 - External API: `EXTERNAL_API_RATE_LIMIT`.
+- Retention: `RETENTION_WEBHOOK_EVENTS_DAYS`, `RETENTION_DELIVERIES_DAYS`,
+  `RETENTION_AUDIT_LOGS_DAYS`, `RETENTION_EXPIRED_SESSIONS_DAYS`,
+  `RETENTION_RATE_LIMIT_BUCKETS_DAYS`, and `RETENTION_BATCH_SIZE`. A zero-day
+  value disables only that individual cleanup policy.
 - Explicit local bypass: `DEV_AUTH_BYPASS`, `VITE_DEV_AUTH_BYPASS`.
 - Development proxy: `VITE_DEV_SERVER_URL`.
 
@@ -211,6 +221,7 @@ Keep actual values in ignored environment files. Do not document or print them.
 ```powershell
 bun install
 bun run migrate
+bun run retention
 bun dev
 bun dev:ui
 bun run typecheck
@@ -224,6 +235,8 @@ bun start
 
 - `bun dev` starts the backend watcher on port 3000 and formats Pino logs with
   `pino-pretty`.
+- `bun run retention` applies configured cutoffs in bounded database batches;
+  schedule it daily in production rather than tying cleanup to HTTP startup.
 - `bun dev:ui` starts Vite on port 5173; run it in a separate terminal.
 - `bun run build:ui` creates ignored production output in `dist/liff`.
 - `bun start` starts Elysia and serves the production build under `/liff/`.
@@ -254,12 +267,15 @@ and then starts the server. Because the image builds after `COPY`, ignored local
 - `lib/sdk-line.js` — LINE API client, message normalization, token diagnostics,
   and signature verification.
 - `lib/delivery.js` — shared validate/push/delivery/audit flow.
+- `lib/rate-limit.js` — atomic database-backed external API quota consumption.
+- `lib/retention.js` — portable batched retention policy execution.
 - `lib/secrets.js` — credential encryption and legacy read compatibility.
 - `lib/db.js` — PostgreSQL/SQLite Kysely setup.
 - `lib/logger.js` — shared structured Pino logger and credential redaction.
 - `migrations/` — portable application schema.
 - `scripts/smoke-*.js` and `scripts/verify-build.js` — repeatable runtime/build
   verification without production data.
+- `scripts/retention.js` — migration-aware retention command for a scheduler.
 - `src/` — React LIFF dashboard.
 - `src/flex.js` — compact Flex card builder.
 - `vite.config.js` — `/liff/` base, port 5173 HMR, API proxies, and
@@ -306,6 +322,7 @@ bun run typecheck
 bun test
 bun run build:ui
 $env:DATABASE_URL=':memory:'; bun run migrate
+$env:DATABASE_URL=':memory:'; bun run retention
 ```
 
 Also run `git diff --check`. For PostgreSQL-sensitive changes, migrate against an
