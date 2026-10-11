@@ -47,11 +47,20 @@ future changes must use a new numbered migration.
   upserts share quota across application instances; old windows are removed by
   the retention job.
 
+- `managed_webhook_target` holds a bot's outbound webhook endpoints (optionally
+  scoped to one `managed_chat`), the encrypted signing secret, and health fields
+  (`consecutive_failures`, `paused_until`, last success/failure/error).
+- `managed_webhook_forward` is the delivery outbox: one row per target and
+  webhook event (unique), with `pending | sending | succeeded | dead` status,
+  attempt counters, next attempt time, and the last HTTP status/error. It cascades
+  from both the target and the webhook event.
+
 ## Data retention
 
-`bun run retention` removes expired sessions and old webhook, delivery, audit,
-and rate-limit records in bounded batches. Cutoffs are configured with the
+`bun run retention` removes expired sessions and old webhook, forward, delivery,
+audit, and rate-limit records in bounded batches. Cutoffs are configured with the
 `RETENTION_*` environment variables documented in `.env.example`. A value of
 zero disables the corresponding policy. Webhook rows in `processing` state are
-excluded to avoid deleting an active claim. Run the command from a daily
+excluded to avoid deleting an active claim, as are events with a pending or
+in-flight forward. `RETENTION_FORWARDS_DAYS` (default 30) controls forwards. Run the command from a daily
 scheduler; concurrent executions remain idempotent.

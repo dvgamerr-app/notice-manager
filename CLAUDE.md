@@ -168,6 +168,35 @@ handlers must resolve those rows under the selected bot and pass
 - Persist delivery status, LINE request ID, response/error payload, timestamps,
   and audit events without storing or logging raw credentials.
 
+## Webhook forwarding
+
+- An owner can add outbound webhook targets per bot: either every chat of the bot
+  or one specific chat (`managed_webhook_target.chat_id`). Targets must be public
+  HTTPS URLs (no credentials, localhost/private addresses; the resolved IP is
+  checked again before each send and redirects are not followed).
+- After a LINE event is verified and stored, `enqueueForwards` writes one
+  `managed_webhook_forward` row per applicable enabled target (unique per
+  target/event, so LINE redelivery never queues a second copy). Events consumed
+  by this application (`/hi`, `/id` — see `OWN_COMMAND` in
+  `api/webhooks/line.js`) are never forwarded; everything else is.
+- Delivery is asynchronous from the database outbox: `startForwardWorker` in
+  `index.js` polls every 5 s and is kicked after each enqueue. Claims are
+  atomic, so multiple instances are safe; a `sending` claim older than 2 minutes
+  is re-claimed. The body is `{destination, events:[event]}` signed with the
+  target's own secret in `x-line-signature` (Base64 HMAC-SHA256 of the raw body).
+  The secret (`whsec_...`) is AES-256-GCM encrypted at rest and shown once.
+- Only 2xx is success. Network errors, timeouts, 408, 429 and 5xx retry with
+  backoff (10 s, 1 m, 5 m, 30 m, 2 h) up to the target's `max_attempts` (default
+  6); other 4xx and blocked hosts go straight to `dead`. Five consecutive failures
+  pause the target for 5 minutes (circuit breaker); three mark it `failing`.
+- Failures are surfaced in the Forward tab (health, last error, counts, per-delivery
+  history with manual retry) and in logs (`warn` per retry, `error` when giving up
+  or when a target starts failing) plus `managed_audit_log` entries
+  (`webhook-forward.dead`, `webhook-target.failing`, `webhook-target.recovered`).
+  A failing target never affects the response to LINE or this app's own handling.
+- Forwarded events are not ordered; `webhookEventId` and `timestamp` let the
+  receiver reorder or deduplicate.
+
 ## Public and authenticated routes
 
 - `GET /health` — health check.
@@ -179,7 +208,8 @@ handlers must resolve those rows under the selected bot and pass
 - `POST /auth/liff`, `POST /auth/logout` — LIFF session lifecycle.
 - `POST /line/:bot` — primary signed LINE webhook.
 - `/api/bots...` — authenticated bot, webhook, quota, chat, delivery, API-key,
-  audit, and test-send management routes.
+  audit, test-send, and webhook-forwarding (`/api/bots/:bot/forwards...`)
+  management routes.
 - `GET /api/line`, `GET /api/line/:bot/room`, and
   `GET /api/line/:bot/history` are read-only compatibility aliases.
 - `GET /v1/bots/:bot/chats` and
@@ -198,7 +228,8 @@ an old route list from conversation history.
 - Default local database: `sqlite://./notice-manager.sqlite`.
 - Run `bun run migrate`; startup also calls `migrateToLatest()` safely.
 - Current migrations: `001_line_management.js`, `002_management_operations.js`,
-  `003_webhook_processing.js`, and `004_distributed_hardening.js`.
+  `003_webhook_processing.js`, `004_distributed_hardening.js`, and
+  `005_webhook_forwarding.js`.
 - Applied migration filenames and contents are immutable. Never rename, delete,
   reorder, or edit an existing migration; add the next numbered migration for
   every later schema change.
@@ -206,10 +237,13 @@ an old route list from conversation history.
   be claimed again on LINE redelivery instead of being discarded as a duplicate.
 - Core tables: `app_setting`, `app_user`, `app_session`, `managed_bot`,
   `managed_chat`, `managed_webhook_event`, `managed_delivery`,
-  `managed_api_key`, `managed_audit_log`, and `managed_rate_limit_bucket`.
+  `managed_api_key`, `managed_audit_log`, `managed_rate_limit_bucket`,
+  `managed_webhook_target`, and `managed_webhook_forward`.
 - Run `bun run retention` from one or more safe scheduled jobs. Cleanup is
   idempotent, batched, safe under concurrent runners, and never deletes webhook
-  rows currently marked `processing`.
+  rows currently marked `processing`. Forward rows are removed first
+  (`RETENTION_FORWARDS_DAYS`, default 30; `sending` rows are kept), and a webhook
+  event is kept while it still has a `pending`/`sending` forward.
 - The `managed_` prefix deliberately avoids collisions with legacy `line_*`
   tables. Do not reintroduce legacy import behavior without an explicit request.
 
@@ -222,7 +256,7 @@ an old route list from conversation history.
 - Ownership/session: `LINE_ADMIN_USER_IDS`, `SESSION_DAYS`.
 - Security: `CREDENTIAL_ENCRYPTION_KEY`.
 - External API: `EXTERNAL_API_RATE_LIMIT`.
-- Retention: `RETENTION_WEBHOOK_EVENTS_DAYS`, `RETENTION_DELIVERIES_DAYS`,
+- Retention: `RETENTION_WEBHOOK_EVENTS_DAYS`, `RETENTION_FORWARDS_DAYS`, `RETENTION_DELIVERIES_DAYS`,
   `RETENTION_AUDIT_LOGS_DAYS`, `RETENTION_EXPIRED_SESSIONS_DAYS`,
   `RETENTION_RATE_LIMIT_BUCKETS_DAYS`, and `RETENTION_BATCH_SIZE`. A zero-day
   value disables only that individual cleanup policy.
@@ -298,6 +332,10 @@ credentials in the macOS Keychain.
   and signature verification.
 - `lib/delivery.js` — shared validate/push/delivery/audit flow.
 - `lib/avatars.js` — deterministic generated PNG sender avatars.
+- `lib/webhook-forward.js` — forwarding outbox, signing, SSRF checks, retry/circuit
+  breaker, and the delivery worker.
+- `api/management/forwards.js` — forwarding target and delivery management.
+- `src/pages/bot/ForwardsTab.jsx` — Forward tab (targets, health, history).
 - `lib/rate-limit.js` — atomic database-backed external API quota consumption.
 - `lib/retention.js` — portable batched retention policy execution.
 - `lib/secrets.js` — credential encryption and legacy read compatibility.

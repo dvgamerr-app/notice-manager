@@ -10,10 +10,14 @@ import {
   bulkTestChats,
   bulkUpdateChats,
   createBot,
+  createForward,
+  deleteForward,
   getBot,
   getBotQuota,
   getSession,
   leaveChat,
+  listForwardDeliveries,
+  listForwards,
   listApiKeys,
   listAuditLogs,
   listBots,
@@ -21,12 +25,15 @@ import {
   listDeliveries,
   listWebhookEvents,
   refreshChat,
+  retryForwardDelivery,
   revokeApiKey,
   syncBotWebhook,
   testBotWebhook,
   testChat,
+  testForward,
   updateBot,
   updateChat,
+  updateForward,
 } from './management/index.js'
 
 const webhookRoutes = new Elysia({ name: 'line-webhooks' })
@@ -60,6 +67,13 @@ const managementRoutes = /** @type {any} */ (new Elysia({ name: 'management-rout
   .get('/api/bots/:bot/api-keys', listApiKeys)
   .post('/api/bots/:bot/api-keys', addApiKey)
   .delete('/api/bots/:bot/api-keys/:key', revokeApiKey)
+  .get('/api/bots/:bot/forwards', listForwards)
+  .post('/api/bots/:bot/forwards', createForward)
+  .patch('/api/bots/:bot/forwards/:forward', updateForward)
+  .delete('/api/bots/:bot/forwards/:forward', deleteForward)
+  .post('/api/bots/:bot/forwards/:forward/test', testForward)
+  .get('/api/bots/:bot/forwards/:forward/deliveries', listForwardDeliveries)
+  .post('/api/bots/:bot/forwards/:forward/deliveries/:delivery/retry', retryForwardDelivery)
   .get('/api/bots/:bot/audit-logs', listAuditLogs)
   // Read-only compatibility aliases for the previous LIFF frontend.
   .get('/api/line', listBots)

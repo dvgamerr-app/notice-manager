@@ -27,3 +27,12 @@ export {
   updateChat,
 } from './chats.js'
 export { getSession } from './session.js'
+export {
+  createForward,
+  deleteForward,
+  listForwardDeliveries,
+  listForwards,
+  retryForwardDelivery,
+  testForward,
+  updateForward,
+} from './forwards.js'

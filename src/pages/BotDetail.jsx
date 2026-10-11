@@ -5,6 +5,7 @@ import Notice from '../components/Notice.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import Spinner from '../components/Spinner.jsx'
 import ApiKeysTab from './bot/ApiKeysTab.jsx'
+import ForwardsTab from './bot/ForwardsTab.jsx'
 import MonitorTab from './bot/MonitorTab.jsx'
 import RoomsTab from './bot/RoomsTab.jsx'
 import SettingsTab from './bot/SettingsTab.jsx'
@@ -12,6 +13,7 @@ import SettingsTab from './bot/SettingsTab.jsx'
 const tabs = [
   ['rooms', 'Rooms'],
   ['monitor', 'Monitor'],
+  ['forward', 'Forward'],
   ['api', 'API Keys'],
   ['settings', 'Settings'],
 ]
@@ -76,13 +78,13 @@ export default function BotDetail({ api }) {
           </section>
 
           <nav className="sticky top-0 z-[9] -mx-4 px-4 py-2 bg-[#f0f0f0]/95 backdrop-blur">
-            <div className="grid grid-cols-4 bg-white rounded-xl shadow-sm p-1">
+            <div className="grid grid-cols-5 bg-white rounded-xl shadow-sm p-1">
               {tabs.map(([value, label]) => (
                 <button
                   type="button"
                   key={value}
                   onClick={() => setTab(value)}
-                  className={`rounded-lg py-2.5 text-xs font-semibold ${
+                  className={`rounded-lg py-2.5 text-[11px] font-semibold ${
                     tab === value
                       ? 'bg-[#06C755] text-white'
                       : 'text-gray-500'
@@ -104,6 +106,7 @@ export default function BotDetail({ api }) {
             />
           )}
           {tab === 'monitor' && <MonitorTab api={api} bot={bot} chats={chats} />}
+          {tab === 'forward' && <ForwardsTab api={api} bot={bot} chats={chats} />}
           {tab === 'api' && <ApiKeysTab api={api} bot={bot} />}
           {tab === 'settings' && (
             <SettingsTab api={api} bot={bot} reload={reload} />

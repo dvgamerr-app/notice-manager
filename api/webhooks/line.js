@@ -3,6 +3,11 @@ import { db } from '../../lib/db.js'
 import { lineClient, verifySignature } from '../../lib/sdk-line.js'
 import { decryptSecret } from '../../lib/secrets.js'
 import { logger } from '../../lib/logger.js'
+import { enqueueForwards } from '../../lib/webhook-forward.js'
+
+// Commands answered by this application. They are consumed here and are not
+// forwarded to external webhook targets.
+const OWN_COMMAND = /^\/(?:hi|id)$/i
 
 const nowIso = () => new Date().toISOString()
 const safeJson = (value) => {
@@ -259,6 +264,9 @@ export default async ({ params, body, headers, set }) => {
           event.replyToken,
           `Chat ID: ${chat.source_id}\nType: ${chat.source_type}`,
         )
+      }
+      if (!OWN_COMMAND.test(text)) {
+        await enqueueForwards({ bot, eventRecordId: eventId, chatId: chat?.id || null })
       }
       await finishEvent(eventId)
       accepted += 1

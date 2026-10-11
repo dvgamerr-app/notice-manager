@@ -99,6 +99,41 @@ export const createApi = (token) => {
         'DELETE',
         `/api/bots/${encodeURIComponent(bot)}/api-keys/${encodeURIComponent(key)}`,
       ),
+    getForwards: (bot) =>
+      call('GET', `/api/bots/${encodeURIComponent(bot)}/forwards`),
+    createForward: (bot, data) =>
+      call('POST', `/api/bots/${encodeURIComponent(bot)}/forwards`, data),
+    updateForward: (bot, id, data) =>
+      call(
+        'PATCH',
+        `/api/bots/${encodeURIComponent(bot)}/forwards/${encodeURIComponent(id)}`,
+        data,
+      ),
+    deleteForward: (bot, id) =>
+      call(
+        'DELETE',
+        `/api/bots/${encodeURIComponent(bot)}/forwards/${encodeURIComponent(id)}`,
+      ),
+    testForward: (bot, id) =>
+      call(
+        'POST',
+        `/api/bots/${encodeURIComponent(bot)}/forwards/${encodeURIComponent(id)}/test`,
+        {},
+      ),
+    getForwardDeliveries: (bot, id, query) =>
+      call(
+        'GET',
+        withQuery(
+          `/api/bots/${encodeURIComponent(bot)}/forwards/${encodeURIComponent(id)}/deliveries`,
+          query,
+        ),
+      ),
+    retryForwardDelivery: (bot, id, delivery) =>
+      call(
+        'POST',
+        `/api/bots/${encodeURIComponent(bot)}/forwards/${encodeURIComponent(id)}/deliveries/${encodeURIComponent(delivery)}/retry`,
+        {},
+      ),
     getAuditLogs: (bot, query) =>
       call(
         'GET',

@@ -111,10 +111,10 @@ DATABASE_URL=postgresql://user:password@host:5432/line_manager bun run start
 bun run retention
 ```
 
-ค่าเริ่มต้นเก็บ webhook 30 วัน, delivery 90 วัน, audit log 365 วัน, session
+ค่าเริ่มต้นเก็บ webhook 30 วัน, forward webhook (`RETENTION_FORWARDS_DAYS`) 30 วัน, delivery 90 วัน, audit log 365 วัน, session
 ที่หมดอายุแล้วอีก 7 วัน และ rate-limit bucket 2 วัน โดยลบทีละ 1,000 records
 ปรับได้ด้วย `RETENTION_*` ใน `.env.example`; ตั้ง policy รายตัวเป็น `0` เพื่อ
-ปิดการลบชุดนั้น ระบบจะไม่ลบ webhook ที่กำลังอยู่ในสถานะ `processing`
+ปิดการลบชุดนั้น ระบบจะไม่ลบ webhook ที่กำลังอยู่ในสถานะ `processing` หรือที่ยังมี forward รอส่งอยู่
 
 ## Verification
 
