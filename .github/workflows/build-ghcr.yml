@@ -12,7 +12,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  PLATFORMS: linux/arm64
+  PLATFORMS: linux/amd64,linux/arm64
   TRIVY_IMAGE: aquasec/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969
 
 jobs:
@@ -42,15 +42,8 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Validate release build configuration
-        if: github.event_name != 'pull_request'
-        env:
-          VITE_LIFF_ID: ${{ vars.VITE_LIFF_ID }}
-        run: |
-          if [ -z "${VITE_LIFF_ID}" ]; then
-            echo "Missing required repository variable: VITE_LIFF_ID" >&2
-            exit 1
-          fi
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
@@ -78,9 +71,6 @@ jobs:
           load: true
           push: false
           tags: notice-manager:scan-${{ github.sha }}
-          build-args: |
-            VITE_LIFF_ID=${{ vars.VITE_LIFF_ID }}
-            VITE_API_URL=${{ vars.VITE_API_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -92,7 +82,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish ARM64 image
+      - name: Publish multi-arch image
         id: publish
         if: github.event_name != 'pull_request'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -102,9 +92,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            VITE_LIFF_ID=${{ vars.VITE_LIFF_ID }}
-            VITE_API_URL=${{ vars.VITE_API_URL }}
           cache-from: type=gha
           provenance: mode=max
           sbom: true
@@ -129,6 +116,7 @@ jobs:
       PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
       CORS_ORIGINS: ${{ vars.CORS_ORIGINS }}
       LOG_LEVEL: ${{ vars.LOG_LEVEL || 'info' }}
+      LIFF_ID: ${{ vars.LIFF_ID || vars.VITE_LIFF_ID }}
       LINE_LOGIN_CHANNEL_ID: ${{ vars.LINE_LOGIN_CHANNEL_ID }}
       SESSION_DAYS: ${{ vars.SESSION_DAYS || '30' }}
       EXTERNAL_API_RATE_LIMIT: ${{ vars.EXTERNAL_API_RATE_LIMIT || '60' }}
@@ -146,9 +134,8 @@ jobs:
         env:
           CREDENTIAL_ENCRYPTION_KEY: ${{ secrets.CREDENTIAL_ENCRYPTION_KEY }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          VITE_LIFF_ID: ${{ vars.VITE_LIFF_ID }}
         run: |
-          for name in DATABASE_URL CREDENTIAL_ENCRYPTION_KEY PUBLIC_BASE_URL LINE_LOGIN_CHANNEL_ID VITE_LIFF_ID; do
+          for name in DATABASE_URL CREDENTIAL_ENCRYPTION_KEY PUBLIC_BASE_URL LIFF_ID; do
             if [ -z "${!name}" ]; then
               echo "Missing required deployment setting: ${name}" >&2
               exit 1
@@ -176,6 +163,7 @@ jobs:
             -e CORS_ORIGINS="${CORS_ORIGINS}" \
             -e LOG_LEVEL="${LOG_LEVEL}" \
             -e TZ="${TZ}" \
+            -e LIFF_ID="${LIFF_ID}" \
             -e LINE_LOGIN_CHANNEL_ID="${LINE_LOGIN_CHANNEL_ID}" \
             -e LINE_ADMIN_USER_IDS="${LINE_ADMIN_USER_IDS}" \
             -e SESSION_DAYS="${SESSION_DAYS}" \

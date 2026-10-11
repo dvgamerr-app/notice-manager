@@ -18,6 +18,7 @@ const migrations = await Promise.all(
 process.env.DATABASE_URL = ':memory:'
 process.env.LINE_LOGIN_CHANNEL_ID = '1234567890'
 process.env.PUBLIC_BASE_URL = 'https://line-manager.example.com'
+process.env.LIFF_ID = '1234567890-AbCdEfGh'
 delete process.env.LINE_ADMIN_USER_IDS
 
 let db
@@ -1322,6 +1323,7 @@ describe('Elysia application', () => {
       expect(configResponse.status).toBe(200)
       const config = await configResponse.json()
       expect(config.publicBaseUrl).toBe('https://line-manager.example.com')
+      expect(config.liffId).toBe('1234567890-AbCdEfGh')
       expect(config.avatars).toHaveLength(3)
       expect(config.avatars[0]).toMatchObject({
         id: 'mint',
@@ -1350,6 +1352,25 @@ describe('Elysia application', () => {
       else process.env.BASE_URL = previousBaseUrl
       if (previousPublicBaseUrl === undefined) delete process.env.PUBLIC_BASE_URL
       else process.env.PUBLIC_BASE_URL = previousPublicBaseUrl
+    }
+  })
+})
+
+describe('runtime LIFF configuration', () => {
+  test('derives the LINE Login channel ID from the LIFF ID', async () => {
+    const saved = { ...process.env }
+    try {
+      delete process.env.LINE_LOGIN_CHANNEL_ID
+      delete process.env.LINE_CLIENT_ID
+      process.env.LIFF_ID = '1607427050-1rqxE7BN'
+      const { getLoginChannelId, getLiffId } = await import('../lib/liff.js')
+      expect(getLiffId()).toBe('1607427050-1rqxE7BN')
+      expect(getLoginChannelId()).toBe('1607427050')
+      process.env.LINE_LOGIN_CHANNEL_ID = '42'
+      expect(getLoginChannelId()).toBe('42')
+    } finally {
+      process.env.LIFF_ID = saved.LIFF_ID
+      process.env.LINE_LOGIN_CHANNEL_ID = saved.LINE_LOGIN_CHANNEL_ID
     }
   })
 })

@@ -5,6 +5,7 @@ import externalApi from './routes/external.js'
 import { getAvatarOptions, getAvatarPng } from '../lib/avatars.js'
 import lineBotWebhook from './webhooks/line.js'
 import { privacyPolicy, termsOfUse } from './legal.js'
+import { getLiffId } from '../lib/liff.js'
 import {
   addApiKey,
   bulkTestChats,
@@ -111,6 +112,7 @@ export default new Elysia({ name: 'routes' })
     const publicBaseUrl = getPublicBaseUrl()
     return {
       publicBaseUrl,
+      liffId: getLiffId(),
       avatars: getAvatarOptions(publicBaseUrl),
     }
   })

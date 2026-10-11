@@ -2,7 +2,7 @@ import liff from '@line/liff'
 import { useEffect, useState } from 'react'
 import { requiresLiffTunnel } from './environment.js'
 
-const LIFF_ID = import.meta.env.VITE_LIFF_ID || ''
+const BUILD_LIFF_ID = import.meta.env.VITE_LIFF_ID || ''
 const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')
 const DEV_BYPASS = import.meta.env.VITE_DEV_AUTH_BYPASS === 'true'
 const SESSION_KEY = 'line_manager_session'
@@ -14,7 +14,12 @@ const sessionProfile = (user) => ({
 })
 
 export function useLiff() {
-  const requiresTunnel = requiresLiffTunnel(window.location, {
+  // The LIFF ID is served by the backend (`LIFF_ID`) so a prebuilt image works
+  // without a rebuild; the build-time VITE_LIFF_ID remains as a fallback.
+  const [liffId, setLiffId] = useState(BUILD_LIFF_ID)
+  const [configLoaded, setConfigLoaded] = useState(false)
+  const LIFF_ID = liffId
+  const requiresTunnel = configLoaded && requiresLiffTunnel(window.location, {
     liffId: LIFF_ID,
     devBypass: DEV_BYPASS,
   })
@@ -25,13 +30,30 @@ export function useLiff() {
 
   useEffect(() => {
     let cancelled = false
+    fetch(`${API_BASE}/app/config`)
+      .then((response) => (response.ok ? response.json() : /** @type {{ liffId?: string }} */ ({})))
+      .then((config) => {
+        if (!cancelled && config.liffId) setLiffId(config.liffId)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setConfigLoaded(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!configLoaded) return undefined
+    let cancelled = false
 
     const start = async () => {
       if (requiresTunnel) return
 
       if (!LIFF_ID) {
         if (!DEV_BYPASS) {
-          throw new Error('ยังไม่ได้ตั้งค่า VITE_LIFF_ID')
+          throw new Error('ยังไม่ได้ตั้งค่า LIFF_ID')
         }
         if (!cancelled) {
           setProfile({
@@ -95,7 +117,7 @@ export function useLiff() {
     return () => {
       cancelled = true
     }
-  }, [requiresTunnel])
+  }, [configLoaded, requiresTunnel, LIFF_ID])
 
   const logout = async () => {
     const currentToken = localStorage.getItem(SESSION_KEY)
