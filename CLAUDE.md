@@ -42,7 +42,8 @@ The backend and Vite configuration contain the new proxy/build architecture:
   `/liff` returns 503 with an instruction to build the UI.
 - The obsolete checked-in `public/liff` build has been removed.
 - Development uses two explicit processes: `bun dev` watches the Elysia backend
-  and formats its Pino JSON logs through `pino-pretty`; `bun dev:ui` starts Vite.
+  and logs one JSON record per line by default (`LOG_FORMAT=text` enables
+  `pino-pretty` inside the logger); `bun dev:ui` starts Vite.
 - Start both commands in separate terminals. Each process owns its own lifecycle
   and fails independently when its configured port is unavailable.
 
@@ -215,7 +216,7 @@ an old route list from conversation history.
 ## Environment variables
 
 - Runtime/network: `PORT`, `BASE_URL`, `PUBLIC_BASE_URL`, `CORS_ORIGINS`,
-  `LOG_LEVEL`.
+  `LOG_LEVEL`, `LOG_FORMAT` (`json` default, or `text`).
 - Database: `DATABASE_URL`.
 - LINE Login/LIFF: `LINE_LOGIN_CHANNEL_ID`, `VITE_LIFF_ID`, `VITE_API_URL`.
 - Ownership/session: `LINE_ADMIN_USER_IDS`, `SESSION_DAYS`.
@@ -247,9 +248,9 @@ bun run smoke:prod
 bun start
 ```
 
-- `bun dev` starts the backend watcher on port 3000 and formats Pino logs with
-  `pino-pretty`. Metadata and error objects stay on one terminal line; embedded
-  stack newlines are escaped as `\n`.
+- `bun dev` starts the backend watcher on port 3000. Logs are JSON per line
+  unless `LOG_FORMAT=text`, which uses `pino-pretty` (`colorize`, `singleLine`,
+  `errorLikeObjectKeys: ['__none__']`) configured in `lib/logger.js`.
 - `bun run retention` applies configured cutoffs in bounded database batches;
   schedule it daily in production rather than tying cleanup to HTTP startup.
 - `bun dev:ui` starts Vite on port 5173; run it in a separate terminal.
@@ -270,9 +271,10 @@ the built `dist`; it runs as the non-root `bun` user with exactly
 `CMD ["bun", "index.js"]`. Ignored local `dist` output is not required.
 
 `.github/workflows/build-ghcr.yml` runs application checks plus Trivy repository
-and image gates, publishes SBOM/provenance multi-platform images to GHCR, and
-deploys the immutable manifest digest on the self-hosted Apple `container`
-runner. CI runs a digest-pinned Trivy container for filesystem and image scans.
+and image gates on a native ARM64 runner, publishes an SBOM/provenance-enabled
+`linux/arm64` image to GHCR, and deploys the immutable manifest digest on the
+self-hosted Apple `container` runner. CI runs a digest-pinned Trivy container for
+filesystem and image scans.
 The deploy step passes runtime settings explicitly to `container run`. Required
 GitHub variables/secrets are documented in `README.md`; do not move runtime
 secrets into Docker build arguments or image layers. The published GHCR package
@@ -328,8 +330,8 @@ credentials in the macOS Keychain.
    and `bun dev:ui` owns only Vite. Keep two terminals open and diagnose each
    process directly instead of assuming one command supervises the other.
 4. **Structured logs need a single boundary:** application code writes Pino JSON;
-   only the interactive backend development command pipes it through
-   `pino-pretty`. Production and automation retain machine-readable records.
+   `lib/logger.js` switches to `pino-pretty` only when `LOG_FORMAT=text`.
+   The default `json` keeps machine-readable records.
 5. **Missing dist should be explicit:** initializing the static plugin against a
    nonexistent output directory produced noisy `ENOENT` messages during tests.
    Check for `dist/liff` and return a clear 503 until the UI is built.
