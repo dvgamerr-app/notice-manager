@@ -203,7 +203,7 @@ handlers must resolve those rows under the selected bot and pass
 - `GET /privacy-policy`, `GET /terms-of-use` — public Thai legal pages for the
   LINE Developers Console; neither route starts LIFF authentication.
 - `GET /app/config` — safe public configuration containing the validated HTTPS
-  `publicBaseUrl` and generated sender-avatar choices.
+  `publicBaseUrl`, the public `liffId`, and generated sender-avatar choices.
 - `GET /app/avatars/:file` — public generated PNG sender avatars for LINE.
 - `POST /auth/liff`, `POST /auth/logout` — LIFF session lifecycle.
 - `POST /line/:bot` — primary signed LINE webhook.
@@ -252,7 +252,11 @@ an old route list from conversation history.
 - Runtime/network: `PORT`, `BASE_URL`, `PUBLIC_BASE_URL`, `CORS_ORIGINS`,
   `LOG_LEVEL`, `LOG_FORMAT` (`json` default, or `text`).
 - Database: `DATABASE_URL`.
-- LINE Login/LIFF: `LINE_LOGIN_CHANNEL_ID`, `VITE_LIFF_ID`, `VITE_API_URL`.
+- LINE Login/LIFF: `LIFF_ID` (runtime, served to the browser through
+  `GET /app/config`; `lib/liff.js` derives the LINE Login channel ID from its
+  numeric prefix), optional `LINE_LOGIN_CHANNEL_ID` override, and the legacy
+  build-time fallbacks `VITE_LIFF_ID`/`VITE_API_URL`. The published image needs
+  no build arguments.
 - Ownership/session: `LINE_ADMIN_USER_IDS`, `SESSION_DAYS`.
 - Security: `CREDENTIAL_ENCRYPTION_KEY`.
 - External API: `EXTERNAL_API_RATE_LIMIT`.
@@ -299,14 +303,23 @@ bun start
   an isolated in-memory database and port.
 
 Docker uses separate dependency/build/runtime stages. `VITE_LIFF_ID` and
-`VITE_API_URL` are public build arguments used only by the Vite stage. The
+`VITE_API_URL` remain optional public build arguments; normally leave them empty
+because the frontend reads `liffId` from `/app/config`. The runtime image
+defaults to SQLite at `/data/notice-manager.sqlite` (a declared volume) and has
+a `/health` HEALTHCHECK.
+
+`docker-compose.yml` is the supported self-host path: `app` (the GHCR image,
+requires `LIFF_ID`, `PUBLIC_BASE_URL`, `CREDENTIAL_ENCRYPTION_KEY`) plus an
+optional `caddy` service behind `--profile https` for automatic HTTPS. User docs:
+`README.md`, `README.th.md`, `docs/self-hosting.md`; `docs/reference.th.md` keeps
+the long Thai reference. The
 runtime stage contains production dependencies, backend/migration sources, and
 the built `dist`; it runs as the non-root `bun` user with exactly
 `CMD ["bun", "index.js"]`. Ignored local `dist` output is not required.
 
 `.github/workflows/build-ghcr.yml` runs application checks plus Trivy repository
 and image gates on a native ARM64 runner, publishes an SBOM/provenance-enabled
-`linux/arm64` image to GHCR, and deploys the immutable manifest digest on the
+multi-arch (`linux/amd64`, `linux/arm64`) image to GHCR, and deploys the immutable manifest digest on the
 self-hosted Apple `container` runner. CI runs a digest-pinned Trivy container for
 filesystem and image scans.
 The deploy step passes runtime settings explicitly to `container run`. Required
@@ -349,6 +362,11 @@ credentials in the macOS Keychain.
 - `.github/workflows/build-ghcr.yml` — Bun verification, Trivy scanning, GHCR
   publication, and digest-pinned self-hosted deployment.
 - `Dockerfile` — multi-stage non-root production image running `bun index.js`.
+- `docker-compose.yml` — one-command self-hosting (app + optional Caddy HTTPS).
+- `lib/liff.js` — runtime LIFF ID and derived LINE Login channel ID.
+- `site/` and `.github/workflows/pages.yml` — GitHub Pages marketing site;
+  the workflow copies `docs/screenshots/*.png` into it. Screenshots are mock data
+  only (never real tokens or LINE IDs).
 - `src/` — React LIFF dashboard.
 - `src/components/FlexMessagePreview.jsx` — LINE-like Flex bubble preview.
 - `src/flex.js` — compact Flex card builder.
