@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LINE Manager: self-hosted API for LINE</title>
+<meta name="description" content="A self-hosted API wrapper for LINE. Manage every bot from one LINE account, send messages with a simple REST API, and forward webhooks. Deploy with one docker compose command.">
+<meta property="og:title" content="LINE Manager: self-hosted API for LINE">
+<meta property="og:description" content="Run every LINE bot from one LINE account. Send messages through one REST API, forward webhooks, and deploy with a single command.">
+<meta property="og:image" content="https://dvgamerr-app.github.io/notice-manager/screenshots/rooms.png">
+<meta property="og:type" content="website">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+:root {
+  --bg: #f7faf8; --surface: #ffffff; --text: #14201a; --muted: #5a6b62; --line: #dbe6df;
+  --brand: #06c755; --brand-ink: #04642a; --brand-soft: #e4f8ec; --code-bg: #0f1a14; --code-text: #d6f5e1;
+  --shadow: 0 10px 30px rgba(10, 40, 25, .10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b110e; --surface: #121b16; --text: #e9f3ec; --muted: #94a89c; --line: #223229;
+    --brand-ink: #7cf0a9; --brand-soft: #123022; --code-bg: #070c09; --shadow: 0 10px 30px rgba(0, 0, 0, .45);
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", "Noto Sans Thai", sans-serif; }
+a { color: var(--brand-ink); }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; gap: 12px; }
+nav .logo { font-weight: 800; letter-spacing: -.02em; font-size: 1.15rem; text-decoration: none; color: var(--text); display: flex; align-items: center; gap: 8px; }
+nav .logo i { width: 28px; height: 28px; border-radius: 8px; background: var(--brand); display: inline-block; }
+nav .links { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; font-size: .95rem; }
+nav .links a { text-decoration: none; color: var(--muted); }
+nav .links a:hover { color: var(--text); }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 12px; font-weight: 700; text-decoration: none; border: 1px solid var(--line); background: var(--surface); color: var(--text); min-height: 44px; cursor: pointer; font-size: 1rem; }
+.btn.primary { background: var(--brand); border-color: var(--brand); color: #04210f; }
+.btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+.btn:focus-visible, a:focus-visible, button:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.hero { display: grid; grid-template-columns: 1.1fr .9fr; gap: 32px; align-items: center; padding: 40px 0 64px; }
+.hero h1 { font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.08; letter-spacing: -.03em; margin: 0 0 16px; }
+.hero h1 em { font-style: normal; color: var(--brand); }
+.hero p.lead { font-size: 1.15rem; color: var(--muted); margin: 0 0 24px; max-width: 34em; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; }
+.pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+.pill { font-size: .85rem; padding: 4px 12px; border-radius: 999px; background: var(--brand-soft); color: var(--brand-ink); font-weight: 600; }
+.phones { position: relative; height: 560px; }
+.phone { position: absolute; width: 230px; border-radius: 28px; border: 6px solid #101612; background: #101612; box-shadow: var(--shadow); overflow: hidden; }
+.phone img { display: block; width: 100%; height: auto; }
+.phone.a { left: 0; top: 40px; transform: rotate(-4deg); }
+.phone.b { left: 30%; top: 0; z-index: 2; width: 250px; }
+.phone.c { right: 0; top: 60px; transform: rotate(4deg); }
+section { padding: 56px 0; }
+section h2 { font-size: clamp(1.6rem, 3.4vw, 2.2rem); letter-spacing: -.02em; margin: 0 0 8px; }
+section .sub { color: var(--muted); margin: 0 0 32px; max-width: 40em; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+.card .ico { font-size: 1.6rem; }
+.card h3 { margin: 8px 0 4px; font-size: 1.05rem; }
+.card p { margin: 0; color: var(--muted); font-size: .95rem; }
+.steps { counter-reset: s; display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; position: relative; }
+.step::before { counter-increment: s; content: counter(s); position: absolute; top: -14px; left: 16px; width: 30px; height: 30px; border-radius: 50%; background: var(--brand); color: #04210f; font-weight: 800; display: grid; place-items: center; }
+.step h3 { margin: 6px 0 8px; }
+.step ol, .step p { margin: 0; padding-left: 20px; color: var(--muted); font-size: .95rem; }
+.step p { padding: 0; }
+.code { position: relative; background: var(--code-bg); color: var(--code-text); border-radius: 14px; padding: 18px 16px; overflow-x: auto; font: .88rem/1.65 ui-monospace, "Cascadia Code", Consolas, monospace; margin: 16px 0 0; }
+.code button { position: absolute; top: 8px; right: 8px; background: #1d2c23; color: #bfe9cd; border: 0; border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: .8rem; min-height: 32px; }
+.code pre { margin: 0; }
+.api { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; }
+.shots { display: flex; gap: 20px; overflow-x: auto; padding: 8px 4px 24px; scroll-snap-type: x mandatory; }
+.shots figure { margin: 0; flex: 0 0 auto; scroll-snap-align: center; text-align: center; }
+.shots img { width: 220px; border-radius: 22px; border: 6px solid #101612; box-shadow: var(--shadow); display: block; }
+.shots figcaption { margin-top: 10px; font-size: .9rem; color: var(--muted); }
+.star { text-align: center; background: linear-gradient(135deg, var(--brand-soft), var(--surface)); border: 1px solid var(--line); border-radius: 24px; padding: 48px 20px; }
+.star h2 { margin-bottom: 8px; }
+.star .count { font-weight: 800; color: var(--brand-ink); }
+footer { padding: 32px 0 48px; color: var(--muted); font-size: .9rem; text-align: center; }
+@media (max-width: 820px) {
+  .hero, .api { grid-template-columns: 1fr; }
+  .phones { height: 430px; max-width: 420px; margin: 0 auto; width: 100%; }
+  .phone { width: 150px; border-width: 4px; border-radius: 20px; }
+  .phone.b { width: 170px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .btn:hover { transform: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="logo" href="#"><i></i> LINE Manager</a>
+    <div class="links">
+      <a href="#features">Features</a>
+      <a href="#deploy">Deploy</a>
+      <a href="#api">API</a>
+      <a href="https://github.com/dvgamerr-app/notice-manager/blob/main/docs/self-hosting.md">Docs</a>
+      <a class="btn" href="https://github.com/dvgamerr-app/notice-manager">★ Star <span id="stars-nav"></span></a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <h1>Your own <em>API for LINE</em>. Every bot, one account.</h1>
+      <p class="lead">A self-hosted wrapper around the LINE Messaging API. Manage all your bots from one LINE account, send messages with a single REST call, and forward webhooks anywhere. It deploys with one command.</p>
+      <div class="cta">
+        <a class="btn primary" href="#deploy">Deploy in 5 minutes</a>
+        <a class="btn" href="https://github.com/dvgamerr-app/notice-manager">★ Star on GitHub <span id="stars-hero"></span></a>
+      </div>
+      <div class="pills"><span class="pill">Self-hosted</span><span class="pill">MIT license</span><span class="pill">SQLite or PostgreSQL</span><span class="pill">amd64 + arm64</span></div>
+    </div>
+    <div class="phones" aria-hidden="true">
+      <div class="phone a"><img src="screenshots/monitor.png" alt="" loading="lazy"></div>
+      <div class="phone b"><img src="screenshots/rooms.png" alt=""></div>
+      <div class="phone c"><img src="screenshots/composer.png" alt="" loading="lazy"></div>
+    </div>
+  </header>
+
+  <section id="features">
+    <h2>Everything LINE, from one place</h2>
+    <p class="sub">Stop juggling channel tokens, webhook URLs and group IDs. LINE Manager handles them and gives your code one simple interface.</p>
+    <div class="grid">
+      <div class="card"><div class="ico">🤖</div><h3>Many bots, one login</h3><p>Sign in once with LIFF and manage every Messaging API channel from your phone. Webhooks are set up for you.</p></div>
+      <div class="card"><div class="ico">💬</div><h3>Rooms discover themselves</h3><p>Users, groups and multi-person chats show up from signed webhooks. Send /hi to register one and /id to get its ID.</p></div>
+      <div class="card"><div class="ico">📨</div><h3>Text and Flex sender</h3><p>Compose with a LINE-style preview, set a sender name and avatar, and send to up to 20 rooms at once.</p></div>
+      <div class="card"><div class="ico">🔑</div><h3>Scoped API keys</h3><p>Hashed, shown once, and limited to the registered chats of one bot. Your apps never see a LINE token.</p></div>
+      <div class="card"><div class="ico">🔀</div><h3>Webhook forwarding</h3><p>Fan events out to your HTTPS endpoints with signing secrets, retries, a circuit breaker and delivery history.</p></div>
+      <div class="card"><div class="ico">🛡️</div><h3>Secure by default</h3><p>HMAC checks, idempotent redelivery, SSRF protection and AES-256-GCM encrypted credentials. Data stays on your server.</p></div>
+    </div>
+  </section>
+
+  <section id="deploy">
+    <h2>Deploy in 5 minutes</h2>
+    <p class="sub">You need Docker and a public HTTPS domain. The bundled Caddy profile gets the certificate for you.</p>
+    <div class="steps">
+      <div class="step"><h3>Create the LINE side</h3>
+        <ol><li>Create a <b>LINE Login</b> channel</li><li>Add a <b>LIFF app</b> with endpoint <code>https://YOUR_DOMAIN/liff/</code></li><li>Copy the <b>LIFF ID</b></li></ol></div>
+      <div class="step"><h3>Run one command</h3>
+        <p>Download the compose file, fill in three values in <code>.env</code>, then start it. SQLite and HTTPS are included.</p></div>
+      <div class="step"><h3>Add your first bot</h3>
+        <p>Open the LIFF URL in LINE, tap <b>Add bot</b> and paste its token and secret. Webhooks and chat discovery start right away.</p></div>
+    </div>
+    <div class="code" data-copy><button type="button">Copy</button><pre>curl -O https://raw.githubusercontent.com/dvgamerr-app/notice-manager/main/docker-compose.yml
+curl -o .env https://raw.githubusercontent.com/dvgamerr-app/notice-manager/main/.env.example
+
+# edit .env: LIFF_ID, PUBLIC_BASE_URL, DOMAIN, CREDENTIAL_ENCRYPTION_KEY
+docker compose --profile https up -d</pre></div>
+  </section>
+
+  <section id="api">
+    <div class="api">
+      <div>
+        <h2>Send from anywhere</h2>
+        <p class="sub" style="margin-bottom:12px">Scripts, CI, cron jobs and servers push to LINE with one authenticated request. Rate limits are shared across instances and reported in standard headers.</p>
+        <a class="btn" href="https://github.com/dvgamerr-app/notice-manager/blob/main/docs/self-hosting.md">Read the guide</a>
+      </div>
+      <div class="code" data-copy style="margin:0"><button type="button">Copy</button><pre>curl -X POST \
+  'https://YOUR_DOMAIN/v1/bots/my-bot/chats/CHAT_ID/messages' \
+  -H 'X-API-Key: lm_live_REPLACE_ME' \
+  -H 'Content-Type: application/json' \
+  -d '{"message":"Deploy finished ✅"}'</pre></div>
+    </div>
+  </section>
+
+  <section id="screens">
+    <h2>A dashboard built for your phone</h2>
+    <p class="sub">It runs inside LINE as a LIFF app, so there is nothing to install.</p>
+    <div class="shots">
+      <figure><img src="screenshots/bots.png" alt="Bot list" loading="lazy"><figcaption>Bots</figcaption></figure>
+      <figure><img src="screenshots/rooms.png" alt="Rooms" loading="lazy"><figcaption>Rooms</figcaption></figure>
+      <figure><img src="screenshots/composer.png" alt="Flex composer" loading="lazy"><figcaption>Composer</figcaption></figure>
+      <figure><img src="screenshots/monitor.png" alt="Monitor" loading="lazy"><figcaption>Monitor</figcaption></figure>
+      <figure><img src="screenshots/api-keys.png" alt="API keys" loading="lazy"><figcaption>API keys</figcaption></figure>
+      <figure><img src="screenshots/forwards.png" alt="Webhook forwarding" loading="lazy"><figcaption>Forwarding</figcaption></figure>
+      <figure><img src="screenshots/settings.png" alt="Settings" loading="lazy"><figcaption>Settings</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <div class="star">
+      <h2>Like it? Give it a ⭐</h2>
+      <p class="sub" style="margin:0 auto 24px">LINE Manager is free and open source. A star takes one second and helps other LINE developers find it<span id="stars-line"></span>.</p>
+      <div class="cta" style="justify-content:center">
+        <a class="btn primary" href="https://github.com/dvgamerr-app/notice-manager">★ Star on GitHub</a>
+        <a class="btn" href="https://github.com/dvgamerr-app/notice-manager/issues">Report an issue</a>
+        <a class="btn" href="https://sponsor.dvgamerr.app">☕ Sponsor</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    MIT licensed · <a href="https://github.com/dvgamerr-app/notice-manager">dvgamerr-app/notice-manager</a> · Not affiliated with LINE Corporation
+  </footer>
+</div>
+<script>
+document.querySelectorAll('[data-copy]').forEach(function (box) {
+  var button = box.querySelector('button');
+  button.addEventListener('click', function () {
+    var text = box.querySelector('pre').textContent;
+    var done = function () { button.textContent = 'Copied'; setTimeout(function () { button.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () {});
+  });
+});
+fetch('https://api.github.com/repos/dvgamerr-app/notice-manager').then(function (r) { return r.ok ? r.json() : null; }).then(function (repo) {
+  if (!repo || typeof repo.stargazers_count !== 'number') return;
+  var n = repo.stargazers_count.toLocaleString('en-US');
+  document.getElementById('stars-nav').textContent = n;
+  document.getElementById('stars-hero').textContent = n;
+  document.getElementById('stars-line').textContent = ' (' + n + ' so far)';
+}).catch(function () {});
+</script>
+</body>
+</html>
