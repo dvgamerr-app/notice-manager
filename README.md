@@ -62,7 +62,7 @@ bun run start
 Development:
 
 ```bash
-# terminal 1: Elysia backend with pino-pretty
+# terminal 1: Elysia backend (LOG_FORMAT=text for pretty logs)
 bun dev
 
 # terminal 2: Vite UI
@@ -70,7 +70,7 @@ bun dev:ui
 ```
 
 `bun dev` เปิด backend แบบ watch ที่ `http://localhost:3000` และแสดง structured
-Pino logs ผ่าน `pino-pretty` แบบหนึ่งบรรทัดต่อ log ส่วน `bun dev:ui` เปิด Vite ที่
+Pino logs เป็น JSON หนึ่งบรรทัดต่อ log (ตั้ง `LOG_FORMAT=text` เพื่อใช้ `pino-pretty`) ส่วน `bun dev:ui` เปิด Vite ที่
 `http://127.0.0.1:5173` ให้รันแยก terminal กัน backend จะ proxy `/` และ
 `/liff/*` ไป Vite เพื่อใช้ React HMR
 
@@ -165,8 +165,8 @@ docker run --rm -p 3000:3000 \
 ```
 
 `.github/workflows/build-ghcr.yml` ทำงานบน push เข้า `main`, tag `v*`, pull
-request และ manual dispatch โดยรัน Bun checks และ Trivy ก่อน publish image
-`linux/amd64` + `linux/arm64` ไปที่ `ghcr.io/<owner>/notice-manager` จากนั้น deploy
+request และ manual dispatch โดยรัน Bun checks และ Trivy บน ARM64 runner ก่อน publish
+image `linux/arm64` ไปที่ `ghcr.io/<owner>/notice-manager` จากนั้น deploy
 ด้วย manifest digest บน self-hosted Apple `container` runner และตรวจ `/health`
 
 ตั้ง GitHub Actions configuration ก่อน deploy:
@@ -177,7 +177,7 @@ request และ manual dispatch โดยรัน Bun checks และ Trivy 
 | Variable | `VITE_API_URL` | API origin ที่ฝังตอน build; เว้นว่างเพื่อใช้ same-origin |
 | Variable | `LINE_LOGIN_CHANNEL_ID` | Channel ID ที่ backend ใช้ตรวจ LIFF token |
 | Variable | `PUBLIC_BASE_URL` | Public HTTPS origin สำหรับ webhook/avatar |
-| Variable | `BASE_URL`, `CORS_ORIGINS`, `LOG_LEVEL`, `PORT`, `TZ` | Runtime URL, CORS, log level, host port และ timezone |
+| Variable | `BASE_URL`, `CORS_ORIGINS`, `LOG_LEVEL`, `LOG_FORMAT`, `PORT`, `TZ` | Runtime URL, CORS, log level, host port และ timezone |
 | Variable | `SESSION_DAYS`, `EXTERNAL_API_RATE_LIMIT` | อายุ session และ distributed API rate limit |
 | Variable | `RETENTION_*` | ระยะเก็บข้อมูลและ batch size; ใช้ค่า default จาก `.env.example` เมื่อไม่ตั้ง |
 | Secret | `DATABASE_URL` | Production PostgreSQL/SQLite connection |
