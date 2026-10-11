@@ -1,0 +1,38 @@
+# Self-host LINE Manager:
+#   cp .env.example .env   # fill in the 3 required values
+#   docker compose up -d
+# With automatic HTTPS (Caddy + Let's Encrypt, needs DOMAIN pointing at this host):
+#   docker compose --profile https up -d
+services:
+  app:
+    image: ghcr.io/dvgamerr-app/notice-manager:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      LIFF_ID: ${LIFF_ID:?Set LIFF_ID in .env (LINE Developers > LINE Login > LIFF)}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?Set PUBLIC_BASE_URL in .env (public HTTPS URL)}
+      CREDENTIAL_ENCRYPTION_KEY: ${CREDENTIAL_ENCRYPTION_KEY:?Set CREDENTIAL_ENCRYPTION_KEY in .env (openssl rand -hex 32)}
+      LINE_ADMIN_USER_IDS: ${LINE_ADMIN_USER_IDS:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      TZ: ${TZ:-Asia/Bangkok}
+      # SQLite in the volume by default; set DATABASE_URL=postgresql://... to use PostgreSQL.
+      DATABASE_URL: ${DATABASE_URL:-sqlite:///data/notice-manager.sqlite}
+    volumes:
+      - notice-manager-data:/data
+
+  caddy:
+    image: caddy:2-alpine
+    profiles: [https]
+    restart: unless-stopped
+    depends_on: [app]
+    ports:
+      - "80:80"
+      - "443:443"
+    command: caddy reverse-proxy --from ${DOMAIN:?Set DOMAIN in .env for the https profile} --to app:3000
+    volumes:
+      - caddy-data:/data
+
+volumes:
+  notice-manager-data:
+  caddy-data:

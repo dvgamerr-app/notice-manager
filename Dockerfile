@@ -25,7 +25,8 @@ WORKDIR /app
 RUN apk upgrade --no-cache
 
 ENV NODE_ENV=production \
-    PORT=3000
+    PORT=3000 \
+    DATABASE_URL=sqlite:///data/notice-manager.sqlite
 
 COPY package.json bun.lockb ./
 RUN bun install --frozen-lockfile --production --omit=peer --ignore-scripts
@@ -36,8 +37,12 @@ COPY --chown=bun:bun lib ./lib
 COPY --chown=bun:bun migrations ./migrations
 COPY --from=build --chown=bun:bun /app/dist ./dist
 
-RUN chown bun:bun /app
+RUN mkdir -p /data && chown bun:bun /app /data
 USER bun
 
+# Default SQLite database lives here; mount a volume to persist it.
+VOLUME /data
 EXPOSE 3000/tcp
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD ["bun", "-e", "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
 CMD ["bun", "index.js"]
