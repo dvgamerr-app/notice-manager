@@ -108,7 +108,11 @@ const installLineFetchMock = () => {
       )
     }
     if (target.endsWith('/v2/bot/message/reply')) {
-      expect(JSON.parse(options.body)).toMatchObject({
+      const reply = JSON.parse(options.body)
+      if (reply.messages[0].text.startsWith('Chat ID:')) {
+        return Response.json({ sentMessages: [{ id: 'reply-id-1' }] })
+      }
+      expect(reply).toMatchObject({
         messages: [{ type: 'text', text: 'ลงทะเบียนห้องนี้ใน LINE Manager แล้ว' }],
       })
       if (replyFailuresRemaining > 0) {
@@ -239,11 +243,12 @@ describe('compact Flex card', () => {
 
 describe('portable Kysely database', () => {
   test('runs every migration using Bun native SQLite', async () => {
-    expect(migrationNames.slice(0, 4)).toEqual([
+    expect(migrationNames.slice(0, 5)).toEqual([
       '001_line_management.js',
       '002_management_operations.js',
       '003_webhook_processing.js',
       '004_distributed_hardening.js',
+      '005_webhook_forwarding.js',
     ])
     await migrateToLatest()
     const tables = await db.introspection.getTables()
@@ -829,6 +834,7 @@ describe('distributed hardening', () => {
     const deleted = await runRetention({
       now: new Date('2026-01-31T00:00:00.000Z'),
       policy: {
+        forwardsDays: 10,
         webhookEventsDays: 10,
         deliveriesDays: 10,
         auditLogsDays: 10,
@@ -838,6 +844,7 @@ describe('distributed hardening', () => {
       },
     })
     expect(deleted).toEqual({
+      forwards: 0,
       webhookEvents: 1,
       deliveries: 1,
       auditLogs: 1,
@@ -863,6 +870,362 @@ describe('distributed hardening', () => {
   test('validates retention configuration and supports disabling a policy', () => {
     expect(() => resolveRetentionPolicy({ RETENTION_AUDIT_LOGS_DAYS: '-1' })).toThrow()
     expect(resolveRetentionPolicy({ RETENTION_AUDIT_LOGS_DAYS: '0' }).auditLogsDays).toBe(0)
+  })
+})
+
+describe('webhook forwarding', () => {
+  let forwardApp
+  let authorization
+  let userChat
+  const publicHost = 'https://hooks.example.com'
+  const received = []
+  let destinationStatus = {}
+  let runtime
+  let processDueForwards
+  let sendToTarget
+  let signBody
+  let validateTargetUrl
+  let originalLookup
+
+  const lineSignature = (payload) =>
+    createHmac('sha256', 'channel-secret').update(payload).digest('base64')
+
+  const postEvent = async (webhookEventId, text) => {
+    const payload = JSON.stringify({
+      destination: 'U99999999999999999999999999999999',
+      events: [{
+        type: 'message',
+        webhookEventId,
+        replyToken: `reply-${webhookEventId}`,
+        timestamp: Date.now(),
+        source: { type: 'user', userId: 'U11111111111111111111111111111111' },
+        message: { id: `message-${webhookEventId}`, type: 'text', text },
+      }],
+    })
+    return forwardApp.handle(new Request('http://localhost/line/manager-bot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-line-signature': lineSignature(payload) },
+      body: payload,
+    }))
+  }
+
+  const api = async (method, path, body) => {
+    const response = await forwardApp.handle(new Request(`http://localhost${path}`, {
+      method,
+      headers: { ...authorization, 'Content-Type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    }))
+    return { status: response.status, body: await response.json() }
+  }
+
+  const forwardRows = (targetId) => db
+    .selectFrom('managed_webhook_forward')
+    .selectAll()
+    .where('target_id', '=', targetId)
+    .orderBy('created_at', 'asc')
+    .execute()
+
+  beforeAll(async () => {
+    ;({ forwardRuntime: runtime, processDueForwards, sendToTarget, signBody, validateTargetUrl } =
+      await import('../lib/webhook-forward.js'))
+    originalLookup = runtime.lookup
+    runtime.lookup = async () => [{ address: '93.184.216.34', family: 4 }]
+
+    const token = await getOwnerSession()
+    installLineFetchMock()
+    const lineFetch = globalThis.fetch
+    globalThis.fetch = async (url, options = {}) => {
+      if (!String(url).startsWith(publicHost)) return lineFetch(url, options)
+      const path = new URL(String(url)).pathname
+      received.push({ path, headers: options.headers, body: options.body })
+      const status = destinationStatus[path] || 200
+      return new Response(status === 200 ? 'ok' : 'oops', { status })
+    }
+    authorization = { Authorization: `Bearer ${token}` }
+    forwardApp = createApp()
+    const chats = await (await forwardApp.handle(
+      new Request('http://localhost/api/bots/manager-bot/chats', { headers: authorization }),
+    )).json()
+    userChat = chats.find((chat) => chat.type === 'user')
+  })
+
+  afterAll(() => {
+    runtime.lookup = originalLookup
+  })
+
+  test('creates the forwarding tables', async () => {
+    const names = (await db.introspection.getTables()).map((table) => table.name)
+    expect(names).toContain('managed_webhook_target')
+    expect(names).toContain('managed_webhook_forward')
+  })
+
+  test('accepts only public HTTPS endpoints', () => {
+    expect(validateTargetUrl('https://hooks.example.com/a')).toBe('https://hooks.example.com/a')
+    for (const bad of [
+      'http://hooks.example.com',
+      'https://localhost/a',
+      'https://service.internal/a',
+      'https://10.0.0.5/a',
+      'https://192.168.1.10/a',
+      'https://169.254.169.254/latest',
+      'https://[::1]/a',
+      'https://user:pass@hooks.example.com/a',
+      'not a url',
+    ]) {
+      expect(() => validateTargetUrl(bad)).toThrow()
+    }
+  })
+
+  test('forwards every event except /hi and /id, once per target and scope', async () => {
+    const rejected = await api('POST', '/api/bots/manager-bot/forwards', {
+      name: 'Bad', url: 'http://hooks.example.com/bad',
+    })
+    expect(rejected.status).toBe(400)
+
+    const all = await api('POST', '/api/bots/manager-bot/forwards', {
+      name: 'All chats', url: `${publicHost}/all`,
+    })
+    expect(all.status).toBe(201)
+    expect(all.body.secret).toStartWith('whsec_')
+    expect(all.body.health).toBe('unknown')
+    const scoped = await api('POST', '/api/bots/manager-bot/forwards', {
+      name: 'User chat only', url: `${publicHost}/chat`, chatId: userChat.id,
+    })
+    expect(scoped.status).toBe(201)
+    const stored = await db.selectFrom('managed_webhook_target').select('secret')
+      .where('id', '=', all.body.id).executeTakeFirstOrThrow()
+    expect(stored.secret).toStartWith('enc:v1:')
+
+    const now = new Date().toISOString()
+    await db.insertInto('managed_chat').values({
+      id: 'forward-other-chat',
+      bot_id: (await db.selectFrom('managed_bot').select('id')
+        .where('service', '=', 'manager-bot').executeTakeFirstOrThrow()).id,
+      source_id: 'C-other-forward-chat',
+      source_type: 'group',
+      display_name: 'Other',
+      line_display_name: 'Other',
+      picture_url: null,
+      metadata_payload: '{}',
+      active: 1,
+      registered: 1,
+      first_seen_at: now,
+      last_seen_at: now,
+      updated_at: now,
+    }).execute()
+    const other = await api('POST', '/api/bots/manager-bot/forwards', {
+      name: 'Other chat only', url: `${publicHost}/other`, chatId: 'forward-other-chat',
+    })
+    expect(other.status).toBe(201)
+    expect((await api('POST', '/api/bots/manager-bot/forwards', {
+      name: 'Unknown chat', url: `${publicHost}/x`, chatId: 'missing',
+    })).status).toBe(400)
+
+    // Commands handled by this application are never forwarded.
+    expect((await postEvent('fwd-hi', '/hi')).status).toBe(200)
+    expect((await postEvent('fwd-id', '/ID')).status).toBe(200)
+    expect(await forwardRows(all.body.id)).toHaveLength(0)
+
+    expect((await postEvent('fwd-1', 'hello')).status).toBe(200)
+    // LINE redelivery must not queue a second copy.
+    expect(await (await postEvent('fwd-1', 'hello')).json())
+      .toMatchObject({ accepted: 0, duplicates: 1 })
+    expect(await forwardRows(all.body.id)).toHaveLength(1)
+    expect(await forwardRows(scoped.body.id)).toHaveLength(1)
+    expect(await forwardRows(other.body.id)).toHaveLength(0)
+
+    destinationStatus = { '/all': 200, '/chat': 500 }
+    const outcomes = []
+    await processDueForwards({ outcomes })
+    expect(outcomes.sort()).toEqual(['retry', 'succeeded'])
+
+    const delivered = received.find((entry) => entry.path === '/all')
+    expect(delivered.headers['x-line-signature'])
+      .toBe(signBody(all.body.secret, delivered.body))
+    expect(delivered.headers['x-notice-manager-bot']).toBe('manager-bot')
+    expect(JSON.parse(delivered.body)).toMatchObject({
+      destination: 'U99999999999999999999999999999999',
+      events: [{ webhookEventId: 'fwd-1', message: { text: 'hello' } }],
+    })
+
+    const listed = (await api('GET', '/api/bots/manager-bot/forwards')).body
+    const scopedView = listed.find((target) => target.id === scoped.body.id)
+    expect(scopedView).toMatchObject({
+      health: 'degraded',
+      consecutiveFailures: 1,
+      counts: { pending: 1, succeeded: 0, dead: 0 },
+    })
+    expect(scopedView.lastError).toContain('HTTP 500')
+    expect(listed.find((target) => target.id === all.body.id))
+      .toMatchObject({ health: 'healthy', counts: { succeeded: 1 } })
+    expect(JSON.stringify(listed)).not.toContain('whsec_')
+
+    // A permanent 4xx is not retried.
+    destinationStatus = { '/all': 200, '/chat': 400 }
+    const later = new Date(Date.now() + 60_000)
+    const second = []
+    await processDueForwards({ now: later, outcomes: second })
+    expect(second).toEqual(['dead'])
+    const dead = (await forwardRows(scoped.body.id))[0]
+    expect(dead).toMatchObject({ status: 'dead', attempt_count: 2, last_http_status: 400 })
+    expect(await db.selectFrom('managed_audit_log').select('id')
+      .where('action', '=', 'webhook-forward.dead').executeTakeFirst()).toBeDefined()
+
+    // Repeated failures flip the target to failing, then pause it.
+    destinationStatus = { '/all': 200, '/chat': 500 }
+    for (const id of ['fwd-2', 'fwd-3']) await postEvent(id, 'again')
+    await processDueForwards()
+    let view = (await api('GET', '/api/bots/manager-bot/forwards')).body
+      .find((target) => target.id === scoped.body.id)
+    expect(view).toMatchObject({ health: 'failing', consecutiveFailures: 4 })
+    expect(await db.selectFrom('managed_audit_log').select('id')
+      .where('action', '=', 'webhook-target.failing').executeTakeFirst()).toBeDefined()
+
+    await postEvent('fwd-4', 'again')
+    await processDueForwards()
+    view = (await api('GET', '/api/bots/manager-bot/forwards')).body
+      .find((target) => target.id === scoped.body.id)
+    expect(view.consecutiveFailures).toBe(5)
+    expect(view.pausedUntil).not.toBeNull()
+
+    // While paused only the healthy target is attempted.
+    await postEvent('fwd-5', 'again')
+    expect(await processDueForwards()).toBe(1)
+
+    // Retrying a dead delivery clears the pause and the target recovers.
+    destinationStatus = { '/all': 200, '/chat': 200 }
+    const retry = await api(
+      'POST',
+      `/api/bots/manager-bot/forwards/${scoped.body.id}/deliveries/${dead.id}/retry`,
+    )
+    expect(retry.body).toEqual({ ok: true })
+    await processDueForwards()
+    view = (await api('GET', '/api/bots/manager-bot/forwards')).body
+      .find((target) => target.id === scoped.body.id)
+    expect(view).toMatchObject({ health: 'healthy', consecutiveFailures: 0 })
+    expect(await db.selectFrom('managed_audit_log').select('id')
+      .where('action', '=', 'webhook-target.recovered').executeTakeFirst()).toBeDefined()
+
+    const deliveries = await api(
+      'GET',
+      `/api/bots/manager-bot/forwards/${scoped.body.id}/deliveries?status=succeeded`,
+    )
+    expect(deliveries.body.length).toBeGreaterThan(0)
+
+    // Test sends report the outcome without queueing anything.
+    const before = (await forwardRows(all.body.id)).length
+    const testResult = await api('POST', `/api/bots/manager-bot/forwards/${all.body.id}/test`)
+    expect(testResult.body).toMatchObject({ ok: true, status: 200 })
+    destinationStatus = { '/all': 503 }
+    expect((await api('POST', `/api/bots/manager-bot/forwards/${all.body.id}/test`)).body)
+      .toMatchObject({ ok: false, status: 503 })
+    expect(await forwardRows(all.body.id)).toHaveLength(before)
+
+    // Disabled targets stop receiving new events; deleting removes the history.
+    await api('PATCH', `/api/bots/manager-bot/forwards/${all.body.id}`, { enabled: false })
+    await postEvent('fwd-6', 'after disable')
+    expect((await forwardRows(all.body.id)).some((row) => row.status === 'pending'))
+      .toBe(false)
+    expect((await api('DELETE', `/api/bots/manager-bot/forwards/${all.body.id}`)).body)
+      .toEqual({ ok: true })
+    expect(await forwardRows(all.body.id)).toHaveLength(0)
+    destinationStatus = {}
+  })
+
+  test('never calls a host that resolves to a private address', async () => {
+    runtime.lookup = async () => [{ address: '10.0.0.8', family: 4 }]
+    try {
+      const result = await sendToTarget({
+        target: { url: `${publicHost}/all`, secret: 'secret', timeout_ms: 1_000 },
+        service: 'manager-bot',
+        body: '{}',
+      })
+      expect(result).toMatchObject({ ok: false, retryable: false })
+      expect(result.error).toContain('non-public')
+    } finally {
+      runtime.lookup = async () => [{ address: '93.184.216.34', family: 4 }]
+    }
+  })
+
+  test('retention keeps forwards that are still being delivered', async () => {
+    const old = '2026-01-01T00:00:00.000Z'
+    const now = new Date('2026-02-01T00:00:00.000Z')
+    const botId = 'retention-bot'
+    await db.insertInto('managed_webhook_target').values({
+      id: 'retention-target',
+      bot_id: botId,
+      chat_id: null,
+      name: 'Retention target',
+      url: `${publicHost}/retention`,
+      secret: 'secret',
+      enabled: 1,
+      timeout_ms: 5000,
+      max_attempts: 6,
+      consecutive_failures: 0,
+      created_at: old,
+      updated_at: old,
+    }).execute()
+    const statuses = { a: 'succeeded', b: 'pending', c: 'sending', d: 'dead' }
+    for (const [suffix, status] of Object.entries(statuses)) {
+      await db.insertInto('managed_webhook_event').values({
+        id: `forward-retention-event-${suffix}`,
+        bot_id: botId,
+        webhook_event_id: `forward-retention-event-${suffix}`,
+        event_type: 'message',
+        source_id: null,
+        payload: '{}',
+        is_redelivery: 0,
+        received_at: old,
+        processing_status: 'processed',
+        attempt_count: 1,
+        last_attempt_at: old,
+        processed_at: old,
+        processing_error: null,
+      }).execute()
+      await db.insertInto('managed_webhook_forward').values({
+        id: `forward-retention-${suffix}`,
+        target_id: 'retention-target',
+        event_id: `forward-retention-event-${suffix}`,
+        status,
+        attempt_count: 1,
+        next_attempt_at: old,
+        created_at: old,
+      }).execute()
+    }
+    const policy = {
+      forwardsDays: 60,
+      webhookEventsDays: 10,
+      deliveriesDays: 0,
+      auditLogsDays: 0,
+      expiredSessionsDays: 0,
+      rateLimitBucketsDays: 0,
+      batchSize: 2,
+    }
+    const exists = async (table, id) =>
+      Boolean(await db.selectFrom(table).select('id').where('id', '=', id).executeTakeFirst())
+
+    // Events are old enough but forwards are not: only finished work goes.
+    const first = await runRetention({ now, policy })
+    expect(first).toMatchObject({ forwards: 0, webhookEvents: 2 })
+    expect(await exists('managed_webhook_event', 'forward-retention-event-a')).toBe(false)
+    expect(await exists('managed_webhook_event', 'forward-retention-event-d')).toBe(false)
+    expect(await exists('managed_webhook_event', 'forward-retention-event-b')).toBe(true)
+    expect(await exists('managed_webhook_event', 'forward-retention-event-c')).toBe(true)
+
+    // Once the forward cutoff passes, abandoned pending work is removed too,
+    // but a delivery mid-send is never deleted.
+    const second = await runRetention({ now, policy: { ...policy, forwardsDays: 10 } })
+    expect(second).toMatchObject({ forwards: 1, webhookEvents: 1 })
+    expect(await exists('managed_webhook_forward', 'forward-retention-b')).toBe(false)
+    expect(await exists('managed_webhook_event', 'forward-retention-event-b')).toBe(false)
+    expect(await exists('managed_webhook_forward', 'forward-retention-c')).toBe(true)
+    expect(await exists('managed_webhook_event', 'forward-retention-event-c')).toBe(true)
+  })
+
+  test('configures the forwards retention window', () => {
+    expect(resolveRetentionPolicy({}).forwardsDays).toBe(30)
+    expect(resolveRetentionPolicy({ RETENTION_FORWARDS_DAYS: '0' }).forwardsDays).toBe(0)
+    expect(() => resolveRetentionPolicy({ RETENTION_FORWARDS_DAYS: '-1' })).toThrow()
   })
 })
 
