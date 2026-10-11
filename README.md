@@ -12,7 +12,7 @@ No SaaS, no per-message fees, no data leaving your server.
 [![License](https://img.shields.io/github/license/dvgamerr-app/notice-manager?style=for-the-badge)](LICENSE)
 [![Docker](https://img.shields.io/badge/ghcr.io-amd64%20%7C%20arm64-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://github.com/dvgamerr-app/notice-manager/pkgs/container/notice-manager)
 
-[Website](https://dvgamerr-app.github.io/notice-manager/) · [Quick start](#-deploy-in-5-minutes) · [Self-hosting guide](docs/self-hosting.md) · [ภาษาไทย](README.th.md)
+[Website](https://dvgamerr.app/notice-manager/) · [Quick start](#-deploy-in-5-minutes) · [Self-hosting guide](docs/self-hosting.md) · [ภาษาไทย](README.th.md)
 
 <br>
 

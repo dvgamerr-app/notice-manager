@@ -11,7 +11,7 @@
 [![Release](https://img.shields.io/github/v/release/dvgamerr-app/notice-manager?style=for-the-badge&color=06C755)](https://github.com/dvgamerr-app/notice-manager/releases)
 [![License](https://img.shields.io/github/license/dvgamerr-app/notice-manager?style=for-the-badge)](LICENSE)
 
-[เว็บไซต์](https://dvgamerr-app.github.io/notice-manager/) · [เริ่มใช้งานเร็ว](#-deploy-ใน-5-นาที) · [คู่มือ self-host](docs/self-hosting.md) · [English](README.md)
+[เว็บไซต์](https://dvgamerr.app/notice-manager/) · [เริ่มใช้งานเร็ว](#-deploy-ใน-5-นาที) · [คู่มือ self-host](docs/self-hosting.md) · [English](README.md)
 
 <br>
 

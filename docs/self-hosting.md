@@ -41,7 +41,7 @@ Useful optional values:
 | `LINE_ADMIN_USER_IDS` | | Comma-separated LINE user IDs allowed to own the installation. When empty, the first user who signs in becomes the permanent owner. Set it in production. |
 | `DATABASE_URL` | SQLite in the data volume | `postgresql://user:pass@host:5432/db` to use PostgreSQL. |
 | `PORT` | `3000` | Host port published by Compose. |
-| `IMAGE_TAG` | `latest` | Pin a release such as `v7.1.0`. |
+| `IMAGE_TAG` | `latest` | Pin a release such as `v7.2.0`. |
 | `EXTERNAL_API_RATE_LIMIT` | `60` | Requests per minute per API key. |
 | `LOG_LEVEL`, `LOG_FORMAT` | `info`, `json` | Pino level, and `text` for pretty logs. |
 | `RETENTION_*` | see `.env.example` | How long webhook events, deliveries, audit logs and so on are kept. |
