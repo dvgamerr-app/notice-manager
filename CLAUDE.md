@@ -56,6 +56,10 @@ The backend and Vite configuration contain the new proxy/build architecture:
   intentionally has no duplicate global header, in-content back/title row,
   administrator profile, or sign-out button.
 - Legacy bot import is not part of the product and has no management route or UI.
+- Settings can change a bot's service slug (`PATCH /api/bots/:bot` with
+  `service`). The backend validates and de-duplicates it, sets the new webhook
+  endpoint at LINE first, and only then persists; the UI navigates to the new
+  slug. Callers of `/v1/bots/:slug/...` must switch to the new slug.
 - Each managed bot stores its own service slug, bot user ID, channel access token,
   channel secret, and webhook endpoint.
 - Adding a bot verifies its Messaging API token with LINE, sets the channel's
