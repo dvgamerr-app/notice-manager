@@ -4,6 +4,7 @@ import Layout from '../components/Layout.jsx'
 import { ErrorNotice } from '../components/Notice.jsx'
 import Spinner from '../components/Spinner.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
+import BotAvatar from '../components/BotAvatar.jsx'
 
 export default function BotList({ api }) {
   const [bots, setBots] = useState([])
@@ -68,11 +69,14 @@ export default function BotList({ api }) {
           onClick={() => nav(`/bot/${bot.service}`)}
           className="w-full bg-white rounded-2xl p-4 shadow-sm flex items-center gap-4 active:bg-gray-50 transition-colors text-left"
         >
-          <div className="w-12 h-12 rounded-full bg-[#e8f8ef] flex items-center justify-center shrink-0">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06C755" strokeWidth="1.5">
-              <path d="M8 10h8M8 14h5M12 2C6.48 2 2 6.48 2 12c0 1.54.35 3 .97 4.29L2 22l5.71-.97C9 21.65 10.46 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/>
-            </svg>
-          </div>
+          <BotAvatar
+            url={bot.pictureUrl}
+            onBroken={() => api.getBot(bot.service, { refresh: true })
+              .then((fresh) => setBots((list) => list.map((item) => (
+                item.id === bot.id ? { ...item, pictureUrl: fresh.pictureUrl } : item
+              ))))
+              .catch(() => {})}
+          />
           <div className="flex-1 min-w-0">
             <div className="font-semibold text-gray-900 truncate">{bot.name || bot.service}</div>
             <div className="text-xs text-gray-500 truncate font-mono mt-0.5">{bot.service}</div>
