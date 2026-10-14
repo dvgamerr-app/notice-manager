@@ -44,14 +44,32 @@ export const listBots = async ({ user, set }) => {
   }))
 }
 
-export const getBot = async ({ params, user, set }) => {
+// Re-reads the bot's LINE profile so a stale or expired picture URL is replaced.
+// Best-effort: on failure the stored values are kept.
+const refreshBotProfile = async (bot) => {
+  try {
+    const { data: info } = await lineClient(decryptSecret(bot.channel_access_token)).getBotInfo()
+    const updates = {
+      picture_url: info.pictureUrl || null,
+      basic_id: info.basicId || bot.basic_id,
+      updated_at: nowIso(),
+    }
+    await db.updateTable('managed_bot').set(updates).where('id', '=', bot.id).execute()
+    return { ...bot, ...updates }
+  } catch {
+    return bot
+  }
+}
+
+export const getBot = async ({ params, query, user, set }) => {
   if (!user) return unauthorized(set)
   const bot = await findBot(params.bot, user.id)
   if (!bot) {
     set.status = 404
     return { error: 'Bot not found' }
   }
-  return botView(bot)
+  const refresh = query?.refresh === '1' || !bot.picture_url
+  return botView(refresh ? await refreshBotProfile(bot) : bot)
 }
 
 export const createBot = async ({ body, user, set }) => {
@@ -229,7 +247,7 @@ export const updateBot = async ({ params, body, user, set }) => {
       activeChanged: updates.active !== undefined,
     },
   })
-  return getBot({ params: { ...params, bot: updates.service || bot.service }, user, set })
+  return getBot({ params: { ...params, bot: updates.service || bot.service }, query: {}, user, set })
 }
 
 export const getBotQuota = async ({ params, user, set }) => {
@@ -282,6 +300,7 @@ export const syncBotWebhook = async ({ params, user, set }) => {
       })
       .where('id', '=', bot.id)
       .execute()
+    await refreshBotProfile(bot)
     await audit({
       actorType: 'user',
       actorId: user.id,

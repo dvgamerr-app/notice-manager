@@ -4,6 +4,7 @@ import Layout from '../components/Layout.jsx'
 import Notice from '../components/Notice.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import Spinner from '../components/Spinner.jsx'
+import BotAvatar from '../components/BotAvatar.jsx'
 import ApiKeysTab from './bot/ApiKeysTab.jsx'
 import ForwardsTab from './bot/ForwardsTab.jsx'
 import MonitorTab from './bot/MonitorTab.jsx'
@@ -58,11 +59,14 @@ export default function BotDetail({ api }) {
       {!loading && bot && (
         <>
           <section className="flex gap-3 rounded-2xl bg-white p-4 shadow-sm">
-            {bot.pictureUrl ? (
-              <img src={bot.pictureUrl} alt="" className="w-12 h-12 rounded-full object-cover" />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-[#e8f8ef]" />
-            )}
+            <BotAvatar
+              url={bot.pictureUrl}
+              onBroken={() => api.getBot(name, { refresh: true })
+                .then((fresh) => setBot((current) => (
+                  current ? { ...current, pictureUrl: fresh.pictureUrl } : current
+                )))
+                .catch(() => {})}
+            />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <h2 className="font-bold truncate">{bot.name}</h2>

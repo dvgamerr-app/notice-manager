@@ -40,7 +40,8 @@ export const createApi = (token) => {
     getAppConfig: () => call('GET', '/app/config'),
     getSession: () => call('GET', '/api/session'),
     getBots: () => call('GET', '/api/bots'),
-    getBot: (bot) => call('GET', `/api/bots/${encodeURIComponent(bot)}`),
+    getBot: (bot, { refresh = false } = {}) =>
+      call('GET', `/api/bots/${encodeURIComponent(bot)}${refresh ? '?refresh=1' : ''}`),
     createBot: (data) => call('POST', '/api/bots', data),
     updateBot: (bot, data) =>
       call('PATCH', `/api/bots/${encodeURIComponent(bot)}`, data),
