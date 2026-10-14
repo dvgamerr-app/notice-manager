@@ -18,6 +18,8 @@ import {
   webhookUrl,
 } from './shared.js'
 
+const SERVICE_PATTERN = /^[a-z0-9][a-z0-9_-]{1,63}$/
+
 export const listBots = async ({ user, set }) => {
   if (!user) return unauthorized(set)
   const bots = await db
@@ -62,7 +64,7 @@ export const createBot = async ({ body, user, set }) => {
   const channelSecret = String(body?.channelSecret || body?.secret || '').trim()
   const endpoint = webhookUrl(service)
 
-  if (!/^[a-z0-9][a-z0-9_-]{1,63}$/.test(service)) {
+  if (!SERVICE_PATTERN.test(service)) {
     set.status = 400
     return { error: 'Service ID must be 2-64 lowercase letters, numbers, - or _' }
   }
@@ -156,6 +158,41 @@ export const updateBot = async ({ params, body, user, set }) => {
   if (typeof body?.active === 'boolean') updates.active = body.active ? 1 : 0
   const accessToken = normalizeChannelAccessToken(body?.channelAccessToken)
   const channelSecret = String(body?.channelSecret || '').trim()
+
+  const nextService = typeof body?.service === 'string' ? body.service.trim().toLowerCase() : ''
+  const serviceChanged = Boolean(nextService) && nextService !== bot.service
+  if (serviceChanged) {
+    if (!SERVICE_PATTERN.test(nextService)) {
+      set.status = 400
+      return { error: 'Service ID must be 2-64 characters of a-z, 0-9, "_" or "-"' }
+    }
+    const taken = await db
+      .selectFrom('managed_bot')
+      .select('id')
+      .where('service', '=', nextService)
+      .executeTakeFirst()
+    if (taken) {
+      set.status = 409
+      return { error: `Service ID ${nextService} is already in use` }
+    }
+    const endpoint = webhookUrl(nextService)
+    if (!endpoint.startsWith('https://')) {
+      set.status = 400
+      return { error: 'PUBLIC_BASE_URL must be a public HTTPS URL before changing the webhook', endpoint }
+    }
+    try {
+      const client = lineClient(decryptSecret(bot.channel_access_token))
+      await client.setWebhookEndpoint(endpoint)
+      const { data: current } = await client.getWebhookEndpoint()
+      updates.service = nextService
+      updates.webhook_endpoint = current.endpoint || endpoint
+      updates.verified_at = nowIso()
+    } catch (error) {
+      set.status = error instanceof LineApiError ? 400 : 500
+      return lineError(error)
+    }
+  }
+
   if (accessToken || channelSecret) {
     if (!accessToken || !channelSecret) {
       set.status = 400
@@ -187,10 +224,12 @@ export const updateBot = async ({ params, body, user, set }) => {
     entityId: bot.id,
     metadata: {
       nameChanged: Boolean(updates.name),
+      serviceChanged,
+      ...(serviceChanged ? { from: bot.service, to: nextService } : {}),
       activeChanged: updates.active !== undefined,
     },
   })
-  return getBot({ params, user, set })
+  return getBot({ params: { ...params, bot: updates.service || bot.service }, user, set })
 }
 
 export const getBotQuota = async ({ params, user, set }) => {

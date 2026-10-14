@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Notice from '../../components/Notice.jsx'
 
 export default function SettingsTab({ api, bot, reload }) {
+  const nav = useNavigate()
+  const [service, setService] = useState(bot.service)
   const [name, setName] = useState(bot.name)
   const [active, setActive] = useState(bot.active)
   const [token, setToken] = useState('')
@@ -13,15 +16,16 @@ export default function SettingsTab({ api, bot, reload }) {
   useEffect(() => {
     setName(bot.name)
     setActive(bot.active)
-  }, [bot.name, bot.active])
+    setService(bot.service)
+  }, [bot.name, bot.active, bot.service])
 
-  const run = async (key, job, message) => {
+  const run = async (key, job, message, { reload: shouldReload = true } = {}) => {
     setBusy(key)
     setNotice(null)
     try {
       const result = await job()
       setNotice({ type: 'success', text: message(result) })
-      await reload()
+      if (shouldReload) await reload()
       return result
     } catch (error) {
       setNotice({ type: 'error', text: error.data?.detail || error.message })
@@ -31,13 +35,29 @@ export default function SettingsTab({ api, bot, reload }) {
     }
   }
 
-  const save = (event) => {
+  const save = async (event) => {
     event.preventDefault()
-    run(
+    const nextService = service.trim().toLowerCase()
+    const renamed = nextService !== bot.service
+    const result = await run(
       'save',
-      () => api.updateBot(bot.service, { name, active }),
-      () => 'บันทึกการตั้งค่าบอตแล้ว',
+      () => api.updateBot(bot.service, { name, active, service: nextService }),
+      (updated) => renamed
+        ? `เปลี่ยน Service ID และตั้ง Webhook เป็น ${updated.webhookEndpoint} แล้ว`
+        : 'บันทึกการตั้งค่าบอตแล้ว',
+      { reload: !renamed },
     )
+    if (result && renamed) {
+      nav(`/bot/${result.service}`, {
+        replace: true,
+        state: {
+          notice: {
+            type: 'success',
+            text: `เปลี่ยน Service ID และตั้ง Webhook เป็น ${result.webhookEndpoint} แล้ว`,
+          },
+        },
+      })
+    }
   }
 
   const rotate = (event) => {
@@ -104,6 +124,22 @@ export default function SettingsTab({ api, bot, reload }) {
             onChange={(event) => setName(event.target.value)}
             className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#06C755]"
           />
+        </label>
+        <label className="block space-y-1">
+          <span className="text-xs text-gray-500">
+            Service ID (เปลี่ยนแล้วระบบจะตั้ง Webhook URL ใหม่ที่ LINE ให้อัตโนมัติ)
+          </span>
+          <input
+            value={service}
+            onChange={(event) => setService(event.target.value)}
+            pattern="[a-zA-Z0-9][a-zA-Z0-9_\-]{1,63}"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-mono outline-none focus:border-[#06C755]"
+          />
+          {service.trim().toLowerCase() !== bot.service && (
+            <span className="block text-xs text-amber-600">
+              API key และ URL ที่เรียกด้วย /v1/bots/{bot.service} ต้องเปลี่ยนเป็น slug ใหม่
+            </span>
+          )}
         </label>
         <label className="flex items-center gap-2 text-sm">
           <input
