@@ -167,7 +167,7 @@ docker run --rm -p 3000:3000 \
 `.github/workflows/build-ghcr.yml` ทำงานบน push เข้า `main`, tag `v*`, pull
 request และ manual dispatch โดยรัน Bun checks และ Trivy บน ARM64 runner ก่อน publish
 image `linux/arm64` ไปที่ `ghcr.io/<owner>/notice-manager` จากนั้น deploy
-ด้วย manifest digest บน self-hosted Apple `container` runner และตรวจ `/health`
+ด้วย image tag `latest` บน self-hosted Apple `container` runner และตรวจ `/health`
 
 ตั้ง GitHub Actions configuration ก่อน deploy:
 
@@ -189,7 +189,7 @@ Self-hosted runner ต้องเป็น Apple silicon/macOS ที่ติ�
 `container` service แล้ว และต้องเข้าถึง host port กับ production database ได้
 ขั้น deploy ส่ง runtime configuration เข้า `container run` ผ่าน `-e` โดยตรง;
 ค่า secret มาจาก GitHub Secrets เท่านั้นและไม่ถูกฝังใน image
-GHCR package เป็น public จึง pull manifest digest แบบ anonymous และไม่เรียก
+GHCR package เป็น public จึง pull image แบบ anonymous และไม่เรียก
 `container registry login` ซึ่งต้องใช้ interactive macOS Keychain
 
 ## Dashboard

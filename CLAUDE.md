@@ -334,7 +334,7 @@ the built `dist`; it runs as the non-root `bun` user with exactly
 
 `.github/workflows/build-ghcr.yml` runs application checks plus Trivy repository
 and image gates on a native ARM64 runner, publishes an SBOM/provenance-enabled
-multi-arch (`linux/amd64`, `linux/arm64`) image to GHCR, and deploys the immutable manifest digest on the
+multi-arch (`linux/amd64`, `linux/arm64`) image to GHCR, and deploys the `latest` tag on the
 self-hosted Apple `container` runner. CI runs a digest-pinned Trivy container for
 filesystem and image scans.
 The deploy step passes runtime settings explicitly to `container run`. Required
@@ -375,7 +375,7 @@ credentials in the macOS Keychain.
   public legal pages.
 - `scripts/retention.js` — migration-aware retention command for a scheduler.
 - `.github/workflows/build-ghcr.yml` — Bun verification, Trivy scanning, GHCR
-  publication, and digest-pinned self-hosted deployment.
+  publication, and self-hosted deployment of the `latest` image.
 - `Dockerfile` — multi-stage non-root production image running `bun index.js`.
 - `docker-compose.yml` — one-command self-hosting (app + optional Caddy HTTPS).
 - `lib/liff.js` — runtime LIFF ID and derived LINE Login channel ID.
