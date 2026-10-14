@@ -111,7 +111,7 @@ jobs:
       CONTAINER_NAME: notice-manager
       DEPLOY_PLATFORM: linux/arm64
       PORT: ${{ vars.PORT || '8011' }}
-      IMAGE_REF: ${{ needs.build.outputs.image }}@${{ needs.build.outputs.digest }}
+      IMAGE_REF: ${{ needs.build.outputs.image }}:latest
       BASE_URL: ${{ vars.BASE_URL }}
       PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
       CORS_ORIGINS: ${{ vars.CORS_ORIGINS }}
