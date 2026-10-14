@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 const sizeMap = {
   xxs: 10,
   xs: 11,
@@ -141,6 +143,26 @@ function Bubble({ contents }) {
   )
 }
 
+// Falls back to the initial when the picture URL is missing or fails to load.
+function SenderAvatar({ url, displayName }) {
+  const [failed, setFailed] = useState(false)
+  if (url && !failed) {
+    return (
+      <img
+        src={url}
+        alt=""
+        onError={() => setFailed(true)}
+        className="h-9 w-9 shrink-0 rounded-full object-cover shadow-sm"
+      />
+    )
+  }
+  return (
+    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#06C755] text-xs font-bold text-white">
+      {(displayName || 'L').slice(0, 1).toUpperCase()}
+    </div>
+  )
+}
+
 export default function FlexMessagePreview({ message, displayName, avatarUrl }) {
   const messages = Array.isArray(message) ? message : [message]
   const flex = messages.find((item) => item?.type === 'flex')
@@ -159,13 +181,7 @@ export default function FlexMessagePreview({ message, displayName, avatarUrl }) 
     <div className="overflow-hidden rounded-2xl border border-[#d6e1e7] bg-[#8facbf] p-3">
       <div className="mb-2 text-center text-[10px] font-medium text-white/80">ตัวอย่างใน LINE</div>
       <div className="flex items-start gap-2">
-        {avatarUrl ? (
-          <img src={avatarUrl} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover shadow-sm" />
-        ) : (
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#06C755] text-xs font-bold text-white">
-            {(displayName || 'L').slice(0, 1).toUpperCase()}
-          </div>
-        )}
+        <SenderAvatar key={avatarUrl || ''} url={avatarUrl} displayName={displayName} />
         <div className="min-w-0">
           <div className="mb-1 truncate text-[11px] font-medium text-white">
             {displayName || 'LINE Manager'}

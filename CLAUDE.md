@@ -273,6 +273,17 @@ an old route list from conversation history.
 
 Keep actual values in ignored environment files. Do not document or print them.
 
+Two environments intentionally use different public URLs:
+
+- Production (GitHub Repository variables `PUBLIC_BASE_URL`, `BASE_URL`,
+  `CORS_ORIGINS`) is `https://notice.dvgamerr.app`. After a deploy, press
+  Sync webhook per bot so LINE receives `https://notice.dvgamerr.app/line/:service`.
+- Local development keeps a temporary tunnel (tunnl.gg) in the ignored `.env`
+  for LINE testing. Do not "fix" it to the production domain, and do not copy it
+  into Repository variables.
+- Every `vars.*` referenced in `.github/workflows` must exist as a Repository
+  variable; check with `gh variable list` before deleting one as "unused".
+
 ## Commands and build output
 
 ```powershell
