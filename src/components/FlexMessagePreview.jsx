@@ -38,95 +38,113 @@ const safeImageUrl = (value) => {
   }
 }
 
+function TextNode({ node }) {
+  return (
+    <div
+      style={{
+        color: node.color || '#444444',
+        fontSize: sizeMap[node.size] || length(node.size, 13),
+        fontWeight: node.weight === 'bold' ? 700 : 400,
+        textAlign: node.align || 'left',
+        whiteSpace: node.wrap === false ? 'nowrap' : 'pre-wrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        marginTop: length(node.margin, 0),
+        lineHeight: 1.35,
+      }}
+    >
+      {String(node.text || '')}
+    </div>
+  )
+}
+
+function BoxNode({ node, nodeKey }) {
+  const horizontal = node.layout === 'horizontal'
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: horizontal ? 'row' : 'column',
+        alignItems: node.alignItems || (horizontal ? 'center' : 'stretch'),
+        justifyContent: node.justifyContent || 'flex-start',
+        gap: length(node.spacing, 0),
+        marginTop: length(node.margin, 0),
+        padding: length(node.paddingAll, 0),
+        background: node.backgroundColor || 'transparent',
+        borderRadius: length(node.cornerRadius, 0),
+      }}
+    >
+      {(node.contents || []).map((child, index) => (
+        <FlexNode key={`${nodeKey}-${index}`} node={child} nodeKey={`${nodeKey}-${index}`} />
+      ))}
+    </div>
+  )
+}
+
+function ButtonNode({ node }) {
+  const primary = node.style === 'primary'
+  const accent = node.color || '#06C755'
+  return (
+    <div
+      style={{
+        marginTop: length(node.margin, 0),
+        borderRadius: 8,
+        background: primary ? accent : 'transparent',
+        border: node.style === 'secondary' ? `1px solid ${accent}` : 'none',
+        color: primary ? '#ffffff' : accent,
+        padding: '9px 12px',
+        textAlign: 'center',
+        fontSize: 12,
+        fontWeight: 700,
+      }}
+    >
+      {node.action?.label || 'Action'}
+    </div>
+  )
+}
+
+function ImageNode({ node }) {
+  const source = safeImageUrl(node.url)
+  if (!source) return null
+  const icon = node.type === 'icon'
+  return (
+    <img
+      src={source}
+      alt=""
+      style={{
+        display: 'block',
+        width: icon ? length(node.size, 20) : '100%',
+        height: icon ? length(node.size, 20) : length(node.aspectRatio, 120),
+        objectFit: node.aspectMode === 'fit' ? 'contain' : 'cover',
+        borderRadius: length(node.cornerRadius, 0),
+        marginTop: length(node.margin, 0),
+      }}
+    />
+  )
+}
+
+function SeparatorNode({ node }) {
+  return <hr style={{ marginTop: length(node.margin, 0), borderColor: node.color || '#eeeeee' }} />
+}
+
+function SpacerNode({ node }) {
+  return <div style={{ height: length(node.size, 8) }} />
+}
+
+const nodeRenderers = {
+  text: TextNode,
+  box: BoxNode,
+  button: ButtonNode,
+  image: ImageNode,
+  icon: ImageNode,
+  separator: SeparatorNode,
+  spacer: SpacerNode,
+}
+
 function FlexNode({ node, nodeKey }) {
   if (!node || typeof node !== 'object') return null
-  if (node.type === 'text') {
-    return (
-      <div
-        key={nodeKey}
-        style={{
-          color: node.color || '#444444',
-          fontSize: sizeMap[node.size] || length(node.size, 13),
-          fontWeight: node.weight === 'bold' ? 700 : 400,
-          textAlign: node.align || 'left',
-          whiteSpace: node.wrap === false ? 'nowrap' : 'pre-wrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          marginTop: length(node.margin, 0),
-          lineHeight: 1.35,
-        }}
-      >
-        {String(node.text || '')}
-      </div>
-    )
-  }
-  if (node.type === 'box') {
-    return (
-      <div
-        key={nodeKey}
-        style={{
-          display: 'flex',
-          flexDirection: node.layout === 'horizontal' ? 'row' : 'column',
-          alignItems: node.alignItems || (node.layout === 'horizontal' ? 'center' : 'stretch'),
-          justifyContent: node.justifyContent || 'flex-start',
-          gap: length(node.spacing, 0),
-          marginTop: length(node.margin, 0),
-          padding: length(node.paddingAll, 0),
-          background: node.backgroundColor || 'transparent',
-          borderRadius: length(node.cornerRadius, 0),
-        }}
-      >
-        {(node.contents || []).map((child, index) => (
-          <FlexNode key={`${nodeKey}-${index}`} node={child} nodeKey={`${nodeKey}-${index}`} />
-        ))}
-      </div>
-    )
-  }
-  if (node.type === 'button') {
-    return (
-      <div
-        key={nodeKey}
-        style={{
-          marginTop: length(node.margin, 0),
-          borderRadius: 8,
-          background: node.style === 'primary' ? node.color || '#06C755' : 'transparent',
-          border: node.style === 'secondary' ? `1px solid ${node.color || '#06C755'}` : 'none',
-          color: node.style === 'primary' ? '#ffffff' : node.color || '#06C755',
-          padding: '9px 12px',
-          textAlign: 'center',
-          fontSize: 12,
-          fontWeight: 700,
-        }}
-      >
-        {node.action?.label || 'Action'}
-      </div>
-    )
-  }
-  if (node.type === 'image' || node.type === 'icon') {
-    const source = safeImageUrl(node.url)
-    return source ? (
-      <img
-        key={nodeKey}
-        src={source}
-        alt=""
-        style={{
-          display: 'block',
-          width: node.type === 'icon' ? length(node.size, 20) : '100%',
-          height: node.type === 'icon' ? length(node.size, 20) : length(node.aspectRatio, 120),
-          objectFit: node.aspectMode === 'fit' ? 'contain' : 'cover',
-          borderRadius: length(node.cornerRadius, 0),
-          marginTop: length(node.margin, 0),
-        }}
-      />
-    ) : null
-  }
-  if (node.type === 'separator') {
-    return <hr key={nodeKey} style={{ marginTop: length(node.margin, 0), borderColor: node.color || '#eeeeee' }} />
-  }
-  if (node.type === 'spacer') {
-    return <div key={nodeKey} style={{ height: length(node.size, 8) }} />
-  }
-  return null
+  const Renderer = Object.hasOwn(nodeRenderers, node.type) ? nodeRenderers[node.type] : null
+  return Renderer ? <Renderer node={node} nodeKey={nodeKey} /> : null
 }
 
 function Bubble({ contents }) {
