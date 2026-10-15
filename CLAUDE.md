@@ -263,6 +263,12 @@ an old route list from conversation history.
   no build arguments.
 - Ownership/session: `LINE_ADMIN_USER_IDS`, `SESSION_DAYS`.
 - Security: `CREDENTIAL_ENCRYPTION_KEY`.
+- Observability (optional, Traceway over OpenTelemetry OTLP/HTTP): `TRACEWAY_URL`
+  (instance base URL) and `TRACEWAY_TOKEN` (backend project token); both
+  must be set or `lib/telemetry.js` stays a no-op. `OTEL_SERVICE_NAME` and
+  `APP_VERSION` are optional. Requests become SERVER spans named by Elysia's route
+  pattern, forward batches become the `webhook-forward-delivery` task, and
+  `bun run retention` is the `retention` task.
 - External API: `EXTERNAL_API_RATE_LIMIT`.
 - Retention: `RETENTION_WEBHOOK_EVENTS_DAYS`, `RETENTION_FORWARDS_DAYS`, `RETENTION_DELIVERIES_DAYS`,
   `RETENTION_AUDIT_LOGS_DAYS`, `RETENTION_EXPIRED_SESSIONS_DAYS`,

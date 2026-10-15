@@ -128,6 +128,7 @@ jobs:
       RETENTION_RATE_LIMIT_BUCKETS_DAYS: ${{ vars.RETENTION_RATE_LIMIT_BUCKETS_DAYS || '2' }}
       RETENTION_BATCH_SIZE: ${{ vars.RETENTION_BATCH_SIZE || '1000' }}
       TZ: ${{ vars.TZ || 'Asia/Bangkok' }}
+      TRACEWAY_URL: ${{ vars.TRACEWAY_URL }}
 
     steps:
       - name: Validate deployment configuration
@@ -150,6 +151,7 @@ jobs:
           CREDENTIAL_ENCRYPTION_KEY: ${{ secrets.CREDENTIAL_ENCRYPTION_KEY }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           LINE_ADMIN_USER_IDS: ${{ secrets.LINE_ADMIN_USER_IDS }}
+          TRACEWAY_TOKEN: ${{ secrets.TRACEWAY_TOKEN }}
         run: |
           container stop "${CONTAINER_NAME}" || true
           container delete "${CONTAINER_NAME}" || true
@@ -166,6 +168,8 @@ jobs:
             -e LIFF_ID="${LIFF_ID}" \
             -e LINE_LOGIN_CHANNEL_ID="${LINE_LOGIN_CHANNEL_ID}" \
             -e LINE_ADMIN_USER_IDS="${LINE_ADMIN_USER_IDS}" \
+            -e TRACEWAY_URL="${TRACEWAY_URL}" \
+            -e TRACEWAY_TOKEN="${TRACEWAY_TOKEN}" \
             -e SESSION_DAYS="${SESSION_DAYS}" \
             -e EXTERNAL_API_RATE_LIMIT="${EXTERNAL_API_RATE_LIMIT}" \
             -e RETENTION_WEBHOOK_EVENTS_DAYS="${RETENTION_WEBHOOK_EVENTS_DAYS}" \
