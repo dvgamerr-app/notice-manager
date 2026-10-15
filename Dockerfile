@@ -38,6 +38,7 @@ COPY --chown=bun:bun migrations ./migrations
 COPY --from=build --chown=bun:bun /app/dist ./dist
 
 RUN mkdir -p /data && chown bun:bun /app /data
+# hadolint ignore=DL3066
 USER bun
 
 # Default SQLite database lives here; mount a volume to persist it.
