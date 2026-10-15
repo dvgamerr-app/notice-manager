@@ -40,23 +40,48 @@ export const listChats = async ({ params, user, set }) => {
   }))
 }
 
-export const updateChat = async ({ params, body, user, set }) => {
-  if (!user) return unauthorized(set)
+// Resolves the authenticated owner's bot. `error` is the ready-to-return response body.
+const loadBot = async ({ params, user, set }) => {
+  if (!user) return { error: unauthorized(set) }
   const bot = await findBot(params.bot, user.id)
   if (!bot) {
     set.status = 404
-    return { error: 'Bot not found' }
+    return { error: { error: 'Bot not found' } }
   }
-  const chat = await db
+  return { bot }
+}
+
+// Resolves a chat under the selected bot; options tighten the lookup for sends.
+const loadChat = async (
+  context,
+  { registeredOnly = false, requireActive = false, missing = 'Chat not found' } = {},
+) => {
+  const scope = await loadBot(context)
+  if (scope.error) return scope
+  const { params, set } = context
+  let query = db
     .selectFrom('managed_chat')
     .selectAll()
     .where('id', '=', params.chat)
-    .where('bot_id', '=', bot.id)
-    .executeTakeFirst()
+    .where('bot_id', '=', scope.bot.id)
+  if (registeredOnly) query = query.where('registered', '=', 1)
+  const chat = await query.executeTakeFirst()
   if (!chat) {
     set.status = 404
-    return { error: 'Chat not found' }
+    return { error: { error: missing } }
   }
+  if (requireActive && !chat.active) {
+    set.status = 409
+    return { error: { error: 'Chat is inactive. The bot may have left or been blocked.' } }
+  }
+  return { ...scope, chat }
+}
+
+export const updateChat = async (context) => {
+  const { body, user } = context
+  const scope = await loadChat(context)
+  if (scope.error) return scope.error
+  const { bot, chat } = scope
 
   const updates = { updated_at: nowIso() }
   if (typeof body?.name === 'string') updates.display_name = body.name.trim()
@@ -81,42 +106,36 @@ export const updateChat = async ({ params, body, user, set }) => {
   return { ok: true }
 }
 
-export const refreshChat = async ({ params, user, set }) => {
-  if (!user) return unauthorized(set)
-  const bot = await findBot(params.bot, user.id)
-  if (!bot) {
-    set.status = 404
-    return { error: 'Bot not found' }
+// Reads LINE's profile/summary for a chat by its source type.
+const fetchChatMetadata = async (client, chat) => {
+  let metadata = {}
+  let displayName = chat.display_name
+  let pictureUrl = chat.picture_url
+  if (chat.source_type === 'user') {
+    const { data } = await client.getProfile(chat.source_id)
+    metadata = data
+    displayName = data.displayName || displayName
+    pictureUrl = data.pictureUrl || pictureUrl
+  } else if (chat.source_type === 'group') {
+    const { data } = await client.getGroupSummary(chat.source_id)
+    metadata = data
+    displayName = data.groupName || displayName
+    pictureUrl = data.pictureUrl || pictureUrl
+  } else {
+    metadata = { note: 'LINE does not provide a room summary endpoint' }
   }
-  const chat = await db
-    .selectFrom('managed_chat')
-    .selectAll()
-    .where('id', '=', params.chat)
-    .where('bot_id', '=', bot.id)
-    .executeTakeFirst()
-  if (!chat) {
-    set.status = 404
-    return { error: 'Chat not found' }
-  }
+  return { metadata, displayName, pictureUrl }
+}
+
+export const refreshChat = async (context) => {
+  const { user, set } = context
+  const scope = await loadChat(context)
+  if (scope.error) return scope.error
+  const { bot, chat } = scope
 
   try {
     const client = lineClient(decryptSecret(bot.channel_access_token))
-    let metadata = {}
-    let displayName = chat.display_name
-    let pictureUrl = chat.picture_url
-    if (chat.source_type === 'user') {
-      const { data } = await client.getProfile(chat.source_id)
-      metadata = data
-      displayName = data.displayName || displayName
-      pictureUrl = data.pictureUrl || pictureUrl
-    } else if (chat.source_type === 'group') {
-      const { data } = await client.getGroupSummary(chat.source_id)
-      metadata = data
-      displayName = data.groupName || displayName
-      pictureUrl = data.pictureUrl || pictureUrl
-    } else {
-      metadata = { note: 'LINE does not provide a room summary endpoint' }
-    }
+    const { metadata, displayName, pictureUrl } = await fetchChatMetadata(client, chat)
     await db
       .updateTable('managed_chat')
       .set({
@@ -149,23 +168,11 @@ export const refreshChat = async ({ params, user, set }) => {
   }
 }
 
-export const leaveChat = async ({ params, user, set }) => {
-  if (!user) return unauthorized(set)
-  const bot = await findBot(params.bot, user.id)
-  if (!bot) {
-    set.status = 404
-    return { error: 'Bot not found' }
-  }
-  const chat = await db
-    .selectFrom('managed_chat')
-    .selectAll()
-    .where('id', '=', params.chat)
-    .where('bot_id', '=', bot.id)
-    .executeTakeFirst()
-  if (!chat) {
-    set.status = 404
-    return { error: 'Chat not found' }
-  }
+export const leaveChat = async (context) => {
+  const { user, set } = context
+  const scope = await loadChat(context)
+  if (scope.error) return scope.error
+  const { bot, chat } = scope
   if (chat.source_type === 'user') {
     set.status = 400
     return { error: 'A bot cannot leave a one-on-one chat. Unregister it instead.' }
@@ -195,13 +202,11 @@ export const leaveChat = async ({ params, user, set }) => {
   }
 }
 
-export const bulkUpdateChats = async ({ params, body, user, set }) => {
-  if (!user) return unauthorized(set)
-  const bot = await findBot(params.bot, user.id)
-  if (!bot) {
-    set.status = 404
-    return { error: 'Bot not found' }
-  }
+export const bulkUpdateChats = async (context) => {
+  const { body, user, set } = context
+  const scope = await loadBot(context)
+  if (scope.error) return scope.error
+  const { bot } = scope
   const chatIds = [...new Set(body?.chatIds || [])].slice(0, 100)
   if (!chatIds.length || typeof body?.registered !== 'boolean') {
     set.status = 400
@@ -225,44 +230,40 @@ export const bulkUpdateChats = async ({ params, body, user, set }) => {
   return { ok: true, updated: Number(result.numUpdatedRows || 0) }
 }
 
-export const testChat = async ({ params, body, user, set }) => {
-  if (!user) return unauthorized(set)
-  const bot = await findBot(params.bot, user.id)
-  if (!bot) {
-    set.status = 404
-    return { error: 'Bot not found' }
-  }
-  const chat = await db
-    .selectFrom('managed_chat')
-    .selectAll()
-    .where('id', '=', params.chat)
-    .where('bot_id', '=', bot.id)
-    .where('registered', '=', 1)
-    .executeTakeFirst()
-  if (!chat) {
-    set.status = 404
-    return { error: 'Registered chat not found' }
-  }
-  if (!chat.active) {
-    set.status = 409
-    return { error: 'Chat is inactive. The bot may have left or been blocked.' }
-  }
-
-  let messages
+// Validates the message payload with the SDK; `error` is a ready-to-return 400 body.
+const parseTestMessages = (body) => {
   try {
-    messages = normalizeMessages(
-      body?.messages || { type: 'text', text: String(body?.message || 'ทดสอบจาก LINE Manager') },
-    )
+    return {
+      messages: normalizeMessages(
+        body?.messages || { type: 'text', text: String(body?.message || 'ทดสอบจาก LINE Manager') },
+      ),
+    }
   } catch (error) {
+    return { error: { error: error.message } }
+  }
+}
+
+export const testChat = async (context) => {
+  const { body, user, set } = context
+  const scope = await loadChat(context, {
+    registeredOnly: true,
+    requireActive: true,
+    missing: 'Registered chat not found',
+  })
+  if (scope.error) return scope.error
+  const { bot, chat } = scope
+
+  const parsed = parseTestMessages(body)
+  if (parsed.error) {
     set.status = 400
-    return { error: error.message }
+    return parsed.error
   }
 
   try {
     const result = await deliverToChat({
       bot,
       chat,
-      messages,
+      messages: parsed.messages,
       actorType: 'user',
       actorId: user.id,
       notificationDisabled: body?.notificationDisabled,
@@ -274,27 +275,22 @@ export const testChat = async ({ params, body, user, set }) => {
   }
 }
 
-export const bulkTestChats = async ({ params, body, user, set }) => {
-  if (!user) return unauthorized(set)
-  const bot = await findBot(params.bot, user.id)
-  if (!bot) {
-    set.status = 404
-    return { error: 'Bot not found' }
-  }
+export const bulkTestChats = async (context) => {
+  const { body, user, set } = context
+  const scope = await loadBot(context)
+  if (scope.error) return scope.error
+  const { bot } = scope
   const chatIds = [...new Set(body?.chatIds || [])].slice(0, 20)
   if (!chatIds.length) {
     set.status = 400
     return { error: 'Select between 1 and 20 chats' }
   }
-  let messages
-  try {
-    messages = normalizeMessages(
-      body?.messages || { type: 'text', text: String(body?.message || 'ทดสอบจาก LINE Manager') },
-    )
-  } catch (error) {
+  const parsed = parseTestMessages(body)
+  if (parsed.error) {
     set.status = 400
-    return { error: error.message }
+    return parsed.error
   }
+  const { messages } = parsed
   const chats = await db
     .selectFrom('managed_chat')
     .selectAll()
