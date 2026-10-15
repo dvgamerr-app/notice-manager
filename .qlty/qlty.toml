@@ -83,8 +83,3 @@ name = "zizmor"
 
 [[plugin]]
 name = "osv-scanner"
-
-# Existing production deploy workflow: findings tracked as separate hardening work.
-[[exclude]]
-plugins = ["zizmor", "actionlint"]
-file_patterns = [".github/workflows/build-ghcr.yml"]
