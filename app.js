@@ -5,6 +5,7 @@ import { staticPlugin } from '@elysiajs/static'
 import { Elysia } from 'elysia'
 import routes from './api/route.js'
 import { logger } from './lib/logger.js'
+import { requestTelemetry } from './lib/telemetry.js'
 
 const configuredOrigins = (
   process.env.CORS_ORIGINS || 'http://localhost:5173,http://127.0.0.1:5173'
@@ -60,6 +61,7 @@ const redirectToProductionLiff = ({ request }) => {
 
 export const createApp = () => {
   const app = new Elysia()
+    .use(requestTelemetry)
     .use(cors({
       origin: configuredOrigins,
       credentials: true,
