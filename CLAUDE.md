@@ -389,7 +389,9 @@ credentials in the macOS Keychain.
 - `lib/liff.js` — runtime LIFF ID and derived LINE Login channel ID.
 - `site/` and `.github/workflows/pages.yml` — GitHub Pages marketing site;
   the workflow copies `docs/screenshots/*.png` into it. Screenshots are mock data
-  only (never real tokens or LINE IDs).
+  only (never real tokens or LINE IDs). The workflow injects the `PUBLIC_TRACEWAY_DSN`
+  repository secret into the Traceway browser snippet (errors and session replay);
+  without the secret the snippet does nothing.
 - `src/` — React LIFF dashboard.
 - `src/components/FlexMessagePreview.jsx` — LINE-like Flex bubble preview.
 - `src/flex.js` — compact Flex card builder.
