@@ -52,11 +52,12 @@ const listExternalChats = async ({ params, apiKey, authError, set }) => {
   }))
 }
 
-const sendExternalMessage = async ({ params, body, apiKey, authError, set }) => {
-  if (authError) return authError
+const failure = (status, body) => ({ failure: { status, body } })
+
+// Resolves the registered, active target chat and its bot for an API key.
+const resolveSendTarget = async ({ params, apiKey }) => {
   if (params.bot !== apiKey.service) {
-    set.status = 403
-    return { error: 'This API key does not grant access to the requested bot' }
+    return failure(403, { error: 'This API key does not grant access to the requested bot' })
   }
   const chat = await db
     .selectFrom('managed_chat')
@@ -69,54 +70,71 @@ const sendExternalMessage = async ({ params, body, apiKey, authError, set }) => 
         expression('source_id', '=', params.chat),
       ]))
     .executeTakeFirst()
-  if (!chat) {
-    set.status = 404
-    return { error: 'Registered chat not found' }
-  }
-  if (!chat.active) {
-    set.status = 409
-    return { error: 'Chat is inactive' }
-  }
+  if (!chat) return failure(404, { error: 'Registered chat not found' })
+  if (!chat.active) return failure(409, { error: 'Chat is inactive' })
   const bot = await db
     .selectFrom('managed_bot')
     .selectAll()
     .where('id', '=', apiKey.bot_id)
     .executeTakeFirstOrThrow()
+  return { bot, chat }
+}
 
-  let messages
+const parseExternalMessages = (body) => {
   try {
-    messages = normalizeMessages(
+    const messages = normalizeMessages(
       body?.messages || { type: 'text', text: String(body?.message || '') },
     )
     if (messages[0]?.type === 'text' && !messages[0].text) {
       throw new TypeError('message or messages is required')
     }
+    return { messages }
   } catch (error) {
-    set.status = 400
-    return { error: error.message }
+    return failure(400, { error: error.message })
   }
+}
 
-  try {
-    const result = await deliverToChat({
-      bot,
-      chat,
-      messages,
-      actorType: 'api-key',
-      actorId: apiKey.id,
-      notificationDisabled: body?.notificationDisabled,
-    })
-    return { ok: true, ...result }
-  } catch (error) {
-    const expectedError = error instanceof LineApiError || error instanceof TypeError
-    set.status = expectedError ? 400 : 500
-    if (!expectedError) logger.error({ err: error }, 'Unexpected external delivery failure')
-    return {
+const externalDeliveryFailure = (error) => {
+  const expectedError = error instanceof LineApiError || error instanceof TypeError
+  if (!expectedError) logger.error({ err: error }, 'Unexpected external delivery failure')
+  return {
+    status: expectedError ? 400 : 500,
+    body: {
       error: expectedError ? error.message : 'Unable to send LINE message',
       deliveryId: error.deliveryId || null,
       requestId: error instanceof LineApiError ? error.requestId || null : null,
       details: error instanceof LineApiError ? error.details || null : null,
-    }
+    },
   }
+}
+
+// Returns `{ status?, body }`; the status is applied only when present.
+const deliverExternal = async ({ params, body, apiKey }) => {
+  const target = await resolveSendTarget({ params, apiKey })
+  if (target.failure) return target.failure
+  const parsed = parseExternalMessages(body)
+  if (parsed.failure) return parsed.failure
+
+  try {
+    const result = await deliverToChat({
+      bot: target.bot,
+      chat: target.chat,
+      messages: parsed.messages,
+      actorType: 'api-key',
+      actorId: apiKey.id,
+      notificationDisabled: body?.notificationDisabled,
+    })
+    return { body: { ok: true, ...result } }
+  } catch (error) {
+    return externalDeliveryFailure(error)
+  }
+}
+
+const sendExternalMessage = async ({ params, body, apiKey, authError, set }) => {
+  if (authError) return authError
+  const outcome = await deliverExternal({ params, body, apiKey })
+  if (outcome.status) set.status = outcome.status
+  return outcome.body
 }
 
 // Elysia cannot infer the union returned by an async derive in JavaScript.

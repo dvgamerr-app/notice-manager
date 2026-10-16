@@ -84,6 +84,85 @@ function Deliveries({ api, bot, target, onChanged }) {
   )
 }
 
+const chatNameOf = (chats, id) => {
+  const chat = chats.find((item) => item.id === id)
+  return chat ? chat.name || chat.lineName || chat.sourceId : id
+}
+
+function TargetCard({ api, bot, target, chats, result, busy, open, onTest, onToggle, onRemove, onOpen, onChanged }) {
+  const [badge, label] = healthStyle[target.health] || healthStyle.unknown
+  const busyHere = busy === target.id
+  return (
+    <div className="bg-white rounded-2xl shadow-sm p-4 space-y-2">
+      <div className="flex items-center gap-2">
+        <h4 className="font-semibold truncate">{target.name}</h4>
+        <span className={`ml-auto shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${badge}`}>
+          {label}
+        </span>
+      </div>
+      <code className="block break-all text-xs text-gray-500">{target.url}</code>
+      <p className="text-xs text-gray-500">
+        {target.chatId ? `เฉพาะห้อง ${chatNameOf(chats, target.chatId)}` : 'ทุกห้องของบอต'}
+        {' · '}รอส่ง {target.counts.pending} · สำเร็จ {target.counts.succeeded}
+        {' · '}ล้มเหลว {target.counts.dead}
+      </p>
+      <p className="text-[11px] text-gray-400">
+        สำเร็จล่าสุด: {formatDate(target.lastSuccessAt)}
+        {target.lastFailureAt ? ` · ผิดพลาดล่าสุด: ${formatDate(target.lastFailureAt)}` : ''}
+      </p>
+      {target.lastError && target.health !== 'healthy' && (
+        <p className="break-words text-xs text-red-600">
+          {target.lastError}
+          {target.pausedUntil && new Date(target.pausedUntil) > new Date()
+            ? ` · พักการส่งถึง ${formatDate(target.pausedUntil)}`
+            : ''}
+        </p>
+      )}
+      {result && (
+        <p className={`text-xs ${result.ok ? 'text-[#05a344]' : 'text-red-600'}`}>
+          ทดสอบ: {result.ok ? `สำเร็จ HTTP ${result.status}` : result.error} ({result.durationMs} ms)
+        </p>
+      )}
+      <div className="flex gap-4 text-xs font-semibold pt-1">
+        <button
+          type="button"
+          disabled={busyHere}
+          onClick={() => onTest(target)}
+          className="text-gray-900 disabled:opacity-50"
+        >
+          ทดสอบ
+        </button>
+        <button
+          type="button"
+          disabled={busyHere}
+          onClick={() => onToggle(target)}
+          className="text-gray-900 disabled:opacity-50"
+        >
+          {target.enabled ? 'ปิด' : 'เปิด'}
+        </button>
+        <button
+          type="button"
+          onClick={() => onOpen(open === target.id ? '' : target.id)}
+          className="text-gray-900"
+        >
+          ประวัติ
+        </button>
+        <button
+          type="button"
+          disabled={busyHere}
+          onClick={() => onRemove(target)}
+          className="ml-auto text-red-600 disabled:opacity-50"
+        >
+          ลบ
+        </button>
+      </div>
+      {open === target.id && (
+        <Deliveries api={api} bot={bot} target={target} onChanged={onChanged} />
+      )}
+    </div>
+  )
+}
+
 export default function ForwardsTab({ api, bot, chats }) {
   const [targets, setTargets] = useState([])
   const [form, setForm] = useState({ name: '', url: '', chatId: '' })
@@ -99,11 +178,6 @@ export default function ForwardsTab({ api, bot, chats }) {
       .catch((error) => setNotice({ type: 'error', text: error.message }))
 
   useEffect(() => { load() }, [bot.service])
-
-  const chatName = (id) => {
-    const chat = chats.find((item) => item.id === id)
-    return chat ? chat.name || chat.lineName || chat.sourceId : id
-  }
 
   const run = async (key, job) => {
     setBusy(key)
@@ -218,79 +292,24 @@ export default function ForwardsTab({ api, bot, chats }) {
       <h3 className="text-sm font-semibold text-gray-500 px-1">
         ปลายทาง · {targets.length}
       </h3>
-      {targets.map((target) => {
-        const [badge, label] = healthStyle[target.health] || healthStyle.unknown
-        const result = testResult[target.id]
-        return (
-          <div key={target.id} className="bg-white rounded-2xl shadow-sm p-4 space-y-2">
-            <div className="flex items-center gap-2">
-              <h4 className="font-semibold truncate">{target.name}</h4>
-              <span className={`ml-auto shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${badge}`}>
-                {label}
-              </span>
-            </div>
-            <code className="block break-all text-xs text-gray-500">{target.url}</code>
-            <p className="text-xs text-gray-500">
-              {target.chatId ? `เฉพาะห้อง ${chatName(target.chatId)}` : 'ทุกห้องของบอต'}
-              {' · '}รอส่ง {target.counts.pending} · สำเร็จ {target.counts.succeeded}
-              {' · '}ล้มเหลว {target.counts.dead}
-            </p>
-            <p className="text-[11px] text-gray-400">
-              สำเร็จล่าสุด: {formatDate(target.lastSuccessAt)}
-              {target.lastFailureAt ? ` · ผิดพลาดล่าสุด: ${formatDate(target.lastFailureAt)}` : ''}
-            </p>
-            {target.lastError && target.health !== 'healthy' && (
-              <p className="break-words text-xs text-red-600">
-                {target.lastError}
-                {target.pausedUntil && new Date(target.pausedUntil) > new Date()
-                  ? ` · พักการส่งถึง ${formatDate(target.pausedUntil)}`
-                  : ''}
-              </p>
-            )}
-            {result && (
-              <p className={`text-xs ${result.ok ? 'text-[#05a344]' : 'text-red-600'}`}>
-                ทดสอบ: {result.ok ? `สำเร็จ HTTP ${result.status}` : result.error} ({result.durationMs} ms)
-              </p>
-            )}
-            <div className="flex gap-4 text-xs font-semibold pt-1">
-              <button
-                type="button"
-                disabled={busy === target.id}
-                onClick={() => test(target)}
-                className="text-gray-900 disabled:opacity-50"
-              >
-                ทดสอบ
-              </button>
-              <button
-                type="button"
-                disabled={busy === target.id}
-                onClick={() => toggle(target)}
-                className="text-gray-900 disabled:opacity-50"
-              >
-                {target.enabled ? 'ปิด' : 'เปิด'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setOpen(open === target.id ? '' : target.id)}
-                className="text-gray-900"
-              >
-                ประวัติ
-              </button>
-              <button
-                type="button"
-                disabled={busy === target.id}
-                onClick={() => remove(target)}
-                className="ml-auto text-red-600 disabled:opacity-50"
-              >
-                ลบ
-              </button>
-            </div>
-            {open === target.id && (
-              <Deliveries api={api} bot={bot} target={target} onChanged={load} />
-            )}
-          </div>
-        )
-      })}
+      {targets.map((target) => (
+        <TargetCard
+          key={target.id}
+          api={api}
+          bot={bot}
+          target={target}
+          chats={chats}
+          result={testResult[target.id]}
+          busy={busy}
+          open={open}
+          onTest={test}
+          onToggle={toggle}
+          onRemove={remove}
+          onOpen={setOpen}
+          onChanged={load}
+        />
+      ))}
+
     </div>
   )
 }
