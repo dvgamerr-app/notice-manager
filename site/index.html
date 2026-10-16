@@ -93,6 +93,25 @@ footer { padding: 32px 0 48px; color: var(--muted); font-size: .9rem; text-align
       }
     cronitor('config', { clientKey: 'a08df15d735c0c7518246129767fd319' })
   </script>
+  <script>
+    // Traceway error reporting and session replay. pages.yml replaces the placeholder with
+    // PUBLIC_TRACEWAY_DSN at build time; without it nothing is loaded.
+    ;(function () {
+      var dsn = '__PUBLIC_TRACEWAY_DSN__'
+      if (dsn.indexOf('@') < 1 || dsn.indexOf('__') === 0) return
+      var s = document.createElement('script')
+      s.src = 'https://cdn.jsdelivr.net/npm/@tracewayapp/frontend@1.2.1/dist/traceway.iife.global.js'
+      s.async = true
+      s.onload = function () {
+        try {
+          window.Traceway.init(dsn, { recordAllSessions: true })
+        } catch (e) {
+          console.warn('Traceway disabled:', e && e.message)
+        }
+      }
+      document.head.appendChild(s)
+    })()
+  </script>
 </head>
 <body>
 <div class="wrap">
