@@ -17,42 +17,74 @@ const safeJson = (value) => {
     return {}
   }
 }
+
+// The recipient is chosen strictly from source.type; never fall back to another ID,
+// because group/room events also carry the sender's userId.
+const SOURCE_ID_FIELD = { user: 'userId', group: 'groupId', room: 'roomId' }
 const sourceId = (source) => {
-  if (source?.type === 'user') return source.userId || null
-  if (source?.type === 'group') return source.groupId || null
-  if (source?.type === 'room') return source.roomId || null
-  return null
+  const type = source?.type
+  if (!Object.hasOwn(SOURCE_ID_FIELD, type)) return null
+  return source[SOURCE_ID_FIELD[type]] || null
+}
+
+const metadataResolvers = {
+  user: async (client, source) => {
+    const { data } = await client.getProfile(source.userId)
+    return {
+      displayName: data.displayName || '',
+      pictureUrl: data.pictureUrl || null,
+      metadata: data,
+    }
+  },
+  group: async (client, source) => {
+    const { data } = await client.getGroupSummary(source.groupId)
+    return {
+      displayName: data.groupName || '',
+      pictureUrl: data.pictureUrl || null,
+      metadata: data,
+    }
+  },
+  room: async () => ({
+    displayName: 'Multi-person chat',
+    pictureUrl: null,
+    metadata: { note: 'LINE does not provide a room summary endpoint' },
+  }),
 }
 
 const resolveMetadata = async (client, source) => {
   try {
-    if (source.type === 'user') {
-      const { data } = await client.getProfile(source.userId)
-      return {
-        displayName: data.displayName || '',
-        pictureUrl: data.pictureUrl || null,
-        metadata: data,
-      }
-    }
-    if (source.type === 'group') {
-      const { data } = await client.getGroupSummary(source.groupId)
-      return {
-        displayName: data.groupName || '',
-        pictureUrl: data.pictureUrl || null,
-        metadata: data,
-      }
-    }
-    if (source.type === 'room') {
-      return {
-        displayName: 'Multi-person chat',
-        pictureUrl: null,
-        metadata: { note: 'LINE does not provide a room summary endpoint' },
-      }
+    if (Object.hasOwn(metadataResolvers, source.type)) {
+      return await metadataResolvers[source.type](client, source)
     }
   } catch {
     // A chat can still be registered even when profile/summary permission fails.
   }
   return { displayName: '', pictureUrl: null, metadata: {} }
+}
+
+// Re-claims a redelivered event that previously failed or whose processing went stale.
+const reclaimEvent = async (bot, event, attemptAt) => {
+  const retry = async (status, staleBefore = null) => {
+    let claim = db
+      .updateTable('managed_webhook_event')
+      .set((expression) => ({
+        processing_status: 'processing',
+        attempt_count: expression('attempt_count', '+', 1),
+        last_attempt_at: attemptAt,
+        processing_error: null,
+        is_redelivery: event.deliveryContext?.isRedelivery ? 1 : 0,
+      }))
+      .where('bot_id', '=', bot.id)
+      .where('webhook_event_id', '=', event.webhookEventId)
+      .where('processing_status', '=', status)
+    if (staleBefore) claim = claim.where('last_attempt_at', '<', staleBefore)
+    return claim.returning('id').executeTakeFirst()
+  }
+
+  const failed = await retry('failed')
+  if (failed) return failed.id
+  const staleBefore = new Date(Date.now() - 5 * 60_000).toISOString()
+  return (await retry('processing', staleBefore))?.id || null
 }
 
 const claimEvent = async (bot, event, rawEvent) => {
@@ -79,28 +111,7 @@ const claimEvent = async (bot, event, rawEvent) => {
     .executeTakeFirst()
   if (inserted) return inserted.id
   if (!event.webhookEventId) return null
-
-  const retry = async (status, staleBefore = null) => {
-    let claim = db
-      .updateTable('managed_webhook_event')
-      .set((expression) => ({
-        processing_status: 'processing',
-        attempt_count: expression('attempt_count', '+', 1),
-        last_attempt_at: attemptAt,
-        processing_error: null,
-        is_redelivery: event.deliveryContext?.isRedelivery ? 1 : 0,
-      }))
-      .where('bot_id', '=', bot.id)
-      .where('webhook_event_id', '=', event.webhookEventId)
-      .where('processing_status', '=', status)
-    if (staleBefore) claim = claim.where('last_attempt_at', '<', staleBefore)
-    return claim.returning('id').executeTakeFirst()
-  }
-
-  const failed = await retry('failed')
-  if (failed) return failed.id
-  const staleBefore = new Date(Date.now() - 5 * 60_000).toISOString()
-  return (await retry('processing', staleBefore))?.id || null
+  return reclaimEvent(bot, event, attemptAt)
 }
 
 const finishEvent = (eventId) => db
@@ -131,25 +142,60 @@ const failEvent = async (eventId, error) => {
   }
 }
 
-const upsertChat = async (bot, event, client) => {
-  const id = sourceId(event.source)
-  if (!id || !event.source?.type) return null
-
-  let current = await db
+// Finds the stored chat, repairing a legacy group/room row keyed by the sender's userId.
+const findCurrentChat = async (bot, event, id) => {
+  const current = await db
     .selectFrom('managed_chat')
     .selectAll()
     .where('bot_id', '=', bot.id)
     .where('source_id', '=', id)
     .executeTakeFirst()
-  if (!current && ['group', 'room'].includes(event.source.type) && event.source.userId) {
-    current = await db
-      .selectFrom('managed_chat')
-      .selectAll()
-      .where('bot_id', '=', bot.id)
-      .where('source_id', '=', event.source.userId)
-      .where('source_type', '=', event.source.type)
-      .executeTakeFirst()
+  if (current || !['group', 'room'].includes(event.source.type) || !event.source.userId) {
+    return current
   }
+  return db
+    .selectFrom('managed_chat')
+    .selectAll()
+    .where('bot_id', '=', bot.id)
+    .where('source_id', '=', event.source.userId)
+    .where('source_type', '=', event.source.type)
+    .executeTakeFirst()
+}
+
+const updateExistingChat = async (current, event, resolved, active) => {
+  const id = sourceId(event.source)
+  const now = nowIso()
+  await db
+    .updateTable('managed_chat')
+    .set({
+      source_id: id,
+      source_type: event.source.type,
+      line_display_name: resolved.displayName,
+      picture_url: resolved.pictureUrl,
+      metadata_payload: JSON.stringify(resolved.metadata),
+      active: active ? 1 : 0,
+      last_seen_at: now,
+      updated_at: now,
+    })
+    .where('id', '=', current.id)
+    .execute()
+  return {
+    ...current,
+    id: current.id,
+    source_id: id,
+    source_type: event.source.type,
+    display_name: current.display_name,
+    line_display_name: resolved.displayName,
+    picture_url: resolved.pictureUrl,
+    active: active ? 1 : 0,
+  }
+}
+
+const upsertChat = async (bot, event, client) => {
+  const id = sourceId(event.source)
+  if (!id || !event.source?.type) return null
+
+  const current = await findCurrentChat(bot, event, id)
   const resolved = current
     ? {
         displayName: current.line_display_name || current.display_name,
@@ -157,35 +203,10 @@ const upsertChat = async (bot, event, client) => {
         metadata: safeJson(current.metadata_payload),
       }
     : await resolveMetadata(client, event.source)
-  const now = nowIso()
   const active = !['leave', 'unfollow'].includes(event.type)
 
-  if (current) {
-    await db
-      .updateTable('managed_chat')
-      .set({
-        source_id: id,
-        source_type: event.source.type,
-        line_display_name: resolved.displayName,
-        picture_url: resolved.pictureUrl,
-        metadata_payload: JSON.stringify(resolved.metadata),
-        active: active ? 1 : 0,
-        last_seen_at: now,
-        updated_at: now,
-      })
-      .where('id', '=', current.id)
-      .execute()
-    return {
-      ...current,
-      id: current.id,
-      source_id: id,
-      source_type: event.source.type,
-      display_name: current.display_name,
-      line_display_name: resolved.displayName,
-      picture_url: resolved.pictureUrl,
-      active: active ? 1 : 0,
-    }
-  }
+  if (current) return updateExistingChat(current, event, resolved, active)
+  const now = nowIso()
 
   const chat = {
     id: randomUUID(),
@@ -206,17 +227,45 @@ const upsertChat = async (bot, event, client) => {
   return chat
 }
 
-export default async ({ params, body, headers, set }) => {
+// Answers /hi and /id for a chat that can be replied to.
+const answerOwnCommand = async (client, event, chat, text) => {
+  if (!chat || !event.replyToken) return
+  if (/^\/hi$/i.test(text)) {
+    await db.updateTable('managed_chat').set({ registered: 1, active: 1 })
+      .where('id', '=', chat.id).execute()
+    await client.reply(event.replyToken, 'ลงทะเบียนห้องนี้ใน LINE Manager แล้ว')
+  } else if (/^\/id$/i.test(text)) {
+    await client.reply(
+      event.replyToken,
+      `Chat ID: ${chat.source_id}\nType: ${chat.source_type}`,
+    )
+  }
+}
+
+const processEvent = async (bot, client, event, eventId) => {
+  const chat = await upsertChat(bot, event, client)
+
+  const text = event.type === 'message' && event.message?.type === 'text'
+    ? event.message.text.trim()
+    : ''
+  await answerOwnCommand(client, event, chat, text)
+  if (!OWN_COMMAND.test(text)) {
+    await enqueueForwards({ bot, eventRecordId: eventId, chatId: chat?.id || null })
+  }
+  await finishEvent(eventId)
+}
+
+const failure = (status, error) => ({ failure: { status, body: { error } } })
+
+// Resolves the bot and checks the signature, JSON body and destination.
+const verifyRequest = async ({ params, body, headers }) => {
   const bot = await db
     .selectFrom('managed_bot')
     .selectAll()
     .where('service', '=', params.bot)
     .where('active', '=', 1)
     .executeTakeFirst()
-  if (!bot) {
-    set.status = 404
-    return { error: 'Bot not found' }
-  }
+  if (!bot) return failure(404, 'Bot not found')
 
   const rawBody = typeof body === 'string' ? body : JSON.stringify(body || {})
   if (!verifySignature(
@@ -224,21 +273,28 @@ export default async ({ params, body, headers, set }) => {
     rawBody,
     headers['x-line-signature'],
   )) {
-    set.status = 401
-    return { error: 'Invalid or missing LINE webhook signature' }
+    return failure(401, 'Invalid or missing LINE webhook signature')
   }
 
   let payload
   try {
     payload = JSON.parse(rawBody)
   } catch {
-    set.status = 400
-    return { error: 'Invalid JSON body' }
+    return failure(400, 'Invalid JSON body')
   }
   if (payload.destination && payload.destination !== bot.bot_user_id) {
-    set.status = 400
-    return { error: 'Webhook destination does not match this bot' }
+    return failure(400, 'Webhook destination does not match this bot')
   }
+  return { bot, payload }
+}
+
+export default async ({ params, body, headers, set }) => {
+  const verified = await verifyRequest({ params, body, headers })
+  if (verified.failure) {
+    set.status = verified.failure.status
+    return verified.failure.body
+  }
+  const { bot, payload } = verified
 
   const client = lineClient(decryptSecret(bot.channel_access_token))
   let accepted = 0
@@ -250,25 +306,7 @@ export default async ({ params, body, headers, set }) => {
       continue
     }
     try {
-      const chat = await upsertChat(bot, event, client)
-
-      const text = event.type === 'message' && event.message?.type === 'text'
-        ? event.message.text.trim()
-        : ''
-      if (chat && event.replyToken && /^\/hi$/i.test(text)) {
-        await db.updateTable('managed_chat').set({ registered: 1, active: 1 })
-          .where('id', '=', chat.id).execute()
-        await client.reply(event.replyToken, 'ลงทะเบียนห้องนี้ใน LINE Manager แล้ว')
-      } else if (chat && event.replyToken && /^\/id$/i.test(text)) {
-        await client.reply(
-          event.replyToken,
-          `Chat ID: ${chat.source_id}\nType: ${chat.source_type}`,
-        )
-      }
-      if (!OWN_COMMAND.test(text)) {
-        await enqueueForwards({ bot, eventRecordId: eventId, chatId: chat?.id || null })
-      }
-      await finishEvent(eventId)
+      await processEvent(bot, client, event, eventId)
       accepted += 1
     } catch (error) {
       await failEvent(eventId, error)
