@@ -267,7 +267,8 @@ an old route list from conversation history.
   (instance base URL) and `TRACEWAY_TOKEN` (backend project token); both
   must be set or `lib/telemetry.js` stays a no-op. `OTEL_SERVICE_NAME` and
   `APP_VERSION` are optional. Requests become SERVER spans named by Elysia's route
-  pattern, pino records are mirrored to Traceway logs (primitive, non-sensitive
+  pattern (a valid `x-trace-parrent: 00-<traceId>-<spanId>-<flags>` request header,
+  W3C traceparent format, makes the span continue the caller's traceId), pino records are mirrored to Traceway logs (primitive, non-sensitive
   fields only), forward batches become the `webhook-forward-delivery` task, and
   `bun run retention` is the `retention` task.
 - External API: `EXTERNAL_API_RATE_LIMIT`.
