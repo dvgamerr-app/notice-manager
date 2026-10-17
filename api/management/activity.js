@@ -1,4 +1,5 @@
 import { db } from '../../lib/db.js'
+import { getActivityDetail, listActivity, parseFilters, summarizeActivity } from '../../lib/activity.js'
 import {
   findBot,
   pageLimit,
@@ -107,4 +108,60 @@ export const listAuditLogs = async ({ params, query, user, set }) => {
     metadata: safeJson(row.metadata_payload, {}),
     createdAt: row.created_at,
   }))
+}
+
+const withFilters = async ({ params, query, user, set }) => {
+  if (!user) return { failure: unauthorized(set) }
+  const bot = await findBot(params.bot, user.id)
+  if (!bot) {
+    set.status = 404
+    return { failure: { error: 'Bot not found' } }
+  }
+  const chat = query?.chat
+    ? await db
+      .selectFrom('managed_chat')
+      .select(['id', 'source_id'])
+      .where('id', '=', String(query.chat))
+      .where('bot_id', '=', bot.id)
+      .executeTakeFirst()
+    : null
+  return { bot, chat: chat || null, unknownChat: Boolean(query?.chat) && !chat, filters: parseFilters(query) }
+}
+
+export const listActivityFeed = async (context) => {
+  const { failure, bot, chat, unknownChat, filters } = await withFilters(context)
+  if (failure) return failure
+  if (unknownChat) return { items: [], nextCursor: null }
+  return listActivity({
+    bot,
+    chat,
+    filters,
+    before: context.query?.before,
+    limit: pageLimit(context.query, 100),
+  })
+}
+
+export const getActivitySummary = async (context) => {
+  const { failure, bot, chat, unknownChat, filters } = await withFilters(context)
+  if (failure) return failure
+  if (unknownChat) {
+    const empty = { inbound: 0, outbound: 0, forward: 0, system: 0 }
+    return { counts: empty, problems: empty }
+  }
+  return summarizeActivity({ bot, chat, filters })
+}
+
+export const getActivityItem = async ({ params, user, set }) => {
+  if (!user) return unauthorized(set)
+  const bot = await findBot(params.bot, user.id)
+  if (!bot) {
+    set.status = 404
+    return { error: 'Bot not found' }
+  }
+  const detail = await getActivityDetail({ bot, kind: params.kind, id: params.id })
+  if (!detail) {
+    set.status = 404
+    return { error: 'Activity not found' }
+  }
+  return detail
 }

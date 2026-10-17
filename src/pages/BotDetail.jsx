@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useLocation, useParams } from 'react-router-dom'
+import { useLocation, useParams, useSearchParams } from 'react-router-dom'
 import Layout from '../components/Layout.jsx'
 import Notice from '../components/Notice.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
@@ -7,13 +7,13 @@ import Spinner from '../components/Spinner.jsx'
 import BotAvatar from '../components/BotAvatar.jsx'
 import ApiKeysTab from './bot/ApiKeysTab.jsx'
 import ForwardsTab from './bot/ForwardsTab.jsx'
-import MonitorTab from './bot/MonitorTab.jsx'
+import ActivityTab from './bot/ActivityTab.jsx'
 import RoomsTab from './bot/RoomsTab.jsx'
 import SettingsTab from './bot/SettingsTab.jsx'
 
 const tabs = [
   ['rooms', 'Rooms'],
-  ['monitor', 'Monitor'],
+  ['activity', 'Activity'],
   ['forward', 'Forward'],
   ['api', 'API Keys'],
   ['settings', 'Settings'],
@@ -25,7 +25,9 @@ export default function BotDetail({ api }) {
   const [bot, setBot] = useState(null)
   const [chats, setChats] = useState([])
   const [appConfig, setAppConfig] = useState({ avatars: [] })
-  const [tab, setTab] = useState('rooms')
+  const [params, setParams] = useSearchParams()
+  const tab = tabs.some(([value]) => value === params.get('tab')) ? params.get('tab') : 'rooms'
+  const setTab = (value) => setParams({ tab: value })
   const [loading, setLoading] = useState(true)
   const [notice, setNotice] = useState(() => location.state?.notice || null)
 
@@ -109,8 +111,15 @@ export default function BotDetail({ api }) {
               reload={reload}
             />
           )}
-          {tab === 'monitor' && <MonitorTab api={api} bot={bot} chats={chats} />}
-          {tab === 'forward' && <ForwardsTab api={api} bot={bot} chats={chats} />}
+          {tab === 'activity' && <ActivityTab api={api} bot={bot} chats={chats} />}
+          {tab === 'forward' && (
+            <ForwardsTab
+              api={api}
+              bot={bot}
+              chats={chats}
+              onOpenActivity={(target) => setParams({ tab: 'activity', log: 'forward', target })}
+            />
+          )}
           {tab === 'api' && <ApiKeysTab api={api} bot={bot} />}
           {tab === 'settings' && (
             <SettingsTab api={api} bot={bot} reload={reload} />

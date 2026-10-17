@@ -12,84 +12,12 @@ const healthStyle = {
   unknown: ['bg-gray-100 text-gray-500', 'ยังไม่เคยส่ง'],
 }
 
-const statusStyle = {
-  succeeded: 'text-[#05a344]',
-  pending: 'text-amber-700',
-  sending: 'text-amber-700',
-  dead: 'text-red-600',
-}
-
-function Deliveries({ api, bot, target, onChanged }) {
-  const [rows, setRows] = useState([])
-  const [busy, setBusy] = useState(false)
-  const [notice, setNotice] = useState(null)
-
-  const load = () =>
-    api.getForwardDeliveries(bot.service, target.id, { limit: 20 })
-      .then(setRows)
-      .catch((error) => setNotice({ type: 'error', text: error.message }))
-
-  useEffect(() => { load() }, [target.id])
-
-  const retry = async (row) => {
-    setBusy(true)
-    try {
-      await api.retryForwardDelivery(bot.service, target.id, row.id)
-      await load()
-      onChanged()
-    } catch (error) {
-      setNotice({ type: 'error', text: error.message })
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  return (
-    <div className="space-y-2 border-t border-gray-100 pt-3">
-      <Notice value={notice} onClose={() => setNotice(null)} />
-      {!rows.length && <p className="text-xs text-gray-400">ยังไม่มีรายการส่งต่อ</p>}
-      {rows.map((row) => (
-        <div key={row.id} className="rounded-xl bg-gray-50 p-3 text-xs space-y-1">
-          <div className="flex items-center gap-2">
-            <span className={`font-semibold ${statusStyle[row.status] || ''}`}>
-              {row.status}
-            </span>
-            <span className="text-gray-500">{row.eventType}</span>
-            <span className="ml-auto text-gray-400">{formatDate(row.createdAt)}</span>
-          </div>
-          <p className="text-gray-500">
-            ครั้งที่ส่ง {row.attemptCount}
-            {row.lastHttpStatus ? ` · HTTP ${row.lastHttpStatus}` : ''}
-            {row.durationMs != null ? ` · ${row.durationMs} ms` : ''}
-          </p>
-          {row.status === 'pending' && row.attemptCount > 0 && (
-            <p className="text-gray-500">ลองใหม่: {formatDate(row.nextAttemptAt)}</p>
-          )}
-          {row.lastError && (
-            <p className="break-words text-red-600">{row.lastError}</p>
-          )}
-          {row.status === 'dead' && (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => retry(row)}
-              className="font-semibold text-gray-900 disabled:opacity-50"
-            >
-              ส่งใหม่
-            </button>
-          )}
-        </div>
-      ))}
-    </div>
-  )
-}
-
 const chatNameOf = (chats, id) => {
   const chat = chats.find((item) => item.id === id)
   return chat ? chat.name || chat.lineName || chat.sourceId : id
 }
 
-function TargetCard({ api, bot, target, chats, result, busy, open, onTest, onToggle, onRemove, onOpen, onChanged }) {
+function TargetCard({ target, chats, result, busy, onTest, onToggle, onRemove, onOpenActivity }) {
   const [badge, label] = healthStyle[target.health] || healthStyle.unknown
   const busyHere = busy === target.id
   return (
@@ -142,10 +70,10 @@ function TargetCard({ api, bot, target, chats, result, busy, open, onTest, onTog
         </button>
         <button
           type="button"
-          onClick={() => onOpen(open === target.id ? '' : target.id)}
+          onClick={() => onOpenActivity(target.id)}
           className="text-gray-900"
         >
-          ประวัติ
+          ดูประวัติ
         </button>
         <button
           type="button"
@@ -156,18 +84,14 @@ function TargetCard({ api, bot, target, chats, result, busy, open, onTest, onTog
           ลบ
         </button>
       </div>
-      {open === target.id && (
-        <Deliveries api={api} bot={bot} target={target} onChanged={onChanged} />
-      )}
     </div>
   )
 }
 
-export default function ForwardsTab({ api, bot, chats }) {
+export default function ForwardsTab({ api, bot, chats, onOpenActivity }) {
   const [targets, setTargets] = useState([])
   const [form, setForm] = useState({ name: '', url: '', chatId: '' })
   const [created, setCreated] = useState(null)
-  const [open, setOpen] = useState('')
   const [testResult, setTestResult] = useState({})
   const [busy, setBusy] = useState('')
   const [notice, setNotice] = useState(null)
@@ -295,18 +219,14 @@ export default function ForwardsTab({ api, bot, chats }) {
       {targets.map((target) => (
         <TargetCard
           key={target.id}
-          api={api}
-          bot={bot}
           target={target}
           chats={chats}
           result={testResult[target.id]}
           busy={busy}
-          open={open}
           onTest={test}
           onToggle={toggle}
           onRemove={remove}
-          onOpen={setOpen}
-          onChanged={load}
+          onOpenActivity={onOpenActivity}
         />
       ))}
 

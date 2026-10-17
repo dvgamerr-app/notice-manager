@@ -47,7 +47,7 @@ LINE Messaging API ทรงพลัง แต่พอมีหลายบอ
 | 🔑 **API key แยกต่อบอต** | key `lm_live_...` เก็บแบบ hash และแสดงครั้งเดียว แต่ละ key เข้าถึงได้เฉพาะห้องที่ลงทะเบียนของบอตตัวเอง |
 | 🚦 **Rate limit แบบกระจาย** | ตัวนับ atomic ในฐานข้อมูลใช้ร่วมกันทุก instance และตอบ header `RateLimit-*` มาตรฐาน |
 | 🔀 **Webhook forwarding** | ส่งต่อ event จาก LINE ไปยัง HTTPS endpoint ของคุณ แต่ละปลายทางมี secret สำหรับเซ็นเอง retry แบบ backoff, circuit breaker และประวัติการส่ง |
-| 🔍 **Monitor และ audit** | ค้นหา delivery, webhook event และ audit log พร้อมชื่อห้องที่อ่านง่าย |
+| 🔍 **Activity timeline** | รวม webhook event, delivery, การส่งต่อ และ audit ไว้ในไทม์ไลน์เดียว กรองได้ พร้อมชื่อห้องที่อ่านง่าย |
 | 🛡️ **ปลอดภัยตั้งแต่ค่าเริ่มต้น** | ตรวจ HMAC signature, กัน event ซ้ำ, ป้องกัน SSRF ตอน forward, เข้ารหัส credential และใช้นโยบาย owner คนเดียว |
 | 🗄️ **SQLite หรือ PostgreSQL** | เริ่มต้นได้ทันทีด้วย SQLite แล้วย้ายไป PostgreSQL เมื่อต้องการ ใช้ migration ชุดเดียวกัน |
 

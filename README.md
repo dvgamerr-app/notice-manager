@@ -49,7 +49,7 @@ self-hosted layer on top of it:
 | 🔑 **Bot-scoped API keys** | `lm_live_...` keys are hashed at rest and shown once. Each key reaches only the registered chats of its own bot. |
 | 🚦 **Distributed rate limits** | An atomic, database-backed per-key bucket works across every instance and returns standard `RateLimit-*` headers. |
 | 🔀 **Webhook forwarding** | Fan LINE events out to your own HTTPS endpoints. Each target has its own signing secret, retries with backoff, a circuit breaker and a delivery history. |
-| 🔍 **Monitor and audit trail** | Deliveries, webhook events and audit logs are searchable, with human-readable chat names. |
+| 🔍 **Activity timeline** | Webhook events, deliveries, forwards and audit entries in one filterable timeline, with human-readable chat names. |
 | 🛡️ **Secure by default** | HMAC webhook signature checks, idempotent redelivery, SSRF protection on forwards, encrypted credentials and a single-owner policy. |
 | 🗄️ **SQLite or PostgreSQL** | Start with zero setup on SQLite and move to PostgreSQL when you need it. The same migrations run on both. |
 

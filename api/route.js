@@ -24,6 +24,9 @@ import {
   listBots,
   listChats,
   listDeliveries,
+  getActivityItem,
+  getActivitySummary,
+  listActivityFeed,
   listWebhookEvents,
   refreshChat,
   retryForwardDelivery,
@@ -63,6 +66,9 @@ const managementRoutes = /** @type {any} */ (new Elysia({ name: 'management-rout
   .post('/api/bots/:bot/chats/:chat/refresh', refreshChat)
   .post('/api/bots/:bot/chats/:chat/leave', leaveChat)
   .post('/api/bots/:bot/chats/:chat/test', testChat)
+  .get('/api/bots/:bot/activity', listActivityFeed)
+  .get('/api/bots/:bot/activity/summary', getActivitySummary)
+  .get('/api/bots/:bot/activity/:kind/:id', getActivityItem)
   .get('/api/bots/:bot/deliveries', listDeliveries)
   .get('/api/bots/:bot/webhook-events', listWebhookEvents)
   .get('/api/bots/:bot/api-keys', listApiKeys)

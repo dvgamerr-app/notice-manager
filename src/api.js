@@ -135,6 +135,18 @@ export const createApi = (token) => {
         `/api/bots/${encodeURIComponent(bot)}/forwards/${encodeURIComponent(id)}/deliveries/${encodeURIComponent(delivery)}/retry`,
         {},
       ),
+    getActivity: (bot, query) =>
+      call('GET', withQuery(`/api/bots/${encodeURIComponent(bot)}/activity`, query)),
+    getActivitySummary: (bot, query) =>
+      call(
+        'GET',
+        withQuery(`/api/bots/${encodeURIComponent(bot)}/activity/summary`, query),
+      ),
+    getActivityItem: (bot, kind, id) =>
+      call(
+        'GET',
+        `/api/bots/${encodeURIComponent(bot)}/activity/${encodeURIComponent(kind)}/${encodeURIComponent(id)}`,
+      ),
     getAuditLogs: (bot, query) =>
       call(
         'GET',
