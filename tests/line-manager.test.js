@@ -1230,6 +1230,132 @@ describe('webhook forwarding', () => {
   })
 })
 
+describe('unified activity feed', () => {
+  let feedApp
+  let authorization
+  let botId
+  let chat
+  const at = (minutesAgo) => new Date(Date.now() - minutesAgo * 60_000).toISOString()
+
+  const get = async (path) => {
+    const response = await feedApp.handle(
+      new Request(`http://localhost${path}`, { headers: authorization }),
+    )
+    return { status: response.status, body: await response.json() }
+  }
+
+  beforeAll(async () => {
+    authorization = { Authorization: `Bearer ${await getOwnerSession()}` }
+    feedApp = createApp()
+    const bot = await db.selectFrom('managed_bot').select('id')
+      .where('service', '=', 'manager-bot').executeTakeFirstOrThrow()
+    botId = bot.id
+    chat = await db.selectFrom('managed_chat').select(['id', 'source_id'])
+      .where('bot_id', '=', botId).executeTakeFirstOrThrow()
+    const target = await db.selectFrom('managed_webhook_target').select('id')
+      .where('bot_id', '=', botId).executeTakeFirstOrThrow()
+
+    const event = (id, status, minutesAgo, text) => ({
+      id: `act-event-${id}`,
+      bot_id: botId,
+      webhook_event_id: `act-wh-${id}`,
+      event_type: 'message',
+      source_id: chat.source_id,
+      payload: JSON.stringify({ type: 'message', message: { type: 'text', text } }),
+      received_at: at(minutesAgo),
+      processing_status: status,
+      processing_error: status === 'failed' ? 'boom' : null,
+    })
+    await db.insertInto('managed_webhook_event').values([
+      event('a', 'processed', 3, 'hello feed'),
+      event('b', 'failed', 4, 'broken one'),
+      event('c', 'processed', 5, '/hi'),
+    ]).execute()
+    await db.insertInto('managed_webhook_forward').values([
+      { id: 'act-fwd-a', target_id: target.id, event_id: 'act-event-a', status: 'succeeded',
+        attempt_count: 1, next_attempt_at: at(3), created_at: at(3) },
+      { id: 'act-fwd-b', target_id: target.id, event_id: 'act-event-b', status: 'dead',
+        attempt_count: 6, next_attempt_at: at(4), last_error: 'HTTP 500', created_at: at(4) },
+    ]).execute()
+    await db.insertInto('managed_delivery').values([
+      { id: 'act-del-ok', bot_id: botId, chat_id: chat.id, recipient_id: chat.source_id,
+        message_payload: JSON.stringify([{ type: 'text', text: 'sent ok' }]), status: 'sent',
+        source: 'liff', created_at: at(2) },
+      { id: 'act-del-bad', bot_id: botId, chat_id: chat.id, recipient_id: chat.source_id,
+        message_payload: JSON.stringify([{ type: 'text', text: 'sent bad' }]), status: 'failed',
+        error: 'LINE 400', source: 'liff', created_at: at(1) },
+    ]).execute()
+  })
+
+  test('merges every kind newest first and hides successful forwards on request', async () => {
+    const all = await get('/api/bots/manager-bot/activity?limit=100&hideOkForwards=1')
+    expect(all.status).toBe(200)
+    const ids = all.body.items.map((item) => item.id)
+    expect(ids).toContain('act-del-bad')
+    expect(ids).toContain('act-event-a')
+    expect(ids).toContain('act-fwd-b')
+    expect(ids).not.toContain('act-fwd-a')
+    const times = all.body.items.map((item) => item.at)
+    expect([...times].sort().reverse()).toEqual(times)
+    const inbound = all.body.items.find((item) => item.id === 'act-event-a')
+    expect(inbound.forwards).toEqual({ ok: 1, total: 1 })
+    expect(all.body.items.find((item) => item.id === 'act-event-c').title).toContain('คำสั่งของแอป')
+  })
+
+  test('filters by problem, kind and chat using internal chat IDs', async () => {
+    const problems = await get('/api/bots/manager-bot/activity?limit=100&problem=1&kinds=inbound,outbound,forward')
+    const ids = problems.body.items.map((item) => item.id)
+    expect(ids.filter((id) => id.startsWith('act-'))).toEqual(
+      expect.arrayContaining(['act-del-bad', 'act-event-b', 'act-fwd-b']),
+    )
+    expect(ids).not.toContain('act-del-ok')
+    const forwards = await get('/api/bots/manager-bot/activity?limit=100&kinds=forward')
+    expect(forwards.body.items.every((item) => item.kind === 'forward')).toBe(true)
+    const byChat = await get(`/api/bots/manager-bot/activity?limit=100&kinds=outbound&chat=${chat.id}`)
+    expect(byChat.body.items.map((item) => item.id)).toContain('act-del-ok')
+    const unknown = await get('/api/bots/manager-bot/activity?chat=missing')
+    expect(unknown.body.items).toEqual([])
+    const source = await get('/api/bots/manager-bot/activity?limit=100&source=liff')
+    expect(source.body.items.every((item) => item.kind === 'outbound')).toBe(true)
+  })
+
+  test('pages with a stable cursor and summarises counts', async () => {
+    const first = await get('/api/bots/manager-bot/activity?limit=2&kinds=outbound')
+    expect(first.body.items).toHaveLength(2)
+    expect(first.body.nextCursor).toBeTruthy()
+    const second = await get(
+      `/api/bots/manager-bot/activity?limit=100&kinds=outbound&before=${encodeURIComponent(first.body.nextCursor)}`,
+    )
+    const seen = new Set(first.body.items.map((item) => item.id))
+    expect(second.body.items.every((item) => !seen.has(item.id))).toBe(true)
+
+    const summary = await get('/api/bots/manager-bot/activity/summary')
+    expect(summary.body.okForwards).toBeGreaterThanOrEqual(1)
+    expect(summary.body.counts.outbound).toBeGreaterThanOrEqual(2)
+    expect(summary.body.problems.outbound).toBeGreaterThanOrEqual(1)
+    expect(summary.body.problems.forward).toBeGreaterThanOrEqual(1)
+  })
+
+  test('returns detail with related forwards and rejects other bots or kinds', async () => {
+    const inbound = await get('/api/bots/manager-bot/activity/inbound/act-event-b')
+    expect(inbound.body.error).toBe('boom')
+    expect(inbound.body.related.map((item) => item.id)).toEqual(['act-fwd-b'])
+    const forward = await get('/api/bots/manager-bot/activity/forward/act-fwd-b')
+    expect(forward.body.retryable).toBe(true)
+    expect(forward.body.chatId).toBe(chat.id)
+    expect((await get('/api/bots/manager-bot/activity/nope/act-fwd-b')).status).toBe(404)
+    expect((await get('/api/bots/manager-bot/activity/outbound/act-fwd-b')).status).toBe(404)
+    const anonymous = await feedApp.handle(new Request('http://localhost/api/bots/manager-bot/activity'))
+    expect(anonymous.status).toBe(401)
+  })
+
+  test('records who sent a delivery', async () => {
+    const columns = (await db.introspection.getTables())
+      .find((table) => table.name === 'managed_delivery').columns.map((column) => column.name)
+    expect(columns).toEqual(expect.arrayContaining(['source', 'api_key_id']))
+  })
+})
+
 describe('Elysia application', () => {
   test('keeps the LIFF source flattened at the repository root', () => {
     expect(existsSync(new URL('../src/main.jsx', import.meta.url))).toBe(true)

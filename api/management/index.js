@@ -2,6 +2,9 @@ export {
   listDeliveries,
   listAuditLogs,
   listWebhookEvents,
+  getActivityItem,
+  getActivitySummary,
+  listActivityFeed,
 } from './activity.js'
 export {
   addApiKey,
