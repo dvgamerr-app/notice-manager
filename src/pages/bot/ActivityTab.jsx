@@ -366,12 +366,12 @@ function DetailSheet({ api, bot, summary, chatOf, onClose, onOpenRelated, onFilt
     >
       <Notice value={notice} onClose={() => setNotice(null)} />
       {!detail && !notice && <p className="py-8 text-center text-sm text-gray-500">กำลังโหลด...</p>}
-      {detail && (
+      {detail && open && (
         <>
           <div className="flex items-center gap-2.5">
             <KindIcon kind={detail.kind} size={38} bad={Boolean(detail.error)} />
             <div className="min-w-0">
-              <b className="block truncate text-sm">{summary.title}</b>
+              <b className="block truncate text-sm">{summary?.title}</b>
               <small className="text-xs text-gray-500">{KINDS[detail.kind].label} · {dateTime(detail.at)}</small>
             </div>
           </div>
