@@ -88,8 +88,19 @@ The backend and Vite configuration contain the new proxy/build architecture:
   retrieve the square PNG. Test sends validate the message with LINE before push
   and write a `managed_delivery` record.
 - The bot detail header keeps the registered/total chat count inline after the
-  bot ID. Monitor resolves stored chat IDs to their LINE display names and uses
-  the same expandable record layout as Audit; raw IDs remain in record details.
+  bot ID. The Activity tab (formerly Monitor) shows every log kind in one
+  timeline grouped by day: inbound webhook events, outbound deliveries,
+  forwards, and system (audit) entries, each with its own colour and icon.
+  Category chips are single-select; a "problem" toggle works across kinds; a
+  bottom sheet holds the rarer filters (time range, chat, event type, delivery
+  source, forward target, search). Active filters are chips and live in the URL
+  (`?tab=activity&log=&problem=1&chat=&since=&etype=&source=&target=&q=`), so
+  the LINE back button restores them. In the "all" view a successful forward is
+  folded into its inbound row ("ส่งต่อ n/m") while failed ones stay as rows. Audit
+  rows that duplicate a delivery or forward row are hidden. Tapping a row opens a
+  detail sheet (related events, raw JSON folded, retry for a dead forward, copy
+  ID, filter to that chat). The list polls every 15 s and offers a "new items"
+  pill instead of shifting the list.
 - Successful Rooms actions use an auto-dismissing top-center toast. Errors stay
   inline so diagnostic details remain visible.
 - External systems use bot-scoped `lm_live_...` API keys. Only SHA-256 hashes are
@@ -193,8 +204,9 @@ handlers must resolve those rows under the selected bot and pass
   backoff (10 s, 1 m, 5 m, 30 m, 2 h) up to the target's `max_attempts` (default
   6); other 4xx and blocked hosts go straight to `dead`. Five consecutive failures
   pause the target for 5 minutes (circuit breaker); three mark it `failing`.
-- Failures are surfaced in the Forward tab (health, last error, counts, per-delivery
-  history with manual retry) and in logs (`warn` per retry, `error` when giving up
+- Failures are surfaced in the Forward tab (health, last error, counts; the
+  per-delivery history opens in the Activity tab via "ดูประวัติ", with manual retry)
+  and in logs (`warn` per retry, `error` when giving up
   or when a target starts failing) plus `managed_audit_log` entries
   (`webhook-forward.dead`, `webhook-target.failing`, `webhook-target.recovered`).
   A failing target never affects the response to LINE or this app's own handling.
@@ -214,6 +226,10 @@ handlers must resolve those rows under the selected bot and pass
 - `/api/bots...` — authenticated bot, webhook, quota, chat, delivery, API-key,
   audit, test-send, and webhook-forwarding (`/api/bots/:bot/forwards...`)
   management routes.
+- `GET /api/bots/:bot/activity` (merged feed with cursor paging; filters `kinds`,
+  `problem`, `chat`, `since`, `eventType`, `source`, `target`, `q`,
+  `hideOkForwards`), `GET .../activity/summary` (per-kind and problem counts), and
+  `GET .../activity/:kind/:id` (detail). The older per-table list endpoints remain.
 - `GET /api/line`, `GET /api/line/:bot/room`, and
   `GET /api/line/:bot/history` are read-only compatibility aliases.
 - `GET /v1/bots/:bot/chats` and
@@ -233,7 +249,8 @@ an old route list from conversation history.
 - Run `bun run migrate`; startup also calls `migrateToLatest()` safely.
 - Current migrations: `001_line_management.js`, `002_management_operations.js`,
   `003_webhook_processing.js`, `004_distributed_hardening.js`, and
-  `005_webhook_forwarding.js`.
+  `005_webhook_forwarding.js`, and `006_delivery_source.js` (delivery `source` and
+  `api_key_id`, used by the Activity source filter; older rows have neither).
 - Applied migration filenames and contents are immutable. Never rename, delete,
   reorder, or edit an existing migration; add the next numbered migration for
   every later schema change.
@@ -371,7 +388,9 @@ credentials in the macOS Keychain.
 - `lib/webhook-forward.js` — forwarding outbox, signing, SSRF checks, retry/circuit
   breaker, and the delivery worker.
 - `api/management/forwards.js` — forwarding target and delivery management.
-- `src/pages/bot/ForwardsTab.jsx` — Forward tab (targets, health, history).
+- `src/pages/bot/ForwardsTab.jsx` — Forward tab (targets and health).
+- `lib/activity.js` — unified activity feed, summary, and detail queries.
+- `src/pages/bot/ActivityTab.jsx`, `src/components/BottomSheet.jsx` — Activity tab.
 - `lib/rate-limit.js` — atomic database-backed external API quota consumption.
 - `lib/retention.js` — portable batched retention policy execution.
 - `lib/secrets.js` — credential encryption and legacy read compatibility.

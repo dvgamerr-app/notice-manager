@@ -199,7 +199,7 @@ GHCR package เป็น public จึง pull image แบบ anonymous แล
   สูงสุด 20 ห้องเพื่อส่ง Text หรือ Flex card ตัวอย่างพร้อม LINE-like preview,
   display name และ avatar ผู้ส่ง โดยไม่แสดงช่องแก้เนื้อหาหรือ raw JSON และ LINE
   จะ validate payload ก่อน push
-- **Monitor** — แสดงชื่อแชตแทน ID ใน delivery, signed webhook event และ audit
+- **Activity** (เดิมชื่อ Monitor) — รวม delivery, signed webhook event, การส่งต่อ และ audit ไว้ในไทม์ไลน์เดียว แสดงชื่อแชตแทน ID
   log ด้วย expandable record layout เดียวกัน พร้อม filter และโหลดเพิ่มทีละหน้า
 - **API Keys** — สร้าง/revoke bot-scoped key โดย raw key แสดงครั้งเดียว
 - **Settings** — sync/test webhook, เปิด/ปิดบอต, message quota และ rotate
