@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-FROM oven/bun:1.3.14-alpine AS dependencies
+FROM oven/bun:1.4.4-alpine AS dependencies
 WORKDIR /app
 
 RUN apk upgrade --no-cache
@@ -19,7 +19,7 @@ COPY public ./public
 COPY src ./src
 RUN bun run build:ui
 
-FROM oven/bun:1.3.14-alpine AS runtime
+FROM oven/bun:1.4.4-alpine AS runtime
 WORKDIR /app
 
 RUN apk upgrade --no-cache
