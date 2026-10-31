@@ -219,7 +219,7 @@ jobs:
           NOTIFY_IMAGE: ${{ env.IMAGE_REF }}
         run: |
           test -n "$DISCORD_WEBHOOK" || { echo '::warning::DISCORD_WEBHOOK is empty, skip alert'; exit 0; }
-          payload=$(printf '{"username":"kube %s","content":"<:ok:1042489844619804682> Rolled out `%s`","allowed_mentions":{"parse":[]}}' "$NOTIFY_APP" "$NOTIFY_IMAGE")
+          payload=$(printf '{"username":"kube %s","content":"<:ok:1042489844619804682> Rolled out \140%s\140","allowed_mentions":{"parse":[]}}' "$NOTIFY_APP" "$NOTIFY_IMAGE")
           curl --silent --show-error --max-time 15 -H 'Content-Type: application/json' \
             -d "$payload" "$DISCORD_WEBHOOK"
 
