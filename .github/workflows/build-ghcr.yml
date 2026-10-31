@@ -209,25 +209,37 @@ jobs:
             - Digest: `${{ needs.build.outputs.digest }}`
             - Commit: `${{ github.sha }}`
 
-      - name: Notify successful deployment
-        if: success() && env.DISCORD_WEBHOOK != ''
+      # แจ้ง Discord หลัง rollout สำเร็จ — sender `kube <ชื่อแอป>` · แจ้งไม่ได้ต้องไม่ทำให้ deploy ที่สำเร็จแล้วล้ม
+      - name: Notify Discord (rolled out)
+        if: success()
         continue-on-error: true
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          IMAGE: ${{ needs.build.outputs.image }}
-          VERSION: ${{ needs.build.outputs.version }}
+          NOTIFY_APP: ${{ env.CONTAINER_NAME }}
+          NOTIFY_IMAGE: ${{ env.IMAGE_REF }}
         run: |
-          curl --fail --silent --show-error -X POST "${DISCORD_WEBHOOK}" \
-            -H "Content-Type: application/json" \
-            -d "{\"content\":\"Deployment ${CONTAINER_NAME} completed: ${IMAGE}:${VERSION}\"}"
+          test -n "$DISCORD_WEBHOOK" || { echo '::warning::DISCORD_WEBHOOK is empty, skip alert'; exit 0; }
+          payload=$(printf '{"username":"kube %s","content":"<:ok:1042489844619804682> Rolled out \140%s\140","allowed_mentions":{"parse":[]}}' "$NOTIFY_APP" "$NOTIFY_IMAGE")
+          curl --silent --show-error --max-time 15 -H 'Content-Type: application/json' \
+            -d "$payload" "$DISCORD_WEBHOOK"
 
-      - name: Notify failed deployment
-        if: failure() && env.DISCORD_WEBHOOK != ''
-        continue-on-error: true
+  # build หรือ deploy ล้มก็แจ้ง — deploy ถูกข้ามเมื่อ build ล้ม จึงต้องแยกเป็น job ของมันเอง
+  notify-failure:
+    runs-on: ubuntu-24.04-arm
+    needs: [build, deploy]
+    if: ${{ always() && github.event_name != 'pull_request' && (needs.build.result == 'failure' || needs.deploy.result == 'failure') }}
+    permissions: {}
+
+    steps:
+      - name: Notify Discord (failed)
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          BUILD_RESULT: ${{ needs.build.result }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          curl --fail --silent --show-error -X POST "${DISCORD_WEBHOOK}" \
-            -H "Content-Type: application/json" \
-            -d "{\"content\":\"Deployment ${CONTAINER_NAME} failed. Check ${RUN_URL}\"}"
+          test -n "$DISCORD_WEBHOOK" || { echo '::warning::DISCORD_WEBHOOK is empty, cannot notify'; exit 0; }
+          stage=deploy
+          if [ "$BUILD_RESULT" = failure ]; then stage=build; fi
+          payload=$(printf '{"username":"kube notice-manager","content":"<:fai:1065521737896300604><:led:1065521734096257024> %s failed — <%s>","allowed_mentions":{"parse":[]}}' "$stage" "$RUN_URL")
+          curl --silent --show-error --max-time 15 -H 'Content-Type: application/json' \
+            -d "$payload" "$DISCORD_WEBHOOK" || true
